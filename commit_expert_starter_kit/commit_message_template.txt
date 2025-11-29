@@ -1,0 +1,39 @@
+# Commit Message Template
+# Use semantic format: <type>(<scope>): <subject>
+
+# Types:
+#   feat     - New feature
+#   fix      - Bug fix
+#   docs     - Documentation changes
+#   style    - Code formatting (no logic change)
+#   refactor - Code restructuring
+#   test     - Adding tests
+#   chore    - Maintenance tasks
+#   perf     - Performance improvement
+#   ci       - CI/CD changes
+
+# Examples:
+#   feat(odds): add live betting scanner
+#   fix(db): correct transaction rollback logic
+#   docs(readme): update commit workflow guide
+#   chore(automation): schedule nightly commits
+#   perf(api): optimize database query
+#   test(integration): add betting slip tests
+
+# Rules:
+# - Type is required
+# - Scope is optional but recommended
+# - Subject should be 50 chars or less
+# - Use imperative mood ("add" not "added")
+# - Don't end subject with period
+# - Separate subject from body with blank line
+# - Wrap body at 72 characters
+# - Explain what and why, not how
+
+# Body (optional):
+#
+
+
+# Footer (optional - reference issues, breaking changes):
+# Closes #123
+# BREAKING CHANGE: API endpoint changed
