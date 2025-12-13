@@ -1,0 +1,5 @@
+Build me a daily automation plan that runs:
+- Sports data prep (MLB, UFC, soccer)
+- Weather + injury integration
+- Monte Carlo simulations
+- Telegram-ready ticket output in JSON

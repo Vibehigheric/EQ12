@@ -1,0 +1,23 @@
+{
+  "php_extensions": [
+    "curl",
+    "json",
+    "mysqli",
+    "pdo_mysql",
+    "openssl",
+    "bcmath",
+    "gd",
+    "zip",
+    "xml"
+  ],
+  "php_settings": {
+    "memory_limit": "512M",
+    "max_execution_time": "300",
+    "upload_max_filesize": "100M",
+    "post_max_size": "100M",
+    "date.timezone": "UTC",
+    "log_errors": "On",
+    "display_errors": "Off",
+    "error_log": "C:/EQ12/logs/php_errors.log"
+  }
+}

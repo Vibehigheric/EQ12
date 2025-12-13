@@ -1,0 +1,29 @@
+{
+  "API_THROTTLE": {
+    "max_rpm": 30,
+    "burst": 5,
+    "concurrency": 2,
+    "min_interval_ms": 250,
+    "soft_remaining_floor": 200,
+    "jitter_ms": [
+      50,
+      150
+    ],
+    "backoff_base_s": 1.0,
+    "backoff_max_s": 8.0,
+    "enable_proactive_throttle": true,
+    "enable_burst_detection": true
+  },
+  "API_ENDPOINTS": {
+    "odds_api": {
+      "base_url": "https://api.the-odds-api.com",
+      "max_rpm": 60,
+      "cost_per_request": 1
+    },
+    "nba_api": {
+      "base_url": "https://api.nba.com",
+      "max_rpm": 120,
+      "cost_per_request": 1
+    }
+  }
+}

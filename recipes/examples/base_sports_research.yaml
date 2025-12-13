@@ -1,0 +1,109 @@
+# EQ12 Base Sports Research Recipe
+# Foundation recipe that other sports recipes inherit from
+# Version: 1.0
+
+name: "base_sports_research"
+version: "1.0"
+description: "Base configuration for all sports research recipes"
+author: "EQ12 Core Team"
+created_at: "2025-01-03"
+tags: ["base", "sports", "foundation"]
+environments: ["production", "development", "testing"]
+
+# This is a base recipe that others inherit from
+is_base_recipe: true
+
+# === BASE PLANNER SETTINGS ===
+planner:
+  classifier: "intent/sports_base"
+  max_subqueries: 5
+  parallel_execution: true
+  adaptive_planning: false
+
+# === COMMON SPORTS RETRIEVERS ===
+retrievers:
+  # Base web search for general sports info
+  - name: "sports_web_search"
+    type: "http"
+    enabled: true
+    priority: 5
+    base_url: "https://api.bing.com/v7.0/search"
+    api_key_env: "BING_SEARCH_KEY"
+    params:
+      category: "Sports"
+      freshness: "Week"
+    rate_limit:
+      rpm: 1000
+      burst: 100
+
+# === BASE RANKING CONFIGURATION ===
+ranking:
+  reranker: "crossencoder/ms-marco-TinyBERT-L-2-v2"
+
+  weights:
+    recency: 0.30
+    authority: 0.30
+    semantic: 0.30
+    diversity: 0.10
+
+  max_results: 20
+
+# === BASE SYNTHESIS SETTINGS ===
+synthesis:
+  style: "bullet+citations"
+  require_citation: true
+  max_tokens: 1200
+  temperature: 0.3
+
+# === BASE POLICIES ===
+policies:
+  freshness_days: 7
+  safety: "moderate"
+
+  # Common sports domains
+  allow_domains:
+    - "espn.com"
+    - "cbssports.com"
+    - "yahoo.com"
+    - "si.com"
+    - "bleacherreport.com"
+
+  # Responsible gambling baseline
+  include_rg_disclaimer: true
+  max_confidence_claim: 0.80
+
+# === BASE MODEL CONFIGURATION ===
+models:
+  primary: "gpt-4o-mini" # Cost-effective default
+  fallbacks:
+    - "gpt-3.5-turbo"
+
+  model_settings:
+    "gpt-4o-mini":
+      temperature: 0.3
+      max_tokens: 1500
+
+# === BASE BUDGET SETTINGS ===
+budgets:
+  tpm: 30000
+  rpm: 300
+  cost_usd: 1.00
+  max_execution_time_sec: 40
+
+# === BASE CACHING ===
+cache:
+  doc_ttl_min: 240 # 4 hours
+  answer_ttl_min: 60 # 1 hour
+  cache_strategy: "semantic_similarity"
+  similarity_threshold: 0.80
+  backend: "redis"
+
+# === BASE OUTPUTS ===
+outputs:
+  format: "structured_json"
+  sections:
+    - "Summary"
+    - "Analysis"
+    - "Citations"
+  include_confidence_scores: true
+  export_formats: ["json", "markdown"]

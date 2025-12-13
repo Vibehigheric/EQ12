@@ -1,0 +1,16 @@
+
+Hi [FIRST_NAME],
+
+I noticed [COMPANY] is using Docker for containerization. 
+
+Quick question: Are you confident your container infrastructure is optimized for security, performance, and cost efficiency?
+
+We recently helped a similar company in [INDUSTRY] reduce their infrastructure costs by 45% while improving deployment speed by 60% through our comprehensive containerization audit.
+
+Our unique advantage: Hardware-accelerated analysis using Google Coral TPU technology for 10x faster assessment and optimization.
+
+Worth a brief 10-minute conversation to explore potential improvements?
+
+Best,
+[YOUR_NAME]
+EQ12 Containerization Specialists

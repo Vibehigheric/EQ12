@@ -1,0 +1,36 @@
+{
+   "action": {
+      "default_icon": "images/cnet-logo-128.png",
+      "default_title": "CNET Shopping"
+   },
+   "background": {
+      "service_worker": "js/background.js"
+   },
+   "content_scripts": [ {
+      "all_frames": false,
+      "js": [ "vendor/jquery.min.js", "vendor/purify.min.js", "js/app.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_end"
+   } ],
+   "description": "Get the best price on your favorite products with CNET Shopping. When we find deals, we save you an average of $27 per purchase.",
+   "host_permissions": [ "http://*/", "https://*/" ],
+   "icons": {
+      "128": "images/cnet-logo-128.png",
+      "16": "images/cnet-logo-16.png",
+      "48": "images/cnet-logo-48.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDwS1D3zHGTYv5/ASxHhYT+ySq3ATI0+DgOkGNW2G8wnTNQwKXh5Rlxy6suga1mIMjaQbYvBwiNlSO7MHeeP02fExhwzzSuP9k5HI3oUylsrI5t4iPCCt7Y+I+WLTapLIBPzXXxCvjyL61m2v3Bb6EE5HkB5d11a85hh6YwuixpBQIDAQAB",
+   "manifest_version": 3,
+   "name": "CNET Shopping",
+   "options_ui": {
+      "page": "html/options.html"
+   },
+   "permissions": [ "tabs", "webRequest", "storage", "alarms", "cookies" ],
+   "short_name": "CNET Shopping",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "14.20",
+   "web_accessible_resources": [ {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "resources": [ "html/popup.html", "css/popup.css", "fonts/*", "images/*", "html/*", "css/*", "js/webScript.js", "js/app.css", "vendor/*" ]
+   } ]
+}

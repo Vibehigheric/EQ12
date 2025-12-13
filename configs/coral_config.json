@@ -1,0 +1,16 @@
+{
+    "fallback_to_cpu":  true,
+    "performance_monitoring":  true,
+    "auto_optimization":  true,
+    "coral_enabled":  true,
+    "inference_threads":  4,
+    "temperature_monitoring":  true,
+    "max_inference_time_ms":  100,
+    "integration":  {
+                        "trading_signals":  true,
+                        "business_intelligence":  true,
+                        "ethereum_fusion":  true,
+                        "sports_betting":  true
+                    },
+    "model_path":  "models/"
+}

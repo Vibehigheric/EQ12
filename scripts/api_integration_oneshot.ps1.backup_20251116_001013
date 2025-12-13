@@ -1,0 +1,74 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+
+# 🚀 EQ12 API INTEGRATION ONE-SHOT DEPLOYMENT
+# Automated API integration with error handling and monitoring
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$APIName,
+    
+    [Parameter(Mandatory=$true)]
+    [string]$APIKey,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Environment = "production",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$WorkspacePath = "C:\EQ12"
+)
+
+$ErrorActionPreference = "Stop"
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = "$WorkspacePath\logs\api_integration_$APIName_$Timestamp.log"
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $LogEntry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [$Level] $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry
+}
+
+try {
+    Write-Log "🚀 Starting API integration for: $APIName"
+    
+    # Create API configuration
+    $APIConfig = @{
+        api_name = $APIName
+        api_key = $APIKey
+        environment = $Environment
+        integration_date = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+        status = "active"
+    }
+    
+    $ConfigPath = "$WorkspacePath\configs\api_${APIName}_config.json"
+    $APIConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $ConfigPath -Encoding UTF8
+    Write-Log "✅ API configuration saved: $ConfigPath"
+    
+    # Test API connectivity
+    Write-Log "🔍 Testing API connectivity..."
+    $TestResult = & python "$WorkspacePath\scripts\api_integration_tester.py" --api $APIName --config $ConfigPath
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Log "✅ API integration successful: $APIName"
+        
+        # Generate monitoring script
+        $MonitorScript = @"
+# Auto-generated API monitor for $APIName
+python "$WorkspacePath\scripts\api_monitor.py" --api $APIName --config $ConfigPath --continuous
+"@
+        $MonitorScript | Out-File -FilePath "$WorkspacePath\scripts\monitor_${APIName}.ps1" -Encoding UTF8
+        Write-Log "✅ Monitoring script created: monitor_${APIName}.ps1"
+        
+    } else {
+        throw "API integration test failed for: $APIName"
+    }
+    
+} catch {
+    Write-Log "❌ API integration failed: $_" -Level "ERROR"
+    exit 1
+}
+
+Write-Log "🎉 API integration complete: $APIName"

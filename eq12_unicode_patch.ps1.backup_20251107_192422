@@ -1,0 +1,528 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Unicode Environment Patch
+# ===============================
+# Makes UTF-8 encoding permanent in Windows for EQ12 operations
+# Run with Administrator privileges for system-wide changes
+
+[CmdletBinding()]
+param(
+    [switch]$SystemWide,
+    [switch]$CurrentUser,
+    [switch]$Verify,
+    [switch]$Force
+)
+
+Write-Host "🛡️ EQ12 UNICODE ENVIRONMENT PATCH" -ForegroundColor Green
+Write-Host "=================================" -ForegroundColor Green
+
+function Set-UTF8Environment {
+    param([bool]$IsSystemWide)
+
+    $scope = if ($IsSystemWide) { "Machine" } else { "User" }
+    $scopeName = if ($IsSystemWide) { "System-wide" } else { "Current User" }
+
+    Write-Host "🔧 Configuring UTF-8 environment for: $scopeName" -ForegroundColor Yellow
+
+    try {
+        # Set Python encoding environment variables
+        [Environment]::SetEnvironmentVariable("PYTHONIOENCODING", "utf-8", $scope)
+        [Environment]::SetEnvironmentVariable("PYTHONLEGACYWINDOWSFSENCODING", "0", $scope)
+        [Environment]::SetEnvironmentVariable("PYTHONUNBUFFERED", "1", $scope)
+
+        # Set console encoding (Windows 10+)
+        if ([Environment]::OSVersion.Version.Major -ge 10) {
+            [Environment]::SetEnvironmentVariable("PYTHONLEGACYWINDOWSSTDIO", "0", $scope)
+        }
+
+        Write-Host "✅ Environment variables set for $scopeName" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "❌ Failed to set environment for $scopeName`: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Set-ConsoleUTF8 {
+    Write-Host "🔧 Configuring console UTF-8 output..." -ForegroundColor Yellow
+
+    try {
+        # Set console output encoding to UTF-8
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        [Console]::InputEncoding = [System.Text.Encoding]::UTF8
+
+        # Set PowerShell execution policy for current session
+        if (Get-Command "chcp" -ErrorAction SilentlyContinue) {
+            chcp 65001 | Out-Null  # UTF-8 code page
+        }
+
+        Write-Host "✅ Console UTF-8 encoding activated" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "❌ Failed to set console encoding: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Add-PowerShellProfile {
+    Write-Host "🔧 Adding UTF-8 to PowerShell profile..." -ForegroundColor Yellow
+
+    try {
+        $profilePath = $PROFILE.AllUsersAllHosts
+        if (-not (Test-Path $profilePath)) {
+            New-Item -Path $profilePath -ItemType File -Force | Out-Null
+        }
+
+        $utf8Config = @"
+
+# EQ12 Unicode Configuration
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+`$env:PYTHONIOENCODING = "utf-8"
+`$env:PYTHONLEGACYWINDOWSFSENCODING = "0"
+`$env:PYTHONUNBUFFERED = "1"
+
+"@
+
+        # Check if already configured
+        $currentContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
+        if ($currentContent -and $currentContent.Contains("EQ12 Unicode Configuration")) {
+            Write-Host "✅ PowerShell profile already configured" -ForegroundColor Green
+            return $true
+        }
+
+        # Add configuration
+        Add-Content -Path $profilePath -Value $utf8Config
+        Write-Host "✅ PowerShell profile updated: $profilePath" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "❌ Failed to update PowerShell profile: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Test-UTF8Environment {
+    Write-Host "🧪 Testing UTF-8 environment configuration..." -ForegroundColor Yellow
+
+    $tests = @()
+
+    # Check environment variables
+    $envVars = @("PYTHONIOENCODING", "PYTHONLEGACYWINDOWSFSENCODING", "PYTHONUNBUFFERED")
+    foreach ($var in $envVars) {
+        $value = [Environment]::GetEnvironmentVariable($var, "User")
+        $systemValue = [Environment]::GetEnvironmentVariable($var, "Machine")
+
+        if ($value -or $systemValue) {
+            $tests += [PSCustomObject]@{
+                Test   = "Environment Variable: $var"
+                Status = "✅ PASS"
+                Value  = if ($value) { "User: $value" } else { "System: $systemValue" }
+            }
+        }
+        else {
+            $tests += [PSCustomObject]@{
+                Test   = "Environment Variable: $var"
+                Status = "❌ FAIL"
+                Value  = "Not set"
+            }
+        }
+    }
+
+    # Check console encoding
+    try {
+        $outputEncoding = [Console]::OutputEncoding.EncodingName
+        $tests += [PSCustomObject]@{
+            Test   = "Console Output Encoding"
+            Status = if ($outputEncoding.Contains("UTF-8")) { "✅ PASS" } else { "⚠️ WARN" }
+            Value  = $outputEncoding
+        }
+    }
+    catch {
+        $tests += [PSCustomObject]@{
+            Test   = "Console Output Encoding"
+            Status = "❌ FAIL"
+            Value  = "Unable to read"
+        }
+    }
+
+    # Check Python UTF-8 support
+    try {
+        $pythonTest = & python -c "import sys; print(sys.stdout.encoding)" 2>$null
+        $tests += [PSCustomObject]@{
+            Test   = "Python stdout encoding"
+            Status = if ($pythonTest -and $pythonTest.Contains("utf")) { "✅ PASS" } else { "⚠️ WARN" }
+            Value  = $pythonTest
+        }
+    }
+    catch {
+        $tests += [PSCustomObject]@{
+            Test   = "Python stdout encoding"
+            Status = "❌ FAIL"
+            Value  = "Python not available"
+        }
+    }
+
+    # Display results
+    $tests | Format-Table -AutoSize
+
+    $passCount = ($tests | Where-Object { $_.Status -eq "✅ PASS" }).Count
+    $totalCount = $tests.Count
+
+    Write-Host "📊 UTF-8 Configuration Test Results: $passCount/$totalCount passed" -ForegroundColor $(if ($passCount -eq $totalCount) { "Green" } else { "Yellow" })
+
+    return $passCount -eq $totalCount
+}
+
+function Show-UnicodeTest {
+    Write-Host "🧪 Unicode Display Test:" -ForegroundColor Yellow
+
+    $testStrings = @(
+        "Basic ASCII: Hello World",
+        "Emojis: 🚀🎯⚡🔥🛡️📊✅❌⚠️",
+        "Accented: àáâãäåæçèéêë",
+        "Symbols: ←→↑↓∞≤≥≠±×÷",
+        "Currency: €£¥₹₽₿",
+        "Math: ∑∏∆∇∂∫√∝∞",
+        "Japanese: こんにちは世界",
+        "Arabic: مرحبا بالعالم",
+        "Cyrillic: Привет мир"
+    )
+
+    foreach ($test in $testStrings) {
+        try {
+            Write-Host "  $test" -ForegroundColor White
+        }
+        catch {
+            Write-Host "  [DISPLAY ERROR] $($test.Split(':")[0])" -ForegroundColor Red
+        }
+    }
+
+    Write-Host "✅ Unicode test complete" -ForegroundColor Green
+}
+
+# Main execution
+try {
+    if ($Verify) {
+        Test-UTF8Environment
+        Show-UnicodeTest
+        return
+    }
+
+    $success = $true
+
+    # Set console encoding for current session
+    $success = Set-ConsoleUTF8 -and $success
+
+    # Configure environment variables
+    if ($SystemWide -or $Force) {
+        if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+            Write-Host "⚠️ Administrator privileges required for system-wide changes" -ForegroundColor Yellow
+            Write-Host "   Re-run as Administrator or use -CurrentUser" -ForegroundColor Yellow
+        }
+        else {
+            $success = Set-UTF8Environment -IsSystemWide $true -and $success
+        }
+    }
+
+    if ($CurrentUser -or (-not $SystemWide -and -not $Force)) {
+        $success = Set-UTF8Environment -IsSystemWide $false -and $success
+    }
+
+    # Update PowerShell profile
+    if ($Force -or $SystemWide) {
+        $success = Add-PowerShellProfile -and $success
+    }
+
+    if ($success) {
+        Write-Host ""
+        Write-Host "🎉 EQ12 Unicode Environment Patch: COMPLETE!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📋 NEXT STEPS:" -ForegroundColor Yellow
+        Write-Host "  1. Restart PowerShell/Command Prompt for environment changes" -ForegroundColor White
+        Write-Host "  2. Run: .\eq12_unicode_patch.ps1 -Verify" -ForegroundColor White
+        Write-Host "  3. Import eq12_resilience_core in your Python scripts" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🔧 For immediate effect in current session:" -ForegroundColor Yellow
+        Write-Host "  `$env:PYTHONIOENCODING = 'utf-8"" -ForegroundColor Cyan
+        Write-Host "  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8" -ForegroundColor Cyan
+    }
+    else {
+        Write-Host ""
+        Write-Host "⚠️ EQ12 Unicode Environment Patch: PARTIAL SUCCESS" -ForegroundColor Yellow
+        Write-Host "   Some configuration steps failed. Check error messages above." -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host ""
+    Write-Host "❌ EQ12 Unicode Environment Patch: FAILED" -ForegroundColor Red
+    Write-Host "   Error: $_" -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "For help: Get-Help .\eq12_unicode_patch.ps1 -Detailed" -ForegroundColor Gray# EQ12 Unicode Environment Patch
+# ===============================
+# Makes UTF-8 encoding permanent in Windows for EQ12 operations
+# Run with Administrator privileges for system-wide changes
+
+[CmdletBinding()]
+param(
+    [switch]$SystemWide,
+    [switch]$CurrentUser,
+    [switch]$Verify,
+    [switch]$Force
+)
+
+Write-Host "🛡️ EQ12 UNICODE ENVIRONMENT PATCH" -ForegroundColor Green
+Write-Host "=================================" -ForegroundColor Green
+
+function Set-UTF8Environment {
+    param([bool]$IsSystemWide)
+    
+    $scope = if ($IsSystemWide) { "Machine" } else { "User" }
+    $scopeName = if ($IsSystemWide) { "System-wide" } else { "Current User" }
+    
+    Write-Host "🔧 Configuring UTF-8 environment for: $scopeName" -ForegroundColor Yellow
+    
+    try {
+        # Set Python encoding environment variables
+        [Environment]::SetEnvironmentVariable("PYTHONIOENCODING", "utf-8", $scope)
+        [Environment]::SetEnvironmentVariable("PYTHONLEGACYWINDOWSFSENCODING", "0", $scope)
+        [Environment]::SetEnvironmentVariable("PYTHONUNBUFFERED", "1", $scope)
+        
+        # Set console encoding (Windows 10+)
+        if ([Environment]::OSVersion.Version.Major -ge 10) {
+            [Environment]::SetEnvironmentVariable("PYTHONLEGACYWINDOWSSTDIO", "0", $scope)
+        }
+        
+        Write-Host "✅ Environment variables set for $scopeName" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "❌ Failed to set environment for $scopeName`: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Set-ConsoleUTF8 {
+    Write-Host "🔧 Configuring console UTF-8 output..." -ForegroundColor Yellow
+    
+    try {
+        # Set console output encoding to UTF-8
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        [Console]::InputEncoding = [System.Text.Encoding]::UTF8
+        
+        # Set PowerShell execution policy for current session
+        if (Get-Command "chcp" -ErrorAction SilentlyContinue) {
+            chcp 65001 | Out-Null  # UTF-8 code page
+        }
+        
+        Write-Host "✅ Console UTF-8 encoding activated" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "❌ Failed to set console encoding: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Add-PowerShellProfile {
+    Write-Host "🔧 Adding UTF-8 to PowerShell profile..." -ForegroundColor Yellow
+    
+    try {
+        $profilePath = $PROFILE.AllUsersAllHosts
+        if (-not (Test-Path $profilePath)) {
+            New-Item -Path $profilePath -ItemType File -Force | Out-Null
+        }
+        
+        $utf8Config = @"
+
+# EQ12 Unicode Configuration
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+`$env:PYTHONIOENCODING = "utf-8"
+`$env:PYTHONLEGACYWINDOWSFSENCODING = "0"
+`$env:PYTHONUNBUFFERED = "1"
+
+"@
+        
+        # Check if already configured
+        $currentContent = Get-Content $profilePath -Raw -ErrorAction SilentlyContinue
+        if ($currentContent -and $currentContent.Contains("EQ12 Unicode Configuration")) {
+            Write-Host "✅ PowerShell profile already configured" -ForegroundColor Green
+            return $true
+        }
+        
+        # Add configuration
+        Add-Content -Path $profilePath -Value $utf8Config
+        Write-Host "✅ PowerShell profile updated: $profilePath" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host "❌ Failed to update PowerShell profile: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Test-UTF8Environment {
+    Write-Host "🧪 Testing UTF-8 environment configuration..." -ForegroundColor Yellow
+    
+    $tests = @()
+    
+    # Check environment variables
+    $envVars = @("PYTHONIOENCODING", "PYTHONLEGACYWINDOWSFSENCODING", "PYTHONUNBUFFERED")
+    foreach ($var in $envVars) {
+        $value = [Environment]::GetEnvironmentVariable($var, "User")
+        $systemValue = [Environment]::GetEnvironmentVariable($var, "Machine")
+        
+        if ($value -or $systemValue) {
+            $tests += [PSCustomObject]@{
+                Test   = "Environment Variable: $var"
+                Status = "✅ PASS"
+                Value  = if ($value) { "User: $value" } else { "System: $systemValue" }
+            }
+        }
+        else {
+            $tests += [PSCustomObject]@{
+                Test   = "Environment Variable: $var"
+                Status = "❌ FAIL"
+                Value  = "Not set"
+            }
+        }
+    }
+    
+    # Check console encoding
+    try {
+        $outputEncoding = [Console]::OutputEncoding.EncodingName
+        $tests += [PSCustomObject]@{
+            Test   = "Console Output Encoding"
+            Status = if ($outputEncoding.Contains("UTF-8")) { "✅ PASS" } else { "⚠️ WARN" }
+            Value  = $outputEncoding
+        }
+    }
+    catch {
+        $tests += [PSCustomObject]@{
+            Test   = "Console Output Encoding"
+            Status = "❌ FAIL"
+            Value  = "Unable to read"
+        }
+    }
+    
+    # Check Python UTF-8 support
+    try {
+        $pythonTest = & python -c "import sys; print(sys.stdout.encoding)" 2>$null
+        $tests += [PSCustomObject]@{
+            Test   = "Python stdout encoding"
+            Status = if ($pythonTest -and $pythonTest.Contains("utf")) { "✅ PASS" } else { "⚠️ WARN" }
+            Value  = $pythonTest
+        }
+    }
+    catch {
+        $tests += [PSCustomObject]@{
+            Test   = "Python stdout encoding"
+            Status = "❌ FAIL"
+            Value  = "Python not available"
+        }
+    }
+    
+    # Display results
+    $tests | Format-Table -AutoSize
+    
+    $passCount = ($tests | Where-Object { $_.Status -eq "✅ PASS" }).Count
+    $totalCount = $tests.Count
+    
+    Write-Host "📊 UTF-8 Configuration Test Results: $passCount/$totalCount passed" -ForegroundColor $(if ($passCount -eq $totalCount) { "Green" } else { "Yellow" })
+    
+    return $passCount -eq $totalCount
+}
+
+function Show-UnicodeTest {
+    Write-Host "🧪 Unicode Display Test:" -ForegroundColor Yellow
+    
+    $testStrings = @(
+        "Basic ASCII: Hello World",
+        "Emojis: 🚀🎯⚡🔥🛡️📊✅❌⚠️",
+        "Accented: àáâãäåæçèéêë",
+        "Symbols: ←→↑↓∞≤≥≠±×÷",
+        "Currency: €£¥₹₽₿",
+        "Math: ∑∏∆∇∂∫√∝∞",
+        "Japanese: こんにちは世界",
+        "Arabic: مرحبا بالعالم",
+        "Cyrillic: Привет мир"
+    )
+    
+    foreach ($test in $testStrings) {
+        try {
+            Write-Host "  $test" -ForegroundColor White
+        }
+        catch {
+            Write-Host "  [DISPLAY ERROR] $($test.Split(':")[0])" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host "✅ Unicode test complete" -ForegroundColor Green
+}
+
+# Main execution
+try {
+    if ($Verify) {
+        Test-UTF8Environment
+        Show-UnicodeTest
+        return
+    }
+    
+    $success = $true
+    
+    # Set console encoding for current session
+    $success = Set-ConsoleUTF8 -and $success
+    
+    # Configure environment variables
+    if ($SystemWide -or $Force) {
+        if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+            Write-Host "⚠️ Administrator privileges required for system-wide changes" -ForegroundColor Yellow
+            Write-Host "   Re-run as Administrator or use -CurrentUser" -ForegroundColor Yellow
+        }
+        else {
+            $success = Set-UTF8Environment -IsSystemWide $true -and $success
+        }
+    }
+    
+    if ($CurrentUser -or (-not $SystemWide -and -not $Force)) {
+        $success = Set-UTF8Environment -IsSystemWide $false -and $success
+    }
+    
+    # Update PowerShell profile
+    if ($Force -or $SystemWide) {
+        $success = Add-PowerShellProfile -and $success
+    }
+    
+    if ($success) {
+        Write-Host ""
+        Write-Host "🎉 EQ12 Unicode Environment Patch: COMPLETE!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "📋 NEXT STEPS:" -ForegroundColor Yellow
+        Write-Host "  1. Restart PowerShell/Command Prompt for environment changes" -ForegroundColor White
+        Write-Host "  2. Run: .\eq12_unicode_patch.ps1 -Verify" -ForegroundColor White
+        Write-Host "  3. Import eq12_resilience_core in your Python scripts" -ForegroundColor White
+        Write-Host ""
+        Write-Host "🔧 For immediate effect in current session:" -ForegroundColor Yellow
+        Write-Host "  `$env:PYTHONIOENCODING = 'utf-8"" -ForegroundColor Cyan
+        Write-Host "  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8" -ForegroundColor Cyan
+    }
+    else {
+        Write-Host ""
+        Write-Host "⚠️ EQ12 Unicode Environment Patch: PARTIAL SUCCESS" -ForegroundColor Yellow
+        Write-Host "   Some configuration steps failed. Check error messages above." -ForegroundColor Yellow
+    }
+}
+catch {
+    Write-Host ""
+    Write-Host "❌ EQ12 Unicode Environment Patch: FAILED" -ForegroundColor Red
+    Write-Host "   Error: $_" -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "For help: Get-Help .\eq12_unicode_patch.ps1 -Detailed" -ForegroundColor Gray

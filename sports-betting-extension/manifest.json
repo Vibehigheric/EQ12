@@ -1,0 +1,63 @@
+{
+    "manifest_version": 3,
+    "name": "Sports Betting Assistant",
+    "version": "1.0.0",
+    "description": "Cross-browser sports betting extension: real-time odds tracking, parlay optimization, and DraftKings integration",
+    "permissions": [
+        "storage",
+        "scripting",
+        "tabs",
+        "notifications",
+        "activeTab"
+    ],
+    "host_permissions": [
+        "*://*.draftkings.com/*",
+        "*://*.fanduel.com/*",
+        "*://*.betmgm.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_title": "Sports Betting Assistant"
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*.draftkings.com/*"
+            ],
+            "js": [
+                "polyfill/browser-polyfill.min.js",
+                "content-draftkings.js"
+            ],
+            "run_at": "document_idle"
+        },
+        {
+            "matches": [
+                "*://*.fanduel.com/*"
+            ],
+            "js": [
+                "polyfill/browser-polyfill.min.js",
+                "content-fanduel.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "icons/*"
+            ],
+            "matches": [
+                "*://*.draftkings.com/*",
+                "*://*.fanduel.com/*"
+            ]
+        }
+    ]
+}

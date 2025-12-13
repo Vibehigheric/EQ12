@@ -1,0 +1,50 @@
+# Require expert review on sensitive areas
+/configs/          @eq12/secops
+/.github/          @eq12/devops
+/eq12_ai_client.py @eq12/ai-leads
+/eq12_cost_guards.py @eq12/senior-devs
+/eq12_odds_ingestor.py @eq12/data-leads
+/eq12_enhanced_openai_sdk.py @eq12/ai-leads
+/eq12_*_engine.py @eq12/senior-devs
+/eq12_*_optimizer.py @eq12/senior-devs
+/eq12_*_intelligence.py @eq12/senior-devs
+/eq12_streaming_*.py @eq12/ai-leads
+/scripts/eq12_*.py @eq12/senior-devs
+/scripts/eq12_*.ps1 @eq12/devops
+
+# Security-critical files require multiple approvals
+/.keys/ @eq12/secops @eq12/admin
+/SECURITY.md @eq12/secops @eq12/admin
+/.github/workflows/security.yml @eq12/secops @eq12/devops
+/.pre-commit-config.yaml @eq12/secops @eq12/devops
+
+# Database and data files
+/data/ @eq12/data-leads
+/logs/ @eq12/senior-devs
+*.db @eq12/data-leads @eq12/secops
+*.sqlite @eq12/data-leads @eq12/secops
+
+# Configuration files
+*.json @eq12/senior-devs
+*.yaml @eq12/senior-devs
+*.yml @eq12/senior-devs
+requirements*.txt @eq12/senior-devs @eq12/secops
+
+# Documentation requiring accuracy
+README.md @eq12/senior-devs
+AGENTS.md @eq12/ai-leads @eq12/admin
+*.md @eq12/senior-devs
+
+# Infrastructure and deployment
+Dockerfile* @eq12/devops @eq12/secops
+docker-compose*.yml @eq12/devops
+.devcontainer/ @eq12/devops
+.vscode/ @eq12/devops
+
+# Python packaging and distribution
+setup.py @eq12/senior-devs @eq12/admin
+pyproject.toml @eq12/senior-devs @eq12/admin
+__init__.py @eq12/senior-devs
+
+# Global fallback - all other files need at least one senior review
+* @eq12/senior-devs

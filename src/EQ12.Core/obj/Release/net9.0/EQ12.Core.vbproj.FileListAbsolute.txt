@@ -1,0 +1,14 @@
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\bin\Release\net9.0\EQ12.Core.deps.json
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\bin\Release\net9.0\EQ12.Core.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\bin\Release\net9.0\EQ12.Core.pdb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\bin\Release\net9.0\EQ12.Core.xml
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.vbproj.AssemblyReference.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.AssemblyInfoInputs.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.AssemblyInfo.vb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.vbproj.CoreCompileInputs.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\refint\EQ12.Core.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.xml
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\EQ12.Core.pdb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Core\obj\Release\net9.0\ref\EQ12.Core.dll

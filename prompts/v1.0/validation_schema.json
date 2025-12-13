@@ -1,0 +1,121 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "EQ12 Validation Report Schema",
+    "type": "object",
+    "required": [
+        "input_parlay_id",
+        "validation_status",
+        "violations_found",
+        "corrected_parlay",
+        "risk_assessment",
+        "recommendations"
+    ],
+    "properties": {
+        "input_parlay_id": {
+            "type": "string"
+        },
+        "validation_status": {
+            "type": "string",
+            "enum": [
+                "PASS",
+                "FAIL_CORRECTABLE",
+                "FAIL_UNCORRECTABLE"
+            ]
+        },
+        "violations_found": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "rule": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "type": "string",
+                        "enum": [
+                            "ERROR",
+                            "WARNING",
+                            "INFO"
+                        ]
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "leg_index": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "corrected": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
+        "corrected_parlay": {
+            "anyOf": [
+                {
+                    "$ref": "parlay_schema.json"
+                },
+                {
+                    "type": "null"
+                }
+            ]
+        },
+        "risk_assessment": {
+            "type": "object",
+            "properties": {
+                "overall_risk": {
+                    "type": "string",
+                    "enum": [
+                        "LOW",
+                        "MEDIUM",
+                        "HIGH"
+                    ]
+                },
+                "correlation_risk": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0
+                },
+                "stale_data_risk": {
+                    "type": "boolean"
+                },
+                "kelly_overbet_risk": {
+                    "type": "boolean"
+                },
+                "liquidity_risk": {
+                    "type": "string",
+                    "enum": [
+                        "LOW",
+                        "MEDIUM",
+                        "HIGH"
+                    ]
+                }
+            }
+        },
+        "recommendations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": [
+                            "HIGH",
+                            "MEDIUM",
+                            "LOW"
+                        ]
+                    },
+                    "reason": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

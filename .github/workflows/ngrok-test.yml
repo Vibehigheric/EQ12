@@ -1,0 +1,50 @@
+name: EQ12 ngrok test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ngrok-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install jq and curl
+        run: sudo apt-get update && sudo apt-get install -y jq curl unzip
+
+      - name: Download ngrok
+        run: |
+          curl -sSLo ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip -q ngrok.zip -d ./
+          chmod +x ./ngrok
+
+      - name: Configure authtoken
+        env:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+        run: |
+          ./ngrok authtoken "$NGROK_AUTHTOKEN"
+
+      - name: Start tunnels (dashboard, sports, jobs)
+        run: |
+          nohup ./ngrok http 8080 --log=stdout --log-format=logfmt > ngrok_8080.log 2>&1 &
+          nohup ./ngrok http 5000 --log=stdout --log-format=logfmt > ngrok_5000.log 2>&1 &
+          nohup ./ngrok http 3000 --log=stdout --log-format=logfmt > ngrok_3000.log 2>&1 &
+          sleep 5
+
+      - name: Query ngrok API for tunnels
+        run: |
+          curl -sS http://127.0.0.1:4040/api/tunnels > ngrok_api.json || true
+          cat ngrok_api.json
+
+      - name: Extract URLs and upload artifact
+        run: |
+          jq -r '.tunnels[] | {name: .name, public_url: .public_url}' ngrok_api.json > ngrok_urls.json || true
+          cat ngrok_urls.json
+        continue-on-error: true
+
+      - name: Upload ngrok URLs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ngrok-urls
+          path: ngrok_urls.json

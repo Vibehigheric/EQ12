@@ -1,0 +1,5 @@
+$secure = Read-Host "Enter API Key" -AsSecureString
+$secure | ConvertFrom-SecureString | Out-File "C:\EQ12\keys\openai.txt"
+
+PI Key Vault (encrypted storage)
+Store your OpenAI / OddsAPI / Telegram keys securely with:

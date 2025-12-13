@@ -1,0 +1,168 @@
+#Requires -Version 5.0
+<#
+.SYNOPSIS
+    EQ12 Raspberry Pi Power Control Wrapper
+.DESCRIPTION
+    PowerShell wrapper for controlling Pi power via USB relays, GPIO, or serial commands
+.PARAMETER Device
+    Target device name (default: Pi5)
+.PARAMETER Action
+    Power action: PowerOn, PowerOff, PowerCycle, or BootFromUSB
+.PARAMETER Method
+    Control method: USBRelay, SerialRelay, GPIO, or Auto
+.PARAMETER WaitForBoot
+    Wait for device to respond after power-on
+#>
+
+[CmdletBinding()]
+param(
+    [string]$Device = "Pi5",
+    [ValidateSet("PowerOn", "PowerOff", "PowerCycle", "BootFromUSB")]
+    [string]$Action = "BootFromUSB",
+    [ValidateSet("USBRelay", "SerialRelay", "GPIO", "Auto")]
+    [string]$Method = "Auto",
+    [switch]$WaitForBoot,
+    [switch]$Verbose
+)
+
+function Write-PowerLog {
+    param([string]$Message, [string]$Color = "White")
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    Write-Host "[$timestamp] $Message" -ForegroundColor $Color
+}
+
+function Test-PiResponse {
+    param([string]$IPAddress = "192.168.100.2")
+    
+    $ping = Test-Connection -ComputerName $IPAddress -Count 1 -Quiet -ErrorAction SilentlyContinue
+    if ($ping) {
+        $ssh = Test-NetConnection -ComputerName $IPAddress -Port 22 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+        return $ssh.TcpTestSucceeded
+    }
+    return $false
+}
+
+function Invoke-PowerController {
+    param([string]$Device, [string]$Action, [string]$Method)
+    
+    $pythonArgs = @(
+        "C:\EQ12\scripts\eq12_pi_gpio_trigger.py",
+        "--device", $Device,
+        "--action", $Action.ToLower(),
+        "--method", $Method.ToLower()
+    )
+    
+    if ($Verbose) {
+        $pythonArgs += "--verbose"
+    }
+    
+    try {
+        $result = & python @pythonArgs 2>&1
+        $exitCode = $LASTEXITCODE
+        
+        Write-PowerLog "Power control result: $result" $(if ($exitCode -eq 0) { "Green" } else { "Red" })
+        return $exitCode -eq 0
+    }
+    catch {
+        Write-PowerLog "Power control failed: $_" "Red"
+        return $false
+    }
+}
+
+# Main execution
+Write-Host ""
+Write-Host " EQ12 PI POWER CONTROLLER" -ForegroundColor Cyan
+Write-Host "Device: $Device | Action: $Action | Method: $Method" -ForegroundColor Yellow
+Write-Host ""
+
+# Convert PowerShell actions to Python actions
+$pythonAction = switch ($Action) {
+    "PowerOn" { "power-on" }
+    "PowerOff" { "power-off" }
+    "PowerCycle" { "power-cycle" }
+    "BootFromUSB" { "power-cycle" }
+    default { "power-cycle" }
+}
+
+# Special handling for BootFromUSB
+if ($Action -eq "BootFromUSB") {
+    Write-PowerLog "Initiating USB boot sequence for $Device..." "Cyan"
+    
+    # Check if device is already powered on
+    if (Test-PiResponse) {
+        Write-PowerLog "Device already online - performing soft reboot via SSH..." "Yellow"
+        try {
+            # Attempt graceful reboot via SSH
+            $sshResult = ssh ricoj100@192.168.100.2 "sudo reboot" 2>$null
+            Write-PowerLog "SSH reboot command sent" "Green"
+            Start-Sleep -Seconds 3
+        }
+        catch {
+            Write-PowerLog "SSH reboot failed, falling back to power cycle" "Yellow"
+        }
+    }
+    
+    Write-PowerLog "Performing power cycle for USB boot..." "Cyan"
+}
+
+# Execute power control
+$success = Invoke-PowerController -Device $Device -Action $pythonAction -Method $Method
+
+if ($success) {
+    Write-PowerLog " Power action completed successfully" "Green"
+    
+    if ($WaitForBoot -or $Action -eq "BootFromUSB") {
+        Write-Host ""
+        Write-PowerLog " Waiting for device boot..." "Yellow"
+        
+        $bootTimeout = 120  # 2 minutes
+        $checkInterval = 5  # 5 seconds
+        $attempts = $bootTimeout / $checkInterval
+        
+        for ($i = 1; $i -le $attempts; $i++) {
+            $elapsed = $i * $checkInterval
+            Write-PowerLog "Boot check $i/$attempts (${elapsed}s)..." "Gray"
+            
+            if (Test-PiResponse) {
+                Write-PowerLog " Device is online and SSH ready!" "Green"
+                Write-Host ""
+                Write-Host " BOOT SUCCESS!" -ForegroundColor Green
+                Write-Host "Device: $Device at 192.168.100.2" -ForegroundColor Cyan
+                Write-Host "SSH: ssh ricoj100@192.168.100.2" -ForegroundColor Cyan
+                Write-Host "Password: 102120sRO1!" -ForegroundColor White
+                exit 0
+            }
+            
+            Start-Sleep -Seconds $checkInterval
+        }
+        
+        Write-PowerLog " Boot timeout reached" "Red"
+        Write-Host ""
+        Write-Host " BOOT TIMEOUT" -ForegroundColor Red
+        Write-Host "Device did not respond within $bootTimeout seconds" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Troubleshooting:" -ForegroundColor Cyan
+        Write-Host "1. Check USB boot drive is connected" -ForegroundColor White
+        Write-Host "2. Verify Pi EEPROM boot order (USB first)" -ForegroundColor White
+        Write-Host "3. Check power connections" -ForegroundColor White
+        exit 1
+    }
+}
+else {
+    Write-PowerLog " Power action failed" "Red"
+    Write-Host ""
+    Write-Host " POWER CONTROL FAILED" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Possible issues:" -ForegroundColor Yellow
+    Write-Host "1. USB relay not connected or not found" -ForegroundColor White
+    Write-Host "2. Serial relay not responding" -ForegroundColor White
+    Write-Host "3. GPIO control not available" -ForegroundColor White
+    Write-Host "4. Python dependencies missing" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Install dependencies:" -ForegroundColor Cyan
+    Write-Host "pip install pyusb pyserial" -ForegroundColor Green
+    exit 1
+}
+
+Write-Host ""
+Write-Host "Power control operation completed." -ForegroundColor White

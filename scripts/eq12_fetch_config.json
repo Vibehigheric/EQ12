@@ -1,0 +1,64 @@
+{
+  "fetch_config": {
+    "sources": {
+      "primary": "https://www.espn.com/nfl/schedule",
+      "secondary": "https://www.nfl.com/schedules/",
+      "tertiary": "https://www.cbssports.com/nfl/schedule/"
+    },
+    "weather": {
+      "api": "https://api.weather.gov/gridpoints/HGX/67,81/forecast",
+      "backup": "https://wttr.in/Houston?format=j1"
+    },
+    "validation": {
+      "min_source_confirmations": 2,
+      "required_game_elements": ["Bills", "Texans", "Thursday"],
+      "prohibited_simulation_markers": ["simulation", "simulated", "Bears", "Lions", "fake", "mock"]
+    },
+    "output": {
+      "data_directory": "C:/EQ12/data/",
+      "log_directory": "C:/EQ12/logs/",
+      "filename_pattern": "tnf_real_data_{timestamp}.json"
+    },
+    "timeouts": {
+      "web_request": 15,
+      "weather_request": 10,
+      "total_fetch": 60
+    },
+    "retry_logic": {
+      "max_retries": 3,
+      "backoff_seconds": 2,
+      "exponential_backoff": true
+    }
+  },
+  "game_data": {
+    "target_date": "2025-11-20",
+    "target_game": "Bills @ Texans",
+    "expected_kickoff": "8:15 PM ET",
+    "expected_network": "Prime Video",
+    "expected_location": "NRG Stadium Houston"
+  },
+  "betting_lines": {
+    "spread": {
+      "bills": -5.5,
+      "texans": 5.5,
+      "juice": -110
+    },
+    "total": 44.5,
+    "moneyline": {
+      "bills": -225,
+      "texans": 185
+    }
+  },
+  "injury_tracking": {
+    "bills_key_injuries": [
+      "Dalton Kincaid TE OUT",
+      "Curtis Samuel WR OUT",
+      "Mecole Hardman WR OUT"
+    ],
+    "texans_key_injuries": [
+      "C.J. Stroud QB OUT",
+      "Joe Mixon RB OUT",
+      "Jalen Pitre S OUT"
+    ]
+  }
+}

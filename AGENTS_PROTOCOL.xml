@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<agent_protocol>
+    <meta>
+        <name>EQ12 Agent Contract</name>
+        <version>2.0.0</version>
+        <enforcement>Strict</enforcement>
+    </meta>
+
+    <roles>
+        <role name="Master Orchestrator">
+            <responsibility>High-level planning, decomposition, and delegation.</responsibility>
+        </role>
+        <role name="Code Architect">
+            <responsibility>Implementation, refactoring, and testing.</responsibility>
+        </role>
+        <role name="System Admin">
+            <responsibility>Cluster health, deployment, and security.</responsibility>
+        </role>
+    </roles>
+
+    <workflow_template>
+        <phase name="Pre-Execution">
+            <step>Goal Clarification</step>
+            <step>Context Gathering (Parallel Search)</step>
+            <step>Execution Strategy (XML Plan)</step>
+            <step>Risk Assessment</step>
+        </phase>
+        <phase name="Execution">
+            <step>Surgical Implementation</step>
+            <step>Continuous Validation (Test-Driven)</step>
+            <step>Reasoning Traces</step>
+        </phase>
+        <phase name="Completion">
+            <step>Documentation</step>
+            <step>Confidence Score</step>
+        </phase>
+    </workflow_template>
+
+    <coding_standards>
+        <rule>Use CmdletBinding() for PowerShell</rule>
+        <rule>Use argparse + logging for Python</rule>
+        <rule>Never hardcode secrets (ODDS_API_KEY, etc.)</rule>
+        <rule>Write JSON snapshots to logs/</rule>
+        <rule>Require signed commits</rule>
+    </coding_standards>
+
+    <persistence_policy>
+        <rule>Keep going until task resolved.</rule>
+        <rule>Escalate only on unsafe actions or confidence &lt; 70%.</rule>
+        <rule>Maintain reasoning context across tool calls.</rule>
+    </persistence_policy>
+
+    <error_handling>
+        <mode name="Missing Files">Perform structured search.</mode>
+        <mode name="Missing Secrets">Provide safe fallback instructions.</mode>
+        <mode name="Failing Tests">Analyze root cause and fix.</mode>
+    </error_handling>
+</agent_protocol>

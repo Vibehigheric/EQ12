@@ -1,0 +1,69 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>EQ12WindowsManager</RootNamespace>
+    <TargetFramework>net6.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyTitle>EQ12WindowsManager</AssemblyTitle>
+    <AssemblyDescription>EQ12 VB.NET Windows Forms App</AssemblyDescription>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- EQ12 System Auto-Execute Targets -->
+  
+  <!-- Pre-Build: Environment Validation -->
+  <Target Name="EQ12PreBuildValidation" BeforeTargets="BeforeBuild">
+    <Message Text="ðŸ” EQ12: Validating build environment..." Importance="high" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;if (-not (Test-Path 'C:\EQ12\logs')) { New-Item -ItemType Directory -Path 'C:\EQ12\logs' -Force }&quot;" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;Write-Host 'âœ… EQ12 logs directory verified' -ForegroundColor Green&quot;" />
+  </Target>
+
+  <!-- Post-Build: EQ12 System Integration -->
+  <Target Name="EQ12PostBuildIntegration" AfterTargets="AfterBuild">
+    <Message Text="ðŸš€ EQ12: Executing post-build integration..." Importance="high" />
+    
+    <!-- Check EQ12 system status -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;try { if (Test-Path 'C:\EQ12\eq12_simple_start.ps1') { Write-Host 'âœ… EQ12 startup script available' -ForegroundColor Green } else { Write-Host 'âš ï¸ EQ12 startup script not found' -ForegroundColor Yellow } } catch { Write-Host 'âŒ EQ12 status check failed' -ForegroundColor Red }&quot;" 
+           ContinueOnError="true" />
+    
+    <!-- Auto-start core EQ12 services if in development mode -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;if ( -eq 'true') { try { C:\EQ12\eq12_simple_start.ps1 -TestOnly; Write-Host 'ðŸŽ¯ EQ12 services auto-started' -ForegroundColor Cyan } catch { Write-Host 'âš ï¸ EQ12 auto-start skipped (services may already be running)' -ForegroundColor Yellow } }&quot;" 
+           ContinueOnError="true" />
+           
+    <!-- Log build completion -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;Add-Content -Path 'C:\EQ12\logs\build_history.log' -Value '2025-10-04 08:08:53 - Build completed: $(MSBuildProjectName)' -Encoding UTF8&quot;" 
+           ContinueOnError="true" />
+  </Target>
+
+  <!-- Clean: EQ12 Cleanup Operations -->
+  <Target Name="EQ12CleanupOperations" AfterTargets="AfterClean">
+    <Message Text="ðŸ§¹ EQ12: Performing cleanup operations..." Importance="high" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;if (Test-Path 'C:\EQ12\logs\temp_build_*') { Remove-Item 'C:\EQ12\logs\temp_build_*' -Force; Write-Host 'âœ… Cleaned temporary build files' -ForegroundColor Green }&quot;" 
+           ContinueOnError="true" />
+  </Target>
+
+  <!-- Custom EQ12 Workspace Commands -->
+  <Target Name="EQ12WorkspaceCommands" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Debug'">
+    <Message Text="ðŸ”§ EQ12: Executing workspace-specific commands..." Importance="high" />
+    
+    <!-- Validate Python environment -->
+    <Exec Command="python --version" 
+           ContinueOnError="true" />
+    
+    <!-- Check ngrok status -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;try { $ngrokStatus = (Invoke-WebRequest -Uri 'http://localhost:4040/api/tunnels' -TimeoutSec 2 -ErrorAction Stop).Content | ConvertFrom-Json; if ($ngrokStatus.tunnels.Count -gt 0) { Write-Host 'ðŸŒ Ngrok tunnels active' -ForegroundColor Green } else { Write-Host 'âš ï¸ No active ngrok tunnels' -ForegroundColor Yellow } } catch { Write-Host 'ðŸ“¡ Ngrok status unknown' -ForegroundColor Gray }&quot;" 
+           ContinueOnError="true" />
+           
+    <!-- Execute custom workspace script if specified -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -File &quot;C:\EQ12\scripts\workspace_integration.ps1&quot;" 
+           Condition="Exists('C:\EQ12\scripts\workspace_integration.ps1')"
+           ContinueOnError="true" />
+  </Target>
+</Project>

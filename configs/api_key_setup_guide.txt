@@ -1,0 +1,82 @@
+
+ EQ12 API KEY SETUP GUIDE
+=========================
+
+To fix your API authentication issues, you need to obtain and configure the following API keys:
+
+ CRITICAL APIS (Required for core functionality):
+--------------------------------------------------
+
+1. ODDS_API_KEY (The Odds API)
+    Website: https://the-odds-api.com/
+    Free Tier: 500 requests/month
+    Setup: Sign up  Get API key  Set environment variable
+    Command: set ODDS_API_KEY=your_api_key_here
+
+2. SPORTSDATA_API_KEY (SportsData.io)
+    Website: https://sportsdata.io/
+    Free Tier: 1000 requests/month
+    Setup: Create account  Choose NFL/NHL  Get key
+    Command: set SPORTSDATA_API_KEY=your_api_key_here
+
+3. TWITTER_API_KEY (Twitter API v2)
+    Website: https://developer.twitter.com/
+    Free Tier: Limited access
+    Setup: Apply for developer account  Create app  Get bearer token
+    Command: set TWITTER_API_KEY=your_bearer_token_here
+
+ IMPORTANT APIS (Enhanced functionality):
+------------------------------------------
+
+4. OPENWEATHER_API_KEY (OpenWeatherMap)
+    Website: https://openweathermap.org/api
+    Free Tier: 1000 calls/day
+    Setup: Sign up  API keys section  Copy key
+    Command: set OPENWEATHER_API_KEY=your_api_key_here
+
+5. OPENAI_API_KEY (OpenAI)
+    Website: https://platform.openai.com/
+    Paid: $5-20/month typical usage
+    Setup: Create account  Billing  API keys  Create new
+    Command: set OPENAI_API_KEY=sk-your_secret_key_here
+
+6. TELEGRAM_BOT_TOKEN (Telegram Bot API)
+    Website: https://core.telegram.org/bots
+    Free: Unlimited
+    Setup: Message @BotFather  /newbot  Follow instructions
+    Command: set TELEGRAM_BOT_TOKEN=123456789:your_bot_token_here
+
+ SETUP INSTRUCTIONS:
+---------------------
+
+OPTION 1 - PowerShell (Temporary):
+set ODDS_API_KEY=your_key
+set OPENWEATHER_API_KEY=your_key
+set SPORTSDATA_API_KEY=your_key
+set OPENAI_API_KEY=your_key
+set TELEGRAM_BOT_TOKEN=your_token
+
+OPTION 2 - Permanent Environment Variables:
+1. Open System Properties  Advanced  Environment Variables
+2. Add each API key as a new User or System variable
+3. Restart VS Code/PowerShell to load new variables
+
+OPTION 3 - .env File (Recommended):
+1. Create .env file in C:\EQ12\
+2. Add all your API keys:
+   ODDS_API_KEY=your_key_here
+   OPENWEATHER_API_KEY=your_key_here
+   SPORTSDATA_API_KEY=your_key_here
+   # ... etc
+
+ SECURITY NOTES:
+------------------
+- Never commit API keys to git
+- Use backup keys for redundancy
+- Monitor usage to avoid rate limits
+- Rotate keys periodically for security
+
+ TESTING:
+----------
+Run this script again after setting up keys:
+python eq12_api_key_manager.py --test-all

@@ -1,0 +1,133 @@
+{
+  "generated_at": "2025-10-04T11:13:09.687692",
+  "system": "EQ12 NCAA Week 7 Conference Builder",
+  "conference": "Sun Belt",
+  "week": 7,
+  "parlays": [
+    {
+      "parlay_id": "Sun Belt_HIGH-PAYOUT_Week7_20251004_111309",
+      "conference": "Sun Belt",
+      "parlay_type": "high-payout",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "6d9c7edbf2884eb46707ebd76ff969d7",
+          "sport": "NCAA-FB",
+          "conference": "Sun Belt",
+          "matchup": "James Madison Dukes @ Georgia State Panthers",
+          "home_team": "Georgia State Panthers",
+          "away_team": "James Madison Dukes",
+          "pick_type": "H2H",
+          "bet": "Georgia State Panthers ML",
+          "odds": 900.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.09555555555555557,
+          "sentiment": 0.6,
+          "weather": "Cloudy",
+          "edge_percentage": 43.00000000000001,
+          "clv_variance": 0.04994300528035277,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "Caesars",
+            "market": "h2h",
+            "outcome_name": "Georgia State Panthers"
+          }
+        },
+        {
+          "game_id": "9af91cb4d445ab55fec6eb8d60e079f8",
+          "sport": "NCAA-FB",
+          "conference": "Sun Belt",
+          "matchup": "Coastal Carolina Chanticleers @ Old Dominion Monarchs",
+          "home_team": "Old Dominion Monarchs",
+          "away_team": "Coastal Carolina Chanticleers",
+          "pick_type": "H2H",
+          "bet": "Coastal Carolina Chanticleers ML",
+          "odds": 810.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.09439506172839508,
+          "sentiment": 0.6,
+          "weather": "Windy",
+          "edge_percentage": 42.010989010989015,
+          "clv_variance": 0.0772981806031097,
+          "start_time": "2025-10-04T22:00:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Coastal Carolina Chanticleers"
+          }
+        },
+        {
+          "game_id": "a62fc08c67b4e292879a17791a727e4a",
+          "sport": "NCAA-FB",
+          "conference": "Sun Belt",
+          "matchup": "Texas State Bobcats @ Arkansas State Red Wolves",
+          "home_team": "Arkansas State Red Wolves",
+          "away_team": "Texas State Bobcats",
+          "pick_type": "H2H",
+          "bet": "Arkansas State Red Wolves ML",
+          "odds": 400.0,
+          "confidence": 0.545,
+          "kelly_percentage": 0.08625000000000001,
+          "sentiment": 0.65,
+          "weather": "Cold",
+          "edge_percentage": 34.5,
+          "clv_variance": -0.018667152233202648,
+          "start_time": "2025-10-04T20:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetRivers",
+            "market": "h2h",
+            "outcome_name": "Arkansas State Red Wolves"
+          }
+        },
+        {
+          "game_id": "80be7099edd5c7bdd8543513a959d509",
+          "sport": "NCAA-FB",
+          "conference": "Sun Belt",
+          "matchup": "Louisiana Tech Bulldogs @ Kennesaw State Owls",
+          "home_team": "Kennesaw State Owls",
+          "away_team": "Louisiana Tech Bulldogs",
+          "pick_type": "H2H",
+          "bet": "Kennesaw State Owls ML",
+          "odds": 180.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.053777777777777785,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 17.28571428571429,
+          "clv_variance": -0.009374457265282103,
+          "start_time": "2025-10-09T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Kennesaw State Owls"
+          }
+        }
+      ],
+      "combined_odds": 127300.0,
+      "win_probability": 0.08113796500000003,
+      "expected_roi": 10236.976741000004,
+      "clv_vs_open": 0.024799894096244425,
+      "recommended_stake": 25.0,
+      "total_edge": 136.7967032967033,
+      "risk_score": 0.6,
+      "top25_count": 0,
+      "steam_count": 1,
+      "created_at": "2025-10-04T11:13:09.670782"
+    }
+  ],
+  "summary": {
+    "total_parlays": 1,
+    "total_legs": 4,
+    "top25_games": 0,
+    "steam_moves": 1,
+    "total_stake": 25.0
+  }
+}

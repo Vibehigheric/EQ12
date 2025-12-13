@@ -1,0 +1,49 @@
+EQ12 inventory (generated)
+Generated: 2025-09-20T15:59:32.876406
+
+Kept:
+- C:\EQ12\archive_duplicates
+- C:\EQ12\dashboard
+- C:\EQ12\data
+- C:\EQ12\EdgeGodParlays
+- C:\EQ12\EdgeGodUnified
+- C:\EQ12\envs
+- C:\EQ12\EQ12_Automation
+- C:\EQ12\eq12_cleanup.py
+- C:\EQ12\eq12_daily_maintenance.xml
+- C:\EQ12\eq12_daily_test.ps1
+- C:\EQ12\eq12_inventory.txt
+- C:\EQ12\eq12_launcher.ps1
+- C:\EQ12\eq12_master_launcher.ps1
+- C:\EQ12\eq12_master_task.xml
+- C:\EQ12\EQ12_Profile.ps1
+- C:\EQ12\eq12_recycle.ps1
+- C:\EQ12\eq12_update.ps1
+- C:\EQ12\keys
+- C:\EQ12\logs
+- C:\EQ12\odds_parser.py
+- C:\EQ12\parlay_builder.py
+- C:\EQ12\profiles
+- C:\EQ12\run_daily_maintenance_now.ps1
+- C:\EQ12\scripts
+- C:\EQ12\EdgeGodParlays\.venv
+- C:\EQ12\EdgeGodParlays\ai_betting_bot_stealth_final_flask_pro.py
+- C:\EQ12\EdgeGodParlays\EdgeGodParlays_AutoStart.xml
+- C:\EQ12\EdgeGodParlays\EdgeGodParlays_LogicMatrix.csv
+- C:\EQ12\EdgeGodParlays\logs
+- C:\EQ12\EdgeGodParlays\main.py
+- C:\EQ12\EdgeGodParlays\output
+- C:\EQ12\EdgeGodParlays\presets
+- C:\EQ12\EdgeGodParlays\sports_live.py
+- C:\EQ12\EdgeGodParlays\Start-EdgeGodParlays.ps1
+- C:\EQ12\EdgeGodParlays\templates
+- C:\EQ12\EdgeGodParlays\ui
+- C:\EQ12\data\archive
+- C:\EQ12\data\file_report_20250919.json
+- C:\EQ12\dashboard\index.html
+
+Sensitive (moved):
+- EdgeGodParlays\creds.json
+- EdgeGodParlays\.env
+
+Archived duplicates: see archive_duplicates/

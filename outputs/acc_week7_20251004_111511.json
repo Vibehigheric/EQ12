@@ -1,0 +1,183 @@
+{
+  "generated_at": "2025-10-04T11:15:11.213896",
+  "system": "EQ12 NCAA Week 7 Conference Builder",
+  "conference": "ACC",
+  "week": 7,
+  "parlays": [
+    {
+      "parlay_id": "ACC_HIGH-PAYOUT_Week7_20251004_111511",
+      "conference": "ACC",
+      "parlay_type": "high-payout",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "2e59cc43133dd809fffed4c843d7afcc",
+          "sport": "NCAA-FB",
+          "conference": "ACC",
+          "matchup": "Clemson Tigers @ North Carolina Tar Heels",
+          "home_team": "North Carolina Tar Heels",
+          "away_team": "Clemson Tigers",
+          "pick_type": "H2H",
+          "bet": "North Carolina Tar Heels ML",
+          "odds": 570.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08950877192982457,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 38.07462686567165,
+          "clv_variance": -0.012337416267313366,
+          "start_time": "2025-10-04T16:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "North Carolina Tar Heels"
+          }
+        },
+        {
+          "game_id": "6713f27b1f4032c4ebc0f91d0fc86306",
+          "sport": "NCAA-FB",
+          "conference": "ACC",
+          "matchup": "Virginia Cavaliers @ Louisville Cardinals",
+          "home_team": "Louisville Cardinals",
+          "away_team": "Virginia Cavaliers",
+          "pick_type": "H2H",
+          "bet": "Virginia Cavaliers ML",
+          "odds": 210.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.06123809523809526,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 20.74193548387097,
+          "clv_variance": -0.0018319196187967547,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "DraftKings",
+            "market": "h2h",
+            "outcome_name": "Virginia Cavaliers"
+          }
+        },
+        {
+          "game_id": "4c9bd2ce4bac0213c310def6bf4fb8be",
+          "sport": "NCAA-FB",
+          "conference": "ACC",
+          "matchup": "Boston College Eagles @ Pittsburgh Panthers",
+          "home_team": "Pittsburgh Panthers",
+          "away_team": "Boston College Eagles",
+          "pick_type": "H2H",
+          "bet": "Boston College Eagles ML",
+          "odds": 205.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.060146341463414646,
+          "sentiment": 0.6,
+          "weather": "Cloudy",
+          "edge_percentage": 20.21311475409836,
+          "clv_variance": 0.07808543315964235,
+          "start_time": "2025-10-04T16:00:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "Bovada",
+            "market": "h2h",
+            "outcome_name": "Boston College Eagles"
+          }
+        },
+        {
+          "game_id": "4579a2cd837e62498e3b3831d4475c96",
+          "sport": "NCAA-FB",
+          "conference": "ACC",
+          "matchup": "Wake Forest Demon Deacons @ Virginia Tech Hokies",
+          "home_team": "Virginia Tech Hokies",
+          "away_team": "Wake Forest Demon Deacons",
+          "pick_type": "H2H",
+          "bet": "Wake Forest Demon Deacons ML",
+          "odds": 192.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.057041666666666685,
+          "sentiment": 0.6,
+          "weather": "Windy",
+          "edge_percentage": 18.75342465753425,
+          "clv_variance": 0.04382676413706588,
+          "start_time": "2025-10-04T17:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "Caesars",
+            "market": "h2h",
+            "outcome_name": "Wake Forest Demon Deacons"
+          }
+        },
+        {
+          "game_id": "e3f1c7a8b94a532b18987dfd0c13998e",
+          "sport": "NCAA-FB",
+          "conference": "ACC",
+          "matchup": "Miami Hurricanes @ Florida State Seminoles",
+          "home_team": "Florida State Seminoles",
+          "away_team": "Miami Hurricanes",
+          "pick_type": "H2H",
+          "bet": "Florida State Seminoles ML",
+          "odds": 161.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.04761490683229816,
+          "sentiment": 0.6,
+          "weather": "Windy",
+          "edge_percentage": 14.68582375478928,
+          "clv_variance": 0.03233682014953314,
+          "start_time": "2025-10-04T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "LowVig.ag",
+            "market": "h2h",
+            "outcome_name": "Florida State Seminoles"
+          }
+        },
+        {
+          "game_id": "98032c76517a301d3547a0224bb802f1",
+          "sport": "NCAA-FB",
+          "conference": "ACC",
+          "matchup": "Duke Blue Devils @ California Golden Bears",
+          "home_team": "California Golden Bears",
+          "away_team": "Duke Blue Devils",
+          "pick_type": "H2H",
+          "bet": "California Golden Bears ML",
+          "odds": 126.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.0313968253968254,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 8.752212389380531,
+          "clv_variance": 0.015829845873850553,
+          "start_time": "2025-10-05T01:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "California Golden Bears"
+          }
+        }
+      ],
+      "combined_odds": 109010.89893319998,
+      "win_probability": 0.02216436112900001,
+      "expected_roi": 2318.373367065266,
+      "clv_vs_open": 0.025984921238996966,
+      "recommended_stake": 8.99285606710307,
+      "total_edge": 121.22113790534505,
+      "risk_score": 0.8999999999999999,
+      "top25_count": 0,
+      "steam_count": 1,
+      "created_at": "2025-10-04T11:15:11.190705"
+    }
+  ],
+  "summary": {
+    "total_parlays": 1,
+    "total_legs": 6,
+    "top25_games": 0,
+    "steam_moves": 1,
+    "total_stake": 8.99285606710307
+  }
+}

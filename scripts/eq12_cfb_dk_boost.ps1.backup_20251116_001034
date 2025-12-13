@@ -1,0 +1,216 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    EQ12 Enhanced CFB DraftKings Mystery Profit Boost Optimizer
+
+.DESCRIPTION
+    PowerShell wrapper for the enhanced EQ12 CFB DK boost optimizer that includes
+    CSV export and Telegram integration. Uses OddsAPI to find optimal parlays for
+    DraftKings Mystery Profit Boost promotions with comprehensive analytics and notifications.
+
+.PARAMETER TokenPercent
+    Mystery Profit Boost token percentage. Valid values: 25, 33, 50. Default: 25
+
+.PARAMETER Stake
+    Maximum bet amount in USD. Range: $1-$100 for DK promos. Default: $100
+
+.PARAMETER PromoDate
+    Target promotion date in YYYY-MM-DD format. Default: today
+
+.PARAMETER MaxLegs
+    Maximum number of legs to consider. Range: 3-8. Default: 5
+
+.PARAMETER CsvFilename
+    Custom CSV filename for export. Default: auto-generated with timestamp
+
+.PARAMETER NoTelegram
+    Disable Telegram notifications. Default: enabled if credentials available
+
+.PARAMETER AllowWholeLines
+    Allow integer spreads/totals (increases push risk). Default: half-point only
+
+.PARAMETER MinPerLegDecimal
+    Filter ultra-juicy legs below this decimal threshold. Default: 1.2
+
+.PARAMETER Help
+    Show help information
+
+.EXAMPLE
+    .\eq12_cfb_dk_boost.ps1 -TokenPercent 33 -Stake 100 -PromoDate "2025-10-03"
+
+    Runs CFB optimizer with 33% boost token for $100 stake on October 3rd, 2025
+
+.EXAMPLE
+    .\eq12_cfb_dk_boost.ps1 -MaxLegs 6 -CsvFilename "custom_picks.csv" -NoTelegram
+
+    Runs optimizer allowing up to 6 legs, exports to custom CSV file, no Telegram
+
+.NOTES
+    Requires:
+    - ODDS_API_KEY or ODDSAPI_KEY environment variable
+    - Optional: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID for notifications
+    - Python 3.8+ with requests module
+    - EQ12 CFB boost optimizer script
+
+    Author: EQ12 Development Team
+    Version: 2.0.0
+    Updated: 2025-10-03
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false, HelpMessage = "Mystery Profit Boost token percentage (25, 33, or 50)")]
+    [ValidateSet(25, 33, 50)]
+    [int]$TokenPercent = 25,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Maximum bet amount in USD (1-100)")]
+    [ValidateRange(1.0, 100.0)]
+    [double]$Stake = 100.0,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Target promotion date (YYYY-MM-DD)")]
+    [ValidateScript({
+            try { [datetime]::ParseExact($_, "yyyy-MM-dd", $null) }
+            catch { throw "Date must be in YYYY-MM-DD format" }
+        })]
+    [string]$PromoDate = (Get-Date).ToString("yyyy-MM-dd"),
+
+    [Parameter(Mandatory = $false, HelpMessage = "Maximum number of parlay legs (3-8)")]
+    [ValidateRange(3, 8)]
+    [int]$MaxLegs = 5,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Custom CSV filename for export")]
+    [string]$CsvFilename,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Disable Telegram notifications")]
+    [switch]$NoTelegram,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Allow integer spreads/totals (push risk)")]
+    [switch]$AllowWholeLines,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Filter ultra-juicy legs below decimal threshold")]
+    [ValidateRange(1.1, 2.0)]
+    [double]$MinPerLegDecimal = 1.2,
+
+    [Parameter(Mandatory = $false, HelpMessage = "Show help information")]
+    [switch]$Help
+)
+
+# Show help if requested
+if ($Help) {
+    Get-Help $MyInvocation.MyCommand.Definition -Full
+    return
+}
+
+try {
+    # Initialize EQ12 environment
+    Write-Host "🏈 EQ12 Enhanced CFB DraftKings Mystery Boost Optimizer" -ForegroundColor Green
+    Write-Host "=" * 60 -ForegroundColor Green
+
+    # Validate environment
+    $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+    $EQ12Root = Split-Path -Parent $ScriptRoot
+    $OptimizerScript = Join-Path $EQ12Root "cfb_dk_boost_optimizer.py"
+
+    if (-not (Test-Path $OptimizerScript)) {
+        throw "CFB optimizer script not found: $OptimizerScript"
+    }
+
+    # Check API key
+    $ApiKey = ${env}ODDS_API_KEY
+    if (-not $ApiKey) {
+        $ApiKey = ${env}ODDSAPI_KEY
+    }
+    if (-not $ApiKey) {
+        throw "Missing OddsAPI key. Set ODDS_API_KEY or ODDSAPI_KEY environment variable."
+    }
+
+    # Check Python availability
+    try {
+        $PythonVersion = python --version 2>&1
+        Write-Host "✅ Python: $PythonVersion" -ForegroundColor Green
+    } catch {
+        throw "Python not found in PATH. Install Python 3.8+ and ensure it's accessible."
+    }
+
+    # Build command arguments
+    $PythonArgs = @(
+        $OptimizerScript,
+        "--promo-date", $PromoDate,
+        "--token", $TokenPercent,
+        "--stake", $Stake,
+        "--max-legs", $MaxLegs,
+        "--min-per-leg-decimal", $MinPerLegDecimal
+    )
+
+    if ($CsvFilename) {
+        $PythonArgs += @("--csv-filename", $CsvFilename)
+    }
+
+    if ($NoTelegram) {
+        $PythonArgs += "--no-telegram"
+    }
+
+    if ($AllowWholeLines) {
+        $PythonArgs += "--allow-whole-lines"
+    }
+
+    # Set environment variables
+    ${env}ODDSAPI_KEY = $ApiKey
+
+    Write-Host "`n📊 Configuration:" -ForegroundColor Cyan
+    Write-Host "   • Promo Date: $PromoDate" -ForegroundColor White
+    Write-Host "   • Token: $TokenPercent%" -ForegroundColor White
+    Write-Host "   • Stake: `$$($Stake.ToString("F2"))" -ForegroundColor White
+    Write-Host "   • Max Legs: $MaxLegs" -ForegroundColor White
+    Write-Host "   • CSV Export: $(if ($CsvFilename) { $CsvFilename } else { "Auto-generated" })" -ForegroundColor White
+    Write-Host "   • Telegram: $(if ($NoTelegram) { 'Disabled' } else { "Enabled (if configured)" })" -ForegroundColor White
+
+    # Check Telegram configuration
+    if (-not $NoTelegram) {
+        $TelegramBot = ${env}TELEGRAM_BOT_TOKEN
+        $TelegramChat = ${env}TELEGRAM_CHAT_ID
+        if ($TelegramBot -and $TelegramChat) {
+            Write-Host "   • Telegram: Configured ✅" -ForegroundColor Green
+        } else {
+            Write-Host "   • Telegram: Not configured (set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)" -ForegroundColor Yellow
+        }
+    }
+
+    Write-Host "`n🚀 Launching CFB optimizer..." -ForegroundColor Cyan
+
+    # Execute optimizer
+    $StartTime = Get-Date
+    & python @PythonArgs
+
+    $ExitCode = $LASTEXITCODE
+    $Duration = (Get-Date) - $StartTime
+
+    Write-Host "`n⏱️  Execution completed in $($Duration.TotalSeconds.ToString("F1"))s" -ForegroundColor Cyan
+
+    if ($ExitCode -eq 0) {
+        Write-Host "✅ CFB optimization successful!" -ForegroundColor Green
+
+        # Check for generated files
+        $LogsDir = Join-Path $EQ12Root "logs"
+        if (Test-Path $LogsDir) {
+            $CsvFiles = Get-ChildItem -Path $LogsDir -Filter "cfb_parlay_recommendations_*.csv" |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+
+            if ($CsvFiles) {
+                Write-Host "📊 Latest CSV export: $($CsvFiles.FullName)" -ForegroundColor Green
+            }
+        }
+    } else {
+        Write-Error "❌ CFB optimizer failed with exit code $ExitCode"
+    }
+
+} catch {
+    Write-Error "❌ EQ12 CFB Optimizer Error: $($_.Exception.Message)"
+    exit 1
+}
+
+Write-Host "`n🏆 EQ12 CFB optimization complete!" -ForegroundColor Green

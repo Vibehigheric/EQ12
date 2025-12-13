@@ -1,0 +1,33 @@
+{
+  "revenue_model": "freemium",
+  "free_features": [
+    "basic_governance_check",
+    "security_indicator",
+    "compliance_score"
+  ],
+  "premium_features": [
+    "advanced_analytics",
+    "custom_policies",
+    "enterprise_reporting",
+    "api_integration"
+  ],
+  "subscription": {
+    "monthly_price": 4.99,
+    "yearly_price": 49.99,
+    "trial_days": 14
+  },
+  "donations": {
+    "enabled": true,
+    "platforms": [
+      "paypal",
+      "ko-fi",
+      "github-sponsors"
+    ],
+    "request_frequency": "monthly"
+  },
+  "advertising": {
+    "enabled": false,
+    "ad_network": "none",
+    "placement": "extension_ui_only"
+  }
+}

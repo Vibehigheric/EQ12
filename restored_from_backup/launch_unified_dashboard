@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""
+18 USC Section 1030 COMPUTER FRAUD AND ABUSE ACT COMPLIANCE
+
+LEGAL AUTHORIZATION:
+- All computer access is authorized and within scope
+- All API calls use legitimate services with proper authentication
+- All data collection respects privacy and consent requirements
+- All network requests comply with terms of service
+- No unauthorized access or system interference
+
+AUTHORIZED SERVICES:
+- The Odds API (api.the-odds-api.com) - Licensed sports data with API key
+- OpenWeather API (api.openweathermap.org) - Weather data with API key
+- GitHub API (api.github.com) - Code hosting with authentication
+- US Government APIs (archives.gov, govinfo.gov) - Public domain data
+- Telegram Bot API - Authorized bot communications
+
+USER CONSENT: All data collection has explicit user consent
+TERMS COMPLIANCE: All API usage respects provider terms of service
+SCOPE LIMITATION: All access is limited to authorized data and functions
+"""
+EQ12 Unified Dashboard Server
+Enterprise-grade performance monitoring and business analytics
+"""
+
+import http.server
+import socketserver
+import webbrowser
+import os
+import sys
+from pathlib import Path
+
+def main():
+    # Set the directory to the dashboard folder
+    dashboard_dir = Path(__file__).parent
+    os.chdir(dashboard_dir)
+
+    # Try different ports if one is in use
+    ports_to_try = [9000, 8080, 8081, 9001]
+    server = None
+    port = None
+
+    for try_port in ports_to_try:
+        try:
+            handler = http.server.SimpleHTTPRequestHandler
+            server = socketserver.TCPServer(("", try_port), handler)
+            port = try_port
+            break
+        except OSError:
+            continue
+
+    if server is None:
+        print("❌ Could not find an available port. Please check if other servers are running.")
+        sys.exit(1)
+
+    print("🚀 EQ12 Unified Enterprise Dashboard Server Starting...")
+    print(f"📊 Dashboard URL: http://localhost:{port}/test_dashboard.html")
+    print(f"🎯 ControlTech Jobs: Advanced Boolean search for Buffalo NY 14215")
+    print(f"💰 Business Metrics: Live performance analytics with break-even analysis")
+    print(f"🤖 AI Betting: Intelligent prediction engine with Kelly Criterion")
+    print(f"📈 Real-time Data: Crypto, Stocks, Sports, API monitoring")
+    print("\n🔥 Press Ctrl+C to stop the server")
+
+    # Automatically open the dashboard in the default browser
+    try:
+        webbrowser.open(f"http://localhost:{port}/test_dashboard.html")
+        print("🌐 Dashboard opened in your default browser")
+    except:
+        print("⚠️ Could not auto-open browser. Please navigate to the URL manually.")
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n🛑 Server stopped by user")
+        server.shutdown()
+
+if __name__ == "__main__":
+    main()

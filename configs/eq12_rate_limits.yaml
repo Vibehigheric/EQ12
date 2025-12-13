@@ -1,0 +1,154 @@
+# EQ12 Rate Limit Configuration
+# Production-ready TPM/RPM limits aligned with $120/month budget
+# Set these in OpenAI Dashboard → Projects → Rate limits
+
+# ✅ PRIMARY MODELS (PRODUCTION ON)
+# These limits ensure burst protection while allowing normal operations
+
+production_limits:
+  gpt-4o-mini:
+    tpm: 20000
+    rpm: 60
+    purpose: "90% of calls; cheap & fast; ~400 short requests/min safely"
+  
+  gpt-4o:
+    tpm: 3000
+    rpm: 20
+    purpose: "Guard rails for expensive work; prevents runaway cost"
+  
+  text-embedding-3-small:
+    tpm: 80000
+    rpm: 60
+    purpose: "Batch indexing; modest to avoid accidental full-corpus re-embeds"
+  
+  omni-moderation-latest:
+    tpm: 10000
+    rpm: 120
+    purpose: "Very cheap; keep RPM high so it never blocks writes"
+  
+  whisper-1:
+    tpm: 10000
+    rpm: 30
+    purpose: "Enough for occasional clips; won't choke the budget"
+  
+  gpt-image-1:
+    images_per_min: 2
+    purpose: "Hard-cap image bursts"
+  
+  tts-1:
+    rpm: 30
+    purpose: "Cap TTS to demos, not streams"
+
+# 🟡 CONDITIONAL/FEATURE MODELS (OFF by default - enable per sprint)
+conditional_limits:
+  gpt-4o-realtime-preview-2024-12-17:
+    tpm: 10000
+    rpm: 10
+    purpose: "Live demo windows only; auto-turn off after demo"
+  
+  gpt-4o-mini-realtime-preview-2024-12-17:
+    tpm: 10000
+    rpm: 10
+    purpose: "Live demo windows only; auto-turn off after demo"
+  
+  o1:
+    tpm: 5000
+    rpm: 5
+    purpose: "Specific jobs with signed-off budget"
+  
+  o1-mini:
+    tpm: 5000
+    rpm: 5
+    purpose: "Specific jobs with signed-off budget"
+  
+  o1-pro:
+    tpm: 5000
+    rpm: 5
+    purpose: "Specific jobs with signed-off budget"
+  
+  text-embedding-3-large:
+    tpm: 50000
+    rpm: 10
+    purpose: "Offline one-off reindex or evals only"
+
+# ⛔ DEFAULT/UNKNOWN MODELS
+default_limits:
+  default:
+    tpm: 0
+    rpm: 0
+    purpose: "Anything not explicitly allowed can't run"
+
+# 🏗️ ENVIRONMENT-SPECIFIC LIMITS
+
+# Development (halved for safety)
+dev_limits:
+  gpt-4o-mini:
+    tpm: 10000
+    rpm: 30
+  gpt-4o:
+    tpm: 1000
+    rpm: 10
+  text-embedding-3-small:
+    tpm: 40000
+    rpm: 30
+  omni-moderation-latest:
+    tpm: 5000
+    rpm: 60
+  default:
+    tpm: 0
+    rpm: 0
+
+# Staging (75% of production)
+staging_limits:
+  gpt-4o-mini:
+    tpm: 15000
+    rpm: 45
+  gpt-4o:
+    tpm: 2000
+    rpm: 15
+  text-embedding-3-small:
+    tpm: 60000
+    rpm: 45
+  omni-moderation-latest:
+    tpm: 7500
+    rpm: 90
+  default:
+    tpm: 0
+    rpm: 0
+
+# Live Event Windows (NFL Sunday - temporary boost)
+live_event_limits:
+  gpt-4o-mini:
+    tpm: 40000
+    rpm: 120
+  gpt-4o:
+    tpm: 6000
+    rpm: 40
+  text-embedding-3-small:
+    tpm: 100000
+    rpm: 80
+  omni-moderation-latest:
+    tpm: 15000
+    rpm: 150
+  default:
+    tpm: 0
+    rpm: 0
+
+# Budget and alerting thresholds
+budget_config:
+  monthly_usd: 120
+  daily_usd: 4
+  alert_thresholds_usd: [80, 100, 110, 115]
+  alert_actions:
+    at_80: "warn"
+    at_100: "switch to 4o-mini only"
+    at_110: "disable images/audio"
+    at_115: "read-only mode"
+
+# Rate limit enforcement settings
+enforcement:
+  local_buckets: true
+  retry_backoff_ms: [200, 500, 1000, 2000]
+  max_retries: 3
+  queue_size: 100
+  log_violations: true

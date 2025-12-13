@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <!-- Permissive stub to stop LemMinX from failing when the remote XSD is gone.
+       Allows any content; adjust later if you want strict validation. -->
+    <xs:element name="nunit">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:anyAttribute processContents="lax"/>
+        </xs:complexType>
+    </xs:element>
+    <!-- Common NUnit3 roots (test-run/test-suite) so you get fewer warnings -->
+    <xs:element name="test-run" type="xs:anyType"/>
+    <xs:element name="test-suite" type="xs:anyType"/>
+    <xs:element name="test-case" type="xs:anyType"/>
+    <xs:element name="test-results" type="xs:anyType"/>
+    <xs:element name="test-fixture" type="xs:anyType"/>
+    <!-- Allow common attributes for NUnit elements -->
+    <xs:complexType name="nunitElementType">
+        <xs:sequence>
+            <xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="lax"/>
+    </xs:complexType>
+</xs:schema>

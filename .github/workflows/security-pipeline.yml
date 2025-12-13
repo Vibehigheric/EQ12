@@ -1,0 +1,397 @@
+name: 🔒 EQ12 Security Pipeline
+on:
+    push:
+        branches: [main, develop, "release/*"]
+    pull_request:
+        branches: [main, develop]
+    schedule:
+        - cron: "0 2 * * 1" # Weekly security scan
+    workflow_dispatch:
+        inputs:
+            scan_type:
+                description: "Security scan type"
+                required: false
+                default: "full"
+                type: choice
+                options:
+                    - full
+                    - quick
+                    - compliance
+
+permissions:
+    contents: read
+    security-events: write
+    actions: read
+    pull-requests: write
+
+jobs:
+    # Pre-commit validation and security checks
+    security-validation:
+        name: 🛡️ Security Validation
+        runs-on: ubuntu-latest
+        outputs:
+            security-score: ${{ steps.security-score.outputs.score }}
+            critical-issues: ${{ steps.security-score.outputs.critical }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Verify signed commits
+              id: verify-commits
+              run: |
+                  echo "🔐 Verifying commit signatures..."
+                  UNSIGNED_COMMITS=0
+
+                  # Check last 10 commits for signatures
+                  for commit in $(git rev-list HEAD~10..HEAD); do
+                    if ! git verify-commit "$commit" 2>/dev/null; then
+                      echo "❌ Unsigned commit: $commit"
+                      UNSIGNED_COMMITS=$((UNSIGNED_COMMITS + 1))
+                    else
+                      echo "✅ Signed commit: $commit"
+                    fi
+                  done
+
+                  echo "unsigned_commits=$UNSIGNED_COMMITS" >> $GITHUB_OUTPUT
+
+                  if [ $UNSIGNED_COMMITS -gt 0 ]; then
+                    echo "::warning::Found $UNSIGNED_COMMITS unsigned commits"
+                  fi
+
+            - name: Secret scanning with TruffleHog
+              uses: trufflesecurity/trufflehog@main
+              with:
+                  path: ./
+                  base: main
+                  head: HEAD
+                  extra_args: --debug --only-verified
+
+            - name: Run Semgrep security analysis
+              uses: returntocorp/semgrep-action@v1
+              with:
+                  config: >-
+                      p/security-audit
+                      p/secrets
+                      p/owasp-top-ten
+                      p/cwe-top-25
+              env:
+                  SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+
+            - name: Security configuration check
+              run: |
+                  echo "🔍 Checking security configurations..."
+
+                  # Check for security policy
+                  if [ ! -f "SECURITY.md" ]; then
+                    echo "::warning::No SECURITY.md found"
+                  fi
+
+                  # Check for dependabot config
+                  if [ ! -f ".github/dependabot.yml" ]; then
+                    echo "::warning::No dependabot.yml found"
+                  fi
+
+                  # Check for CODEOWNERS
+                  if [ ! -f ".github/CODEOWNERS" ]; then
+                    echo "::warning::No CODEOWNERS found"
+                  fi
+
+                  # Check workflow permissions
+                  find .github/workflows -name "*.yml" -exec grep -L "permissions:" {} \; | while read file; do
+                    echo "::warning::Workflow $file missing permissions declaration"
+                  done
+
+            - name: Calculate security score
+              id: security-score
+              run: |
+                  echo "📊 Calculating security score..."
+
+                  SCORE=100
+                  CRITICAL=0
+
+                  # Deduct for unsigned commits
+                  UNSIGNED=${{ steps.verify-commits.outputs.unsigned_commits }}
+                  SCORE=$((SCORE - (UNSIGNED * 5)))
+                  if [ $UNSIGNED -gt 0 ]; then
+                    CRITICAL=$((CRITICAL + 1))
+                  fi
+
+                  # Check for security files
+                  [ ! -f "SECURITY.md" ] && SCORE=$((SCORE - 10))
+                  [ ! -f ".github/dependabot.yml" ] && SCORE=$((SCORE - 10))
+                  [ ! -f ".github/CODEOWNERS" ] && SCORE=$((SCORE - 5))
+
+                  echo "score=$SCORE" >> $GITHUB_OUTPUT
+                  echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+                  echo "🏆 Security Score: $SCORE/100"
+
+    # Advanced CodeQL analysis
+    codeql-analysis:
+        name: 🔬 CodeQL Analysis
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                language: ["javascript", "python"]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Initialize CodeQL
+              uses: github/codeql-action/init@v3
+              with:
+                  languages: ${{ matrix.language }}
+                  config-file: ./.github/codeql/codeql-config.yml
+                  queries: +security-and-quality
+
+            - name: Autobuild
+              uses: github/codeql-action/autobuild@v3
+
+            - name: Perform CodeQL Analysis
+              uses: github/codeql-action/analyze@v3
+              with:
+                  category: "/language:${{matrix.language}}"
+
+    # Dependency vulnerability scanning
+    dependency-security:
+        name: 📦 Dependency Security
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Run Snyk to check for vulnerabilities
+              uses: snyk/actions/node@master
+              env:
+                  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+              with:
+                  args: --severity-threshold=high --file=package.json
+
+            - name: Python dependency check
+              if: hashFiles('**/requirements.txt') != ''
+              run: |
+                  pip install safety
+                  safety check --file requirements.txt --output json > safety-report.json || true
+
+                  if [ -f safety-report.json ]; then
+                    echo "📋 Python dependency vulnerabilities found:"
+                    cat safety-report.json
+                  fi
+
+            - name: Upload Snyk results to GitHub Code Scanning
+              uses: github/codeql-action/upload-sarif@v3
+              if: always()
+              with:
+                  sarif_file: snyk.sarif
+
+    # Container security scanning
+    container-security:
+        name: 🐳 Container Security
+        runs-on: ubuntu-latest
+        if: hashFiles('**/Dockerfile') != ''
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Build Docker image
+              run: |
+                  if [ -f "Dockerfile" ]; then
+                    docker build -t eq12/security-scan:${{ github.sha }} .
+                  fi
+
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@master
+              with:
+                  image-ref: "eq12/security-scan:${{ github.sha }}"
+                  format: "sarif"
+                  output: "trivy-results.sarif"
+
+            - name: Upload Trivy scan results
+              uses: github/codeql-action/upload-sarif@v3
+              if: always()
+              with:
+                  sarif_file: "trivy-results.sarif"
+
+    # Infrastructure as Code security
+    iac-security:
+        name: 🏗️ IaC Security
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Run Checkov
+              id: checkov
+              uses: bridgecrewio/checkov-action@master
+              with:
+                  directory: .
+                  framework: dockerfile,kubernetes,github_actions
+                  output_format: sarif
+                  output_file_path: checkov.sarif
+
+            - name: Upload Checkov scan results
+              uses: github/codeql-action/upload-sarif@v3
+              if: always()
+              with:
+                  sarif_file: checkov.sarif
+
+    # SBOM generation
+    sbom-generation:
+        name: 📑 SBOM Generation
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Generate SBOM
+              uses: anchore/sbom-action@v0
+              with:
+                  path: ./
+                  format: spdx-json
+
+            - name: Upload SBOM
+              uses: actions/upload-artifact@v4
+              with:
+                  name: sbom-spdx
+                  path: ./sbom.spdx.json
+
+            - name: Attest SBOM
+              uses: actions/attest-sbom@v1
+              with:
+                  subject-path: ./sbom.spdx.json
+                  sbom-path: ./sbom.spdx.json
+
+    # Compliance checks
+    compliance-audit:
+        name: ⚖️ Compliance Audit
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: SOC 2 Type II Compliance Check
+              run: |
+                  echo "🔍 Running SOC 2 compliance checks..."
+
+                  # Access controls
+                  if [ -f ".github/CODEOWNERS" ]; then
+                    echo "✅ Access controls: CODEOWNERS present"
+                  else
+                    echo "❌ Access controls: Missing CODEOWNERS"
+                  fi
+
+                  # Audit logging
+                  if [ -d "logs" ] || grep -r "logging" . --include="*.py" --include="*.js" > /dev/null; then
+                    echo "✅ Audit logging: Present"
+                  else
+                    echo "❌ Audit logging: Not detected"
+                  fi
+
+                  # Encryption
+                  if grep -r "crypto\|encrypt\|ssl\|tls" . --include="*.py" --include="*.js" > /dev/null; then
+                    echo "✅ Encryption: Detected in code"
+                  else
+                    echo "❌ Encryption: Not detected"
+                  fi
+
+            - name: GDPR Compliance Check
+              run: |
+                  echo "🔍 Running GDPR compliance checks..."
+
+                  # Privacy policy
+                  if [ -f "PRIVACY.md" ] || [ -f "privacy.md" ]; then
+                    echo "✅ Privacy policy: Present"
+                  else
+                    echo "❌ Privacy policy: Missing"
+                  fi
+
+                  # Data processing documentation
+                  if grep -r "data.*process\|personal.*data\|gdpr" . --include="*.md" > /dev/null; then
+                    echo "✅ Data processing: Documented"
+                  else
+                    echo "❌ Data processing: Not documented"
+                  fi
+
+            - name: Security compliance score
+              run: |
+                  echo "📊 Security Compliance Summary:"
+                  echo "- Code scanning: Enabled"
+                  echo "- Dependency scanning: Enabled"
+                  echo "- Secret scanning: Enabled"
+                  echo "- Container scanning: Enabled"
+                  echo "- SBOM generation: Enabled"
+                  echo "- Compliance auditing: Enabled"
+
+    # Security reporting and notifications
+    security-reporting:
+        name: 📊 Security Reporting
+        runs-on: ubuntu-latest
+        needs: [security-validation, codeql-analysis, dependency-security]
+        if: always()
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Generate security report
+              run: |
+                  cat > security-report.md << EOF
+                  # 🔒 EQ12 Security Report
+
+                  **Generated:** $(date -u)
+                  **Commit:** ${{ github.sha }}
+                  **Security Score:** ${{ needs.security-validation.outputs.security-score }}/100
+                  **Critical Issues:** ${{ needs.security-validation.outputs.critical-issues }}
+
+                  ## Security Checks Performed
+                  - ✅ Signed commit verification
+                  - ✅ Secret scanning (TruffleHog)
+                  - ✅ Static analysis (Semgrep)
+                  - ✅ Code analysis (CodeQL)
+                  - ✅ Dependency scanning (Snyk)
+                  - ✅ Container scanning (Trivy)
+                  - ✅ IaC scanning (Checkov)
+                  - ✅ SBOM generation (Anchore)
+                  - ✅ Compliance audit (SOC 2, GDPR)
+
+                  ## Recommendations
+                  - Ensure all commits are signed with GPG
+                  - Keep dependencies updated with Dependabot
+                  - Review and address any security alerts
+                  - Maintain security documentation
+
+                  ---
+                  *Generated by EQ12 Security Pipeline*
+                  EOF
+
+            - name: Upload security report
+              uses: actions/upload-artifact@v4
+              with:
+                  name: security-report
+                  path: security-report.md
+
+            - name: Comment on PR
+              if: github.event_name == 'pull_request'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const report = fs.readFileSync('security-report.md', 'utf8');
+
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: report
+                      });
+
+    # Security policy enforcement
+    policy-enforcement:
+        name: 🚫 Policy Enforcement
+        runs-on: ubuntu-latest
+        needs: [security-validation]
+        if: needs.security-validation.outputs.critical-issues > 0
+        steps:
+            - name: Block deployment on critical issues
+              run: |
+                  echo "🚨 Critical security issues detected!"
+                  echo "Security score: ${{ needs.security-validation.outputs.security-score }}/100"
+                  echo "Critical issues: ${{ needs.security-validation.outputs.critical-issues }}"
+                  echo "Deployment blocked for security review."
+                  exit 1

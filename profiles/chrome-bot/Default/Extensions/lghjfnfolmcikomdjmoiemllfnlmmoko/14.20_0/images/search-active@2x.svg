@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61 (89581) - https://sketch.com -->
+    <title>money-search</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="770" y="121" width="360" height="500" rx="14"></rect>
+        <filter x="-21.9%" y="-9.4%" width="143.9%" height="131.6%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="32" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="21" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.243137255   0 0 0 0 0.282352941   0 0 0 0 0.435294118  0 0 0 0.06 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Price-alert-pop-ups" transform="translate(-1072.000000, -582.000000)">
+            <g id="Rectangle">
+                <use fill="none" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use fill="none" fill-rule="evenodd" xlink:href="#path-1"></use>
+            </g>
+            <g id="money-search" opacity="1" transform="translate(1073.000000, 583.000000)" stroke="#3E486F" stroke-linecap="round" stroke-width="1.5">
+                <path d="M11.6210526,6.19668421 C10.8341167,6.05468671 10.0370428,5.97615327 9.23752632,5.96184211 C6.85763158,5.96184211 6.01389474,6.78621053 6.01389474,7.49194737 C6.01389474,8.58142105 7.65778947,8.84047368 9.10678947,9.07410526 C11.2857368,9.42515789 12.2541579,9.74352632 12.2541579,10.7046842 C12.2541579,11.4648947 11.3874211,12.0156842 9.93478947,12.1778947 C8.57820145,12.2871023 7.21293921,12.1617962 5.89889474,11.8074737" id="Path"></path>
+                <line x1="9.09468421" y1="5.90131579" x2="9.09468421" y2="4.84210526" id="Path"></line>
+                <line x1="9.09468421" y1="13.3157895" x2="9.09468421" y2="12.2565789" id="Path"></line>
+                <circle id="Oval" cx="9.07894737" cy="9.07894737" r="9.07894737"></circle>
+                <path d="M18.0671053,15.4947368 L21.919,19.3466316 C22.2597783,19.6871916 22.4512439,20.1492211 22.4512439,20.631 C22.4512439,21.1127789 22.2597783,21.5748084 21.919,21.9153684 L21.919,21.9153684 C21.57844,22.2561467 21.1164105,22.4476123 20.6346316,22.4476123 C20.1528526,22.4476123 19.6908231,22.2561467 19.3502632,21.9153684 L15.4947368,18.0671053" id="Path"></path>
+            </g>
+        </g>
+    </g>
+</svg>

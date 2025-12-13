@@ -1,0 +1,239 @@
+# EQ12 + Raspberry Pi 5-USB System Validation Script
+# Complete testing and validation of modular USB system
+# Buffalo NY 14215 Content Empire Validation
+
+[CmdletBinding()]
+param(
+    [string]$USBBuildPath = "C:\EQ12\usb_builds",
+    [switch]$FullTest,
+    [switch]$QuickValidation
+)
+
+# UTF-8 enforcement
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
+
+Write-Host ""
+Write-Host "🚀 EQ12 + RASPBERRY PI 5-USB SYSTEM VALIDATION" -ForegroundColor Cyan
+Write-Host "🦬 Buffalo NY 14215 Content Empire System Test" -ForegroundColor Yellow
+Write-Host "=" * 60
+
+# Test USB build directory
+Write-Host "📁 Testing USB build directory..." -ForegroundColor Green
+if (-not (Test-Path $USBBuildPath)) {
+    Write-Host "❌ USB build path not found: $USBBuildPath" -ForegroundColor Red
+    exit 1
+}
+Write-Host "✅ USB build directory found: $USBBuildPath" -ForegroundColor Green
+
+# Define USB systems
+$USBSystems = @(
+    @{
+        Name = "USB1_EQ12_RECOVERY"
+        DisplayName = "🔵 USB #1 - EQ12 Recovery System"
+        KeyFiles = @("EQ12_RECOVERY_BOOTSTRAP.ps1", "PYTHON_ENV\setup_python.ps1")
+        Purpose = "System recovery and reinstallation"
+    },
+    @{
+        Name = "USB2_CORAL_TPU_CACHE"
+        DisplayName = "🟣 USB #2 - Coral TPU Model Cache"
+        KeyFiles = @("coral_model_loader.sh", "download_models.py")
+        Purpose = "AI model acceleration"
+    },
+    @{
+        Name = "USB3_BUFFALO_14215_INTEL"
+        DisplayName = "🟢 USB #3 - Buffalo Intelligence"
+        KeyFiles = @("buffalo_14215_intel_scraper.py")
+        Purpose = "Local market intelligence"
+    },
+    @{
+        Name = "USB4_REVENUE_CONTENT_VAULT"
+        DisplayName = "🟠 USB #4 - Revenue Vault"
+        KeyFiles = @("content_empire_vault_manager.py")
+        Purpose = "Content Empire protection"
+    },
+    @{
+        Name = "USB5_ENTERPRISE_AUTH_KEY"
+        DisplayName = "🟡 USB #5 - Enterprise Auth"
+        KeyFiles = @("eq12_enterprise_auth_system.py", "AUTH_KEY")
+        Purpose = "Hardware authentication"
+    }
+)
+
+Write-Host ""
+Write-Host "🔍 VALIDATING USB SYSTEM COMPONENTS..." -ForegroundColor Cyan
+
+$ValidationResults = @()
+
+foreach ($USB in $USBSystems) {
+    Write-Host ""
+    Write-Host $USB.DisplayName -ForegroundColor White
+    Write-Host "Purpose: $($USB.Purpose)" -ForegroundColor Gray
+
+    $USBPath = Join-Path $USBBuildPath $USB.Name
+    $USBResult = @{
+        Name = $USB.Name
+        DisplayName = $USB.DisplayName
+        Path = $USBPath
+        Exists = $false
+        KeyFilesFound = 0
+        TotalKeyFiles = $USB.KeyFiles.Count
+        Status = "FAIL"
+    }
+
+    if (Test-Path $USBPath) {
+        $USBResult.Exists = $true
+        Write-Host "  📁 Directory: ✅ FOUND" -ForegroundColor Green
+
+        foreach ($KeyFile in $USB.KeyFiles) {
+            $FilePath = Join-Path $USBPath $KeyFile
+            if (Test-Path $FilePath) {
+                $USBResult.KeyFilesFound++
+                Write-Host "  📄 $KeyFile: ✅ FOUND" -ForegroundColor Green
+            } else {
+                Write-Host "  📄 $KeyFile: ❌ MISSING" -ForegroundColor Red
+            }
+        }
+
+        if ($USBResult.KeyFilesFound -eq $USBResult.TotalKeyFiles) {
+            $USBResult.Status = "PASS"
+            Write-Host "  🎯 Status: ✅ COMPLETE" -ForegroundColor Green
+        } else {
+            $USBResult.Status = "PARTIAL"
+            Write-Host "  🎯 Status: ⚠️ PARTIAL ($($USBResult.KeyFilesFound)/$($USBResult.TotalKeyFiles))" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "  📁 Directory: ❌ NOT FOUND" -ForegroundColor Red
+        Write-Host "  🎯 Status: ❌ MISSING" -ForegroundColor Red
+    }
+
+    $ValidationResults += $USBResult
+}
+
+Write-Host ""
+Write-Host "📊 VALIDATION SUMMARY:" -ForegroundColor Cyan
+
+$PassedSystems = ($ValidationResults | Where-Object { $_.Status -eq "PASS" }).Count
+$PartialSystems = ($ValidationResults | Where-Object { $_.Status -eq "PARTIAL" }).Count
+$FailedSystems = ($ValidationResults | Where-Object { $_.Status -eq "FAIL" }).Count
+
+Write-Host "✅ Passed: $PassedSystems/5 USB systems" -ForegroundColor Green
+Write-Host "⚠️ Partial: $PartialSystems/5 USB systems" -ForegroundColor Yellow
+Write-Host "❌ Failed: $FailedSystems/5 USB systems" -ForegroundColor Red
+
+# Test master deployment script
+Write-Host ""
+Write-Host "🚀 TESTING MASTER DEPLOYMENT SCRIPT..." -ForegroundColor Cyan
+$MasterScript = Join-Path $USBBuildPath "DEPLOY_ALL_USB_SYSTEMS.ps1"
+if (Test-Path $MasterScript) {
+    Write-Host "✅ Master deployment script found" -ForegroundColor Green
+    $MasterSize = (Get-Item $MasterScript).Length
+    Write-Host "📏 Script size: $MasterSize bytes" -ForegroundColor Gray
+} else {
+    Write-Host "❌ Master deployment script missing" -ForegroundColor Red
+}
+
+# Test system configuration
+Write-Host ""
+Write-Host "🔧 TESTING SYSTEM CONFIGURATION..." -ForegroundColor Cyan
+$ConfigFile = Join-Path $USBBuildPath "EQ12_5USB_SYSTEM_CONFIG.json"
+if (Test-Path $ConfigFile) {
+    Write-Host "✅ System configuration file found" -ForegroundColor Green
+    try {
+        $Config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
+        Write-Host "📊 Total USB systems: $($Config.usb_systems.Count)" -ForegroundColor Gray
+        Write-Host "💾 Total storage: $($Config.total_storage)" -ForegroundColor Gray
+        Write-Host "📍 Location: $($Config.location)" -ForegroundColor Gray
+    } catch {
+        Write-Host "⚠️ Configuration file found but invalid JSON" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "❌ System configuration file missing" -ForegroundColor Red
+}
+
+# Calculate total system size
+Write-Host ""
+Write-Host "📊 CALCULATING SYSTEM SIZE..." -ForegroundColor Cyan
+$TotalSize = 0
+foreach ($USB in $USBSystems) {
+    $USBPath = Join-Path $USBBuildPath $USB.Name
+    if (Test-Path $USBPath) {
+        $USBSize = (Get-ChildItem $USBPath -Recurse -File | Measure-Object -Property Length -Sum).Sum
+        $USBSizeMB = [Math]::Round($USBSize / 1MB, 2)
+        Write-Host "💾 $($USB.Name): $USBSizeMB MB" -ForegroundColor Gray
+        $TotalSize += $USBSize
+    }
+}
+$TotalSizeMB = [Math]::Round($TotalSize / 1MB, 2)
+$TotalSizeGB = [Math]::Round($TotalSize / 1GB, 2)
+Write-Host "💾 Total system size: $TotalSizeMB MB ($TotalSizeGB GB)" -ForegroundColor White
+
+# Generate deployment recommendations
+Write-Host ""
+Write-Host "💡 DEPLOYMENT RECOMMENDATIONS:" -ForegroundColor Cyan
+
+if ($PassedSystems -eq 5) {
+    Write-Host "✅ All USB systems are ready for deployment!" -ForegroundColor Green
+    Write-Host "📋 Next steps:" -ForegroundColor White
+    Write-Host "   1. Purchase 5 x 32GB USB 3.0+ drives" -ForegroundColor Gray
+    Write-Host "   2. Copy each USB folder to physical drives" -ForegroundColor Gray
+    Write-Host "   3. Label drives with system names" -ForegroundColor Gray
+    Write-Host "   4. Install USB #1 into EQ12 permanently" -ForegroundColor Gray
+    Write-Host "   5. Install USB #2 into Raspberry Pi permanently" -ForegroundColor Gray
+    Write-Host "   6. Test hot-swap workflow with USB #3, #4, #5" -ForegroundColor Gray
+} elseif ($PassedSystems -ge 3) {
+    Write-Host "⚠️ Most USB systems ready, but some issues found" -ForegroundColor Yellow
+    Write-Host "🔧 Consider regenerating failed/partial systems" -ForegroundColor Yellow
+} else {
+    Write-Host "❌ Multiple USB systems have issues" -ForegroundColor Red
+    Write-Host "🔄 Recommend running USB system generator again" -ForegroundColor Red
+}
+
+# Buffalo NY specific recommendations
+Write-Host ""
+Write-Host "🦬 BUFFALO NY 14215 RECOMMENDATIONS:" -ForegroundColor Yellow
+Write-Host "📦 USB Drive sources:" -ForegroundColor White
+Write-Host "   • Best Buy (Sheridan Drive) - 15 min drive" -ForegroundColor Gray
+Write-Host "   • Micro Center (Henrietta, NY) - 1.5 hour drive" -ForegroundColor Gray
+Write-Host "   • Amazon - 2-day Prime shipping" -ForegroundColor Gray
+Write-Host "❄️ Winter considerations:" -ForegroundColor White
+Write-Host "   • Store USB drives indoors (lake effect snow)" -ForegroundColor Gray
+Write-Host "   • Use waterproof USB drive cases" -ForegroundColor Gray
+Write-Host "   • Keep backup of each drive at separate location" -ForegroundColor Gray
+
+# Final system status
+Write-Host ""
+Write-Host "🎯 EQ12 5-USB SYSTEM STATUS:" -ForegroundColor Cyan
+if ($PassedSystems -eq 5) {
+    Write-Host "🟢 READY FOR DEPLOYMENT" -ForegroundColor Green
+    Write-Host "🚀 Buffalo NY 14215 Content Empire: OPERATIONAL" -ForegroundColor Green
+} elseif ($PassedSystems -ge 3) {
+    Write-Host "🟡 MOSTLY READY (MINOR ISSUES)" -ForegroundColor Yellow
+    Write-Host "🔧 Buffalo NY 14215 Content Empire: NEEDS ATTENTION" -ForegroundColor Yellow
+} else {
+    Write-Host "🔴 NEEDS RECONSTRUCTION" -ForegroundColor Red
+    Write-Host "⚠️ Buffalo NY 14215 Content Empire: REBUILD REQUIRED" -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "📋 Validation complete. Check results above for next steps." -ForegroundColor Cyan
+
+# Export validation results
+$ValidationReport = @{
+    timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+    location = "Buffalo NY 14215"
+    system = "EQ12_5USB_VALIDATION"
+    total_systems = $USBSystems.Count
+    passed_systems = $PassedSystems
+    partial_systems = $PartialSystems
+    failed_systems = $FailedSystems
+    total_size_mb = $TotalSizeMB
+    total_size_gb = $TotalSizeGB
+    validation_results = $ValidationResults
+    deployment_ready = ($PassedSystems -eq 5)
+}
+
+$ReportPath = "C:\EQ12\logs\usb_validation_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+$ValidationReport | ConvertTo-Json -Depth 10 | Out-File -FilePath $ReportPath -Encoding UTF8
+
+Write-Host "📄 Validation report saved to: $ReportPath" -ForegroundColor Gray

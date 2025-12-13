@@ -1,0 +1,133 @@
+name: Generate Changelog
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to generate changelog for (e.g., v1.2.3)'
+        required: false
+        type: string
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install git-cliff
+        uses: taiki-e/install-action@v2
+        with:
+          tool: git-cliff
+
+      - name: Set target tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.tag }}" ]]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          echo "TARGET_TAG=$TAG" >> $GITHUB_ENV
+          echo "target_tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Using tag: $TAG"
+
+      - name: Generate full changelog
+        run: |
+          echo "🔄 Generating complete changelog..."
+          git-cliff --config cliff.toml > CHANGELOG.md
+
+      - name: Generate release notes for current version
+        run: |
+          echo "📋 Generating release notes for $TARGET_TAG..."
+          git-cliff --config cliff.toml --latest --strip header > RELEASE_NOTES.md
+
+      - name: Display release notes
+        run: |
+          echo "📋 Release Notes for $TARGET_TAG:"
+          echo "================================"
+          cat RELEASE_NOTES.md
+          echo "================================"
+
+      - name: Validate changelog
+        run: |
+          # Check that changelog was generated
+          if [[ ! -s "CHANGELOG.md" ]]; then
+            echo "❌ Changelog generation failed - file is empty"
+            exit 1
+          fi
+
+          if [[ ! -s "RELEASE_NOTES.md" ]]; then
+            echo "❌ Release notes generation failed - file is empty"
+            exit 1
+          fi
+
+          echo "✅ Changelog and release notes generated successfully"
+          echo "📊 Changelog size: $(wc -l < CHANGELOG.md) lines"
+          echo "📊 Release notes size: $(wc -l < RELEASE_NOTES.md) lines"
+
+      - name: Update CHANGELOG.md in repository
+        if: github.event_name == 'push'
+        run: |
+          # Configure git for commits
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add and commit changelog if it changed
+          if git diff --quiet CHANGELOG.md; then
+            echo "📄 Changelog unchanged, skipping commit"
+          else
+            git add CHANGELOG.md
+            git commit -m "docs(changelog): Update changelog for $TARGET_TAG"
+            git push origin HEAD:main
+            echo "✅ Changelog committed to main branch"
+          fi
+
+      - name: Upload changelog artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-${{ steps.tag.outputs.target_tag || github.ref_name }}
+          path: |
+            CHANGELOG.md
+            RELEASE_NOTES.md
+          retention-days: 90
+
+      - name: Update existing release with changelog
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the release ID for this tag
+          RELEASE_ID=$(gh release view "$TARGET_TAG" --json id -q '.id' 2>/dev/null || echo "")
+
+          if [[ -n "$RELEASE_ID" ]]; then
+            echo "📝 Updating existing release $TARGET_TAG with generated changelog..."
+
+            # Read the release notes and update the release body
+            RELEASE_BODY=$(cat RELEASE_NOTES.md)
+            gh release edit "$TARGET_TAG" --notes "$RELEASE_BODY"
+
+            echo "✅ Release $TARGET_TAG updated with changelog"
+          else
+            echo "ℹ️ No existing release found for $TARGET_TAG"
+          fi
+
+      - name: Changelog generation summary
+        run: |
+          echo "🎉 Changelog Generation Complete!"
+          echo "================================="
+          echo "📋 Target Tag: $TARGET_TAG"
+          echo "📄 Full Changelog: CHANGELOG.md ($(wc -l < CHANGELOG.md) lines)"
+          echo "📝 Release Notes: RELEASE_NOTES.md ($(wc -l < RELEASE_NOTES.md) lines)"
+          echo "🔗 Configuration: cliff.toml"
+          echo ""
+          echo "📦 Artifacts uploaded for 90 days"
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "✅ Changelog committed to main branch"
+          fi

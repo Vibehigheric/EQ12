@@ -1,0 +1,30 @@
+{
+    "openweather_config": {
+        "api_key": "YOUR_API_KEY_HERE",
+        "base_urls": {
+            "onecall": "https://api.openweathermap.org/data/3.0/onecall",
+            "current": "https://api.openweathermap.org/data/2.5/weather",
+            "geocoding": "http://api.openweathermap.org/geo/1.0/direct",
+            "air_pollution": "http://api.openweathermap.org/data/2.5/air_pollution"
+        },
+        "free_tier_limits": {
+            "calls_per_day": 1000,
+            "cost_per_additional_call": 0.0015
+        }
+    },
+    "betting_integration": {
+        "impact_thresholds": {
+            "critical": 7,
+            "high": 5,
+            "medium": 3,
+            "low": 1
+        },
+        "confidence_adjustments": {
+            "critical": -50,
+            "high": -30,
+            "medium": -15,
+            "low": -5,
+            "minimal": 0
+        }
+    }
+}

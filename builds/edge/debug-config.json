@@ -1,0 +1,23 @@
+{
+  "debug_level": "INFO",
+  "enable_console_logs": true,
+  "enable_error_tracking": true,
+  "enable_performance_monitoring": true,
+  "debug_components": {
+    "background": true,
+    "content_scripts": true,
+    "popup": true,
+    "options": true,
+    "storage": true
+  },
+  "log_filters": {
+    "exclude_patterns": [
+      "webpack",
+      "hot-reload"
+    ],
+    "include_patterns": [
+      "EQ12",
+      "governance"
+    ]
+  }
+}

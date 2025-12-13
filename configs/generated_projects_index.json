@@ -1,0 +1,18 @@
+{
+  "projects": [
+    {
+      "name": "EQ12SystemMonitor",
+      "type": "Python Module",
+      "path": "C:\\EQ12\\generated_projects\\EQ12SystemMonitor",
+      "complexity": "low",
+      "generated_at": "2025-10-03T14:55:27.004913",
+      "files_count": 7,
+      "integration_points": [
+        "EQ12 logging system integration",
+        "EQ12 configuration management",
+        "EQ12 monitoring and health checks"
+      ]
+    }
+  ],
+  "last_updated": "2025-10-03T14:55:27.004913"
+}

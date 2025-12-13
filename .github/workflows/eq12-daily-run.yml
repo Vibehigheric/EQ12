@@ -1,0 +1,24 @@
+name: EQ12 Daily Run
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-elite:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run EQ12 elite run (PowerShell)
+        run: |
+          pwsh -NoProfile -NoLogo -Command "& {Set-Location $env:GITHUB_WORKSPACE; if (Test-Path './scripts/eq12-elite-run.ps1') { .\scripts\eq12-elite-run.ps1 } else { Write-Host 'eq12-elite-run.ps1 not found; skipping.' } }"
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eq12-logs
+          path: logs/**

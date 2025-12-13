@@ -1,0 +1,72 @@
+{
+  "_comment": "EQ12 Sports Parlay Analyzer Configuration",
+  "name": "EQ12 Sports Parlay Analyzer",
+  "version": "1.0.0",
+  "description": "Analyzes NHL and NBA games for parlay opportunities using The Odds API",
+  
+  "api_config": {
+    "base_url": "https://api.the-odds-api.com/v4",
+    "timeout": 30,
+    "rate_limit_delay": 1.0,
+    "max_retries": 3
+  },
+  
+  "sports_config": {
+    "primary_sports": {
+      "nhl": "icehockey_nhl",
+      "nba_preseason": "basketball_nba_preseason_sg"
+    },
+    "fallback_sports": {
+      "nba_regular": "basketball_nba",
+      "nba_postseason": "basketball_nba_postseason"
+    },
+    "regions": ["us"],
+    "markets": ["h2h", "spreads", "totals"],
+    "odds_format": "american",
+    "date_format": "iso"
+  },
+  
+  "analysis_config": {
+    "confidence_thresholds": {
+      "high_confidence": 60,
+      "medium_confidence": 40,
+      "low_confidence": 20,
+      "parlay_minimum": 40
+    },
+    "value_analysis": {
+      "moneyline_max_implied_prob": 0.6,
+      "spread_close_game_threshold": 2.5,
+      "nhl_total_range": [5.5, 7.0],
+      "nba_total_range": [200, 240]
+    },
+    "parlay_config": {
+      "max_legs": 2,
+      "max_suggestions": 5,
+      "same_game_parlays": false
+    }
+  },
+  
+  "logging_config": {
+    "log_directory": "C:\\EQ12\\logs",
+    "daily_analysis_file": "parlay_analysis_{date}.json",
+    "error_log_file": "sports_parlay_analyzer.log",
+    "keep_logs_days": 30,
+    "log_level": "INFO"
+  },
+  
+  "output_config": {
+    "console_output": true,
+    "save_to_logs": true,
+    "max_games_displayed": 10,
+    "max_bets_per_game": 3,
+    "show_reasoning": true,
+    "color_output": true
+  },
+  
+  "risk_management": {
+    "disclaimer_required": true,
+    "educational_purpose": true,
+    "responsible_gaming_warnings": true,
+    "confidence_transparency": true
+  }
+}

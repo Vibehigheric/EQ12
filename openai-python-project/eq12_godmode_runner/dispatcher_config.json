@@ -1,0 +1,48 @@
+{
+  "telegram": {
+    "enabled": true
+  },
+  "dispatchers": {
+    "sports_picks": {
+      "type": "telegram",
+      "script": "scripts/sports_telegram.py",
+      "keywords": ["sports", "betting", "picks", "odds", "game", "match"],
+      "priority": "urgent"
+    },
+    "travel_alerts": {
+      "type": "telegram",
+      "script": "scripts/travel_alerts.py",
+      "keywords": ["flight", "hotel", "travel", "booking", "visa"],
+      "priority": "short_term"
+    },
+    "market_analysis": {
+      "type": "notebook",
+      "script": "notebooks/market_analysis.ipynb",
+      "keywords": ["dropship", "market", "product", "trend", "analysis"],
+      "priority": "long_term"
+    },
+    "housing_tracker": {
+      "type": "script",
+      "script": "scripts/housing_monitor.py",
+      "keywords": ["housing", "property", "real estate", "investment"],
+      "priority": "short_term"
+    },
+    "study_scheduler": {
+      "type": "script",
+      "script": "scripts/study_planner.py",
+      "keywords": ["study", "learning", "schedule", "exam", "education"],
+      "priority": "long_term"
+    },
+    "civil_service_jobs": {
+      "type": "script",
+      "script": "scripts/job_tracker.py",
+      "keywords": ["civil service", "government", "job", "application", "career"],
+      "priority": "short_term"
+    }
+  },
+  "execution": {
+    "auto_execute": true,
+    "confirm_before_run": true,
+    "max_concurrent": 3
+  }
+}

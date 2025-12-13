@@ -1,0 +1,387 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 Bootstrap - One-time environment setup for fast daily starts
+.DESCRIPTION
+    Builds Python environment, precompiles bytecode, sets up caches, and prepares
+    the EQ12 system for lightning-fast daily starts. Run this once or after dependency changes.
+.PARAMETER Force
+    Force rebuild of virtual environment even if it exists
+.EXAMPLE
+    .\scripts\eq12_bootstrap.ps1
+    .\scripts\eq12_bootstrap.ps1 -Force
+#>
+
+[CmdletBinding()]
+param(
+    [switch]$Force
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+
+# Navigate to EQ12 root
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location "$root\.."
+
+Write-Host "🚀 EQ12 FREE TOOLCHAIN BOOTSTRAP STARTING..." -ForegroundColor Cyan
+Write-Host "Comprehensive Windows development environment setup" -ForegroundColor Green
+Write-Host "Working Directory: $(Get-Location)" -ForegroundColor Gray
+Write-Host "No paid services required - 100% free development tools" -ForegroundColor Yellow
+
+# 1) Python Environment Setup
+Write-Host "`n📦 PYTHON ENVIRONMENT" -ForegroundColor Yellow
+
+$venvPath = ".\.venv"
+$pythonExe = "$venvPath\Scripts\python.exe"
+$readySentinel = "$venvPath\.ready"
+
+if ($Force -and (Test-Path $venvPath)) {
+    Write-Host "Removing existing virtual environment..." -ForegroundColor Gray
+    Remove-Item $venvPath -Recurse -Force
+}
+
+if (-not (Test-Path $pythonExe)) {
+    Write-Host "Creating virtual environment..." -ForegroundColor Gray
+    python -m venv $venvPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create virtual environment"
+    }
+}
+
+Write-Host "Upgrading pip, wheel, setuptools..." -ForegroundColor Gray
+& $pythonExe -m pip install -U pip wheel setuptools --disable-pip-version-check --quiet
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to upgrade pip tools"
+}
+
+# Install requirements if file exists
+$reqFile = "requirements.txt"
+if (Test-Path $reqFile) {
+    Write-Host "Installing requirements (binary-only for speed)..." -ForegroundColor Gray
+    & $pythonExe -m pip install --only-binary=:all: --no-build-isolation -r $reqFile --quiet
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "Some packages may have failed binary installation, trying with builds..."
+        & $pythonExe -m pip install -r $reqFile --quiet
+    }
+} else {
+    Write-Host "No requirements.txt found, installing comprehensive EQ12 free toolchain..." -ForegroundColor Gray
+    $freeToolchain = @(
+        # Core Python packages
+        "requests>=2.31.0",
+        "aiohttp>=3.8.0", 
+        "fastapi>=0.104.0",
+        "uvicorn>=0.24.0",
+        "python-dotenv>=1.0.0",
+        "pydantic>=2.5.0",
+        "asyncio-throttle>=1.0.2",
+        
+        # OpenAI and AI packages
+        "openai>=1.51.0",
+        "httpx>=0.25.0",
+        
+        # Web scraping and automation
+        "beautifulsoup4>=4.12.0",
+        "selenium>=4.15.0",
+        "playwright>=1.40.0",
+        
+        # Data processing
+        "pandas>=2.1.0",
+        "numpy>=1.24.0",
+        "openpyxl>=3.1.0",
+        
+        # Development and testing
+        "pytest>=7.4.0",
+        "pytest-asyncio>=0.21.0",
+        "black>=23.7.0",
+        "ruff>=0.1.0",
+        "mypy>=1.6.0",
+        
+        # CLI and utilities
+        "click>=8.1.7",
+        "rich>=13.6.0",
+        "typer>=0.9.0",
+        "python-dateutil>=2.8.0",
+        
+        # Configuration and deployment
+        "pip-tools>=7.3.0",
+        "pre-commit>=3.5.0"
+    )
+    
+    Write-Host "Installing $(($freeToolchain).Count) free development packages..." -ForegroundColor Cyan
+    & $pythonExe -m pip install @freeToolchain --quiet
+    
+    # Install Playwright browsers for automation
+    Write-Host "Installing Playwright browsers (free automation tools)..." -ForegroundColor Cyan
+    & $pythonExe -m playwright install --with-deps 2>$null
+}
+
+# 2) Precompile Python bytecode
+Write-Host "`n⚡ PRECOMPILING BYTECODE" -ForegroundColor Yellow
+Write-Host "Compiling Python files for faster imports..." -ForegroundColor Gray
+& $pythonExe -m compileall -q . 2>$null
+
+# 3) Create wheelhouse for offline installs (optional)
+Write-Host "`n📚 CREATING WHEELHOUSE" -ForegroundColor Yellow
+$wheelhousePath = ".\wheelhouse"
+if (-not (Test-Path $wheelhousePath)) {
+    New-Item -ItemType Directory -Path $wheelhousePath -Force | Out-Null
+}
+
+if (Test-Path $reqFile) {
+    Write-Host "Downloading wheels for offline use..." -ForegroundColor Gray
+    & $pythonExe -m pip download -r $reqFile -d $wheelhousePath --quiet 2>$null
+}
+
+# 4) Validate Node.js/npm if needed
+Write-Host "`n📟 NODE.JS VALIDATION" -ForegroundColor Yellow
+try {
+    $nodeVersion = node --version 2>$null
+    $npmVersion = npm --version 2>$null
+    Write-Host "Node.js: $nodeVersion, npm: $npmVersion" -ForegroundColor Gray
+    
+    # Check for package.json and install if exists
+    if (Test-Path "package.json") {
+        Write-Host "Installing Node.js dependencies..." -ForegroundColor Gray
+        npm install --silent 2>$null
+    }
+} catch {
+    Write-Warning "Node.js not found - dashboard features may be limited"
+}
+
+# 5) Create logs directory structure
+Write-Host "`n📋 DIRECTORY STRUCTURE" -ForegroundColor Yellow
+$logDirs = @("logs", "logs\circuit_breaker", "logs\betting", "logs\health", "data", "data\cache")
+foreach ($dir in $logDirs) {
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        Write-Host "Created: $dir" -ForegroundColor Gray
+    }
+}
+
+# 6) Initialize Git if not present
+Write-Host "`n🔧 GIT INITIALIZATION" -ForegroundColor Yellow
+if (-not (Test-Path ".git")) {
+    Write-Host "Initializing Git repository..." -ForegroundColor Gray
+    git init 2>$null
+    if (Test-Path ".gitignore") {
+        git add .gitignore 2>$null
+    }
+}
+
+# 7) Set circuit breaker to healthy state
+Write-Host "`n🛡️ CIRCUIT BREAKER RESET" -ForegroundColor Yellow
+$circuitBreakerPath = "logs\circuit_breaker\state.json"
+$circuitState = @{
+    "status" = "healthy"
+    "offline" = $false
+    "until" = $null
+    "last_reset" = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+    "failure_count" = 0
+} | ConvertTo-Json -Depth 3
+
+Set-Content -Path $circuitBreakerPath -Value $circuitState -Encoding UTF8
+Write-Host "Circuit breaker reset to healthy state" -ForegroundColor Gray
+
+# 8) Initialize EQ12 Free Toolchain Configuration
+Write-Host "`n⚙️ EQ12 CONFIGURATION SETUP" -ForegroundColor Yellow
+
+# Create comprehensive config structure
+$configDirs = @("configs", "configs\profiles", "configs\templates")
+foreach ($dir in $configDirs) {
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        Write-Host "Created config directory: $dir" -ForegroundColor Gray
+    }
+}
+
+# Create EQ12 defaults configuration
+$defaultsPath = "configs\eq12_defaults.json"
+if (-not (Test-Path $defaultsPath) -or $Force) {
+    $eq12Defaults = @{
+        "free_mode" = $true
+        "dry_run" = $true
+        "timezone" = "UTC"
+        "logging" = @{
+            "utf8_console_safe" = $true
+            "max_log_mb" = 10
+            "level" = "INFO"
+        }
+        "web" = @{
+            "apache_port" = 8080
+            "api_host" = "127.0.0.1"
+            "api_port" = 8000
+        }
+        "odds" = @{
+            "cache_minutes" = 5
+            "live_cache_minutes" = 1
+            "free_mode_mock" = $true
+        }
+        "cost_guards" = @{
+            "daily_budget_usd" = 1.00
+            "per_request_limit_usd" = 0.01
+            "hard_stop_usd" = 3.00
+        }
+        "models" = @{
+            "primary" = "gpt-4o-mini"
+            "fallbacks" = @("gpt-4o", "gpt-3.5-turbo")
+        }
+        "free_toolchain" = @{
+            "enabled" = $true
+            "winget_packages" = @(
+                "Python.Python.3.12",
+                "Microsoft.VisualStudioCode", 
+                "Git.Git",
+                "Microsoft.PowerShell",
+                "ApacheFriends.Xampp",
+                "Microsoft.WindowsTerminal"
+            )
+        }
+    } | ConvertTo-Json -Depth 5
+    
+    Set-Content -Path $defaultsPath -Value $eq12Defaults -Encoding UTF8
+    Write-Host "Created: $defaultsPath" -ForegroundColor Gray
+}
+
+# Create .env template for free development
+$envPath = ".env"
+if (-not (Test-Path $envPath) -or $Force) {
+    $envTemplate = @(
+        "# EQ12 Free Toolchain Environment Variables",
+        "# Safe for development - no API charges will be incurred",
+        "",
+        "# =============================================================================",
+        "# FREE MODE SETTINGS (Always safe for development)",
+        "# =============================================================================",
+        "EQ12_ENABLE_RESPONSES_API=true",
+        "EQ12_DEBUG_HEADERS=true",
+        "EQ12_DEFAULT_MODEL=gpt-4o-mini",
+        "EQ12_DAILY_BUDGET=1.00",
+        "DRY_RUN=true",
+        "FREE_MODE=true",
+        "",
+        "# =============================================================================", 
+        "# PAID API KEYS (Uncomment when ready for production)",
+        "# =============================================================================",
+        "# OpenAI Configuration",
+        "# OPENAI_API_KEY=sk-your-openai-key-here",
+        "",
+        "# Azure OpenAI Configuration (alternative to OpenAI)",
+        "# AZURE_OPENAI_ENDPOINT=https://your-resource.openai.azure.com/",
+        "# AZURE_OPENAI_API_KEY=your-azure-key-here",
+        "# AZURE_OPENAI_DEPLOYMENT=gpt-4o",
+        "",
+        "# Sports Betting APIs (optional)",
+        "# ODDS_API_KEY=your-odds-api-key-here",
+        "",
+        "# Notification APIs (optional)",
+        "# TELEGRAM_BOT_TOKEN=your-telegram-bot-token",
+        "# TELEGRAM_CHAT_ID=your-telegram-chat-id",
+        ""
+    ) -join "`n"
+    
+    Set-Content -Path $envPath -Value $envTemplate -Encoding UTF8
+    Write-Host "Created: $envPath (free development mode)" -ForegroundColor Gray
+}
+
+# Create VS Code settings for optimal EQ12 development
+$vscodePath = ".vscode"
+if (-not (Test-Path $vscodePath)) {
+    New-Item -ItemType Directory -Path $vscodePath -Force | Out-Null
+}
+
+$vscodeSettingsPath = "$vscodePath\settings.json"
+if (-not (Test-Path $vscodeSettingsPath) -or $Force) {
+    $vscodeSettings = @{
+        "python.defaultInterpreterPath" = ".\.venv\Scripts\python.exe"
+        "python.terminal.activateEnvironment" = $true
+        "python.linting.enabled" = $true
+        "python.linting.ruffEnabled" = $true
+        "python.formatting.provider" = "black"
+        "python.testing.pytestEnabled" = $true
+        "python.testing.pytestArgs" = @("tests")
+        "files.encoding" = "utf8"
+        "files.eol" = "`n"
+        "editor.formatOnSave" = $true
+        "editor.codeActionsOnSave" = @{
+            "source.organizeImports" = $true
+        }
+        "terminal.integrated.defaultProfile.windows" = "PowerShell"
+        "powershell.codeFormatting.preset" = "OTBS"
+        "git.autofetch" = $true
+        "[python]" = @{
+            "editor.defaultFormatter" = "ms-python.black-formatter"
+        }
+        "[powershell]" = @{
+            "editor.defaultFormatter" = "ms-vscode.powershell"
+        }
+    } | ConvertTo-Json -Depth 4
+    
+    Set-Content -Path $vscodeSettingsPath -Value $vscodeSettings -Encoding UTF8
+    Write-Host "Created: $vscodeSettingsPath" -ForegroundColor Gray
+}
+
+# Test EQ12 modules
+Write-Host "`n🧪 TESTING EQ12 MODULES" -ForegroundColor Yellow
+try {
+    $testResults = @()
+    
+    # Test free guard module
+    $freeGuardTest = & $pythonExe -c "import eq12_free_guard; print('✅ EQ12 Free Guard: OK')" 2>&1
+    $testResults += $freeGuardTest
+    
+    # Test responses client
+    $clientTest = & $pythonExe -c "import eq12_responses_client; print('✅ EQ12 Responses Client: OK')" 2>&1  
+    $testResults += $clientTest
+    
+    # Test configuration loading
+    $configTest = & $pythonExe -c "from eq12_free_guard import load_eq12_defaults; config = load_eq12_defaults(); print('✅ Configuration: Loaded successfully')" 2>&1
+    $testResults += $configTest
+    
+    foreach ($result in $testResults) {
+        Write-Host $result -ForegroundColor Green
+    }
+}
+catch {
+    Write-Host "⚠️ Some EQ12 modules not yet available (will work after first run)" -ForegroundColor Yellow
+}
+
+# 9) Create ready sentinel
+Write-Host "`n✅ FINALIZING BOOTSTRAP" -ForegroundColor Yellow
+$readyInfo = @{
+    "bootstrap_completed" = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+    "python_version" = (& $pythonExe --version 2>&1)
+    "pip_version" = (& $pythonExe -m pip --version 2>&1)
+    "node_version" = $(try { node --version 2>$null } catch { "not_installed" })
+    "ready" = "OK"
+} | ConvertTo-Json -Depth 2
+
+Set-Content -Path $readySentinel -Value $readyInfo -Encoding UTF8
+
+Write-Host "`n🎉 EQ12 FREE TOOLCHAIN BOOTSTRAP COMPLETE!" -ForegroundColor Green
+Write-Host "="*60 -ForegroundColor Green
+Write-Host "🛡️ FREE MODE ACTIVE - No paid API calls will be made" -ForegroundColor Cyan
+Write-Host "📦 Comprehensive development environment ready" -ForegroundColor White
+Write-Host ""
+Write-Host "📋 What"s Ready:" -ForegroundColor Yellow
+Write-Host "   ✅ Python virtual environment with comprehensive packages" -ForegroundColor White
+Write-Host "   ✅ OpenAI Responses API client (with free mode)" -ForegroundColor White
+Write-Host "   ✅ Web scraping tools (Selenium, Playwright, BeautifulSoup)" -ForegroundColor White
+Write-Host "   ✅ Data processing (Pandas, NumPy)" -ForegroundColor White
+Write-Host "   ✅ Development tools (Black, Ruff, Pytest)" -ForegroundColor White
+Write-Host "   ✅ VS Code configuration optimized for EQ12" -ForegroundColor White
+Write-Host "   ✅ Safe .env configuration for development" -ForegroundColor White
+Write-Host ""
+Write-Host "🚀 Next Steps:" -ForegroundColor Yellow
+Write-Host "   1. Open VS Code: code ." -ForegroundColor White
+Write-Host "   2. Test installation: python eq12_responses_client.py" -ForegroundColor White
+Write-Host "   3. Daily startup: .\start-eq12-fast.ps1" -ForegroundColor White
+Write-Host "   4. Edit .env when ready for paid APIs" -ForegroundColor White
+Write-Host ""
+Write-Host "Ready sentinel: $readySentinel" -ForegroundColor Gray
+Write-Host "Time: $((Get-Date).ToString("HH:mm:ss"))" -ForegroundColor Gray
+Write-Host "="*60 -ForegroundColor Green

@@ -1,0 +1,347 @@
+# EQ12 MLB Props Research Recipe
+# Policy-driven configuration for MLB prop research
+# Version: 2.0
+
+name: "mlb_props_sgp_research"
+version: "2.0"
+description: "Comprehensive MLB prop and SGP research recipe with injury intelligence"
+author: "EQ12 Research Engine"
+created_at: "2025-01-03"
+tags: ["mlb", "props", "sgp", "injury_intelligence"]
+environments: ["production", "development", "testing"]
+
+# Inherits base settings from parent recipe
+inherits_from: "base_sports_research"
+depends_on:
+  - "injury_intelligence_core"
+  - "odds_market_tracker"
+
+# === PLANNER CONFIGURATION ===
+planner:
+  classifier: "intent/sports_v3" # Advanced sports intent classifier
+  steps:
+    - "player_profile_analysis" # Deep dive on target player
+    - "recent_performance_trends" # Last 15 games + situational
+    - "matchup_context_analysis" # Opponent strengths/weaknesses
+    - "injury_impact_assessment" # EQ12's injury intelligence engine
+    - "prop_betting_history" # Historical prop performance
+    - "market_sentiment_analysis" # Line movement + sharp money
+    - "weather_park_factors" # Environmental considerations
+    - "value_assessment_synthesis" # Final recommendation synthesis
+  max_subqueries: 8
+  parallel_execution: true
+  adaptive_planning: true # Adjust steps based on intermediate results
+
+# === RETRIEVER CONFIGURATION ===
+retrievers:
+  # Primary MLB Data Sources
+  - name: "mlb_statcast_api"
+    type: "http"
+    enabled: true
+    priority: 1
+    base_url: "https://baseballsavant.mlb.com/statcast_search"
+    rate_limit:
+      rpm: 120
+      burst: 20
+    params:
+      hfPT: "" # Pitch type filter
+      hfAB: "" # At-bat result filter
+      hfGT: "R|" # Game type (regular season)
+    headers:
+      User-Agent: "EQ12-Research-Engine/2.0"
+
+  # Injury Intelligence (EQ12's secret sauce)
+  - name: "injury_intelligence_engine"
+    type: "vector"
+    enabled: true
+    priority: 1
+    index: "qdrant://eq12_injury_intel"
+    embedding_model: "text-embedding-ada-002"
+    search_params:
+      metric: "cosine"
+      limit: 25
+      score_threshold: 0.75
+
+  # Market Data & Odds
+  - name: "odds_api_aggregator"
+    type: "http"
+    enabled: true
+    priority: 2
+    base_url: "https://api.the-odds-api.com/v4"
+    api_key_env: "ODDS_API_KEY"
+    rate_limit:
+      rpm: 500
+      burst: 50
+    endpoints:
+      odds: "/sports/baseball_mlb/odds"
+      props: "/sports/baseball_mlb/events/{event_id}/odds"
+
+  # News & Analysis Feeds
+  - name: "fangraphs_scraper"
+    type: "http"
+    enabled: true
+    priority: 3
+    base_url: "https://www.fangraphs.com"
+    rate_limit:
+      rpm: 60
+      burst: 10
+    extraction:
+      method: "beautifulsoup"
+      selectors:
+        title: "h1.entry-title"
+        content: ".entry-content"
+        author: ".author-name"
+        date: ".entry-date"
+
+  # Weather Data
+  - name: "weather_underground_api"
+    type: "http"
+    enabled: true
+    priority: 4
+    base_url: "https://api.weather.com/v1"
+    rate_limit:
+      rpm: 1000
+      burst: 100
+
+  # Advanced Analytics
+  - name: "baseball_reference_scraper"
+    type: "http"
+    enabled: true
+    priority: 4
+    base_url: "https://www.baseball-reference.com"
+    rate_limit:
+      rpm: 30
+      burst: 5
+    extraction:
+      method: "pandas_html" # Use pandas for table extraction
+
+  # Social Sentiment (Optional)
+  - name: "twitter_sentiment_feed"
+    type: "rss"
+    enabled: false # Disabled by default
+    priority: 6
+    feeds:
+      - "https://twitter-rss.com/search/baseball+injuries"
+      - "https://twitter-rss.com/search/mlb+lineup+news"
+
+# === RANKING & RERANKING ===
+ranking:
+  reranker: "crossencoder/ms-marco-MiniLM-L-12-v2"
+
+  # Scoring weights (must sum to ~1.0)
+  weights:
+    recency: 0.35 # How recent is the information
+    authority: 0.25 # Source authority/reliability
+    semantic: 0.30 # Semantic relevance to query
+    diversity: 0.10 # Content diversity
+
+  max_results: 25 # Results to pass to synthesis
+
+  # Source authority scoring
+  authority_multipliers:
+    "mlb.com": 1.0
+    "fangraphs.com": 0.95
+    "baseballsavant.mlb.com": 1.0
+    "baseball-reference.com": 0.90
+    "theathletic.com": 0.85
+    "espn.com": 0.75
+    "rotowire.com": 0.80
+    "cbssports.com": 0.70
+
+  # Freshness decay (hours)
+  freshness_decay:
+    injury_reports: 6 # Injury news decays fast
+    lineup_news: 12 # Lineup changes decay fast
+    performance_stats: 168 # Weekly stats decay slower
+    historical_analysis: 8760 # Yearly analysis very slow decay
+
+# === SYNTHESIS CONFIGURATION ===
+synthesis:
+  style: "bullet+citations" # bullet, narrative, structured, data_sheet
+  require_citation: true
+  max_tokens: 1800
+  temperature: 0.25 # Lower temp for factual analysis
+
+  # Output sections (ordered)
+  sections:
+    - "Executive Summary" # 2-3 sentence key takeaways
+    - "Player Performance Analysis" # Recent form + key stats
+    - "Injury Intelligence" # EQ12's injury impact analysis
+    - "Matchup Context" # Opponent analysis + park factors
+    - "Prop Betting History" # Historical prop performance
+    - "Market Analysis" # Line movement + sharp money indicators
+    - "Weather & Park Impact" # Environmental factors
+    - "Risk Assessment" # Confidence intervals + uncertainties
+    - "Recommendation" # Final verdict with confidence score
+    - "Supporting Data" # Key stats + citations
+
+  # Citation requirements
+  min_citations_per_section: 2
+  citation_format: "[Source: {domain} - {date}]"
+
+  # Quality controls
+  min_confidence_score: 0.75
+  require_injury_check: true # Always check injury status
+  require_weather_check: true # Always check weather for outdoor games
+
+# === POLICY CONFIGURATION ===
+policies:
+  # Domain filtering
+  allow_domains:
+    - "mlb.com"
+    - "fangraphs.com"
+    - "baseballsavant.mlb.com"
+    - "baseball-reference.com"
+    - "theathletic.com"
+    - "rotowire.com"
+    - "espn.com"
+    - "weather.com"
+    - "accuweather.com"
+
+  deny_domains:
+    - "gambling-addiction-sites.com"
+    - "unreliable-tipsters.net"
+    - "spam-domains.org"
+
+  # Content freshness (days)
+  freshness_days: 14
+
+  # Safety settings
+  safety: "sports_advisory_only" # strict, moderate, permissive, sports_advisory_only
+
+  # Responsible gambling
+  include_rg_disclaimer: true
+  max_confidence_claim: 0.85 # Never claim > 85% confidence
+
+  # Data quality requirements
+  min_source_diversity: 3 # Require at least 3 different source types
+  min_total_sources: 5 # Require at least 5 sources total
+  require_official_stats: true # Must include MLB.com or Baseball Savant
+
+# === MODEL CONFIGURATION ===
+models:
+  primary: "gpt-4o" # Primary analysis model
+  fallbacks:
+    - "gpt-4o-mini" # Cost-effective fallback
+    - "gpt-4-turbo" # Performance fallback
+    - "claude-3-sonnet" # Anthropic fallback
+
+  # Model selection rules
+  selection_rules:
+    complex_analysis: "gpt-4o" # Use best model for complex analysis
+    simple_lookups: "gpt-4o-mini" # Use cheaper model for simple tasks
+    injury_analysis: "gpt-4o" # Always use best model for injury analysis
+    synthesis: "gpt-4o" # Use best model for final synthesis
+
+  # Model-specific settings
+  model_settings:
+    "gpt-4o":
+      temperature: 0.2
+      max_tokens: 2000
+      top_p: 0.95
+    "gpt-4o-mini":
+      temperature: 0.1
+      max_tokens: 1500
+      top_p: 0.9
+
+# === BUDGET CONFIGURATION ===
+budgets:
+  # API rate limits
+  tpm: 80000 # Tokens per minute
+  rpm: 800 # Requests per minute
+
+  # Cost controls
+  cost_usd: 2.50 # Max cost per research query
+  daily_cost_usd: 50.00 # Daily cost limit
+
+  # Performance targets
+  max_execution_time_sec: 45 # Target completion time
+
+  # Quality vs cost tradeoffs
+  cost_optimization:
+    use_cache_aggressively: true
+    prefer_cheaper_models: false # Quality over cost for sports analysis
+    parallel_vs_sequential: "parallel" # Faster execution
+
+# === CACHING CONFIGURATION ===
+cache:
+  # Document caching (minutes)
+  doc_ttl_min: 720 # 12 hours for scraped content
+
+  # Answer caching (minutes)
+  answer_ttl_min: 30 # 30 minutes for analysis results
+
+  # Cache keys
+  cache_strategy: "semantic_similarity" # exact_match, semantic_similarity
+  similarity_threshold: 0.85
+
+  # Cache storage
+  backend: "redis" # redis, memory, disk
+  max_cache_size_mb: 500
+
+# === OUTPUT CONFIGURATION ===
+outputs:
+  # Primary output format
+  format: "structured_json" # json, markdown, html, text
+
+  # Include sections
+  sections:
+    - "Summary"
+    - "Analysis"
+    - "Recommendation"
+    - "Risk Assessment"
+    - "Supporting Data"
+    - "Citations"
+    - "Metadata"
+
+  # Confidence scoring
+  include_confidence_scores: true
+  confidence_method: "ensemble_average" # max, min, average, ensemble_average
+
+  # Export options
+  export_formats: ["json", "markdown"]
+  save_to_file: true
+  file_prefix: "mlb_props_research"
+
+  # Notification (optional)
+  notify_completion: false
+  webhook_url: ""
+
+# === ENVIRONMENT OVERRIDES ===
+overrides:
+  # Development environment - faster, cheaper
+  development:
+    budgets:
+      cost_usd: 0.25
+      max_execution_time_sec: 30
+    models:
+      primary: "gpt-4o-mini"
+    retrievers:
+      - name: "twitter_sentiment_feed"
+        enabled: false
+    cache:
+      doc_ttl_min: 60 # Shorter cache in dev
+
+  # Testing environment - limited sources
+  testing:
+    retrievers:
+      - name: "mlb_statcast_api"
+        enabled: true
+      - name: "injury_intelligence_engine"
+        enabled: true
+    budgets:
+      cost_usd: 0.10
+    synthesis:
+      max_tokens: 500
+
+  # Production environment - full quality
+  production:
+    models:
+      primary: "gpt-4o"
+    budgets:
+      cost_usd: 5.00 # Higher cost limit for production
+    policies:
+      min_source_diversity: 5
+      min_total_sources: 8
+    cache:
+      doc_ttl_min: 1440 # 24 hours in production

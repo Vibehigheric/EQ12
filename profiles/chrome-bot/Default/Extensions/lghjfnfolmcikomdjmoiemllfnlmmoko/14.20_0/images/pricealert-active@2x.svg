@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="23px" viewBox="0 0 20 23" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61 (89581) - https://sketch.com -->
+    <title>Group 6</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="770" y="121" width="360" height="500" rx="14"></rect>
+        <filter x="-21.9%" y="-9.4%" width="143.9%" height="131.6%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="32" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="21" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.243137255   0 0 0 0 0.282352941   0 0 0 0 0.435294118  0 0 0 0.06 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Price-alert-pop-ups" transform="translate(-980.000000, -581.000000)" opacity="1">
+            <g id="Rectangle">
+                <use fill="none" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use fill="none" fill-rule="evenodd" xlink:href="#path-1"></use>
+            </g>
+            <g id="Group-6" transform="translate(981.099560, 583.100000)">
+                <path d="M11.5770286,17.2957714 C11.5770286,18.682819 10.4497905,19.8100571 9.06274286,19.8100571 C7.6736,19.8100571 6.54845714,18.682819 6.54845714,17.2957714" id="Stroke-1" stroke="#3E486F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M11.6118095,1.1847619 C10.8365714,0.824380952 9.97333333,0.621142857 9.06190476,0.621142857 C5.72628571,0.621142857 3.02133333,3.32609524 3.02133333,6.66380952 C3.02133333,13.7121905 -1.27897692e-13,15.7257143 -1.27897692e-13,15.7257143 L18.1238095,15.7257143 C18.1238095,15.7257143 15.1045714,13.7121905 15.1045714,6.66380952 L15.1045714,5.55542857" id="Stroke-3" stroke="#3E486F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M16.5773714,2.38095238 C16.5773714,3.6968254 15.5107048,4.76190476 14.196419,4.76190476 C12.8821333,4.76190476 11.8154667,3.6968254 11.8154667,2.38095238 C11.8154667,1.06507937 12.8821333,0 14.196419,0 C15.5107048,0 16.5773714,1.06507937 16.5773714,2.38095238 Z" id="Stroke-5" stroke="#FFFFFF" stroke-width="4"></path>
+                <path d="M16.5773714,2.38095238 C16.5773714,3.6968254 15.5107048,4.76190476 14.196419,4.76190476 C12.8821333,4.76190476 11.8154667,3.6968254 11.8154667,2.38095238 C11.8154667,1.06507937 12.8821333,0 14.196419,0 C15.5107048,0 16.5773714,1.06507937 16.5773714,2.38095238 Z" id="Stroke-5" stroke="#3E486F" stroke-width="1.5"></path>
+            </g>
+        </g>
+    </g>
+</svg>

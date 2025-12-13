@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="26px" viewBox="0 0 26 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.5 (67469) - http://www.bohemiancoding.com/sketch -->
+    <title>PopUp /ButtonNext</title>
+    <desc>Created with Sketch.</desc>
+    <g id="PopUp-/ButtonNext" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="g">
+            <rect id="Rectangle" x="0" y="0" width="26" height="26"></rect>
+            <path d="M9.92368375,19.3492086 L15.3658626,13 L9.92368375,6.65079137 C9.5642616,6.23146553 9.61282313,5.60016555 10.032149,5.2407434 C10.4514748,4.88132125 11.0827748,4.92988278 11.442197,5.34920863 L18.0000181,13 L11.442197,20.6507914 C11.0827748,21.0701172 10.4514748,21.1186788 10.032149,20.7592566 C9.61282313,20.3998345 9.5642616,19.7685345 9.92368375,19.3492086 Z" id="Path" fill="#F2F4F7" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

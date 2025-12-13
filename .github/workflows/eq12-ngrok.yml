@@ -1,0 +1,35 @@
+name: EQ12 ngrok CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  ngrok:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ngrok
+        run: |
+          curl -sSLo ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+          unzip -q ngrok.zip -d ./
+          chmod +x ./ngrok
+
+      - name: Start ngrok tunnels
+        env:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+        run: |
+          ./ngrok authtoken "$NGROK_AUTHTOKEN"
+          # start dashboard tunnel on 8080 in background
+          nohup ./ngrok http 8080 --log=stdout --log-format=logfmt > ngrok_dashboard.log 2>&1 &
+          sleep 5
+          grep -o 'url=[^ ]*' ngrok_dashboard.log | head -n 5 > ngrok_urls.txt || true
+          cat ngrok_dashboard.log | sed -n '1,200p'
+
+      - name: Upload ngrok logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ngrok-logs
+          path: ngrok_dashboard.log

@@ -1,0 +1,5 @@
+Build a real estate investment automation system that:
+- Tracks property values and market trends
+- Analyzes rental yields and cash flow potential
+- Monitors mortgage rates and financing options
+- Generates investment recommendations with risk assessments

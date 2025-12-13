@@ -1,0 +1,103 @@
+#Requires -Version 5.0
+<#
+.SYNOPSIS
+    EQ12 Pi Cluster Integration Monitor
+.DESCRIPTION
+    Monitors Pi transition from WiFi (192.168.1.80) to cluster network (192.168.100.2)
+.PARAMETER MonitorMinutes
+    How long to monitor for the transition (default: 5 minutes)
+#>
+
+[CmdletBinding()]
+param(
+    [int]$MonitorMinutes = 5
+)
+
+function Write-MonitorLog {
+    param([string]$Message, [string]$Color = "White")
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    Write-Host "[$timestamp] $Message" -ForegroundColor $Color
+}
+
+function Test-PiConnection {
+    param([string]$IPAddress, [string]$Name)
+    
+    $ping = Test-Connection -ComputerName $IPAddress -Count 1 -Quiet -ErrorAction SilentlyContinue
+    if ($ping) {
+        $ssh = Test-NetConnection -ComputerName $IPAddress -Port 22 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue -InformationLevel Quiet
+        if ($ssh.TcpTestSucceeded) {
+            return "SSH_Ready"
+        } else {
+            return "Ping_Only"
+        }
+    }
+    return "Offline"
+}
+
+Write-Host ""
+Write-Host " EQ12 PI CLUSTER INTEGRATION MONITOR" -ForegroundColor Cyan
+Write-Host "Monitoring Pi transition to cluster network..." -ForegroundColor Yellow
+Write-Host ""
+
+$startTime = Get-Date
+$maxAttempts = $MonitorMinutes * 12  # 5-second intervals
+$attempt = 1
+
+Write-MonitorLog "Starting monitor - Pi should reboot and join cluster network" "Cyan"
+Write-MonitorLog "WiFi IP: 192.168.1.80  Cluster IP: 192.168.100.2" "Gray"
+Write-Host ""
+
+while ($attempt -le $maxAttempts) {
+    $elapsed = [math]::Round(((Get-Date) - $startTime).TotalMinutes, 1)
+    
+    # Check both networks
+    $wifiStatus = Test-PiConnection -IPAddress "192.168.1.80" -Name "WiFi"
+    $clusterStatus = Test-PiConnection -IPAddress "192.168.100.2" -Name "Cluster"
+    
+    Write-MonitorLog "Check $attempt/$maxAttempts (${elapsed}m) - WiFi: $wifiStatus | Cluster: $clusterStatus" "Gray"
+    
+    # Success condition: Pi available on cluster network
+    if ($clusterStatus -eq "SSH_Ready") {
+        Write-Host ""
+        Write-MonitorLog " SUCCESS! Pi joined cluster network!" "Green"
+        Write-Host ""
+        Write-Host " CLUSTER INTEGRATION COMPLETE!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "Pi is now available at:" -ForegroundColor Cyan
+        Write-Host "ssh ricoj100@192.168.100.2" -ForegroundColor Green
+        Write-Host "Password: 102120sRO1!" -ForegroundColor White
+        Write-Host ""
+        Write-Host " Ready for cluster operations!" -ForegroundColor Cyan
+        exit 0
+    }
+    
+    # Warning if Pi disappeared from WiFi but not yet on cluster
+    if ($wifiStatus -eq "Offline" -and $clusterStatus -eq "Offline" -and $attempt -gt 6) {
+        Write-MonitorLog " Pi offline on both networks - likely rebooting..." "Yellow"
+    }
+    
+    # Show progress every minute
+    if ($attempt % 12 -eq 0) {
+        Write-MonitorLog "Still monitoring - Pi transition in progress..." "Yellow"
+    }
+    
+    $attempt++
+    Start-Sleep -Seconds 5
+}
+
+# Timeout reached
+Write-Host ""
+Write-MonitorLog " Monitor timeout reached" "Red"
+Write-Host ""
+Write-Host " PI CLUSTER TRANSITION TIMEOUT" -ForegroundColor Red
+Write-Host ""
+Write-Host "Current status:" -ForegroundColor Yellow
+$finalWifi = Test-PiConnection -IPAddress "192.168.1.80" -Name "WiFi"
+$finalCluster = Test-PiConnection -IPAddress "192.168.100.2" -Name "Cluster"
+Write-Host "WiFi (192.168.1.80): $finalWifi" -ForegroundColor White
+Write-Host "Cluster (192.168.100.2): $finalCluster" -ForegroundColor White
+Write-Host ""
+Write-Host "Troubleshooting:" -ForegroundColor Cyan
+Write-Host "1. Check if Pi is still connected via WiFi" -ForegroundColor White
+Write-Host "2. Verify Ethernet cable is connected Pi  EQ12" -ForegroundColor White
+Write-Host "3. Try manual SSH to 192.168.1.80 to check configuration" -ForegroundColor White

@@ -1,0 +1,161 @@
+# EQ12 GODSTACK CODEOWNERS
+# Private Repository Access Control
+# Ensures sensitive stacks require explicit owner approval
+
+# ===========================================
+# SENSITIVE STACKS (Require Owner Approval)
+# ===========================================
+
+# Betting / Gambling Stack - High Risk
+betting/*                   @Vibehigheric
+*/betting/*                 @Vibehigheric
+**/betting/**               @Vibehigheric
+odds_parser.py              @Vibehigheric
+parlay_builder.py           @Vibehigheric
+*odds*                      @Vibehigheric
+*parlay*                    @Vibehigheric
+*gambling*                  @Vibehigheric
+
+# Cannabis / CBD Stack - Regulatory Risk  
+cannabis/*                  @Vibehigheric
+*/cannabis/*                @Vibehigheric
+**/cannabis/**              @Vibehigheric
+*cbd*                       @Vibehigheric
+*weed*                      @Vibehigheric
+*marijuana*                 @Vibehigheric
+
+# Credit / Housing Stack - Financial Risk
+credit/*                    @Vibehigheric
+housing/*                   @Vibehigheric
+*/credit/*                  @Vibehigheric
+*/housing/*                 @Vibehigheric
+**/credit/**                @Vibehigheric
+**/housing/**               @Vibehigheric
+*credit*                    @Vibehigheric
+*loan*                      @Vibehigheric
+*mortgage*                  @Vibehigheric
+*finance*                   @Vibehigheric
+
+# Fleet Management (Insurance/Financial Integration)
+fleet/*                     @Vibehigheric
+*/fleet/*                   @Vibehigheric
+**/fleet/**                 @Vibehigheric
+*turo*                      @Vibehigheric
+*insurance*                 @Vibehigheric
+
+# ===========================================
+# CORE INFRASTRUCTURE (Owner Review)
+# ===========================================
+
+# Environment & Secrets
+.env*                       @Vibehigheric
+*.env*                      @Vibehigheric
+**/secrets/**               @Vibehigheric
+**/keys/**                  @Vibehigheric
+keys/*                      @Vibehigheric
+secrets/*                   @Vibehigheric
+
+# Task Scheduler XMLs (Automation Control)
+*.xml                       @Vibehigheric
+**/xml/**                   @Vibehigheric
+scheduler/*                 @Vibehigheric
+tasks/*                     @Vibehigheric
+
+# Database & Persistence
+*.db                        @Vibehigheric
+*.sqlite*                   @Vibehigheric
+**/database/**              @Vibehigheric
+**/db/**                    @Vibehigheric
+migration*                  @Vibehigheric
+
+# AI/ML Integration (GPT, OpenAI)
+enrichment/*                @Vibehigheric
+*/enrichment/*              @Vibehigheric
+**/enrichment/**            @Vibehigheric
+*gpt*                       @Vibehigheric
+*openai*                    @Vibehigheric
+*ai*                        @Vibehigheric
+*anthropic*                 @Vibehigheric
+
+# ===========================================
+# BUSINESS LOGIC (Semi-Sensitive)
+# ===========================================
+
+# Travel Stack (Affiliate Revenue)
+travel/*                    @Vibehigheric
+*/travel/*                  @Vibehigheric
+**/travel/**                @Vibehigheric
+
+# AliDropship Stack (SEO/Revenue)
+ali/*                       @Vibehigheric
+dropship/*                  @Vibehigheric
+*/ali/*                     @Vibehigheric
+*/dropship/*                @Vibehigheric
+**/ali/**                   @Vibehigheric
+**/dropship/**              @Vibehigheric
+
+# Education Stack (Scholarship/Loan Tracking)
+education/*                 @Vibehigheric
+*/education/*               @Vibehigheric
+**/education/**             @Vibehigheric
+*scholarship*               @Vibehigheric
+
+# Swagbucks/Revenue Stacks
+swagbucks/*                 @Vibehigheric
+*/swagbucks/*               @Vibehigheric
+**/swagbucks/**             @Vibehigheric
+*swag*                      @Vibehigheric
+*reward*                    @Vibehigheric
+*cashback*                  @Vibehigheric
+
+# ===========================================
+# DEPLOYMENT & OPERATIONS
+# ===========================================
+
+# PowerShell Automation Scripts
+*.ps1                       @Vibehigheric
+**/powershell/**            @Vibehigheric
+**/scripts/**               @Vibehigheric
+profiles/*                  @Vibehigheric
+
+# Python Core Components  
+trending_monitor.py         @Vibehigheric
+dashboard.py                @Vibehigheric
+hlayer_wrapper.py           @Vibehigheric
+devtools_agent.py           @Vibehigheric
+
+# GitHub Workflows & CI/CD
+.github/*                   @Vibehigheric
+.github/**                  @Vibehigheric
+
+# Configuration Files
+requirements*.txt           @Vibehigheric
+Dockerfile*                 @Vibehigheric
+docker-compose*             @Vibehigheric
+*.yml                       @Vibehigheric
+*.yaml                      @Vibehigheric
+
+# ===========================================
+# DOCUMENTATION & COMPLIANCE
+# ===========================================
+
+# Legal/Compliance Documentation
+**/compliance/**            @Vibehigheric
+**/legal/**                 @Vibehigheric
+*TOS*                       @Vibehigheric
+*TERMS*                     @Vibehigheric
+*PRIVACY*                   @Vibehigheric
+*GDPR*                      @Vibehigheric
+
+# Master Documentation
+README*.md                  @Vibehigheric
+AGENTS.md                   @Vibehigheric
+COPILOT*.md                 @Vibehigheric
+*PROMPT*.md                 @Vibehigheric
+
+# ===========================================
+# FALLBACK (Default Owner Review)
+# ===========================================
+
+# Catch-all for any files not explicitly covered
+*                          @Vibehigheric

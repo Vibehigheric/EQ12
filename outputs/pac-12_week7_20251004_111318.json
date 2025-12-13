@@ -1,0 +1,183 @@
+{
+  "generated_at": "2025-10-04T11:13:18.163165",
+  "system": "EQ12 NCAA Week 7 Conference Builder",
+  "conference": "Pac-12",
+  "week": 7,
+  "parlays": [
+    {
+      "parlay_id": "Pac-12_HIGH-PAYOUT_Week7_20251004_111318",
+      "conference": "Pac-12",
+      "parlay_type": "high-payout",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "cb392d95625a9a1bc0c9d38b48e01e04",
+          "sport": "NCAA-FB",
+          "conference": "Pac-12",
+          "matchup": "Penn State Nittany Lions @ UCLA Bruins",
+          "home_team": "UCLA Bruins",
+          "away_team": "Penn State Nittany Lions",
+          "pick_type": "H2H",
+          "bet": "UCLA Bruins ML",
+          "odds": 1500.0,
+          "confidence": 0.545,
+          "kelly_percentage": 0.10293333333333335,
+          "sentiment": 0.65,
+          "weather": "Cold",
+          "edge_percentage": 48.25000000000001,
+          "clv_variance": -0.011689414476129915,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "UCLA Bruins"
+          }
+        },
+        {
+          "game_id": "32aab37746e32d72605120ee63924aea",
+          "sport": "NCAA-FB",
+          "conference": "Pac-12",
+          "matchup": "Oklahoma State Cowboys @ Arizona Wildcats",
+          "home_team": "Arizona Wildcats",
+          "away_team": "Oklahoma State Cowboys",
+          "pick_type": "H2H",
+          "bet": "Oklahoma State Cowboys ML",
+          "odds": 880.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.09531818181818183,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 42.79591836734694,
+          "clv_variance": 0.0063702112294068275,
+          "start_time": "2025-10-04T19:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "MyBookie.ag",
+            "market": "h2h",
+            "outcome_name": "Oklahoma State Cowboys"
+          }
+        },
+        {
+          "game_id": "c1614464ceef18bdc3108d0fb3899343",
+          "sport": "NCAA-FB",
+          "conference": "Pac-12",
+          "matchup": "Colorado Buffaloes @ TCU Horned Frogs",
+          "home_team": "TCU Horned Frogs",
+          "away_team": "Colorado Buffaloes",
+          "pick_type": "H2H",
+          "bet": "Colorado Buffaloes ML",
+          "odds": 425.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08388235294117648,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 33.952380952380956,
+          "clv_variance": 0.009071618985975246,
+          "start_time": "2025-10-04T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetUS",
+            "market": "h2h",
+            "outcome_name": "Colorado Buffaloes"
+          }
+        },
+        {
+          "game_id": "2bba5df15d3c9222962c8bb8fc24ae80",
+          "sport": "NCAA-FB",
+          "conference": "Pac-12",
+          "matchup": "Indiana Hoosiers @ Oregon Ducks",
+          "home_team": "Oregon Ducks",
+          "away_team": "Indiana Hoosiers",
+          "pick_type": "H2H",
+          "bet": "Indiana Hoosiers ML",
+          "odds": 290.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.07358620689655172,
+          "sentiment": 0.6,
+          "weather": "Cloudy",
+          "edge_percentage": 27.358974358974358,
+          "clv_variance": 0.007070387402267182,
+          "start_time": "2025-10-11T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Indiana Hoosiers"
+          }
+        },
+        {
+          "game_id": "0626d930549333f431b6e7700ffd7291",
+          "sport": "NCAA-FB",
+          "conference": "Pac-12",
+          "matchup": "Washington Huskies @ Maryland Terrapins",
+          "home_team": "Maryland Terrapins",
+          "away_team": "Washington Huskies",
+          "pick_type": "H2H",
+          "bet": "Maryland Terrapins ML",
+          "odds": 190.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.05652631578947368,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 18.517241379310345,
+          "clv_variance": 0.01289269496884959,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Maryland Terrapins"
+          }
+        },
+        {
+          "game_id": "a109b71f4beba173453582bb0043e075",
+          "sport": "NCAA-FB",
+          "conference": "Pac-12",
+          "matchup": "Arizona State Sun Devils @ Utah Utes",
+          "home_team": "Utah Utes",
+          "away_team": "Arizona State Sun Devils",
+          "pick_type": "H2H",
+          "bet": "Arizona State Sun Devils ML",
+          "odds": 138.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.03788405797101449,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 10.983193277310926,
+          "clv_variance": 0.03850189644083871,
+          "start_time": "2025-10-12T02:15:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Arizona State Sun Devils"
+          }
+        }
+      ],
+      "combined_odds": 2215773.2959999996,
+      "win_probability": 0.022791654368500013,
+      "expected_roi": 50403.41828682092,
+      "clv_vs_open": 0.010369565758534606,
+      "recommended_stake": 11.667381231593039,
+      "total_edge": 181.85770833532354,
+      "risk_score": 0.8999999999999999,
+      "top25_count": 0,
+      "steam_count": 0,
+      "created_at": "2025-10-04T11:13:18.146787"
+    }
+  ],
+  "summary": {
+    "total_parlays": 1,
+    "total_legs": 6,
+    "top25_games": 0,
+    "steam_moves": 0,
+    "total_stake": 11.667381231593039
+  }
+}

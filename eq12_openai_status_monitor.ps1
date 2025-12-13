@@ -1,0 +1,422 @@
+#Requires -Version 5.1
+
+<#
+.SYNOPSIS
+    EQ12 OpenAI Status Monitor PowerShell Interface
+
+.DESCRIPTION
+    PowerShell wrapper for monitoring OpenAI service status and providing EQ12-specific recommendations.
+    Integrates with the EQ12 optimization ecosystem to provide proactive service monitoring.
+
+.PARAMETER Action
+    The monitoring action to perform:
+    - CheckStatus: Check current OpenAI service status
+    - CheckModel: Check availability of specific model
+    - Summary: Get comprehensive status summary
+    - Monitor: Continuous monitoring mode
+
+.PARAMETER ModelName
+    Specific OpenAI model to check (required when Action is CheckModel)
+
+.PARAMETER OutputPath
+    Optional path for saving monitoring results
+
+.PARAMETER Continuous
+    Enable continuous monitoring mode (checks every N minutes)
+
+.PARAMETER IntervalMinutes
+    Monitoring interval in minutes (default: 5)
+
+.PARAMETER AlertThreshold
+    Health score threshold for alerts (default: 80)
+
+.EXAMPLE
+    .\eq12_openai_status_monitor.ps1 -Action CheckStatus
+
+.EXAMPLE
+    .\eq12_openai_status_monitor.ps1 -Action CheckModel -ModelName "gpt-4.1-2025-04-14"
+
+.EXAMPLE
+    .\eq12_openai_status_monitor.ps1 -Action Monitor -Continuous -IntervalMinutes 10 -AlertThreshold 75
+
+.NOTES
+    Author: EQ12 System
+    Requires: Python 3.12+, requests library
+    Dependencies: eq12_openai_status_monitor.py
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [ValidateSet("CheckStatus", "CheckModel", "Summary", "Monitor")]
+    [string]$Action,
+
+    [string]$ModelName,
+
+    [string]$OutputPath,
+
+    [switch]$Continuous,
+
+    [int]$IntervalMinutes = 5,
+
+    [int]$AlertThreshold = 80
+)
+
+# Script configuration
+$ErrorActionPreference = "Stop"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$LogFile = Join-Path $ScriptDir "logs" "eq12_openai_status_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+# Ensure logs directory exists
+$LogDir = Split-Path -Parent $LogFile
+if (-not (Test-Path $LogDir)) {
+    New-Item -Path $LogDir -ItemType Directory -Force | Out-Null
+}
+
+function Write-LogMessage {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Message,
+
+        [ValidateSet("INFO", "WARNING", "ERROR", "DEBUG")]
+        [string]$Level = "INFO"
+    )
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+
+    # Write to console with appropriate color
+    switch ($Level) {
+        "ERROR" { Write-Host $logEntry -ForegroundColor Red }
+        "WARNING" { Write-Host $logEntry -ForegroundColor Yellow }
+        "DEBUG" { Write-Host $logEntry -ForegroundColor Gray }
+        default { Write-Host $logEntry -ForegroundColor White }
+    }
+
+    # Write to log file
+    Add-Content -Path $LogFile -Value $logEntry -Encoding UTF8
+}
+
+function Test-Prerequisites {
+    """Verify prerequisites for OpenAI status monitoring"""
+
+    Write-LogMessage "Checking prerequisites..." -Level INFO
+
+    # Check Python installation
+    try {
+        $pythonVersion = & python --version 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            throw "Python not found in PATH"
+        }
+        Write-LogMessage "Python version: $pythonVersion" -Level INFO
+    } catch {
+        Write-LogMessage "Python 3.12+ is required but not found: $_" -Level ERROR
+        return $false
+    }
+
+    # Check required Python modules
+    $requiredModules = @("requests", "xml")
+    foreach ($module in $requiredModules) {
+        try {
+            $null = & python -c "import $module; print('OK')" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+                throw "Module $module not available"
+            }
+            Write-LogMessage "Python module '$module' available" -Level DEBUG
+        } catch {
+            Write-LogMessage "Required Python module '$module' not found: $_" -Level ERROR
+            return $false
+        }
+    }
+
+    # Check status monitor script
+    $statusMonitorScript = Join-Path $ScriptDir "eq12_openai_status_monitor.py"
+    if (-not (Test-Path $statusMonitorScript)) {
+        Write-LogMessage "Status monitor script not found: $statusMonitorScript" -Level ERROR
+        return $false
+    }
+
+    Write-LogMessage "All prerequisites satisfied" -Level INFO
+    return $true
+}
+
+function Invoke-StatusMonitor {
+    param(
+        [string]$Action,
+        [string]$ModelName,
+        [string]$OutputPath
+    )
+
+    Write-LogMessage "Invoking OpenAI status monitor..." -Level INFO
+    Write-LogMessage "Action: $Action" -Level INFO
+
+    # Build Python command
+    $pythonScript = Join-Path $ScriptDir "eq12_openai_status_monitor.py"
+    $arguments = @()
+
+    switch ($Action) {
+        "CheckStatus" {
+            $arguments += @("--check-status")
+        }
+        "CheckModel" {
+            if (-not $ModelName) {
+                throw "ModelName parameter required for CheckModel action"
+            }
+            $arguments += @("--check-model", $ModelName)
+        }
+        "Summary" {
+            $arguments += @("--summary")
+        }
+        "Monitor" {
+            $arguments += @("--check-status")  # Default to status check for monitor mode
+        }
+    }
+
+    if ($OutputPath) {
+        $arguments += @("--output", $OutputPath)
+    }
+
+    try {
+        Write-LogMessage "Executing: python `"$pythonScript`" $($arguments -join ' ')" -Level DEBUG
+
+        # Run the status monitor
+        $result = & python $pythonScript @arguments 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-LogMessage "Status monitor completed successfully" -Level INFO
+            return @{
+                Success = $true
+                Output  = $result
+            }
+        } else {
+            Write-LogMessage "Status monitor failed with exit code: $LASTEXITCODE" -Level ERROR
+            foreach ($line in $result) {
+                Write-LogMessage $line -Level ERROR
+            }
+            return @{
+                Success = $false
+                Error   = $result -join "`n"
+            }
+        }
+    } catch {
+        Write-LogMessage "Failed to execute status monitor: $_" -Level ERROR
+        return @{
+            Success = $false
+            Error   = $_.Exception.Message
+        }
+    }
+}
+
+function Convert-StatusResult {
+    param([string]$JsonResult)
+
+    try {
+        $statusData = $JsonResult | ConvertFrom-Json
+
+        Write-LogMessage "=== OpenAI Service Status Summary ===" -Level INFO
+
+        if ($statusData.overall_health) {
+            $healthColor = if ($statusData.overall_health -ge 90) { "Green" } elseif ($statusData.overall_health -ge 70) { "Yellow" } else { "Red" }
+            Write-Host "Overall Health: $($statusData.overall_health)%" -ForegroundColor $healthColor
+            Write-Host "Status: $($statusData.status)" -ForegroundColor $healthColor
+        }
+
+        if ($statusData.services) {
+            Write-LogMessage "`nService Details:" -Level INFO
+            foreach ($service in $statusData.services) {
+                $statusColor = switch ($service.status) {
+                    "operational" { "Green" }
+                    "degraded_performance" { "Yellow" }
+                    "partial_outage" { "DarkYellow" }
+                    "major_outage" { "Red" }
+                    default { "White" }
+                }
+
+                Write-Host "  $($service.name): " -NoNewline
+                Write-Host $service.status -ForegroundColor $statusColor
+                if ($service.description -ne "No reported issues") {
+                    Write-Host "    Description: $($service.description)" -ForegroundColor Gray
+                }
+            }
+        }
+
+        if ($statusData.active_recommendations -and $statusData.active_recommendations.Count -gt 0) {
+            Write-LogMessage "`nEQ12 Recommendations:" -Level WARNING
+            foreach ($rec in $statusData.active_recommendations) {
+                $recData = $rec.recommendation
+                $priorityColor = switch ($rec.priority) {
+                    "critical" { "Red" }
+                    "high" { "DarkRed" }
+                    "major" { "Yellow" }
+                    "moderate" { "DarkYellow" }
+                    default { "White" }
+                }
+
+                Write-Host "  [$($rec.priority.ToUpper())] " -ForegroundColor $priorityColor -NoNewline
+                Write-Host "$($recData.action): $($recData.description)"
+                if ($recData.affected_use_cases) {
+                    Write-Host "    Affected: $($recData.affected_use_cases -join ', ')" -ForegroundColor Gray
+                }
+            }
+        }
+
+        if ($statusData.eq12_impact_assessment) {
+            Write-LogMessage "`nEQ12 Workflow Impact:" -Level INFO
+            foreach ($workflow in $statusData.eq12_impact_assessment.PSObject.Properties) {
+                $impactColor = switch ($workflow.Value) {
+                    "operational" { "Green" }
+                    "degraded" { "Yellow" }
+                    "unavailable" { "Red" }
+                    default { "White" }
+                }
+
+                Write-Host "  $($workflow.Name): " -NoNewline
+                Write-Host $workflow.Value -ForegroundColor $impactColor
+            }
+        }
+
+        return $statusData
+
+    } catch {
+        Write-LogMessage "Failed to parse status result: $_" -Level ERROR
+        return $null
+    }
+}
+
+function Start-ContinuousMonitoring {
+    param(
+        [int]$IntervalMinutes,
+        [int]$AlertThreshold
+    )
+
+    Write-LogMessage "Starting continuous monitoring (interval: $IntervalMinutes minutes, alert threshold: $AlertThreshold%)" -Level INFO
+    Write-LogMessage "Press Ctrl+C to stop monitoring" -Level INFO
+
+    $monitoringActive = $true
+
+    # Register Ctrl+C handler
+    $null = Register-EngineEvent PowerShell.Exiting -Action {
+        $script:monitoringActive = $false
+        Write-LogMessage "Monitoring stopped by user" -Level INFO
+    }
+
+    $alertsFile = Join-Path $ScriptDir "logs" "eq12_openai_alerts.json"
+    $lastAlertTime = $null
+
+    try {
+        while ($monitoringActive) {
+            $result = Invoke-StatusMonitor -Action "Summary"
+
+            if ($result.Success) {
+                $statusData = Convert-StatusResult ($result.Output -join "`n")
+
+                if ($statusData -and $statusData.overall_health -lt $AlertThreshold) {
+                    $currentTime = Get-Date
+
+                    # Only alert once per hour for the same condition
+                    if (-not $lastAlertTime -or $currentTime.Subtract($lastAlertTime).TotalMinutes -ge 60) {
+                        Write-LogMessage "ALERT: OpenAI health below threshold ($($statusData.overall_health)% < $AlertThreshold%)" -Level ERROR
+
+                        # Save alert to file
+                        $alert = @{
+                            timestamp       = $currentTime.ToString("yyyy-MM-ddTHH:mm:ssZ")
+                            health_score    = $statusData.overall_health
+                            threshold       = $AlertThreshold
+                            services        = $statusData.services | Where-Object { $_.status -ne "operational" }
+                            recommendations = $statusData.active_recommendations
+                        }
+
+                        $alert | ConvertTo-Json -Depth 5 | Add-Content -Path $alertsFile -Encoding UTF8
+                        $lastAlertTime = $currentTime
+
+                        # Could integrate with notification system here
+                        # Send-EQ12Alert -AlertData $alert
+                    }
+                }
+
+                Write-LogMessage "Next check in $IntervalMinutes minutes..." -Level DEBUG
+                Start-Sleep -Seconds ($IntervalMinutes * 60)
+            } else {
+                Write-LogMessage "Status check failed, retrying in 1 minute..." -Level WARNING
+                Start-Sleep -Seconds 60
+            }
+        }
+    } catch {
+        Write-LogMessage "Continuous monitoring error: $_" -Level ERROR
+    } finally {
+        Write-LogMessage "Continuous monitoring stopped" -Level INFO
+    }
+}
+
+function Export-StatusSummary {
+    """Export status summary for EQ12 dashboard integration"""
+
+    $summaryPath = Join-Path $ScriptDir "logs" "eq12_openai_status_summary.json"
+
+    $summary = @{
+        timestamp         = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+        action            = $Action
+        model_name        = $ModelName
+        output_path       = $OutputPath
+        log_file          = $LogFile
+        script_version    = "1.0.0"
+        monitoring_active = $Continuous.IsPresent
+    }
+
+    $summary | ConvertTo-Json -Depth 3 | Set-Content -Path $summaryPath -Encoding UTF8
+    Write-LogMessage "Status summary exported to: $summaryPath" -Level INFO
+}
+
+# Main execution
+try {
+    Write-LogMessage "=== EQ12 OpenAI Status Monitor ===" -Level INFO
+    Write-LogMessage "Action: $Action" -Level INFO
+
+    # Verify prerequisites
+    if (-not (Test-Prerequisites)) {
+        throw "Prerequisites check failed"
+    }
+
+    # Validate parameters
+    if ($Action -eq "CheckModel" -and -not $ModelName) {
+        throw "ModelName parameter is required when Action is CheckModel"
+    }
+
+    if ($Continuous -and $Action -ne "Monitor") {
+        Write-LogMessage "Continuous monitoring enabled - switching to Monitor action" -Level INFO
+        $Action = "Monitor"
+    }
+
+    # Execute monitoring
+    if ($Action -eq "Monitor" -and $Continuous) {
+        Start-ContinuousMonitoring -IntervalMinutes $IntervalMinutes -AlertThreshold $AlertThreshold
+    } else {
+        $result = Invoke-StatusMonitor -Action $Action -ModelName $ModelName -OutputPath $OutputPath
+
+        if ($result.Success) {
+            $statusData = Convert-StatusResult ($result.Output -join "`n")
+
+            if ($statusData) {
+                Write-LogMessage "Status monitoring completed successfully" -Level INFO
+
+                # Check for critical issues
+                if ($statusData.overall_health -lt 70) {
+                    Write-LogMessage "WARNING: OpenAI services experiencing significant issues" -Level WARNING
+                }
+            }
+        } else {
+            Write-LogMessage "Status monitoring failed: $($result.Error)" -Level ERROR
+            exit 1
+        }
+    }
+
+    Write-LogMessage "=== Monitoring completed ===" -Level INFO
+} catch {
+    Write-LogMessage "Critical error in status monitoring: $_" -Level ERROR
+    exit 1
+} finally {
+    # Always export summary for integration
+    Export-StatusSummary
+
+    Write-LogMessage "Session log: $LogFile" -Level INFO
+}

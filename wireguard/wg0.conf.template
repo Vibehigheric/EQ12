@@ -1,0 +1,22 @@
+[Interface]
+# EQ12 WireGuard config template - DO NOT COMMIT PRIVATE KEYS
+# Replace placeholders via templates or GitHub Secrets.
+PrivateKey = <EQ12_PRIVATE_KEY>
+Address = 10.0.0.2/24
+DNS = 1.1.1.1
+ListenPort = 51820
+
+# Optional: PostUp/Down commands (Linux)
+# PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+# PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+[Peer]
+# GitHub Runner / Codespace peer
+PublicKey = <PEER_PUBLIC_KEY>
+AllowedIPs = 10.0.0.1/32
+Endpoint = <PEER_PUBLIC_ENDPOINT>:51820
+PersistentKeepalive = 25
+
+# Notes:
+# - Never check in real private keys. Use GitHub Secrets (WG_PRIVATE_KEY / WG_PEER_CONFIG) or vaults.
+# - Adjust Address/AllowedIPs to fit your private subnet. The examples use 10.0.0.0/24.

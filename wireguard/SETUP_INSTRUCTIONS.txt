@@ -1,0 +1,39 @@
+﻿EQ12 WireGuard VPN Setup Instructions
+=====================================
+
+1. CONFIGURE YOUR VPN PROVIDER:
+   - Get your VPN provider's WireGuard configuration
+   - Replace 'YOUR_PRIVATE_KEY_HERE' with your private key
+   - Replace 'SERVER_PUBLIC_KEY_HERE' with your server's public key  
+   - Replace 'vpn.yourprovider.com:51820' with your server endpoint
+
+2. GENERATED KEYS (if applicable):
+   - Private Key: IOQ9drZ8R2U5wjEmcr7Ppg2Ckqh93sGOpHUHHwMVPE4=
+   - Public Key: 9/NWNG+i9djhNCx06OikTKJ1nBnYyy9J94JFbSJI01k=
+   - Key Files: C:\EQ12\wireguard\keys\eq12-betting.private, C:\EQ12\wireguard\keys\eq12-betting.public
+
+3. TEST THE CONNECTION:
+   PowerShell Commands:
+   `
+   # Install tunnel
+   & "C:\Program Files\WireGuard\wireguard.exe" /installtunnelservice "C:\EQ12\wireguard\eq12-betting.conf"
+   
+   # Check status
+   Get-Service -Name "WireGuardTunnel$eq12-betting"
+   
+   # Test IP
+   Invoke-RestMethod -Uri "https://ifconfig.me/ip"
+   `
+
+4. INTEGRATE WITH EQ12:
+   - Update EQ12 VPN Guard script to use config: eq12-betting
+   - Run: .\eq12_vpn_guard.ps1 -VpnConfig "eq12-betting"
+
+5. SECURITY RECOMMENDATIONS:
+   - Use 'AllowedIPs = 0.0.0.0/0' for maximum security
+   - Enable 'PersistentKeepalive = 25' for stable connections
+   - Use DNS = 1.1.1.1, 1.0.0.1 to prevent DNS leaks
+   - Test for IP/DNS leaks: https://ipleak.net/
+
+Configuration File: C:\EQ12\wireguard\eq12-betting.conf
+Generated: 2025-09-27 18:36:43 UTC

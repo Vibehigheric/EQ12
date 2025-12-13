@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: Snyk API
+  contact: {}
+  version: '1.0'
+  description: Snyk V1 API (EQ12 Patched Version)
+servers:
+  - url: https://api.snyk.io/v1
+    variables: {}
+paths:
+  /user/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Get User Details
+      description: Retrieves information about a user.
+      operationId: GetUserDetails
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the user.
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserDetailsresponse'
+      security:
+        - APIToken: []
+      deprecated: false
+  /user/me:
+    get:
+      tags:
+        - Users
+      summary: Get My Details
+      description: Retrieves information about the user making the request.
+      operationId: GetMyDetails
+      responses:
+        '200':
+          description: Current user details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetMyDetailsresponse'
+      security:
+        - APIToken: []
+      deprecated: false
+  /user/me/notification-settings/org/{orgId}:
+    get:
+      tags:
+        - Users
+      summary: Get organization notification settings
+      description: The organization notification settings for the user that will determine which emails are sent.
+      operationId: Getorganizationnotificationsettings
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the organization.
+      responses:
+        '200':
+          description: Organization notification settings retrieved successfully
+      security:
+        - APIToken: []
+      deprecated: false
+    put:
+      tags:
+        - Users
+      summary: Modify organization notification settings
+      description: The organization notification settings for the user that will determine which emails are sent.
+      operationId: Modifyorganizationnotificationsettings
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the organization.
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notificationsettingsrequest'
+        required: true
+      responses:
+        '200':
+          description: Organization notification settings updated successfully
+      security:
+        - APIToken: []
+      deprecated: false
+  /orgs:
+    get:
+      tags:
+        - Organizations
+      summary: List all the organizations a user belongs to
+      description: >-
+        Each request to Snyk has to be done in the context of a Snyk organization. If no organization is specified, the user's default organization (user is identified according to the `API_KEY`) will be used.
+        
+        Required permissions:
+        - `View Organization`
+      operationId: Listalltheorganizationsauserbelongsto        
+      responses:
+        '200':
+          description: Organizations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Listalltheorganizationsauserbelongstoresponse'
+      security:
+        - APIToken: []
+      deprecated: false
+
+components:
+  securitySchemes:
+    APIToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: API key value must be prefixed with "Token ". Example: "Authorization: Token <API_KEY>".
+  schemas:
+    GetUserDetailsresponse:
+      title: GetUserDetailsresponse
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+    GetMyDetailsresponse:
+      title: GetMyDetailsresponse
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+    Listalltheorganizationsauserbelongstoresponse:
+      title: Listalltheorganizationsauserbelongstoresponse
+      type: object
+      properties:
+        orgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Org1'
+    Org1:
+      title: Org1
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+    Notificationsettingsrequest:
+      title: Notificationsettingsrequest
+      type: object
+      properties:
+        new_issues_remediations:
+          $ref: '#/components/schemas/Newissuesnotificationsettingrequest'
+        project_imported:
+          $ref: '#/components/schemas/Simplenotificationsettingrequest'
+        test_limit:
+          $ref: '#/components/schemas/Simplenotificationsettingrequest'
+        weekly_report:
+          $ref: '#/components/schemas/Simplenotificationsettingrequest'
+    Newissuesnotificationsettingrequest:
+      title: Newissuesnotificationsettingrequest
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        issueSeverity:
+          type: string
+        issueType:
+          type: string
+    Simplenotificationsettingrequest:
+      title: Simplenotificationsettingrequest
+      type: object
+      properties:
+        enabled:
+          type: boolean
+
+security:
+  - APIToken: []
+
+tags:
+  - name: Users
+    description: For more information users and different user types see [Snyk docs](https://docs.snyk.io/introducing-snyk/snyks-core-concepts/groups-organizations-and-users#user-access-member-types).
+  - name: Organizations
+    description: For more information on organizations see [Snyk docs](https://docs.snyk.io/introducing-snyk/snyks-core-concepts/groups-organizations-and-users#snyk-organizations).

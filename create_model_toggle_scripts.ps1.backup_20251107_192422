@@ -1,0 +1,229 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+"""
+EQ12 Model Toggle Scripts
+========================
+
+PowerShell scripts for temporarily enabling conditional models with auto-revert.
+Allows safe testing of expensive/experimental models with time limits.
+"""
+
+# eq12_model_toggle.ps1
+@"
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    Temporarily enable conditional EQ12 models with auto-revert functionality
+
+.DESCRIPTION
+    This script allows temporary activation of expensive or experimental models
+    (o1, realtime, high-quality TTS, etc.) with automatic reversion after a
+    specified duration. Prevents accidental long-term usage of costly models.
+
+.PARAMETER ModelGroup
+    Group of models to enable: 'realtime', 'reasoning', 'audio-hd', 'embeddings-large', 'all-conditional'
+
+.PARAMETER Duration
+    Duration in minutes to keep models enabled (default: 60, max: 480)
+
+.PARAMETER Reason
+    Reason for enabling (required for audit trail)
+
+.PARAMETER Force
+    Skip confirmation prompts
+
+.EXAMPLE
+    .\eq12_model_toggle.ps1 -ModelGroup realtime -Duration 30 -Reason "Demo preparation"
+
+.EXAMPLE
+    .\eq12_model_toggle.ps1 -ModelGroup reasoning -Duration 120 -Reason "Complex analysis project"
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [ValidateSet('realtime', 'reasoning', 'audio-hd', 'embeddings-large', 'all-conditional')]
+    [string]$ModelGroup,
+
+    [Parameter()]
+    [ValidateRange(1, 480)]
+    [int]$Duration = 60,
+
+    [Parameter(Mandatory)]
+    [string]$Reason,
+
+    [Parameter()]
+    [switch]$Force
+)
+
+$ErrorActionPreference = "Stop"
+
+# Model group definitions
+$ModelGroups = @{
+    'realtime' = @('gpt-4o-realtime-preview-2024-12-17', 'gpt-4o-mini-realtime-preview-2024-12-17')
+    'reasoning' = @('o1', 'o1-mini', 'o1-pro', 'o3', 'o3-mini', 'o4-mini', 'o4-mini-deep-research')
+    'audio-hd' = @('tts-1-hd', 'tts-1-1106', 'tts-1-hd-1106')
+    'embeddings-large' = @('text-embedding-3-large')
+    'all-conditional' = @(
+        'tts-1-hd', 'tts-1-1106', 'tts-1-hd-1106', 'gpt-4o-mini-tts', 'gpt-4o-mini-transcribe',
+        'gpt-4o-realtime-preview-2024-12-17', 'gpt-4o-mini-realtime-preview-2024-12-17',
+        'o1', 'o1-mini', 'o1-pro', 'o3', 'o3-mini', 'o4-mini', 'o4-mini-deep-research',
+        'text-embedding-3-large', 'gpt-4o-search-preview', 'gpt-4o-mini-search-preview'
+    )
+}
+
+# Configuration
+$EnvFile = "C:\EQ12\.env"
+$BackupFile = "C:\EQ12\.env.backup.$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+$LogFile = "C:\EQ12\logs\model_toggle.log"
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "[$Timestamp] [$Level] $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry -ErrorAction SilentlyContinue
+}
+
+function Get-CurrentAllowedModels {
+    if (-not (Test-Path $EnvFile)) {
+        throw ".env file not found at $EnvFile"
+    }
+
+    $Content = Get-Content $EnvFile -Raw
+    if ($Content -match 'EQ12_ALLOWED_MODELS=([^\r\n]+)') {
+        return $Matches[1].Split(',').Trim()
+    }
+
+    throw "EQ12_ALLOWED_MODELS not found in .env file"
+}
+
+function Set-AllowedModels {
+    param([string[]]$Models)
+
+    # Backup current .env
+    Copy-Item $EnvFile $BackupFile
+    Write-Log "Backed up .env to $BackupFile"
+
+    # Update allowed models
+    $Content = Get-Content $EnvFile -Raw
+    $NewModels = ($Models -join ',')
+    $Content = $Content -replace 'EQ12_ALLOWED_MODELS=[^\r\n]+', "EQ12_ALLOWED_MODELS=$NewModels"
+
+    Set-Content $EnvFile -Value $Content -NoNewline
+    Write-Log "Updated EQ12_ALLOWED_MODELS: $NewModels"
+}
+
+function Set-TempConfig {
+    param([string[]]$TempModels, [datetime]$ExpiryTime, [string]$Reason)
+
+    # Add temp config to .env
+    $Content = Get-Content $EnvFile -Raw
+    $TempModelsStr = ($TempModels -join ',')
+    $ExpiryStr = $ExpiryTime.ToString("yyyy-MM-ddTHH:mm:ssZ")
+
+    # Remove existing temp config
+    $Content = $Content -replace 'EQ12_TEMP_ENABLED_MODELS=[^\r\n]*\r?\n?', ''
+    $Content = $Content -replace 'EQ12_TEMP_ENABLED_EXPIRY=[^\r\n]*\r?\n?', ''
+    $Content = $Content -replace 'EQ12_TEMP_ENABLED_REASON=[^\r\n]*\r?\n?', ''
+
+    # Add new temp config
+    $Content += "`nEQ12_TEMP_ENABLED_MODELS=$TempModelsStr"
+    $Content += "`nEQ12_TEMP_ENABLED_EXPIRY=$ExpiryStr"
+    $Content += "`nEQ12_TEMP_ENABLED_REASON=$Reason"
+
+    Set-Content $EnvFile -Value $Content -NoNewline
+}
+
+function Clear-TempConfig {
+    $Content = Get-Content $EnvFile -Raw
+    $Content = $Content -replace 'EQ12_TEMP_ENABLED_MODELS=[^\r\n]*\r?\n?', ''
+    $Content = $Content -replace 'EQ12_TEMP_ENABLED_EXPIRY=[^\r\n]*\r?\n?', ''
+    $Content = $Content -replace 'EQ12_TEMP_ENABLED_REASON=[^\r\n]*\r?\n?', ''
+    Set-Content $EnvFile -Value $Content -NoNewline
+}
+
+# Main execution
+try {
+    Write-Log "Starting model toggle operation: $ModelGroup for $Duration minutes"
+    Write-Log "Reason: $Reason"
+
+    # Get models to enable
+    $ModelsToEnable = $ModelGroups[$ModelGroup]
+    if (-not $ModelsToEnable) {
+        throw "Unknown model group: $ModelGroup"
+    }
+
+    # Calculate expiry time
+    $ExpiryTime = (Get-Date).AddMinutes($Duration)
+
+    # Show what will be enabled
+    Write-Host "`n🔓 MODELS TO ENABLE:" -ForegroundColor Yellow
+    $ModelsToEnable | ForEach-Object { Write-Host "  - $_" -ForegroundColor Cyan }
+    Write-Host "`n⏰ DURATION: $Duration minutes (until $($ExpiryTime.ToString('HH:mm:ss")))" -ForegroundColor Yellow
+    Write-Host "📝 REASON: $Reason" -ForegroundColor Yellow
+
+    # Cost warning
+    Write-Host "`n⚠️  COST WARNING:" -ForegroundColor Red
+    switch ($ModelGroup) {
+        'reasoning' { Write-Host "  O1/O3 models are 15-60x more expensive than gpt-4o-mini" -ForegroundColor Red }
+        'realtime' { Write-Host "  Realtime models have additional streaming costs" -ForegroundColor Red }
+        'audio-hd' { Write-Host "  HD audio models are 2-4x more expensive than standard" -ForegroundColor Red }
+        'embeddings-large' { Write-Host "  Large embeddings are 5x more expensive than small" -ForegroundColor Red }
+    }
+
+    # Confirmation
+    if (-not $Force) {
+        $Confirm = Read-Host "`nProceed with temporary model enablement? (y/N)"
+        if ($Confirm -ne 'y' -and $Confirm -ne 'Y') {
+            Write-Host "Operation cancelled by user" -ForegroundColor Yellow
+            exit 0
+        }
+    }
+
+    # Get current models
+    $CurrentModels = Get-CurrentAllowedModels
+    Write-Log "Current allowed models: $($CurrentModels -join ', ')"
+
+    # Combine current + temp models
+    $AllModels = $CurrentModels + $ModelsToEnable | Sort-Object | Get-Unique
+
+    # Update configuration
+    Set-AllowedModels -Models $AllModels
+    Set-TempConfig -TempModels $ModelsToEnable -ExpiryTime $ExpiryTime -Reason $Reason
+
+    Write-Host "`n✅ MODELS ENABLED SUCCESSFULLY" -ForegroundColor Green
+    Write-Host "Models will auto-revert at: $($ExpiryTime.ToString('yyyy-MM-dd HH:mm:ss"))" -ForegroundColor Green
+
+    # Schedule auto-revert task
+    $TaskName = "EQ12-ModelRevert-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+    $ScriptPath = "$PSScriptRoot\eq12_model_revert.ps1"
+
+    $Action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`""
+    $Trigger = New-ScheduledTaskTrigger -Once -At $ExpiryTime
+    $Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType S4U
+    $Settings = New-ScheduledTaskSettingsSet -DeleteExpiredTaskAfter (New-TimeSpan -Hours 1)
+
+    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Principal $Principal -Settings $Settings -Force | Out-Null
+
+    Write-Host "Auto-revert task scheduled: $TaskName" -ForegroundColor Green
+    Write-Log "Scheduled auto-revert task: $TaskName for $ExpiryTime"
+
+    # Show current status
+    Write-Host "`n📊 CURRENT STATUS:" -ForegroundColor Cyan
+    Write-Host "  Enabled Models: $($AllModels.Count)" -ForegroundColor White
+    Write-Host "  Temp Models: $($ModelsToEnable.Count)" -ForegroundColor White
+    Write-Host "  Expires: $Duration minutes" -ForegroundColor White
+
+}
+catch {
+    Write-Log "ERROR: $($_.Exception.Message)" -Level "ERROR"
+    Write-Host "`n❌ ERROR: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+}
+
+Write-Log "Model toggle operation completed successfully"
+"@ | Out-File -FilePath "C:\EQ12\eq12_model_toggle.ps1" -Encoding UTF8
+
+Write-Host "Created eq12_model_toggle.ps1" -ForegroundColor Green

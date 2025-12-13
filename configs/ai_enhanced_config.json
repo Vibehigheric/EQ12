@@ -1,0 +1,93 @@
+{
+    "ai_configuration": {
+        "openai_settings": {
+            "preferred_model": "gpt-4o",
+            "fallback_models": [
+                "gpt-4o",
+                "gpt-4o-mini", 
+                "o1-preview",
+                "gpt-4-turbo",
+                "gpt-4",
+                "o1-mini"
+            ],
+            "model_parameters": {
+                "gpt-4o": {
+                    "temperature": 0.7,
+                    "max_tokens": 4096,
+                    "top_p": 1.0,
+                    "presence_penalty": 0.0,
+                    "frequency_penalty": 0.0
+                },
+                "gpt-4o-mini": {
+                    "temperature": 0.7,
+                    "max_tokens": 4096,
+                    "top_p": 1.0,
+                    "presence_penalty": 0.0,
+                    "frequency_penalty": 0.0
+                },
+                "o1-preview": {
+                    "temperature": 1.0,
+                    "max_tokens": 32768,
+                    "top_p": 1.0
+                },
+                "gpt-4-turbo": {
+                    "temperature": 0.7,
+                    "max_tokens": 4096,
+                    "top_p": 1.0
+                },
+                "gpt-4": {
+                    "temperature": 0.7,
+                    "max_tokens": 4096,
+                    "top_p": 1.0
+                },
+                "o1-mini": {
+                    "temperature": 1.0,
+                    "max_tokens": 65536,
+                    "top_p": 1.0
+                }
+            }
+        },
+        "classification_settings": {
+            "confidence_thresholds": {
+                "high_confidence": 0.85,
+                "medium_confidence": 0.65,
+                "low_confidence": 0.4,
+                "auto_apply_threshold": 0.9
+            },
+            "enhanced_prompting": true,
+            "context_aware_classification": true,
+            "multi_model_consensus": false
+        },
+        "content_processing": {
+            "max_content_length": 2000,
+            "enable_content_summarization": true,
+            "extract_key_features": true,
+            "analyze_url_structure": true
+        }
+    },
+    "performance_settings": {
+        "enable_model_caching": true,
+        "cache_duration_minutes": 60,
+        "concurrent_api_calls": 3,
+        "retry_attempts": 2,
+        "timeout_seconds": 30
+    },
+    "advanced_features": {
+        "enable_gpt5_reasoning": true,
+        "use_system_prompts": true,
+        "enable_chain_of_thought": true,
+        "context_preservation": true,
+        "adaptive_temperature": false
+    },
+    "environment_variables": {
+        "required": [
+            "OPENAI_API_KEY"
+        ],
+        "optional": [
+            "EQ12_OPENAI_MODEL",
+            "EQ12_AI_LOG_LEVEL",
+            "EQ12_ENABLE_ADVANCED_AI",
+            "ANTHROPIC_API_KEY"
+        ]
+    }
+}

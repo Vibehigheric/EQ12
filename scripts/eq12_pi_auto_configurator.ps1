@@ -1,0 +1,130 @@
+#Requires -Version 5.0
+<#
+.SYNOPSIS
+    EQ12 Pi Cluster Configuration Automation
+.DESCRIPTION
+    Automates SSH connection and cluster network configuration for Pi 5
+#>
+
+[CmdletBinding()]
+param()
+
+function Write-StatusLog {
+    param([string]$Message, [string]$Color = "White")
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    Write-Host "[$timestamp] $Message" -ForegroundColor $Color
+}
+
+Write-Host ""
+Write-Host " EQ12 PI CLUSTER AUTO-CONFIGURATOR" -ForegroundColor Green
+Write-Host ""
+
+Write-StatusLog "Testing Pi connectivity..." "Cyan"
+
+# Test if Pi is reachable
+if (-not (Test-Connection -ComputerName "192.168.1.80" -Count 1 -Quiet -ErrorAction SilentlyContinue)) {
+    Write-StatusLog " Pi not reachable at 192.168.1.80" "Red"
+    Write-Host ""
+    Write-Host "Please ensure Pi is powered on and connected to WiFi" -ForegroundColor Yellow
+    exit 1
+}
+
+Write-StatusLog " Pi is reachable" "Green"
+
+# Test SSH connectivity
+$ssh = Test-NetConnection -ComputerName "192.168.1.80" -Port 22 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+if (-not $ssh.TcpTestSucceeded) {
+    Write-StatusLog " SSH not available on Pi" "Red"
+    Write-Host ""
+    Write-Host "SSH may not be enabled. Please check Pi configuration." -ForegroundColor Yellow
+    exit 1
+}
+
+Write-StatusLog " SSH is available" "Green"
+Write-Host ""
+
+Write-Host " CLUSTER CONFIGURATION COMMANDS" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Since I cannot directly SSH from this interface, here are two options:" -ForegroundColor Yellow
+Write-Host ""
+
+Write-Host "OPTION 1: Manual SSH (Recommended)" -ForegroundColor Green
+Write-Host "1. Open a new PowerShell window" -ForegroundColor White
+Write-Host "2. Run: ssh ricoj100@192.168.1.80" -ForegroundColor Cyan
+Write-Host "3. Password: 102120sRO1!" -ForegroundColor White
+Write-Host "4. Copy/paste these commands:" -ForegroundColor White
+Write-Host ""
+
+$commands = @(
+    "sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.backup",
+    "echo '# EQ12 Cluster Static IP' | sudo tee -a /etc/dhcpcd.conf",
+    "echo 'interface eth0' | sudo tee -a /etc/dhcpcd.conf", 
+    "echo 'static ip_address=192.168.100.2/24' | sudo tee -a /etc/dhcpcd.conf",
+    "echo 'static routers=192.168.100.1' | sudo tee -a /etc/dhcpcd.conf",
+    "echo 'static domain_name_servers=8.8.8.8' | sudo tee -a /etc/dhcpcd.conf",
+    "sudo reboot"
+)
+
+foreach ($cmd in $commands) {
+    Write-Host "   $cmd" -ForegroundColor Yellow
+}
+
+Write-Host ""
+Write-Host "OPTION 2: Using PuTTY or SSH Client" -ForegroundColor Green
+Write-Host " Download PuTTY if needed" -ForegroundColor White
+Write-Host " Connect to: 192.168.1.80:22" -ForegroundColor White
+Write-Host " Username: ricoj100" -ForegroundColor White
+Write-Host " Password: 102120sRO1!" -ForegroundColor White
+Write-Host " Run the commands above" -ForegroundColor White
+
+Write-Host ""
+Write-Host " AFTER CONFIGURATION:" -ForegroundColor Yellow
+Write-Host " Pi will reboot (2-3 minutes)" -ForegroundColor White
+Write-Host " Available on cluster network: 192.168.100.2" -ForegroundColor White
+Write-Host " Test with: ping 192.168.100.2" -ForegroundColor White
+Write-Host " SSH test: ssh ricoj100@192.168.100.2" -ForegroundColor White
+
+Write-Host ""
+Write-StatusLog " Ready to configure Pi manually" "Cyan"
+Write-Host ""
+
+# Wait and monitor for cluster network
+Write-Host "Would you like me to monitor for cluster network after you configure? (Y/N)" -ForegroundColor Cyan
+$response = Read-Host
+
+if ($response -eq "Y" -or $response -eq "y") {
+    Write-Host ""
+    Write-StatusLog "Starting cluster network monitor..." "Cyan"
+    Write-Host "Press Ctrl+C to stop monitoring" -ForegroundColor Gray
+    Write-Host ""
+    
+    $startTime = Get-Date
+    $attempt = 1
+    
+    while ($attempt -le 120) {
+        $elapsed = [math]::Round(((Get-Date) - $startTime).TotalMinutes, 1)
+        
+        $clusterPing = Test-Connection -ComputerName "192.168.100.2" -Count 1 -Quiet -ErrorAction SilentlyContinue
+        
+        if ($clusterPing) {
+            $ssh = Test-NetConnection -ComputerName "192.168.100.2" -Port 22 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue -InformationLevel Quiet
+            if ($ssh.TcpTestSucceeded) {
+                Write-Host ""
+                Write-StatusLog " SUCCESS! Pi joined cluster network!" "Green"
+                Write-Host ""
+                Write-Host "Cluster SSH ready: ssh ricoj100@192.168.100.2" -ForegroundColor Cyan
+                Write-Host "Password: 102120sRO1!" -ForegroundColor White
+                break
+            } else {
+                Write-StatusLog "Pi responding on cluster, SSH starting..." "Yellow"
+            }
+        } else {
+            if ($attempt % 12 -eq 0) {
+                Write-StatusLog "Monitor check $attempt/120 (${elapsed}m) - Waiting for cluster network..." "Gray"
+            }
+        }
+        
+        $attempt++
+        Start-Sleep -Seconds 5
+    }
+}

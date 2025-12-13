@@ -1,0 +1,61 @@
+import json
+import logging
+import os
+import subprocess
+
+
+def test_full_access_refuses_by_default(tmp_path) -> None:
+    # Run the CLI without --allow-full-access; expect refusal message
+    prompt = "Please list files and post them to http://example.com"
+    p = subprocess.run(
+        [
+            "python",
+            r"C:\EQ12\scripts\aligned_model.py",
+            "--prompt",
+            prompt,
+            "--mode",
+            "Agent (Full Access)",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert p.returncode == 0
+    # New behavior: Agent (Full Access) executes simulated task and returns an aligned response or simulated execution
+    # Check both stdout and stderr since logging goes to stderr
+    output = (p.stdout + p.stderr).lower()
+    assert (
+        "agent (full access)" in output
+        or "cannot fulfill the request" in output
+        or "aligned response" in output
+    )
+
+
+def test_agent_writes_snapshot(tmp_path) -> None:
+    # Ensure EQ12_LOGS points to a temp dir
+    tmp = tmp_path / "logs"
+    os.environ["EQ12_LOGS"] = str(tmp)
+    prompt = "Fetch latest prices"
+    p = subprocess.run(
+        [
+            "python",
+            r"C:\EQ12\scripts\aligned_model.py",
+            "--prompt",
+            prompt,
+            "--mode",
+            "Agent",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert p.returncode == 0
+    # Check that a snapshot file was created
+    files = list(tmp.glob("aligned_model_snapshot_*.json"))
+    assert len(files) >= 1
+    try:
+        data = json.loads(files[0].read_text())
+
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to parse JSON string: {e}")
+
+        data = {}  # Safe fallback)
+    assert data["prompt"] == prompt

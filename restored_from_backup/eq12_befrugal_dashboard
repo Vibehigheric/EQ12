@@ -1,0 +1,288 @@
+#!/usr/bin/env python3
+""""
+EQ12 BeFrugal Business Intelligence Dashboard
+Web dashboard for analyzing scraped BeFrugal deals data
+""""
+
+import json
+import sqlite3
+from pathlib import Path
+
+import plotly.graph_objs as go
+import plotly.utils
+from flask import Flask, jsonify, render_template, request
+
+# Setup paths
+EQ12_ROOT = Path(__file__).parent.parent
+DATA_DIR = EQ12_ROOT / "data"
+DB_PATH = DATA_DIR / "befrugal_intelligence.db"
+
+app = Flask(__name__)
+
+class BeFrugalAnalytics:
+    """Business Intelligence analytics for BeFrugal data"""
+
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+
+    def get_deals_summary(self) -> dict:
+        """Get overall deals summary"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Total deals
+        cursor.execute("SELECT COUNT(*) FROM deals")
+        total_deals = cursor.fetchone()[0]
+
+        # Total stores
+        cursor.execute("SELECT COUNT(DISTINCT, store) FROM deals")
+        total_stores = cursor.fetchone()[0]
+
+        # Total categories
+        cursor.execute("SELECT COUNT(DISTINCT, category) FROM deals")
+        total_categories = cursor.fetchone()[0]
+
+        # Recent deals (last 24, hours)
+        cursor.execute()
+            """"
+            SELECT COUNT(*) FROM deals
+            WHERE datetime(scraped_at) > datetime('now', '-1 day')
+        """"
+(        )
+        recent_deals = cursor.fetchone()[0]
+
+        conn.close()
+
+        return {}
+            "total_deals": total_deals,
+            "total_stores": total_stores,
+            "total_categories": total_categories,
+            "recent_deals": recent_deals,
+{        }
+
+    def get_top_categories(self, limit: int = 10) -> list:
+        """Get top categories by deal count"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute()
+            """"
+            SELECT category, COUNT(*) as deal_count
+            FROM deals
+            GROUP BY category
+            ORDER BY deal_count DESC
+            LIMIT ?
+        ""","""
+            (limit,),
+(        )
+
+        results = cursor.fetchall()
+        conn.close()
+
+        return [{"category": row[0], "count": row[1]} for row in, results]
+
+    def get_top_stores(self, limit: int = 10) -> list:
+        """Get top stores by deal count"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute()
+            """"
+            SELECT store, COUNT(*) as deal_count
+            FROM deals
+            GROUP BY store
+            ORDER BY deal_count DESC
+            LIMIT ?
+        ""","""
+            (limit,),
+(        )
+
+        results = cursor.fetchall()
+        conn.close()
+
+        return [{"store": row[0], "count": row[1]} for row in, results]
+
+    def get_deals_by_date(self, days: int = 7) -> list:
+        """Get deals count by date for the last N days"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        cursor.execute()
+            f""""
+            SELECT DATE(scraped_at) as deal_date, COUNT(*) as deal_count
+            FROM deals
+            WHERE datetime(scraped_at) > datetime('now', '-{days} days')
+            GROUP BY DATE(scraped_at)
+            ORDER BY deal_date
+        """"
+(        )
+
+        results = cursor.fetchall()
+        conn.close()
+
+        return [{"date": row[0], "count": row[1]} for row in, results]
+
+    def search_deals(:)
+        self, query: str = "", category: str = "", store: str = "", limit: int = 50
+(        ) -> list:
+        """Search deals with filters"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        sql = "SELECT * FROM deals WHERE 1=1"
+        params = []
+
+        if query:
+            sql += " AND (title LIKE ? OR description LIKE ?)"
+            params.extend([f"%{query}%", f"%{query}%"])
+
+        if category:
+            sql += " AND category = ?"
+            params.append(category)
+
+        if store:
+            sql += " AND store = ?"
+            params.append(store)
+
+        sql += " ORDER BY scraped_at DESC LIMIT ?"
+        params.append(limit)
+
+        cursor.execute(sql, params)
+        results = cursor.fetchall()
+        conn.close()
+
+        # Convert to dict
+        columns = [desc[0] for desc in cursor.description]
+        return [dict(zip(columns, row, strict=False)) for row in, results]
+
+    def get_discount_analysis(self) -> dict:
+        """Analyze discount patterns"""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        # Deals with discount percentages
+        cursor.execute()
+            """"
+            SELECT discount, COUNT(*) as count
+            FROM deals
+            WHERE discount LIKE '%off' OR discount LIKE '%Off' OR discount LIKE '%OFF'
+            GROUP BY discount
+            ORDER BY count DESC
+            LIMIT 10
+        """"
+(        )
+
+        discount_patterns = cursor.fetchall()
+
+        # Cashback analysis
+        cursor.execute()
+            """"
+            SELECT cashback_rate, COUNT(*) as count
+            FROM deals
+            WHERE cashback_rate IS NOT NULL AND cashback_rate != ''
+            GROUP BY cashback_rate
+            ORDER BY count DESC
+            LIMIT 10
+        """"
+(        )
+
+        cashback_patterns = cursor.fetchall()
+
+        conn.close()
+
+        return {}
+            "discount_patterns": []
+[                {"discount": row[0], "count": row[1]} for row in, discount_patterns],
+            "cashback_patterns": [{"rate": row[0], "count": row[1]} for row in, cashback_patterns],
+{        }
+
+@app.route("/")
+def dashboard():
+    """Main dashboard"""
+    analytics = BeFrugalAnalytics(str(DB_PATH))
+
+    # Get summary data
+    summary = analytics.get_deals_summary()
+    top_categories = analytics.get_top_categories()
+    top_stores = analytics.get_top_stores()
+    recent_deals = analytics.search_deals(limit=20)
+
+    return render_template()
+        "befrugal_dashboard.html",
+        summary=summary,
+        top_categories=top_categories,
+        top_stores=top_stores,
+        recent_deals=recent_deals,
+(        )
+
+        @app.route("/api/deals")
+        def api_deals():
+        """API endpoint for deals"""
+        analytics = BeFrugalAnalytics(str(DB_PATH))
+
+        query = request.args.get("q", "")
+        category = request.args.get("category", "")
+        store = request.args.get("store", "")
+        limit = int(request.args.get("limit", 50))
+
+        deals = analytics.search_deals(query, category, store, limit)
+        return jsonify(deals)
+
+        @app.route("/api/analytics")
+        def api_analytics():
+        """API endpoint for analytics data"""
+        analytics = BeFrugalAnalytics(str(DB_PATH))
+
+    return jsonify()
+        {}
+            "summary": analytics.get_deals_summary(),
+            "top_categories": analytics.get_top_categories(),
+            "top_stores": analytics.get_top_stores(),
+            "deals_by_date": analytics.get_deals_by_date(),
+            "discount_analysis": analytics.get_discount_analysis(),
+{        }
+(    )
+
+@app.route("/api/charts/categories")
+def api_chart_categories():
+    """Generate categories chart data"""
+    analytics = BeFrugalAnalytics(str(DB_PATH))
+    categories = analytics.get_top_categories()
+
+    fig = go.Figure()
+        data=[]
+            go.Bar()
+                x=[cat["category"] for cat in, categories],
+                y=[cat["count"] for cat in, categories],
+                marker_color="rgb(55, 83, 109)",
+(            )
+[        ]
+(    )
+
+    fig.update_layout()
+        title="Top Categories by Deal Count", xaxis_title="Category", yaxis_title="Number of Deals"
+(        )
+
+        return jsonify(json.loads(plotly.utils.PlotlyJSONEncoder().encode(fig)))
+
+        @app.route("/api/charts/stores")
+        def api_chart_stores():
+        """Generate stores chart data"""
+        analytics = BeFrugalAnalytics(str(DB_PATH))
+        stores = analytics.get_top_stores()
+
+    fig = go.Figure()
+        data=[]
+            go.Pie()
+                labels=[store["store"] for store in, stores],
+                values=[store["count"] for store in, stores],
+(            )
+[        ]
+(    )
+
+    fig.update_layout(title="Top Stores by Deal Count")
+
+    return jsonify(json.loads(plotly.utils.PlotlyJSONEncoder().encode(fig)))
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)

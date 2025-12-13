@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 EQ12 Network Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .metric-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .metric-status {
+            text-align: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        
+        .status-connected {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status-disconnected {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status-warning {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .interface-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .interface-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .interface-item:last-child {
+            border-bottom: none;
+        }
+        
+        .interface-name {
+            font-weight: 600;
+        }
+        
+        .interface-status {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+        
+        .performance-history {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .history-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9em;
+        }
+        
+        .history-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .timestamp {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .alert-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .alert-item {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .alert-critical {
+            background: rgba(244, 67, 54, 0.2);
+            border-left-color: #f44336;
+        }
+        
+        .alert-warning {
+            background: rgba(255, 152, 0, 0.2);
+            border-left-color: #ff9800;
+        }
+        
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 EQ12 Network Monitoring Dashboard</h1>
+            <p>Real-time UGREEN CM648 Performance Monitoring</p>
+        </div>
+        
+        <div class="refresh-indicator pulse">
+            🔄 Auto-refresh: 30s
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-title">🌐 Internet Connection</div>
+                <div class="metric-value" style="color: #4CAF50;">
+                    ✅
+                </div>
+                <div class="metric-status status-connected">
+                    Connected
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">⚡ Network Latency</div>
+                <div class="metric-value" style="color: #4CAF50;">
+                    30ms
+                </div>
+                <div class="metric-status status-connected">
+                    Good
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">📡 Active Interfaces</div>
+                <div class="metric-value">
+                    3
+                </div>
+                <div class="metric-status status-connected">
+                    Networks Active
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">💻 CPU Usage</div>
+                <div class="metric-value" style="color: #4CAF50;">
+                    41.6%
+                </div>
+                <div class="metric-status status-connected">
+                    Normal
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">🧠 Memory Usage</div>
+                <div class="metric-value" style="color: #f44336;">
+                    82.6%
+                </div>
+                <div class="metric-status status-warning">
+                    High
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-title">📊 Monitoring Status</div>
+                <div class="metric-value" style="color: #4CAF50;">
+                    ✅
+                </div>
+                <div class="metric-status status-connected">
+                    Active
+                </div>
+            </div>
+        </div>
+        
+        <div class="interface-list">
+            <h2 style="margin-bottom: 20px; text-align: center;">📡 Network Interfaces</h2>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Ethernet</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 0 bytes | 
+                        Received: 0 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-disconnected">
+                    Inactive
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Ethernet 2</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 0 bytes | 
+                        Received: 0 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-disconnected">
+                    Inactive
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Ethernet 3</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 0 bytes | 
+                        Received: 0 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-disconnected">
+                    Inactive
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">MozillaVPN</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 1,010,301,952 bytes | 
+                        Received: 2,432,724,300 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-connected">
+                    Active (4294 Mbps)
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Local Area Connection* 8</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 0 bytes | 
+                        Received: 0 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-disconnected">
+                    Inactive
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Local Area Connection* 9</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 0 bytes | 
+                        Received: 0 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-disconnected">
+                    Inactive
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Wi-Fi</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 252,191,202 bytes | 
+                        Received: 627,402,442 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-connected">
+                    Active (301 Mbps)
+                </div>
+            </div>
+
+            <div class="interface-item">
+                <div>
+                    <div class="interface-name">Loopback Pseudo-Interface 1</div>
+                    <div style="font-size: 0.8em; opacity: 0.8;">
+                        Sent: 0 bytes | 
+                        Received: 0 bytes
+                    </div>
+                </div>
+                <div class="interface-status status-connected">
+                    Active (1073 Mbps)
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="performance-history">
+            <h2 style="margin-bottom: 20px; text-align: center;">📈 Recent Performance History</h2>
+
+            <div class="history-entry">
+                <span>14:26:32</span>
+                <span>Status: Connected</span>
+                <span>Latency: 30ms</span>
+            </div>
+
+            <div class="history-entry">
+                <span>14:26:01</span>
+                <span>Status: Connected</span>
+                <span>Latency: 27ms</span>
+            </div>
+
+            <div class="history-entry">
+                <span>14:25:30</span>
+                <span>Status: Connected</span>
+                <span>Latency: 81ms</span>
+            </div>
+
+            <div class="history-entry">
+                <span>14:24:59</span>
+                <span>Status: Connected</span>
+                <span>Latency: 29ms</span>
+            </div>
+
+        </div>
+        
+        <div class="timestamp">
+            📅 Last Updated: 2025-11-07 14:26:32 | 🔄 Monitoring: Active | 🌐 UGREEN CM648 Status: Connected
+        </div>
+    </div>
+    
+    <script>
+        // Auto-refresh functionality
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+        
+        // Add visual feedback on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.metric-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.5s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

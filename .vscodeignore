@@ -1,0 +1,55 @@
+# VS Code Ignore - Prevents indexing of heavy/junk folders
+
+# Browser Extension Contamination
+profiles/
+Extensions/
+*.crx
+*.asar
+*.pak
+
+# Virtual Environments
+envs/
+.venv_new/
+.venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node Modules
+node_modules/
+
+# Data Directories
+data/
+datasets/
+large_datasets/
+
+# Logs
+logs/
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Build Artifacts
+dist/
+build/
+*.egg-info/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary Files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

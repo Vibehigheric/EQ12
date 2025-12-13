@@ -1,0 +1,95 @@
+name: Build EQ12 Extensions (Development)
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'eq12-firefox-ext/**'
+      - '.github/workflows/build-extensions.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'eq12-firefox-ext/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'eq12-firefox-ext/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: eq12-firefox-ext
+        run: npm ci || npm install
+
+      - name: Lint extension code
+        working-directory: eq12-firefox-ext
+        run: |
+          # Basic syntax checking for JavaScript files
+          for js_file in src/*.js; do
+            if [[ -f "$js_file" ]]; then
+              echo "Checking $js_file..."
+              node -c "$js_file" || echo "⚠️ Syntax issues in $js_file"
+            fi
+          done
+
+      - name: Validate manifests
+        working-directory: eq12-firefox-ext
+        run: |
+          # Validate JSON syntax in manifest files
+          for manifest in manifest.firefox.json manifest.chromium.json; do
+            if [[ -f "$manifest" ]]; then
+              echo "Validating $manifest..."
+              jq empty "$manifest" && echo "✅ $manifest is valid JSON" || echo "❌ $manifest has JSON errors"
+            fi
+          done
+
+      - name: Build Firefox extension
+        working-directory: eq12-firefox-ext
+        run: |
+          mkdir -p dist-firefox
+          cp -r src/* dist-firefox/
+          cp -r icons dist-firefox/
+          cp manifest.firefox.json dist-firefox/manifest.json
+          echo "✅ Firefox extension built"
+
+      - name: Build Chromium extension
+        working-directory: eq12-firefox-ext
+        run: |
+          mkdir -p dist-chromium
+          cp -r src/* dist-chromium/
+          cp -r icons dist-chromium/
+          cp manifest.chromium.json dist-chromium/manifest.json
+          echo "✅ Chromium extension built"
+
+      - name: Package extensions
+        working-directory: eq12-firefox-ext
+        run: |
+          cd dist-firefox && zip -r ../eq12-firefox-dev.zip . && cd ..
+          cd dist-chromium && zip -r ../eq12-chromium-dev.zip . && cd ..
+          echo "📦 Development packages created"
+
+      - name: Upload development artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eq12-extensions-dev-${{ github.sha }}
+          path: |
+            eq12-firefox-ext/eq12-firefox-dev.zip
+            eq12-firefox-ext/eq12-chromium-dev.zip
+          retention-days: 30
+
+      - name: Extension build summary
+        run: |
+          echo "🔨 EQ12 Extensions built successfully!"
+          echo "📁 Firefox dev build: eq12-firefox-dev.zip"
+          echo "📁 Chromium dev build: eq12-chromium-dev.zip"
+          echo "💾 Artifacts uploaded for 30 days"

@@ -1,0 +1,32 @@
+{
+  "EQC": {
+    "symbol": "EQC",
+    "contract_address": "0x1234567890123456789012345678901234567890",
+    "decimals": 18,
+    "token_type": "erc20",
+    "network": "polygon",
+    "price_usd": 1.0,
+    "min_balance": 1.0,
+    "enabled": true
+  },
+  "USDC": {
+    "symbol": "USDC",
+    "contract_address": "0xA0b86a33E6417c32F2EC0ba965BAe70B5C88b12e",
+    "decimals": 6,
+    "token_type": "stable",
+    "network": "polygon",
+    "price_usd": 1.0,
+    "min_balance": 5.0,
+    "enabled": true
+  },
+  "MATIC": {
+    "symbol": "MATIC",
+    "contract_address": "",
+    "decimals": 18,
+    "token_type": "native",
+    "network": "polygon",
+    "price_usd": 0.5,
+    "min_balance": 10.0,
+    "enabled": true
+  }
+}

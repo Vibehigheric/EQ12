@@ -1,0 +1,120 @@
+{
+  "name": "EQ12 Betting Engine V1.5",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hours": 10
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/eq12/betting_engine_v1/src/ingest.py"
+      },
+      "name": "Ingest Odds",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "python3 /opt/eq12/betting_engine_v1/src/gpt_analyzer.py"
+      },
+      "name": "Analyze with GPT",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "filePath": "/opt/eq12/logs/gpt_picks.json"
+      },
+      "name": "Read Picks",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{$env.TELEGRAM_CHAT_ID}}",
+        "text": "=💰 **Daily Picks** 💰\n\n🧠 **Smart Money**: {{$json[\"smart_money\"][\"pick\"]}} @ {{$json[\"smart_money\"][\"odds\"]}}\nReason: {{$json[\"smart_money\"][\"reasoning\"]}}\n\n🔒 **Safe Money**: {{$json[\"safe_money\"][\"pick\"]}} @ {{$json[\"safe_money\"][\"odds\"]}}\nReason: {{$json[\"safe_money\"][\"reasoning\"]}}",
+        "additionalFields": {}
+      },
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Ingest Odds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ingest Odds": {
+      "main": [
+        [
+          {
+            "node": "Analyze with GPT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze with GPT": {
+      "main": [
+        [
+          {
+            "node": "Read Picks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Picks": {
+      "main": [
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

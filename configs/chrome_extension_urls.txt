@@ -1,0 +1,31 @@
+# EQ12 GODSTACK - Chrome Extensions Installation URLs
+
+## Security & Privacy
+- uBlock Origin: https://chrome.google.com/webstore/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm
+- Privacy Badger: https://chrome.google.com/webstore/detail/privacy-badger/pkehgijcmpdhfbdbbnkijodmdjhbjlgp
+- Ghostery: https://chrome.google.com/webstore/detail/ghostery/mlomiejdfkolichcflejclcbmpeaniij
+
+## Development Tools
+- Refined GitHub: https://chrome.google.com/webstore/detail/refined-github/hlepfoohegkhhmjieoechaddaejaokhf
+- Octotree: https://chrome.google.com/webstore/detail/octotree/bkhaagjahfmjljalopjnoealnfndnagc
+- GitHub Isometric Contributions: https://chrome.google.com/webstore/detail/github-isometric-contributions/mjoedlfflcchnleknnceiplgaeoegien
+- React Developer Tools: https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi
+- Vue.js devtools: https://chrome.google.com/webstore/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd
+
+## Productivity & Management
+- Tab Session Manager: https://chrome.google.com/webstore/detail/tab-session-manager/iaiomicjabeggjcfkbimgmglanimpnae
+- OneTab: https://chrome.google.com/webstore/detail/onetab/chphlpgkkbolifaimnlloiipkdnihall
+- The Great Suspender: https://chrome.google.com/webstore/detail/the-great-suspender/jaekigmcljkkalnicnjoafgfjoefkpeg
+- Momentum: https://chrome.google.com/webstore/detail/momentum/laookkfknpbbblfpciffpaejjkokdgca
+
+## API & Testing Tools
+- Postman: https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop
+- JSON Viewer: https://chrome.google.com/webstore/detail/json-viewer/gbmdgpbipfallnflgajpaliibnhdgobh
+- REST Client: https://chrome.google.com/webstore/detail/rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb
+- GraphQL Network Inspector: https://chrome.google.com/webstore/detail/graphql-network-inspector/ndlbedplllcgconngcnfmkadhokfaaln
+
+## Monitoring & Analytics
+- Lighthouse: https://chrome.google.com/webstore/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk
+- Web Developer: https://chrome.google.com/webstore/detail/web-developer/bfbameneiokkgbdmiekhjnmfkcnldhhm
+- Page load time: https://chrome.google.com/webstore/detail/page-load-time/fploionmjgeclbkemipmkogoaohcdbig
+

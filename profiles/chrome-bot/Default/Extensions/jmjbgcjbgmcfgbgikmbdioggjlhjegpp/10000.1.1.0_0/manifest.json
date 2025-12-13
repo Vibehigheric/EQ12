@@ -1,0 +1,73 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "badges/normal/Icon128.png",
+         "16": "badges/normal/Icon16.png",
+         "48": "badges/normal/Icon48.png"
+      },
+      "default_popup": "popup/dist/index.html",
+      "default_title": "ScreenClip"
+   },
+   "background": {
+      "service_worker": "sw/index.js",
+      "type": "module"
+   },
+   "commands": {
+      "_execute_action": {
+         "suggested_key": {
+            "default": "Alt+S",
+            "mac": "Alt+S"
+         }
+      },
+      "capture-area-command": {
+         "description": "Clipping Tool",
+         "suggested_key": {
+            "default": "Alt+C",
+            "mac": "Alt+C"
+         }
+      },
+      "capture-page-command": {
+         "description": "Full page",
+         "suggested_key": {
+            "default": "Alt+P",
+            "mac": "Alt+F"
+         }
+      },
+      "capture-tab-command": {
+         "description": "Visible area",
+         "suggested_key": {
+            "default": "Alt+V",
+            "mac": "Alt+V"
+         }
+      }
+   },
+   "content_scripts": [ {
+      "css": [ "insides/permanent/outside.css" ],
+      "js": [ "insides/permanent/browser-polyfill.min.js", "insides/content/content.js" ],
+      "matches": [ "\u003Call_urls>" ],
+      "run_at": "document_start"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "description": "Take screenshots, add annotations & comments",
+   "externally_connectable": {
+      "matches": [ "*://*.screenclip.com/*", "https://screen.link/*", "*://*.screenclip-website-test.firebaseapp.com/*", "http://localhost:5000/*", "http://localhost:5005/*", "http://localhost:5006/*", "https://screen-link-test.web.app/*", "*://screenclip-website-test.firebaseapp.com/*" ]
+   },
+   "host_permissions": [ "*://*/*" ],
+   "icons": {
+      "128": "badges/normal/Icon128.png",
+      "16": "badges/normal/Icon16.png",
+      "48": "badges/normal/Icon48.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzJouyhcVeFm6jF6g/ZR0tQkmR3mTeC3o++fkGqvJviO4Zyp1+o7BeUkWjP9pEoo40YtjO1WHD8ZrVCpU4Fzz7+2zb0mcMMdvclPow1GV/uqtNdbXh7YgvZq3T9Ry5ARHHke55IZhgHA7W8QdK3d4NuWS634UOyCLqrGCLJJzgSQIDAQAB",
+   "manifest_version": 3,
+   "name": "ScreenClip - Screenshot, Comment & Annotate",
+   "permissions": [ "cookies", "storage", "activeTab", "tabs", "notifications", "clipboardWrite", "unlimitedStorage", "scripting" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "10000.1.1.0",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "insides/*", "imgcopy.html" ]
+   } ]
+}

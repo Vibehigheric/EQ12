@@ -1,0 +1,47 @@
+{
+    "name": "eq12-root",
+    "private": true,
+    "scripts": {
+        "prepare": "husky install",
+        "commitlint": "commitlint --edit $1",
+        "lint:commits": "commitlint --from=HEAD~1 --to=HEAD --verbose",
+        "changelog": "git-cliff --config cliff.toml > CHANGELOG.md",
+        "changelog:latest": "git-cliff --config cliff.toml --latest --strip header",
+        "release:prepare": "npm run changelog && git add CHANGELOG.md",
+        "odds:demo": "node eq12_node_odds_client.js",
+        "odds:nfl": "node -e \"const EQ12Client = require('./eq12_node_odds_client.js'); const client = new EQ12Client(); client.getNFLAnalysis().catch(console.error);\"",
+        "odds:arbitrage": "node -e \"const EQ12Client = require('./eq12_node_odds_client.js'); const client = new EQ12Client(); client.findArbitrageOpportunities().catch(console.error);\"",
+        "odds:sports": "node -e \"const EQ12Client = require('./eq12_node_odds_client.js'); const client = new EQ12Client(); client.getSports().catch(console.error);\"",
+        "odds:props": "node -e \"const EQ12Client = require('./eq12_node_odds_client.js'); const client = new EQ12Client(); client.getPlayerProps().catch(console.error);\""
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^18.0.0",
+        "@commitlint/config-conventional": "^18.0.0",
+        "husky": "^8.0.3",
+        "nodemon": "^3.0.1",
+        "jest": "^29.7.0",
+        "@types/node": "^20.8.0"
+    },
+    "commitlint": {
+        "extends": [
+            "@commitlint/config-conventional"
+        ]
+    },
+    "dependencies": {
+        "express": "^5.1.0",
+        "axios": "^1.12.0",
+        "dotenv": "^16.3.1",
+        "winston": "^3.11.0",
+        "moment": "^2.29.4",
+        "lodash": "^4.17.21"
+    },
+    "engines": {
+        "node": ">=18.18.0",
+        "npm": ">=8.0.0"
+    },
+    "workspaces": [
+        "server",
+        "eq12-firefox-ext",
+        "extensions/*"
+    ]
+}

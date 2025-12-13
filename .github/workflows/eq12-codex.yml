@@ -1,0 +1,39 @@
+name: EQ12 Codex check
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  codex-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Codex CLI (if available)
+        run: |
+          npm install -g @openai/codex || echo "Codex CLI not available or install failed; skipping"
+
+      - name: Run Codex dry-run
+        env:
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+        run: |
+          if command -v codex >/dev/null 2>&1; then
+            codex --dry-run 'run pytest -q' || true
+          else
+            echo 'codex CLI not installed; skipping codex checks'
+          fi
+
+      - name: Upload Codex output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-output
+          path: |
+            codex-output.txt

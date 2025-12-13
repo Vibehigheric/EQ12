@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <RootNamespace>EQ12.ChatGPT.InlineRefactor</RootNamespace>
+    <AssemblyName>EQ12.ChatGPT.InlineRefactor</AssemblyName>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+
+    <!-- Added to use modern C# features (nullable annotations require C# 8+) -->
+    <LangVersion>8.0</LangVersion>
+    <!-- Prevent MSBuild from generating AssemblyInfo attributes when you already provide them -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- pin to versions that were resolved in the restore log -->
+    <PackageReference Include="Community.VisualStudio.Toolkit" Version="17.0.76.309" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.10.40171" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.9.3168" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="Microsoft.VisualBasic" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="**\*.cs" Exclude="obj\**;bin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- stop compiling any source AssemblyInfo files if MSBuild also generates attributes -->
+    <Compile Remove="**\AssemblyInfo.cs" />
+  </ItemGroup>
+</Project>
+

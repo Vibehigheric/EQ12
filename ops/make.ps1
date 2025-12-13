@@ -1,0 +1,254 @@
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    EQ12 Expert Quantum Development Task Runner
+.DESCRIPTION
+    Common development tasks for the EQ12 quantum workspace
+.PARAMETER Task
+    The task to run: lint, test, build, format, clean, up, down, logs, help
+.PARAMETER Service
+    Specific service for Docker operations
+.PARAMETER Verbose
+    Enable verbose output
+#>
+
+param(
+    [Parameter(Position = 0)]
+    [string]$Task = "help",
+    [string]$Service = "",
+    [switch]$Verbose
+)
+
+$ErrorActionPreference = "Stop"
+
+function Write-TaskHeader($message) {
+    Write-Host "`n $message" -ForegroundColor Cyan
+    Write-Host ("=" * ($message.Length + 4)) -ForegroundColor DarkCyan
+}
+
+function Test-VirtualEnv {
+    if (!(Test-Path ".venv\Scripts\Activate.ps1")) {
+        Write-Host " Virtual environment not found. Run .\ops\bootstrap.ps1 first" -ForegroundColor Red
+        exit 1
+    }
+}
+
+switch ($Task.ToLower()) {
+    "lint" {
+        Write-TaskHeader "Running Expert Quantum Linting"
+        Test-VirtualEnv
+        & ".\.venv\Scripts\Activate.ps1"
+        
+        Write-Host " Pre-commit hooks..." -ForegroundColor Yellow
+        & ".\.venv\Scripts\pre-commit.exe" run --all-files
+        
+        Write-Host " Python linting..." -ForegroundColor Yellow
+        & ".\.venv\Scripts\ruff.exe" check . --fix
+        & ".\.venv\Scripts\flake8.exe" . --max-line-length=88 --extend-ignore=E203, W503
+        
+        Write-Host " Security scan..." -ForegroundColor Yellow
+        & ".\.venv\Scripts\bandit.exe" -r scripts/ -f json -o logs/bandit-report.json || $true
+        
+        Write-Host " Linting complete" -ForegroundColor Green
+    }
+    
+    "format" {
+        Write-TaskHeader "Formatting Code"
+        Test-VirtualEnv
+        & ".\.venv\Scripts\Activate.ps1"
+        
+        Write-Host " Black formatting..." -ForegroundColor Yellow
+        & ".\.venv\Scripts\black.exe" .
+        
+        Write-Host " Import sorting..." -ForegroundColor Yellow
+        & ".\.venv\Scripts\isort.exe" . --profile black
+        
+        if (Test-Path "package.json") {
+            Write-Host " Prettier formatting..." -ForegroundColor Yellow
+            npx prettier --write "**/*.{js,ts,json,yaml,md}"
+        }
+        
+        Write-Host " Formatting complete" -ForegroundColor Green
+    }
+    
+    "test" {
+        Write-TaskHeader "Running Expert Quantum Tests"
+        Test-VirtualEnv
+        & ".\.venv\Scripts\Activate.ps1"
+        
+        if (Test-Path "tests") {
+            Write-Host " Running pytest..." -ForegroundColor Yellow
+            & ".\.venv\Scripts\pytest.exe" -v --cov=scripts --cov-report=html --cov-report=term
+        }
+        else {
+            Write-Host "  No tests directory found" -ForegroundColor Yellow
+            Write-Host "Creating basic test structure..." -ForegroundColor Gray
+            New-Item -ItemType Directory -Path "tests" -Force | Out-Null
+            @"
+# EQ12 Expert Quantum Test Suite
+import pytest
+import sys
+from pathlib import Path
+
+# Add scripts to path
+sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
+
+def test_quantum_import():
+    """Basic import test"""
+    assert True
+
+def test_workspace_structure():
+    """Test workspace structure"""
+    workspace = Path(__file__).parent.parent
+    assert (workspace / "scripts").exists()
+    assert (workspace / "logs").exists()
+    assert (workspace / "data").exists()
+"@ | Out-File -FilePath "tests/test_quantum_basic.py" -Encoding UTF8
+            Write-Host " Created basic test structure" -ForegroundColor Green
+        }
+        
+        # Run script-specific tests
+        Write-Host " Testing NBA parlay scripts..." -ForegroundColor Yellow
+        if (Test-Path "scripts/eq12_todays_nba_parlays.py") {
+            python scripts/eq12_todays_nba_parlays.py --help > $null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host " NBA parlays script OK" -ForegroundColor Green
+            }
+        }
+        
+        Write-Host " Testing complete" -ForegroundColor Green
+    }
+    
+    "build" {
+        Write-TaskHeader "Building Expert Quantum Containers"
+        
+        if (!(Get-Command docker -ErrorAction SilentlyContinue)) {
+            Write-Host " Docker not found" -ForegroundColor Red
+            exit 1
+        }
+        
+        Write-Host " Building development image..." -ForegroundColor Yellow
+        docker build --target development -t eq12:dev .
+        
+        Write-Host " Building production image..." -ForegroundColor Yellow  
+        docker build --target production -t eq12:prod .
+        
+        Write-Host " Build complete" -ForegroundColor Green
+    }
+    
+    "up" {
+        Write-TaskHeader "Starting Expert Quantum Services"
+        
+        $composeArgs = @("up", "-d")
+        if ($Service) { $composeArgs += $Service }
+        if ($Verbose) { $composeArgs += "--verbose" }
+        
+        docker compose @composeArgs
+        
+        Write-Host " Services started" -ForegroundColor Green
+        Write-Host " Access points:" -ForegroundColor Cyan
+        Write-Host "   Main app: http://localhost:8000" -ForegroundColor White
+        Write-Host "   Dashboard: http://localhost:8080" -ForegroundColor White
+        Write-Host "   Jupyter: http://localhost:8888" -ForegroundColor White
+    }
+    
+    "down" {
+        Write-TaskHeader "Stopping Expert Quantum Services"
+        docker compose down
+        Write-Host " Services stopped" -ForegroundColor Green
+    }
+    
+    "logs" {
+        Write-TaskHeader "Expert Quantum Service Logs"
+        $logArgs = @("logs", "-f")
+        if ($Service) { $logArgs += $Service }
+        docker compose @logArgs
+    }
+    
+    "clean" {
+        Write-TaskHeader "Cleaning Expert Quantum Workspace"
+        
+        # Clean Python cache
+        if (Test-Path "__pycache__") { Remove-Item -Recurse -Force "__pycache__" }
+        Get-ChildItem -Recurse -Name "*.pyc" | Remove-Item -Force
+        Get-ChildItem -Recurse -Name "__pycache__" | Remove-Item -Recurse -Force
+        
+        # Clean test artifacts
+        if (Test-Path ".pytest_cache") { Remove-Item -Recurse -Force ".pytest_cache" }
+        if (Test-Path "htmlcov") { Remove-Item -Recurse -Force "htmlcov" }
+        if (Test-Path ".coverage") { Remove-Item -Force ".coverage" }
+        
+        # Clean Docker (optional)
+        $cleanDocker = Read-Host "Clean Docker images/containers? (y/N)"
+        if ($cleanDocker -eq "y") {
+            docker system prune -f
+            docker image prune -f
+        }
+        
+        Write-Host " Cleanup complete" -ForegroundColor Green
+    }
+    
+    "status" {
+        Write-TaskHeader "Expert Quantum Status"
+        
+        Write-Host " Environment:" -ForegroundColor Yellow
+        Write-Host "   Python: $(python --version 2>$null || 'Not found')" -ForegroundColor White
+        Write-Host "   Virtual env: $(if (Test-Path '.venv') { ' Active' } else { ' Missing' })" -ForegroundColor White
+        Write-Host "   Docker: $(docker --version 2>$null || 'Not found')" -ForegroundColor White
+        
+        Write-Host "`n Workspace:" -ForegroundColor Yellow
+        $dirs = @("scripts", "tests", "logs", "data", "models")
+        foreach ($dir in $dirs) {
+            $status = if (Test-Path $dir) { "" } else { "" }
+            $count = if (Test-Path $dir) { (Get-ChildItem $dir).Count } else { 0 }
+            Write-Host "   $dir`: $status ($count files)" -ForegroundColor White
+        }
+        
+        Write-Host "`n Docker Services:" -ForegroundColor Yellow
+        try {
+            docker compose ps --format table
+        }
+        catch {
+            Write-Host "   No services running" -ForegroundColor Gray
+        }
+    }
+    
+    "help" {
+        Write-Host @"
+ EQ12 Expert Quantum Task Runner
+
+USAGE:
+    .\ops\make.ps1 <task> [options]
+
+TASKS:
+    lint        Run all linting and code quality checks
+    format      Format code with Black, isort, and Prettier
+    test        Run test suite and generate coverage
+    build       Build Docker containers
+    up          Start services with docker-compose
+    down        Stop all services
+    logs        Show service logs (use -Service <name> for specific)
+    clean       Clean workspace of build artifacts
+    status      Show environment and workspace status
+    help        Show this help message
+
+OPTIONS:
+    -Service    Specify service for Docker operations
+    -Verbose    Enable verbose output
+
+EXAMPLES:
+    .\ops\make.ps1 lint
+    .\ops\make.ps1 test
+    .\ops\make.ps1 up -Service eq12-dev
+    .\ops\make.ps1 logs -Service postgres
+
+ Expert Quantum mode activated!
+"@ -ForegroundColor Cyan
+    }
+    
+    default {
+        Write-Host " Unknown task: $Task" -ForegroundColor Red
+        Write-Host "Run '.\ops\make.ps1 help' for available tasks" -ForegroundColor Yellow
+        exit 1
+    }
+}

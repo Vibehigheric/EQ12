@@ -1,0 +1,72 @@
+[
+  {
+    "message_type": "alert",
+    "priority": "critical",
+    "target_chats": [
+      "admin"
+    ],
+    "conditions": null,
+    "rate_limit": 0,
+    "token_threshold": 0.0,
+    "access_level": 0
+  },
+  {
+    "message_type": "system",
+    "priority": "high",
+    "target_chats": [
+      "admin"
+    ],
+    "conditions": null,
+    "rate_limit": 0,
+    "token_threshold": 0.0,
+    "access_level": 0
+  },
+  {
+    "message_type": "financial",
+    "priority": "high",
+    "target_chats": [
+      "admin",
+      "vip"
+    ],
+    "conditions": null,
+    "rate_limit": 0,
+    "token_threshold": 10.0,
+    "access_level": 1
+  },
+  {
+    "message_type": "betting",
+    "priority": "medium",
+    "target_chats": [
+      "admin",
+      "subscriber"
+    ],
+    "conditions": null,
+    "rate_limit": 0,
+    "token_threshold": 1.0,
+    "access_level": 1
+  },
+  {
+    "message_type": "ai",
+    "priority": "low",
+    "target_chats": [
+      "admin",
+      "subscriber"
+    ],
+    "conditions": null,
+    "rate_limit": 0,
+    "token_threshold": 0.0,
+    "access_level": 0
+  },
+  {
+    "message_type": "broadcast",
+    "priority": "medium",
+    "target_chats": [
+      "channel",
+      "group"
+    ],
+    "conditions": null,
+    "rate_limit": 5,
+    "token_threshold": 0.0,
+    "access_level": 0
+  }
+]

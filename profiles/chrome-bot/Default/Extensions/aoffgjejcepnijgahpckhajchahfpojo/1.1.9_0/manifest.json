@@ -1,0 +1,20 @@
+{
+   "background": {
+      "scripts": [ "eventPage.js" ]
+   },
+   "content_scripts": [ {
+      "exclude_globs": [  ],
+      "exclude_matches": [  ],
+      "include_globs": [ "https://worker.mturk.com", "https://worker.mturk.com/*", "https://www.mturk.com/mturk/preview\\?*", "https://www.mturk.com/mturk/previewandaccept\\?*", "https://www.mturk.com/mturk/continue\\?*", "https://www.mturk.com/mturk/accept\\?*", "https://www.mturk.com/mturk/submit", "https://www.mturk.com/mturk/return*", "https://workersandbox.mturk.com/mturk/preview\\?*", "https://workersandbox.mturk.com/mturk/previewandaccept\\?*", "https://workersandbox.mturk.com/mturk/continue\\?*", "https://workersandbox.mturk.com/mturk/accept\\?*", "https://workersandbox.mturk.com/mturk/submit", "https://workersandbox.mturk.com/mturk/return*" ],
+      "js": [ "script.js" ],
+      "matches": [ "http://*/*", "https://*/*" ],
+      "run_at": "document_idle"
+   } ],
+   "converted_from_user_script": true,
+   "description": "Productivity tools for Amazon.com's website mturk.com (Mechanical Turk). Adds a menu with various tools for workers.",
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCzmHnzjlAXbN+Ue3ahWe2/jOvIU8Ra34MmFBTWomNrv7vLBtxBFv4wy06mIWylfPZeKYAmr5/U6WO+JVwsPb1qaLn9PRPbxf2Dq25YuUsjXjiTtP0tXMOBqAUR/2Ddtbk1E9tXdRNT8NWAX4CRDsR36LdxuZeNh8AXd4Hx46IcjwIDAQAB",
+   "manifest_version": 2,
+   "name": "Tools for Amazon's Mechanical Turk",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.1.9"
+}

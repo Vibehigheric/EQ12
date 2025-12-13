@@ -1,0 +1,5 @@
+Create a civil service career optimization system that:
+- Tracks job openings across government agencies
+- Analyzes qualification requirements and application deadlines
+- Generates tailored resumes and cover letters
+- Provides exam preparation schedules and study materials

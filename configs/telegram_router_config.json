@@ -1,0 +1,43 @@
+{
+  "global_rate_limit": 30,
+  "retry_attempts": 3,
+  "retry_delay": 60,
+  "queue_max_size": 1000,
+  "token_verification": {
+    "enabled": false,
+    "contract_address": "",
+    "required_balance": 1.0
+  },
+  "message_types": {
+    "alert": {
+      "enabled": true,
+      "default_priority": "high"
+    },
+    "system": {
+      "enabled": true,
+      "default_priority": "medium"
+    },
+    "financial": {
+      "enabled": true,
+      "default_priority": "high"
+    },
+    "betting": {
+      "enabled": true,
+      "default_priority": "medium"
+    },
+    "ai": {
+      "enabled": true,
+      "default_priority": "low"
+    },
+    "notification": {
+      "enabled": true,
+      "default_priority": "low"
+    }
+  },
+  "webhook_integration": {
+    "enabled": false,
+    "port": 8443,
+    "ssl_cert": "",
+    "ssl_key": ""
+  }
+}

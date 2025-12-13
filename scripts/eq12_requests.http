@@ -1,0 +1,358 @@
+# EQ12 OpenAI Playground REST Client Workflow
+# Use with VS Code REST Client extension for quick testing
+# Press Ctrl+Alt+R (or Cmd+Alt+R) on any request to run it
+
+# Set up variables for all requests
+@baseUrl = https://api.openai.com/v1
+@apiKey = {{$processEnv OPENAI_API_KEY}}
+@model = gpt-5
+@temperature = 0.2
+
+###############################################################################
+# 1) EQ12 Parlay Architect - Main parlay builder
+###############################################################################
+
+# @name parlay_architect
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"moneyline\",\"selection\":\"Kansas City Chiefs\",\"odds\":-110,\"model_prob\":0.55,\"ev\":0.089},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Green Bay Packers -6.5\",\"odds\":-108,\"point\":-6.5,\"model_prob\":0.58,\"ev\":0.092,\"hook_flag\":true},{\"book\":\"BetMGM\",\"game_id\":\"nfl_20251005_cowboys_giants\",\"market\":\"total\",\"selection\":\"Over 47.5\",\"odds\":102,\"point\":47.5,\"model_prob\":0.52,\"ev\":0.076,\"hook_flag\":true}]"
+    }
+  }
+}
+
+###############################################################################
+# 2) EQ12 Hooks Specialist - Spreads/totals with half-point hooks only
+###############################################################################
+
+# @name hooks_specialist
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "medium"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_spread_hooks_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "6",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"spread\",\"selection\":\"Kansas City Chiefs -3.5\",\"odds\":-110,\"point\":-3.5,\"model_prob\":0.55,\"ev\":0.089,\"hook_flag\":true},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Green Bay Packers -6.5\",\"odds\":-108,\"point\":-6.5,\"model_prob\":0.58,\"ev\":0.092,\"hook_flag\":true},{\"book\":\"BetMGM\",\"game_id\":\"nfl_20251005_cowboys_giants\",\"market\":\"total\",\"selection\":\"Over 47.5\",\"odds\":102,\"point\":47.5,\"model_prob\":0.52,\"ev\":0.076,\"hook_flag\":true}]"
+    }
+  }
+}
+
+###############################################################################
+# 3) EQ12 Alert Copy Generator - Telegram/Slack one-liners
+###############################################################################
+
+# @name alert_copy
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": 0.3,
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_alert_copy_v1",
+    "version": "current",
+    "variables": {
+      "book": "DraftKings",
+      "team_or_market": "Chiefs vs Bills",
+      "selection": "Chiefs -3.5",
+      "odds": "-110",
+      "ev_pct": "8.2%",
+      "kelly": "45",
+      "kickoff_local": "4:25p EST",
+      "why": "model loves hook"
+    }
+  }
+}
+
+###############################################################################
+# 4) What-If Scenarios - Test different correlation/EV thresholds
+###############################################################################
+
+# @name whatif_tight_correlation
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.12",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"moneyline\",\"selection\":\"Kansas City Chiefs\",\"odds\":-165,\"model_prob\":0.62,\"ev\":0.081},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"total\",\"selection\":\"Over 51.5\",\"odds\":-110,\"point\":51.5,\"model_prob\":0.57,\"ev\":0.073,\"hook_flag\":true},{\"book\":\"BetMGM\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Chicago Bears +7.0\",\"odds\":110,\"point\":7.0,\"model_prob\":0.51,\"ev\":0.067}]"
+    }
+  }
+}
+
+# @name whatif_raise_ev_floor
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.08",
+      "min_ev": "0.12",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_ravens_steelers\",\"market\":\"spread\",\"selection\":\"Baltimore Ravens -1.5\",\"odds\":105,\"point\":-1.5,\"model_prob\":0.58,\"ev\":0.121,\"hook_flag\":true},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_dolphins_jets\",\"market\":\"moneyline\",\"selection\":\"Miami Dolphins\",\"odds\":145,\"model_prob\":0.48,\"ev\":0.076},{\"book\":\"BetMGM\",\"game_id\":\"nfl_20251005_rams_49ers\",\"market\":\"total\",\"selection\":\"Under 44.5\",\"odds\":108,\"point\":44.5,\"model_prob\":0.54,\"ev\":0.089,\"hook_flag\":true}]"
+    }
+  }
+}
+
+###############################################################################
+# 5) Adversarial Tests - Validate constraint enforcement
+###############################################################################
+
+# @name adversarial_bad_books
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "medium"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"Caesars\",\"game_id\":\"nfl_20251005_test\",\"market\":\"moneyline\",\"selection\":\"Team A\",\"odds\":-110,\"model_prob\":0.60,\"ev\":0.15},{\"book\":\"PointsBet\",\"game_id\":\"nfl_20251005_test2\",\"market\":\"spread\",\"selection\":\"Team B +3\",\"odds\":-105,\"model_prob\":0.58,\"ev\":0.12},{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"spread\",\"selection\":\"Kansas City Chiefs -3.5\",\"odds\":-110,\"point\":-3.5,\"model_prob\":0.55,\"ev\":0.089,\"hook_flag\":true}]"
+    }
+  }
+}
+
+###############################################################################
+# 6) Model Sensitivity Tests - Shifted probabilities
+###############################################################################
+
+# @name model_sensitivity_plus_2pct
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"moneyline\",\"selection\":\"Kansas City Chiefs\",\"odds\":-110,\"model_prob\":0.57,\"ev\":0.109},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Green Bay Packers -6.5\",\"odds\":-108,\"point\":-6.5,\"model_prob\":0.60,\"ev\":0.112,\"hook_flag\":true},{\"book\":\"BetMGM\",\"game_id\":\"nfl_20251005_cowboys_giants\",\"market\":\"total\",\"selection\":\"Over 47.5\",\"odds\":102,\"point\":47.5,\"model_prob\":0.54,\"ev\":0.096,\"hook_flag\":true}]"
+    }
+  }
+}
+
+# @name model_sensitivity_minus_2pct
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"moneyline\",\"selection\":\"Kansas City Chiefs\",\"odds\":-110,\"model_prob\":0.53,\"ev\":0.069},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Green Bay Packers -6.5\",\"odds\":-108,\"point\":-6.5,\"model_prob\":0.56,\"ev\":0.072,\"hook_flag\":true},{\"book\":\"BetMGM\",\"game_id\":\"nfl_20251005_cowboys_giants\",\"market\":\"total\",\"selection\":\"Over 47.5\",\"odds\":102,\"point\":47.5,\"model_prob\":0.50,\"ev\":0.056,\"hook_flag\":true}]"
+    }
+  }
+}
+
+###############################################################################
+# 7) Deterministic Tests - Same seed for reproducibility
+###############################################################################
+
+# @name deterministic_run_1
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": 0.0,
+  "seed": 12345,
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "4",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"spread\",\"selection\":\"Kansas City Chiefs -3.5\",\"odds\":-110,\"point\":-3.5,\"model_prob\":0.55,\"ev\":0.089,\"hook_flag\":true},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Green Bay Packers -6.5\",\"odds\":-108,\"point\":-6.5,\"model_prob\":0.58,\"ev\":0.092,\"hook_flag\":true}]"
+    }
+  }
+}
+
+# @name deterministic_run_2
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": 0.0,
+  "seed": 12345,
+  "reasoning": {
+    "effort": "low"
+  },
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "4",
+      "corr": "0.08",
+      "min_ev": "0.08",
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"game_id\":\"nfl_20251005_chiefs_bills\",\"market\":\"spread\",\"selection\":\"Kansas City Chiefs -3.5\",\"odds\":-110,\"point\":-3.5,\"model_prob\":0.55,\"ev\":0.089,\"hook_flag\":true},{\"book\":\"FanDuel\",\"game_id\":\"nfl_20251005_packers_bears\",\"market\":\"spread\",\"selection\":\"Green Bay Packers -6.5\",\"odds\":-108,\"point\":-6.5,\"model_prob\":0.58,\"ev\":0.092,\"hook_flag\":true}]"
+    }
+  }
+}
+
+###############################################################################
+# 8) Quick Test Datasets for Exercise
+###############################################################################
+
+# Hooks Pack - All half-point spreads/totals
+# @name test_hooks_pack
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "prompt": {
+    "id": "pmpt_eq12_spread_hooks_v1", 
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "6",
+      "corr": "0.08",
+      "min_ev": "0.08", 
+      "bankroll": "1000",
+      "legs_json": "[{\"book\":\"DraftKings\",\"market\":\"spread\",\"selection\":\"Team A -2.5\",\"odds\":-110,\"point\":-2.5,\"hook_flag\":true,\"ev\":0.089},{\"book\":\"FanDuel\",\"market\":\"spread\",\"selection\":\"Team B +3.5\",\"odds\":-105,\"point\":3.5,\"hook_flag\":true,\"ev\":0.092},{\"book\":\"BetMGM\",\"market\":\"total\",\"selection\":\"Over 47.5\",\"odds\":102,\"point\":47.5,\"hook_flag\":true,\"ev\":0.076}]"
+    }
+  }
+}
+
+# Edge EV Pack - Mix of moderate and high EV
+# @name test_edge_ev_pack  
+POST {{baseUrl}}/responses
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "temperature": {{temperature}},
+  "prompt": {
+    "id": "pmpt_eq12_build_parlay_v1",
+    "version": "current",
+    "variables": {
+      "allowed_books": "DraftKings,FanDuel,BetMGM",
+      "max_legs": "8",
+      "corr": "0.08",
+      "min_ev": "0.07",
+      "bankroll": "1000", 
+      "legs_json": "[{\"book\":\"DraftKings\",\"market\":\"spread\",\"selection\":\"Team A -1.5\",\"odds\":105,\"ev\":0.121},{\"book\":\"FanDuel\",\"market\":\"moneyline\",\"selection\":\"Team B\",\"odds\":145,\"ev\":0.076},{\"book\":\"BetMGM\",\"market\":\"total\",\"selection\":\"Under 44.5\",\"odds\":108,\"ev\":0.089}]"
+    }
+  }
+}
+
+###############################################################################
+# Instructions for Use:
+#
+# 1. Install "REST Client" extension in VS Code
+# 2. Set OPENAI_API_KEY environment variable
+# 3. Click "Send Request" above any ### request
+# 4. Compare results across different scenarios
+# 5. Use seed for reproducible testing
+# 6. Adjust temperature (0.0-1.0) and reasoning effort (low/medium/high)
+#
+# Pro Tips:
+# - Use Ctrl+Alt+R to run requests quickly
+# - Save responses as .json files for comparison
+# - Test constraint enforcement with adversarial examples
+# - Validate hooks specialist only selects half-point spreads/totals
+###############################################################################

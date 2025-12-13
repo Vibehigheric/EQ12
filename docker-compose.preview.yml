@@ -1,0 +1,341 @@
+# Docker Compose for EQ12 Preview Environment
+
+version: '3.8'
+
+networks:
+  eq12-preview:
+    driver: bridge
+    name: eq12-preview-net
+
+volumes:
+  preview-data:
+    name: eq12-preview-data
+  preview-logs:
+    name: eq12-preview-logs
+
+services:
+  # Core Dashboard Service
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+      args:
+        - ENVIRONMENT=preview
+        - BUILD_MODE=development
+    container_name: eq12-preview-dashboard
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=preview
+      - PREVIEW_MODE=true
+      - API_BASE_URL=http://api:5000
+      - WEBHOOK_URL=http://webhook:8080
+      - LOG_LEVEL=debug
+      - DISABLE_ANALYTICS=true
+      - MOCK_DATA_MODE=true
+    volumes:
+      - preview-logs:/app/logs
+      - ./configs:/app/configs:ro
+    networks:
+      - eq12-preview
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      - "eq12.service=dashboard"
+      - "eq12.environment=preview"
+      - "eq12.stack=core"
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+      args:
+        - ENVIRONMENT=preview
+        - ENABLE_MOCK_DATA=true
+    container_name: eq12-preview-api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - PREVIEW_MODE=true
+      - DATABASE_URL=sqlite:///preview.db
+      - REDIS_URL=redis://redis:6379/0
+      - LOG_LEVEL=debug
+      - RATE_LIMIT_ENABLED=false
+      - MOCK_EXTERNAL_APIS=true
+    volumes:
+      - preview-data:/app/data
+      - preview-logs:/app/logs
+      - ./configs:/app/configs:ro
+    networks:
+      - eq12-preview
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      - "eq12.service=api"
+      - "eq12.environment=preview"
+      - "eq12.stack=core"
+
+  # Webhook Testing Service
+  webhook:
+    build:
+      context: .
+      dockerfile: Dockerfile.webhook
+      args:
+        - ENVIRONMENT=preview
+    container_name: eq12-preview-webhook
+    ports:
+      - "8080:8080"
+    environment:
+      - WEBHOOK_ENV=preview
+      - LOG_ALL_REQUESTS=true
+      - STORE_PAYLOADS=true
+      - MAX_PAYLOAD_SIZE=10MB
+      - ENABLE_MOCK_RESPONSES=true
+    volumes:
+      - preview-data:/app/webhooks
+      - preview-logs:/app/logs
+    networks:
+      - eq12-preview
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    labels:
+      - "eq12.service=webhook"
+      - "eq12.environment=preview"
+      - "eq12.stack=core"
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    container_name: eq12-preview-redis
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=preview123
+    command: redis-server --requirepass preview123 --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - preview-data:/data
+    networks:
+      - eq12-preview
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "preview123", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    labels:
+      - "eq12.service=redis"
+      - "eq12.environment=preview"
+      - "eq12.stack=infrastructure"
+
+  # Monitoring and Metrics (lightweight for preview)
+  metrics:
+    image: prom/prometheus:latest
+    container_name: eq12-preview-metrics
+    ports:
+      - "9090:9090"
+    environment:
+      - PROMETHEUS_RETENTION_TIME=1h
+      - PROMETHEUS_STORAGE_RETENTION_SIZE=100MB
+    volumes:
+      - ./configs/prometheus-preview.yml:/etc/prometheus/prometheus.yml:ro
+      - preview-data:/prometheus
+    networks:
+      - eq12-preview
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=1h'
+      - '--storage.tsdb.retention.size=100MB'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    labels:
+      - "eq12.service=metrics"
+      - "eq12.environment=preview"
+      - "eq12.stack=monitoring"
+
+  # Log aggregation for preview debugging
+  logs:
+    image: grafana/loki:latest
+    container_name: eq12-preview-logs
+    ports:
+      - "3100:3100"
+    environment:
+      - LOKI_CONFIG_FILE=/etc/loki/local-config.yaml
+    volumes:
+      - ./configs/loki-preview.yml:/etc/loki/local-config.yaml:ro
+      - preview-logs:/loki
+    networks:
+      - eq12-preview
+    command: -config.file=/etc/loki/local-config.yaml
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    labels:
+      - "eq12.service=logs"
+      - "eq12.environment=preview"
+      - "eq12.stack=monitoring"
+
+# Optional Business Stack Services (only enabled for specific tests)
+  # Betting Stack (Mock)
+  betting-mock:
+    build:
+      context: .
+      dockerfile: Dockerfile.betting-mock
+    container_name: eq12-preview-betting
+    ports:
+      - "8001:8000"
+    environment:
+      - MOCK_MODE=true
+      - ODDS_API_KEY=mock_key_preview
+      - PREVIEW_MODE=true
+    profiles:
+      - betting
+      - all
+    volumes:
+      - preview-logs:/app/logs
+    networks:
+      - eq12-preview
+    labels:
+      - "eq12.service=betting"
+      - "eq12.environment=preview"
+      - "eq12.stack=betting"
+
+  # Cannabis Stack (Mock)
+  cannabis-mock:
+    build:
+      context: .
+      dockerfile: Dockerfile.cannabis-mock
+    container_name: eq12-preview-cannabis
+    ports:
+      - "8002:8000"
+    environment:
+      - MOCK_MODE=true
+      - PREVIEW_MODE=true
+      - COMPLIANCE_CHECK=disabled
+    profiles:
+      - cannabis
+      - all
+    volumes:
+      - preview-logs:/app/logs
+    networks:
+      - eq12-preview
+    labels:
+      - "eq12.service=cannabis"
+      - "eq12.environment=preview"
+      - "eq12.stack=cannabis"
+
+  # Credit/Financial Stack (Mock - Extra Security)
+  credit-mock:
+    build:
+      context: .
+      dockerfile: Dockerfile.credit-mock
+    container_name: eq12-preview-credit
+    ports:
+      - "8003:8000"
+    environment:
+      - MOCK_MODE=true
+      - PREVIEW_MODE=true
+      - ENCRYPTION_DISABLED=true
+      - NO_REAL_DATA=true
+      - FAKE_CREDIT_DATA=true
+    profiles:
+      - credit
+      - all
+    volumes:
+      - preview-logs:/app/logs
+    networks:
+      - eq12-preview
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,size=100m
+    labels:
+      - "eq12.service=credit"
+      - "eq12.environment=preview"
+      - "eq12.stack=credit"
+      - "eq12.security=high"
+
+  # Analytics Stack (Limited)
+  analytics-mock:
+    build:
+      context: .
+      dockerfile: Dockerfile.analytics-mock
+    container_name: eq12-preview-analytics
+    ports:
+      - "8004:8000"
+    environment:
+      - MOCK_MODE=true
+      - PREVIEW_MODE=true
+      - SAMPLE_DATA_ONLY=true
+      - NO_EXTERNAL_APIS=true
+    profiles:
+      - analytics
+      - all
+    volumes:
+      - preview-logs:/app/logs
+    networks:
+      - eq12-preview
+    labels:
+      - "eq12.service=analytics"
+      - "eq12.environment=preview"
+      - "eq12.stack=analytics"
+
+# Preview Environment Health Check Service
+  healthcheck:
+    build:
+      context: .
+      dockerfile: Dockerfile.healthcheck
+    container_name: eq12-preview-healthcheck
+    ports:
+      - "8999:8000"
+    environment:
+      - ENVIRONMENT=preview
+      - CHECK_INTERVAL=30
+      - SERVICES=dashboard,api,webhook,redis,metrics,logs
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - preview-logs:/app/logs
+    networks:
+      - eq12-preview
+    depends_on:
+      - dashboard
+      - api
+      - webhook
+      - redis
+    restart: unless-stopped
+    labels:
+      - "eq12.service=healthcheck"
+      - "eq12.environment=preview"
+      - "eq12.stack=monitoring"

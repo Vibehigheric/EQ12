@@ -1,0 +1,31 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EQ12.Core
+</name>
+</assembly>
+<members>
+<member name="T:EQ12.Core.EQ12.Core.BankrollSnapshot">
+ <summary>Represents a bankroll snapshot at a point in time</summary>
+</member>
+<member name="T:EQ12.Core.EQ12.Core.BankrollManager">
+ <summary>Full-featured bankroll manager with transaction history and analytics</summary>
+</member>
+<member name="T:EQ12.Core.EQ12.Core.Transaction">
+ <summary>Transaction record for bankroll tracking</summary>
+</member>
+<member name="T:EQ12.Core.EQ12.Core.PerformanceMetrics">
+ <summary>Performance metrics calculator</summary>
+</member>
+<member name="T:EQ12.Core.EQ12.Core.IEQ12Logger">
+ <summary>Core logger interface for diagnostic output</summary>
+</member>
+<member name="T:EQ12.Core.EQ12.Core.EQ12Config">
+ <summary>Environment configuration holder</summary>
+</member>
+<member name="T:EQ12.Core.EQ12.Core.DatabaseConnection">
+ <summary>Simple database connection info holder</summary>
+</member>
+</members>
+</doc>

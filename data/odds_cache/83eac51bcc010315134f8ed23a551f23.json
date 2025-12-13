@@ -1,0 +1,3389 @@
+{
+  "sport": "icehockey_nhl",
+  "markets": [
+    "h2h",
+    "spreads",
+    "totals"
+  ],
+  "games": [
+    {
+      "id": "b2af0a6a7130800ba6a208d5ba0fbd91",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-08T23:10:00Z",
+      "home_team": "Toronto Maple Leafs",
+      "away_team": "Montréal Canadiens",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Montréal Canadiens",
+                  "price": 145
+                },
+                {
+                  "name": "Toronto Maple Leafs",
+                  "price": -175
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Montréal Canadiens",
+                  "price": -175,
+                  "point": 1.5
+                },
+                {
+                  "name": "Toronto Maple Leafs",
+                  "price": 145,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -135,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 114,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Montréal Canadiens",
+                  "price": -160,
+                  "point": 1.5
+                },
+                {
+                  "name": "Toronto Maple Leafs",
+                  "price": 135,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Montréal Canadiens",
+                  "price": 140
+                },
+                {
+                  "name": "Toronto Maple Leafs",
+                  "price": -170
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Montréal Canadiens",
+                  "price": -180,
+                  "point": 1.5
+                },
+                {
+                  "name": "Toronto Maple Leafs",
+                  "price": 146,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 116,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -142,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Montréal Canadiens": {
+            "price": 145,
+            "bookmaker": "draftkings"
+          },
+          "Toronto Maple Leafs": {
+            "price": -170,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Montréal Canadiens": {
+            "price": -160,
+            "bookmaker": "betmgm"
+          },
+          "Toronto Maple Leafs": {
+            "price": 146,
+            "bookmaker": "fanduel"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 116,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": 114,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "056e75fd47aeb5419ee5bd1a72e08bcd",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-08T23:40:00Z",
+      "home_team": "Washington Capitals",
+      "away_team": "Boston Bruins",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": 154
+                },
+                {
+                  "name": "Washington Capitals",
+                  "price": -185
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": -170,
+                  "point": 1.5
+                },
+                {
+                  "name": "Washington Capitals",
+                  "price": 142,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -112,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": -108,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": -160,
+                  "point": 1.5
+                },
+                {
+                  "name": "Washington Capitals",
+                  "price": 135,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": 155
+                },
+                {
+                  "name": "Washington Capitals",
+                  "price": -188
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": -168,
+                  "point": 1.5
+                },
+                {
+                  "name": "Washington Capitals",
+                  "price": 136,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -114,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": -106,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Boston Bruins": {
+            "price": 155,
+            "bookmaker": "fanduel"
+          },
+          "Washington Capitals": {
+            "price": -185,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Boston Bruins": {
+            "price": -160,
+            "bookmaker": "betmgm"
+          },
+          "Washington Capitals": {
+            "price": 142,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -112,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": -106,
+            "bookmaker": "fanduel"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "d4139f5d4bdbf4ac808ddb8c25293eee",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T02:10:00Z",
+      "home_team": "Edmonton Oilers",
+      "away_team": "Calgary Flames",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": 185
+                },
+                {
+                  "name": "Edmonton Oilers",
+                  "price": -225
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": -135,
+                  "point": 1.5
+                },
+                {
+                  "name": "Edmonton Oilers",
+                  "price": 114,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 114,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -135,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": -135,
+                  "point": 1.5
+                },
+                {
+                  "name": "Edmonton Oilers",
+                  "price": 110,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": 188
+                },
+                {
+                  "name": "Edmonton Oilers",
+                  "price": -230
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": -134,
+                  "point": 1.5
+                },
+                {
+                  "name": "Edmonton Oilers",
+                  "price": 110,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -142,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 116,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Calgary Flames": {
+            "price": 188,
+            "bookmaker": "fanduel"
+          },
+          "Edmonton Oilers": {
+            "price": -225,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Calgary Flames": {
+            "price": -134,
+            "bookmaker": "fanduel"
+          },
+          "Edmonton Oilers": {
+            "price": 114,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 114,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": 116,
+            "bookmaker": "fanduel"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "d41c1327e68649815397cc566432adaf",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T02:10:00Z",
+      "home_team": "Vegas Golden Knights",
+      "away_team": "Los Angeles Kings",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Los Angeles Kings",
+                  "price": 170
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": -205
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Los Angeles Kings",
+                  "price": -142,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": 120,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -130,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 110,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Los Angeles Kings",
+                  "price": -140,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": 115,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Los Angeles Kings",
+                  "price": 164
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": -200
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Los Angeles Kings",
+                  "price": -158,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": 128,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -128,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 104,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Los Angeles Kings": {
+            "price": 170,
+            "bookmaker": "draftkings"
+          },
+          "Vegas Golden Knights": {
+            "price": -200,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Los Angeles Kings": {
+            "price": -140,
+            "bookmaker": "betmgm"
+          },
+          "Vegas Golden Knights": {
+            "price": 128,
+            "bookmaker": "fanduel"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -128,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": 110,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "214b25ac0c4cf6656774eef6a1216b0f",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Boston Bruins",
+      "away_team": "Chicago Blackhawks",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": -162
+                },
+                {
+                  "name": "Chicago Blackhawks",
+                  "price": 136
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": 160,
+                  "point": -1.5
+                },
+                {
+                  "name": "Chicago Blackhawks",
+                  "price": -192,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -125,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 105,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": 145,
+                  "point": -1.5
+                },
+                {
+                  "name": "Chicago Blackhawks",
+                  "price": -180,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": -162
+                },
+                {
+                  "name": "Chicago Blackhawks",
+                  "price": 134
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Boston Bruins",
+                  "price": 152,
+                  "point": -1.5
+                },
+                {
+                  "name": "Chicago Blackhawks",
+                  "price": -188,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -134,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 110,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Boston Bruins": {
+            "price": -162,
+            "bookmaker": "draftkings"
+          },
+          "Chicago Blackhawks": {
+            "price": 136,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Boston Bruins": {
+            "price": 160,
+            "bookmaker": "draftkings"
+          },
+          "Chicago Blackhawks": {
+            "price": -180,
+            "bookmaker": "betmgm"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -125,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": 110,
+            "bookmaker": "fanduel"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "2e8948271d8467612bffca8aeeaa0d07",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Buffalo Sabres",
+      "away_team": "New York Rangers",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Buffalo Sabres",
+                  "price": -105
+                },
+                {
+                  "name": "New York Rangers",
+                  "price": -115
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Buffalo Sabres",
+                  "price": -265,
+                  "point": 1.5
+                },
+                {
+                  "name": "New York Rangers",
+                  "price": 215,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 110,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -130,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Buffalo Sabres",
+                  "price": 220,
+                  "point": -1.5
+                },
+                {
+                  "name": "New York Rangers",
+                  "price": -275,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Buffalo Sabres",
+                  "price": -102
+                },
+                {
+                  "name": "New York Rangers",
+                  "price": -118
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Buffalo Sabres",
+                  "price": -260,
+                  "point": 1.5
+                },
+                {
+                  "name": "New York Rangers",
+                  "price": 205,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 112,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -138,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Buffalo Sabres": {
+            "price": -102,
+            "bookmaker": "fanduel"
+          },
+          "New York Rangers": {
+            "price": -115,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Buffalo Sabres": {
+            "price": 220,
+            "bookmaker": "betmgm"
+          },
+          "New York Rangers": {
+            "price": 215,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 112,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": -130,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ce238490854db2b6d09506cf4865d7f7",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Carolina Hurricanes",
+      "away_team": "New Jersey Devils",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Carolina Hurricanes",
+                  "price": -162
+                },
+                {
+                  "name": "New Jersey Devils",
+                  "price": 136
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Carolina Hurricanes",
+                  "price": 170,
+                  "point": -1.5
+                },
+                {
+                  "name": "New Jersey Devils",
+                  "price": -205,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -122,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 102,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Carolina Hurricanes",
+                  "price": 150,
+                  "point": -1.5
+                },
+                {
+                  "name": "New Jersey Devils",
+                  "price": -185,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Carolina Hurricanes",
+                  "price": -156
+                },
+                {
+                  "name": "New Jersey Devils",
+                  "price": 130
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Carolina Hurricanes",
+                  "price": 156,
+                  "point": -1.5
+                },
+                {
+                  "name": "New Jersey Devils",
+                  "price": -194,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -122,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 100,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Carolina Hurricanes": {
+            "price": -156,
+            "bookmaker": "fanduel"
+          },
+          "New Jersey Devils": {
+            "price": 136,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Carolina Hurricanes": {
+            "price": 170,
+            "bookmaker": "draftkings"
+          },
+          "New Jersey Devils": {
+            "price": -185,
+            "bookmaker": "betmgm"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -122,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": 102,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1ed2d44bfa7bbc83df5793d3c9fcc87e",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Detroit Red Wings",
+      "away_team": "Montréal Canadiens",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Detroit Red Wings",
+                  "price": -130
+                },
+                {
+                  "name": "Montréal Canadiens",
+                  "price": 110
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Detroit Red Wings",
+                  "price": 190,
+                  "point": -1.5
+                },
+                {
+                  "name": "Montréal Canadiens",
+                  "price": -230,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 110,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -130,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Detroit Red Wings",
+                  "price": 180,
+                  "point": -1.5
+                },
+                {
+                  "name": "Montréal Canadiens",
+                  "price": -220,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Detroit Red Wings",
+                  "price": -130
+                },
+                {
+                  "name": "Montréal Canadiens",
+                  "price": 108
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Detroit Red Wings",
+                  "price": 186,
+                  "point": -1.5
+                },
+                {
+                  "name": "Montréal Canadiens",
+                  "price": -235,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 112,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -138,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Detroit Red Wings": {
+            "price": -130,
+            "bookmaker": "draftkings"
+          },
+          "Montréal Canadiens": {
+            "price": 110,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Detroit Red Wings": {
+            "price": 190,
+            "bookmaker": "draftkings"
+          },
+          "Montréal Canadiens": {
+            "price": -220,
+            "bookmaker": "betmgm"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 112,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": -130,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "7e8592f811bd3b6550a23d39deb23d16",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Florida Panthers",
+      "away_team": "Philadelphia Flyers",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Florida Panthers",
+                  "price": -198
+                },
+                {
+                  "name": "Philadelphia Flyers",
+                  "price": 164
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Florida Panthers",
+                  "price": 136,
+                  "point": -1.5
+                },
+                {
+                  "name": "Philadelphia Flyers",
+                  "price": -162,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -122,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 102,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Florida Panthers",
+                  "price": 120,
+                  "point": -1.5
+                },
+                {
+                  "name": "Philadelphia Flyers",
+                  "price": -145,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Florida Panthers",
+                  "price": -196
+                },
+                {
+                  "name": "Philadelphia Flyers",
+                  "price": 162
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Florida Panthers",
+                  "price": 126,
+                  "point": -1.5
+                },
+                {
+                  "name": "Philadelphia Flyers",
+                  "price": -154,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -128,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 104,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Florida Panthers": {
+            "price": -196,
+            "bookmaker": "fanduel"
+          },
+          "Philadelphia Flyers": {
+            "price": 164,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Florida Panthers": {
+            "price": 136,
+            "bookmaker": "draftkings"
+          },
+          "Philadelphia Flyers": {
+            "price": -145,
+            "bookmaker": "betmgm"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -122,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": 104,
+            "bookmaker": "fanduel"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "454c2d55e6e6104f4032ec484e3e8429",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Pittsburgh Penguins",
+      "away_team": "New York Islanders",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "New York Islanders",
+                  "price": -122
+                },
+                {
+                  "name": "Pittsburgh Penguins",
+                  "price": 102
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "New York Islanders",
+                  "price": 210,
+                  "point": -1.5
+                },
+                {
+                  "name": "Pittsburgh Penguins",
+                  "price": -258,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -125,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 105,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "New York Islanders",
+                  "price": 185,
+                  "point": -1.5
+                },
+                {
+                  "name": "Pittsburgh Penguins",
+                  "price": -225,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "New York Islanders",
+                  "price": -122
+                },
+                {
+                  "name": "Pittsburgh Penguins",
+                  "price": 102
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "New York Islanders",
+                  "price": 198,
+                  "point": -1.5
+                },
+                {
+                  "name": "Pittsburgh Penguins",
+                  "price": -250,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -122,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 100,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "New York Islanders": {
+            "price": -122,
+            "bookmaker": "draftkings"
+          },
+          "Pittsburgh Penguins": {
+            "price": 102,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "New York Islanders": {
+            "price": 210,
+            "bookmaker": "draftkings"
+          },
+          "Pittsburgh Penguins": {
+            "price": -225,
+            "bookmaker": "betmgm"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -122,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": 105,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1125449317578a64e6c65e2a2fd90d60",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-09T23:10:00Z",
+      "home_team": "Tampa Bay Lightning",
+      "away_team": "Ottawa Senators",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Ottawa Senators",
+                  "price": 140
+                },
+                {
+                  "name": "Tampa Bay Lightning",
+                  "price": -166
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Ottawa Senators",
+                  "price": -185,
+                  "point": 1.5
+                },
+                {
+                  "name": "Tampa Bay Lightning",
+                  "price": 154,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 110,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -130,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Ottawa Senators",
+                  "price": -170,
+                  "point": 1.5
+                },
+                {
+                  "name": "Tampa Bay Lightning",
+                  "price": 140,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Ottawa Senators",
+                  "price": 136
+                },
+                {
+                  "name": "Tampa Bay Lightning",
+                  "price": -164
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Ottawa Senators",
+                  "price": -184,
+                  "point": 1.5
+                },
+                {
+                  "name": "Tampa Bay Lightning",
+                  "price": 148,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 112,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -138,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Ottawa Senators": {
+            "price": 140,
+            "bookmaker": "draftkings"
+          },
+          "Tampa Bay Lightning": {
+            "price": -164,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Ottawa Senators": {
+            "price": -170,
+            "bookmaker": "betmgm"
+          },
+          "Tampa Bay Lightning": {
+            "price": 154,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 112,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": -130,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "b39c832aa81ba25a82cfeec73fda0d3a",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T00:10:00Z",
+      "home_team": "Nashville Predators",
+      "away_team": "Columbus Blue Jackets",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Columbus Blue Jackets",
+                  "price": 105
+                },
+                {
+                  "name": "Nashville Predators",
+                  "price": -125
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Columbus Blue Jackets",
+                  "price": -230,
+                  "point": 1.5
+                },
+                {
+                  "name": "Nashville Predators",
+                  "price": 190,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 110,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -130,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Columbus Blue Jackets",
+                  "price": -225,
+                  "point": 1.5
+                },
+                {
+                  "name": "Nashville Predators",
+                  "price": 185,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Columbus Blue Jackets",
+                  "price": 106
+                },
+                {
+                  "name": "Nashville Predators",
+                  "price": -128
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Columbus Blue Jackets",
+                  "price": -225,
+                  "point": 1.5
+                },
+                {
+                  "name": "Nashville Predators",
+                  "price": 180,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 110,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -134,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Columbus Blue Jackets": {
+            "price": 106,
+            "bookmaker": "fanduel"
+          },
+          "Nashville Predators": {
+            "price": -125,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Columbus Blue Jackets": {
+            "price": -225,
+            "bookmaker": "betmgm"
+          },
+          "Nashville Predators": {
+            "price": 190,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 110,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": -130,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "8e1335c2d7944ff220aceef403af9730",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T00:10:00Z",
+      "home_team": "Winnipeg Jets",
+      "away_team": "Dallas Stars",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Dallas Stars",
+                  "price": -115
+                },
+                {
+                  "name": "Winnipeg Jets",
+                  "price": -105
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Dallas Stars",
+                  "price": 225,
+                  "point": -1.5
+                },
+                {
+                  "name": "Winnipeg Jets",
+                  "price": -278,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -115,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": -105,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Dallas Stars",
+                  "price": -275,
+                  "point": 1.5
+                },
+                {
+                  "name": "Winnipeg Jets",
+                  "price": 225,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Dallas Stars",
+                  "price": -118
+                },
+                {
+                  "name": "Winnipeg Jets",
+                  "price": -102
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Dallas Stars",
+                  "price": 210,
+                  "point": -1.5
+                },
+                {
+                  "name": "Winnipeg Jets",
+                  "price": -265,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -114,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": -106,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Dallas Stars": {
+            "price": -115,
+            "bookmaker": "draftkings"
+          },
+          "Winnipeg Jets": {
+            "price": -102,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Dallas Stars": {
+            "price": 225,
+            "bookmaker": "draftkings"
+          },
+          "Winnipeg Jets": {
+            "price": 225,
+            "bookmaker": "betmgm"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -114,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": -105,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "78a46c0500babacf2172d1d745324212",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T00:10:00Z",
+      "home_team": "St Louis Blues",
+      "away_team": "Minnesota Wild",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Minnesota Wild",
+                  "price": 105
+                },
+                {
+                  "name": "St Louis Blues",
+                  "price": -125
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Minnesota Wild",
+                  "price": -265,
+                  "point": 1.5
+                },
+                {
+                  "name": "St Louis Blues",
+                  "price": 215,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -120,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 100,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Minnesota Wild",
+                  "price": -225,
+                  "point": 1.5
+                },
+                {
+                  "name": "St Louis Blues",
+                  "price": 185,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Minnesota Wild",
+                  "price": -102
+                },
+                {
+                  "name": "St Louis Blues",
+                  "price": -118
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Minnesota Wild",
+                  "price": -265,
+                  "point": 1.5
+                },
+                {
+                  "name": "St Louis Blues",
+                  "price": 210,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -115,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": -105,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Minnesota Wild": {
+            "price": 105,
+            "bookmaker": "draftkings"
+          },
+          "St Louis Blues": {
+            "price": -118,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Minnesota Wild": {
+            "price": -225,
+            "bookmaker": "betmgm"
+          },
+          "St Louis Blues": {
+            "price": 215,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -115,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": 100,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "07442b758a313c44922fb411dfe0f0b3",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T01:10:00Z",
+      "home_team": "Colorado Avalanche",
+      "away_team": "Utah Mammoth",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Colorado Avalanche",
+                  "price": -175
+                },
+                {
+                  "name": "Utah Mammoth",
+                  "price": 145
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Colorado Avalanche",
+                  "price": 145,
+                  "point": -1.5
+                },
+                {
+                  "name": "Utah Mammoth",
+                  "price": -175,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 102,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -122,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Colorado Avalanche",
+                  "price": 135,
+                  "point": -1.5
+                },
+                {
+                  "name": "Utah Mammoth",
+                  "price": -160,
+                  "point": 1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Colorado Avalanche",
+                  "price": -184
+                },
+                {
+                  "name": "Utah Mammoth",
+                  "price": 152
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Colorado Avalanche",
+                  "price": 128,
+                  "point": -1.5
+                },
+                {
+                  "name": "Utah Mammoth",
+                  "price": -158,
+                  "point": 1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": 106,
+                  "point": 6.5
+                },
+                {
+                  "name": "Under",
+                  "price": -130,
+                  "point": 6.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Colorado Avalanche": {
+            "price": -175,
+            "bookmaker": "draftkings"
+          },
+          "Utah Mammoth": {
+            "price": 152,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Colorado Avalanche": {
+            "price": 145,
+            "bookmaker": "draftkings"
+          },
+          "Utah Mammoth": {
+            "price": -158,
+            "bookmaker": "fanduel"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": 106,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": -122,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "54438ae3332aaff1c67bfec0e7607daa",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T02:10:00Z",
+      "home_team": "Seattle Kraken",
+      "away_team": "Anaheim Ducks",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Anaheim Ducks",
+                  "price": 105
+                },
+                {
+                  "name": "Seattle Kraken",
+                  "price": -125
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Anaheim Ducks",
+                  "price": -258,
+                  "point": 1.5
+                },
+                {
+                  "name": "Seattle Kraken",
+                  "price": 210,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -130,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 110,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Anaheim Ducks",
+                  "price": -225,
+                  "point": 1.5
+                },
+                {
+                  "name": "Seattle Kraken",
+                  "price": 185,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Anaheim Ducks",
+                  "price": 100
+                },
+                {
+                  "name": "Seattle Kraken",
+                  "price": -120
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Anaheim Ducks",
+                  "price": -250,
+                  "point": 1.5
+                },
+                {
+                  "name": "Seattle Kraken",
+                  "price": 198,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -128,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 104,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Anaheim Ducks": {
+            "price": 105,
+            "bookmaker": "draftkings"
+          },
+          "Seattle Kraken": {
+            "price": -120,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "Anaheim Ducks": {
+            "price": -225,
+            "bookmaker": "betmgm"
+          },
+          "Seattle Kraken": {
+            "price": 210,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -128,
+            "bookmaker": "fanduel"
+          },
+          "Under": {
+            "price": 110,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "b9cedc9c26ac9efe187afe37f7e481b2",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T02:10:00Z",
+      "home_team": "Vancouver Canucks",
+      "away_team": "Calgary Flames",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": 170
+                },
+                {
+                  "name": "Vancouver Canucks",
+                  "price": -205
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": -155,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vancouver Canucks",
+                  "price": 130,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -122,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 102,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": -140,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vancouver Canucks",
+                  "price": 115,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": 176
+                },
+                {
+                  "name": "Vancouver Canucks",
+                  "price": -215
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Calgary Flames",
+                  "price": -144,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vancouver Canucks",
+                  "price": 118,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -124,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 102,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "Calgary Flames": {
+            "price": 176,
+            "bookmaker": "fanduel"
+          },
+          "Vancouver Canucks": {
+            "price": -205,
+            "bookmaker": "draftkings"
+          }
+        },
+        "spreads": {
+          "Calgary Flames": {
+            "price": -140,
+            "bookmaker": "betmgm"
+          },
+          "Vancouver Canucks": {
+            "price": 130,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -122,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": 102,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    },
+    {
+      "id": "95984fcf8c64c782cade4618fd8bc89d",
+      "sport": "icehockey_nhl",
+      "commence_time": "2025-10-10T02:10:00Z",
+      "home_team": "San Jose Sharks",
+      "away_team": "Vegas Golden Knights",
+      "bookmakers": [
+        {
+          "key": "draftkings",
+          "title": "DraftKings",
+          "last_update": "2025-10-08T21:07:31Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "San Jose Sharks",
+                  "price": 160
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": -192
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "San Jose Sharks",
+                  "price": -166,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": 140,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:31Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -135,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 114,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "betmgm",
+          "title": "BetMGM",
+          "last_update": "2025-10-08T21:06:08Z",
+          "markets": {
+            "spreads": {
+              "last_update": "2025-10-08T21:06:08Z",
+              "outcomes": [
+                {
+                  "name": "San Jose Sharks",
+                  "price": -155,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": 125,
+                  "point": -1.5
+                }
+              ]
+            }
+          }
+        },
+        {
+          "key": "fanduel",
+          "title": "FanDuel",
+          "last_update": "2025-10-08T21:07:26Z",
+          "markets": {
+            "h2h": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "San Jose Sharks",
+                  "price": 155
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": -188
+                }
+              ]
+            },
+            "spreads": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "San Jose Sharks",
+                  "price": -160,
+                  "point": 1.5
+                },
+                {
+                  "name": "Vegas Golden Knights",
+                  "price": 130,
+                  "point": -1.5
+                }
+              ]
+            },
+            "totals": {
+              "last_update": "2025-10-08T21:07:26Z",
+              "outcomes": [
+                {
+                  "name": "Over",
+                  "price": -140,
+                  "point": 5.5
+                },
+                {
+                  "name": "Under",
+                  "price": 112,
+                  "point": 5.5
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "best_odds": {
+        "h2h": {
+          "San Jose Sharks": {
+            "price": 160,
+            "bookmaker": "draftkings"
+          },
+          "Vegas Golden Knights": {
+            "price": -188,
+            "bookmaker": "fanduel"
+          }
+        },
+        "spreads": {
+          "San Jose Sharks": {
+            "price": -155,
+            "bookmaker": "betmgm"
+          },
+          "Vegas Golden Knights": {
+            "price": 140,
+            "bookmaker": "draftkings"
+          }
+        },
+        "totals": {
+          "Over": {
+            "price": -135,
+            "bookmaker": "draftkings"
+          },
+          "Under": {
+            "price": 114,
+            "bookmaker": "draftkings"
+          }
+        }
+      },
+      "market_summary": {
+        "h2h": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        },
+        "spreads": {
+          "bookmaker_count": 3,
+          "bookmakers": [
+            "draftkings",
+            "betmgm",
+            "fanduel"
+          ]
+        },
+        "totals": {
+          "bookmaker_count": 2,
+          "bookmakers": [
+            "draftkings",
+            "fanduel"
+          ]
+        }
+      }
+    }
+  ],
+  "total_games": 18,
+  "live_games": 0,
+  "is_live": false,
+  "ingested_at": "2025-10-08T21:07:39.431024+00:00",
+  "data_quality": {
+    "quality_score": 100.0,
+    "total_games": 18,
+    "games_with_odds": 18,
+    "games_with_multiple_books": 18,
+    "avg_bookmakers_per_game": 3.0
+  },
+  "cached_at": "2025-10-08T21:07:39.431024+00:00",
+  "cache_key": "83eac51bcc010315134f8ed23a551f23"
+}

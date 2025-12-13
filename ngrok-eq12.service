@@ -1,0 +1,67 @@
+[Unit]
+Description=Ngrok Tunnel Service for EQ12 GODSTACK
+Documentation=https://ngrok.com/docs
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/usr/local/bin/ngrok
+ConditionPathExists=/home/eq12/ngrok.yml
+
+[Service]
+Type=simple
+User=eq12
+Group=eq12
+WorkingDirectory=/home/eq12
+Environment="HOME=/home/eq12"
+Environment="USER=eq12"
+
+# Main ngrok command - start all tunnels from config
+ExecStart=/usr/local/bin/ngrok start --all --config /home/eq12/ngrok.yml --log stdout
+
+# Restart configuration
+Restart=always
+RestartSec=10
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/eq12/logs
+
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+CPUQuota=50%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ngrok-eq12
+
+# Health check (optional - requires ngrok agent with health endpoint)
+ExecStartPost=/bin/sleep 15
+ExecStartPost=/bin/bash -c 'curl -f http://localhost:4040/api/tunnels > /dev/null || exit 1'
+
+# Cleanup on stop
+ExecStop=/bin/kill -TERM $MAINPID
+TimeoutStopSec=30
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
+
+# Additional systemd service configuration for EQ12 GODSTACK
+# 
+# Setup Instructions:
+# 1. Copy this file to /etc/systemd/system/ngrok-eq12.service
+# 2. Create eq12 user: sudo useradd -m -s /bin/bash eq12
+# 3. Install ngrok: sudo wget -O /usr/local/bin/ngrok https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz && sudo chmod +x /usr/local/bin/ngrok
+# 4. Configure ngrok: sudo -u eq12 ngrok config add-authtoken YOUR_TOKEN
+# 5. Create ngrok.yml in /home/eq12/ with tunnel definitions
+# 6. Create logs directory: sudo mkdir -p /home/eq12/logs && sudo chown eq12:eq12 /home/eq12/logs
+# 7. Enable service: sudo systemctl daemon-reload && sudo systemctl enable ngrok-eq12
+# 8. Start service: sudo systemctl start ngrok-eq12
+# 9. Check status: sudo systemctl status ngrok-eq12
+# 10. View logs: sudo journalctl -u ngrok-eq12 -f

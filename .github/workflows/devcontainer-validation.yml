@@ -1,0 +1,66 @@
+name: Devcontainer Validation
+
+on:
+  push:
+    paths:
+      - '.devcontainer/**'
+      - '*/.devcontainer/**'
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - '*/.devcontainer/**'
+
+jobs:
+  validate-devcontainer:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install devcontainer CLI
+        run: npm install -g @devcontainers/cli
+        
+      - name: Validate devcontainer configurations
+        run: |
+          for config in $(find . -name "devcontainer.json" -not -path "./node_modules/*"); do
+            echo "Validating $config"
+            devcontainer build --workspace-folder "$(dirname $config)" --log-level debug
+          done
+          
+      - name: Test devcontainer build
+        run: |
+          devcontainer build --workspace-folder .
+          
+      - name: Security scan devcontainer
+        run: |
+          # Check for security issues in devcontainer configs
+          python -c "
+          import json
+          import sys
+          from pathlib import Path
+          
+          issues = []
+          for config_file in Path('.').rglob('devcontainer.json'):
+              try:
+                  config = json.loads(config_file.read_text())
+                  # Check for privileged containers
+                  if '--privileged' in str(config.get('runArgs', [])):
+                      issues.append(f'{config_file}: Privileged container detected')
+                  # Check for docker socket mounts
+                  mounts = config.get('mounts', [])
+                  for mount in mounts:
+                      if 'docker.sock' in mount:
+                          issues.append(f'{config_file}: Docker socket mount detected')
+              except Exception as e:
+                  issues.append(f'{config_file}: Parse error - {e}')
+          
+          if issues:
+              for issue in issues:
+                  print(f'SECURITY ISSUE: {issue}')
+              sys.exit(1)
+          else:
+              print('No security issues found in devcontainer configurations')
+          "

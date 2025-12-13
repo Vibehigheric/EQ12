@@ -1,0 +1,89 @@
+{
+    "manifest_version": 3,
+    "name": "EQ12 Betting Dashboard Companion",
+    "version": "1.0.0",
+    "description": "Browser integration for EQ12 betting system - VPN monitoring, odds tracking, and Telegram bot controls",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "notifications",
+        "scripting",
+        "tabs",
+        "alarms",
+        "declarativeNetRequest",
+        "proxy",
+        "cookies",
+        "browsingData",
+        "webRequest",
+        "webRequestBlocking",
+        "privacy",
+        "contextMenus"
+    ],
+    "host_permissions": [
+        "http://localhost:*/*",
+        "https://api.telegram.org/*",
+        "https://api.ipify.org/*",
+        "https://*.draftkings.com/*",
+        "https://*.fanduel.com/*",
+        "https://*.betmgm.com/*"
+    ],
+    "background": {
+        "service_worker": "background_v3_enhanced.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://*.draftkings.com/*",
+                "https://*.fanduel.com/*",
+                "https://*.betmgm.com/*"
+            ],
+            "js": [
+                "sportsbook_scraper_v3_enhanced.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "action": {
+        "default_popup": "popup_v3_enhanced.html",
+        "default_title": "EQ12 Betting Dashboard",
+        "default_icon": {
+            "16": "icons/eq12-16.png",
+            "32": "icons/eq12-32.png",
+            "48": "icons/eq12-48.png",
+            "128": "icons/eq12-128.png"
+        }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "icons/*",
+                "assets/*",
+                "vpn_checker.js",
+                "privacy_manager.js",
+                "developer_tools.js",
+                "ui_enhancer.js",
+                "proxy_manager.js",
+                "tab_manager.js",
+                "testing_dashboard.html"
+            ],
+            "matches": [
+                "https://*.draftkings.com/*",
+                "https://*.fanduel.com/*",
+                "https://*.betmgm.com/*",
+                "http://localhost:*/*",
+                "<all_urls>"
+            ]
+        }
+    ],
+    "icons": {
+        "16": "icons/eq12-16.png",
+        "32": "icons/eq12-32.png",
+        "48": "icons/eq12-48.png",
+        "128": "icons/eq12-128.png"
+    },
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
+    }
+}

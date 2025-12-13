@@ -1,0 +1,364 @@
+name: EQ12 Issue Templates & Automation
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened]
+  issue_comment:
+    types: [created]
+
+env:
+  EQ12_ISSUE_AUTOMATION: ACTIVE
+
+jobs:
+  issue-automation:
+    name: EQ12 Issue Management
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Auto-Label Bug Reports
+      if: contains(github.event.issue.title, '[BUG]') || contains(github.event.issue.body, 'bug_report')
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: ['bug', 'needs-investigation', 'eq12-system']
+          });
+
+          // Add priority label based on content
+          const body = context.payload.issue.body || '';
+          if (body.includes('Pylance') || body.includes('EPIPE') || body.includes('ASCII')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['priority-high', 'pylance-stability']
+            });
+          }
+
+          if (body.includes('pycache') || body.includes('Unicode corruption')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['priority-critical', 'corruption-immunity']
+            });
+          }
+
+    - name: Auto-Label Feature Requests
+      if: contains(github.event.issue.title, '[FEATURE]') || contains(github.event.issue.body, 'feature_request')
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: ['enhancement', 'feature-request', 'eq12-system']
+          });
+
+          // Add component-specific labels
+          const body = context.payload.issue.body || '';
+          const title = context.payload.issue.title || '';
+          const content = body + ' ' + title;
+
+          if (content.includes('betting') || content.includes('odds') || content.includes('parlay')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['betting-automation']
+            });
+          }
+
+          if (content.includes('travel') || content.includes('bot')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['travel-automation']
+            });
+          }
+
+          if (content.includes('PowerShell') || content.includes('ps1')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['powershell']
+            });
+          }
+
+          if (content.includes('Python') || content.includes('py')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['python']
+            });
+          }
+
+    - name: Auto-Label Improvements
+      if: contains(github.event.issue.title, '[IMPROVEMENT]') || contains(github.event.issue.body, 'improvement')
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: ['improvement', 'enhancement', 'eq12-system']
+          });
+
+    - name: Auto-Assign Critical Issues
+      if: contains(github.event.issue.body, 'priority-critical') || contains(github.event.issue.body, 'system failure')
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.addAssignees({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            assignees: ['Vibehigheric']
+          });
+
+          await github.rest.issues.addLabels({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            labels: ['priority-critical', 'needs-immediate-attention']
+          });
+
+    - name: EQ12 System Health Check
+      if: github.event.action == 'opened' && contains(github.event.issue.body, 'system status')
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const comment = `## EQ12 System Health Check 🏥
+
+Thank you for reporting a system issue! Here are some quick diagnostic steps:
+
+### 🔧 Immediate Actions:
+1. **ASCII Safety Check**: Ensure \`EQ12_ASCII_MODE=ACTIVE\`
+2. **Pycache Cleanup**: Run \`powershell scripts/eq12_pycache_cleanup.ps1\`
+3. **Environment Variables**: Verify \`PYTHONDONTWRITEBYTECODE=1\`
+
+### 📊 System Status Commands:
+\`\`\`bash
+# Quick health check
+python scripts/eq12_system_status.py --verbose
+
+# ASCII compliance check
+python scripts/eq12_ascii_validator.py
+
+# PowerShell execution check
+Get-ExecutionPolicy
+\`\`\`
+
+### 🚨 Critical Issues:
+- **Pylance EPIPE errors**: Restart VS Code completely
+- **Unicode corruption**: Run ASCII cleanup immediately
+- **Import failures**: Verify no-pycache system is active
+
+### 📋 Next Steps:
+1. Run the diagnostic commands above
+2. Post the output in this issue
+3. Include your VS Code version and Python version
+4. Tag with additional labels as needed
+
+*Buffalo NY 14215 Content Empire - EQ12 System Support*`;
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          });
+
+    - name: Welcome New Contributors
+      if: github.event.action == 'opened' && github.event.issue.author_association == 'FIRST_TIME_CONTRIBUTOR'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const comment = `## Welcome to EQ12! 🎉
+
+Thank you for your first contribution to the **Buffalo NY 14215 Content Empire** EQ12 automation system!
+
+### 🚀 Getting Started:
+1. **Read AGENTS.md** - Complete system documentation
+2. **Check SUPPORT.md** - Troubleshooting and help resources
+3. **Review SECURITY.md** - Security practices and requirements
+
+### 🛡️ EQ12 System Requirements:
+- **ASCII-Safe Code**: All content must be ASCII-compliant
+- **No-Pycache**: Bytecode generation is disabled
+- **Environment Variables**: Use env vars for all secrets
+- **Signed Commits**: GPG signing required for security
+
+### 🔧 Development Setup:
+\`\`\`bash
+# Set up environment
+$env:PYTHONDONTWRITEBYTECODE = "1"
+$env:EQ12_ASCII_MODE = "ACTIVE"
+
+# Run system validation
+python scripts/eq12_system_status.py
+\`\`\`
+
+### 💡 Need Help?
+- Check existing issues for similar problems
+- Use issue templates for better responses
+- Join discussions in issue comments
+- Follow our contribution guidelines
+
+Looking forward to your contributions! 🚀
+
+*EQ12 Team - Automation Excellence*`;
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          });
+
+    - name: Auto-Close Invalid Issues
+      if: github.event.action == 'opened'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = context.payload.issue.title || '';
+          const body = context.payload.issue.body || '';
+
+          // Check for minimal content
+          if (title.length < 10 || body.length < 50) {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## Issue Incomplete ⚠️
+
+This issue appears to be incomplete. Please:
+
+1. **Use an issue template** - Choose from Bug Report, Feature Request, or Improvement
+2. **Provide detailed information** - Include system details, steps to reproduce, and expected behavior
+3. **Include relevant context** - EQ12 component affected, environment details, etc.
+
+**This issue will be automatically closed in 24 hours if not updated.**
+
+Please reopen with complete information using our issue templates.
+
+*EQ12 Quality Assurance - Buffalo NY 14215*`
+            });
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['invalid', 'needs-more-info', 'auto-generated']
+            });
+          }
+
+  stale-issue-management:
+    name: EQ12 Stale Issue Cleanup
+    runs-on: ubuntu-latest
+    if: github.event.action == 'opened'
+
+    steps:
+    - name: Mark Stale Issues
+      uses: actions/stale@v9
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: |
+          ## Stale Issue Notification 📅
+
+          This issue has been automatically marked as stale because it has not had recent activity.
+
+          ### ⏰ Timeline:
+          - **7 days** to respond or this issue will be closed
+          - **Add comments** to keep the issue active
+          - **Apply labels** to indicate ongoing work
+
+          ### 🔄 To Keep Active:
+          - Provide status updates
+          - Add progress comments
+          - Apply relevant labels
+          - Reference in PRs
+
+          ### 📋 EQ12 Issue Lifecycle:
+          1. **Active**: Regular activity and responses
+          2. **Stale**: No activity for 30 days (current state)
+          3. **Closed**: No activity for 37 days total
+
+          *Buffalo NY 14215 Content Empire - Issue Management*
+        stale-issue-label: 'stale'
+        exempt-issue-labels: 'priority-critical,priority-high,pinned,security'
+        days-before-stale: 30
+        days-before-close: 7
+        operations-per-run: 50
+
+  issue-metrics:
+    name: EQ12 Issue Analytics
+    runs-on: ubuntu-latest
+    if: github.event.action == 'closed'
+
+    steps:
+    - name: Track Issue Resolution
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue = context.payload.issue;
+          const createdAt = new Date(issue.created_at);
+          const closedAt = new Date(issue.closed_at);
+          const resolutionTime = Math.round((closedAt - createdAt) / (1000 * 60 * 60 * 24)); // days
+
+          // Create analytics comment
+          const analyticsComment = `## EQ12 Issue Analytics 📊
+
+### Resolution Metrics:
+- **Resolution Time**: ${resolutionTime} days
+- **Issue Type**: ${issue.labels.map(l => l.name).join(', ')}
+- **Reporter**: ${issue.user.login}
+- **Final State**: ${issue.state}
+
+### EQ12 System Impact:
+- **Component**: ${issue.labels.some(l => l.name.includes('betting')) ? 'Betting Automation' :
+                  issue.labels.some(l => l.name.includes('travel')) ? 'Travel Automation' :
+                  issue.labels.some(l => l.name.includes('pylance')) ? 'Pylance Stability' :
+                  issue.labels.some(l => l.name.includes('ascii')) ? 'ASCII Safety' : 'General'}
+
+*Issue analytics tracked for EQ12 system optimization*`;
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: analyticsComment
+          });
+
+  project-automation:
+    name: EQ12 Project Board Automation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Add to EQ12 Project
+      if: github.event.action == 'opened'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Auto-assign to appropriate project columns
+          const labels = context.payload.issue.labels.map(l => l.name);
+
+          let status = 'Backlog';
+          if (labels.includes('priority-critical')) {
+            status = 'In Progress';
+          } else if (labels.includes('priority-high')) {
+            status = 'Ready';
+          } else if (labels.includes('bug')) {
+            status = 'Bug Triage';
+          }
+
+          console.log(`Issue would be assigned to: ${status}`);
+          // Note: Actual project board integration would require project ID

@@ -1,0 +1,47 @@
+# Fix specific high-frequency NFL parlay tasks
+Write-Host "EQ12 NFL Task Frequency Fix - Targeted Approach" -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
+
+# Target the most problematic tasks
+$HighFrequencyTasks = @(
+    "EQ12_OddsIngestion",
+    "EQ12_AIOptimization",
+    "EQ12_HealthMonitor"
+)
+
+foreach ($TaskName in $HighFrequencyTasks) {
+    try {
+        Write-Host "`nProcessing task: $TaskName" -ForegroundColor Yellow
+        
+        # Check if task exists
+        $Task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+        if ($null -eq $Task) {
+            Write-Host "  Task not found - skipping" -ForegroundColor Gray
+            continue
+        }
+        
+        # Show current state
+        Write-Host "  Current state: $($Task.State)" -ForegroundColor White
+        
+        # Create new trigger with 2-hour interval (off-hours optimization)
+        $NewTrigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 120) -RepetitionDuration (New-TimeSpan -Days 30)
+        
+        # Apply the update
+        Set-ScheduledTask -TaskName $TaskName -Trigger $NewTrigger
+        Write-Host "  ✅ Updated to 120-minute intervals" -ForegroundColor Green
+        
+        # Verify the update
+        $UpdatedTask = Get-ScheduledTask -TaskName $TaskName
+        if ($UpdatedTask.Triggers[0].Repetition.Interval -eq "PT2H") {
+            Write-Host "  ✅ Verification successful - now running every 2 hours" -ForegroundColor Green
+        } else {
+            Write-Host "  ⚠️  Verification inconclusive" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Host "  ❌ Error updating $TaskName : $_" -ForegroundColor Red
+    }
+}
+
+Write-Host "`n🎯 High-frequency task optimization complete" -ForegroundColor Green
+Write-Host "This should significantly reduce NFL parlay log generation" -ForegroundColor Cyan

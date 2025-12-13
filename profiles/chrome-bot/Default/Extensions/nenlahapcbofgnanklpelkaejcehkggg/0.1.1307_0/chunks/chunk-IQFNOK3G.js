@@ -1,0 +1,1 @@
+function n(r){var e=document.createElement("meta");e.name="referrer",e.content="no-referrer",e.id="no-referrer",document.getElementsByTagName("head")[0].appendChild(e),window.open(r),document.getElementById("no-referrer").remove()}export{n as a};

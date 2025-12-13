@@ -1,0 +1,122 @@
+# EQ12 URL Scanner Configuration
+# Free-tier URLs for sports, maps, finance, local data, and more
+
+global:
+  user_agent: "EQ12-URL-Scanner/1.0 (Autonomous BI System)"
+  max_concurrent: 20
+  per_host_limit: 5
+  request_timeout_seconds: 15
+  default_interval_minutes: 60
+
+urls:
+  # ========== SPORTS & BETTING ==========
+  
+  - name: "MLB Statcast Search"
+    url: "https://baseballsavant.mlb.com/statcast_search"
+    category: "sports_stats"
+    interval_minutes: 180
+  
+  - name: "MLB Stats API"
+    url: "https://statsapi.mlb.com/api/v1/people/660271"
+    category: "sports_stats"
+    interval_minutes: 360
+  
+  - name: "The Odds API Docs"
+    url: "https://the-odds-api.com"
+    category: "sports_stats"
+    interval_minutes: 1440
+  
+  # ========== MAPS & ROUTING ==========
+  
+  - name: "OpenStreetMap Main"
+    url: "https://www.openstreetmap.org/about"
+    category: "maps_routing"
+    interval_minutes: 1440
+  
+  - name: "Nominatim API"
+    url: "https://nominatim.openstreetmap.org"
+    category: "maps_routing"
+    interval_minutes: 1440
+  
+  - name: "OpenRouteService"
+    url: "https://openrouteservice.org/dev/"
+    category: "maps_routing"
+    interval_minutes: 1440
+  
+  - name: "Open-Meteo Weather API"
+    url: "https://api.open-meteo.com"
+    category: "weather_api"
+    interval_minutes: 360
+  
+  # ========== LOCAL BUFFALO DATA ==========
+  
+  - name: "Buffalo Open Data Portal"
+    url: "https://data.buffalony.gov"
+    category: "local_data"
+    interval_minutes: 720
+  
+  - name: "NY Open Data - Housing"
+    url: "https://data.ny.gov/browse?category=Housing+%26+Development"
+    category: "local_data"
+    interval_minutes: 1440
+  
+  - name: "Visit Buffalo Niagara"
+    url: "https://www.visitbuffaloniagara.com"
+    category: "local_data"
+    interval_minutes: 1440
+  
+  # ========== CIVIL SERVICE & JOBS ==========
+  
+  - name: "NY Civil Service Jobs"
+    url: "https://www.cs.ny.gov/jobseeker/"
+    category: "civil_service"
+    interval_minutes: 720
+  
+  - name: "Erie County Employment"
+    url: "https://www2.erie.gov/employment/"
+    category: "civil_service"
+    interval_minutes: 720
+  
+  - name: "NY State Licensing"
+    url: "https://www.dos.ny.gov/licensing/"
+    category: "civil_service"
+    interval_minutes: 1440
+  
+  # ========== FINANCE & CREDIT ==========
+  
+  - name: "Student Aid Data Center"
+    url: "https://studentaid.gov/data-center"
+    category: "finance_data"
+    interval_minutes: 1440
+  
+  - name: "CFPB Consumer Finance"
+    url: "https://www.consumerfinance.gov/data-research/"
+    category: "finance_data"
+    interval_minutes: 1440
+  
+  - name: "FRED Economic Data"
+    url: "https://fred.stlouisfed.org/"
+    category: "finance_data"
+    interval_minutes: 1440
+  
+  - name: "SUNY Reconnect"
+    url: "https://www.suny.edu/reconnect/"
+    category: "finance_data"
+    interval_minutes: 1440
+  
+  # ========== PYTHON/ML KNOWLEDGE ==========
+  
+  - name: "scikit-learn Docs"
+    url: "https://scikit-learn.org/stable/"
+    category: "ml_docs"
+    interval_minutes: 10080  # Weekly
+  
+  - name: "XGBoost Docs"
+    url: "https://xgboost.readthedocs.io"
+    category: "ml_docs"
+    interval_minutes: 10080
+  
+  - name: "pandas Docs"
+    url: "https://pandas.pydata.org/docs/"
+    category: "ml_docs"
+    interval_minutes: 10080

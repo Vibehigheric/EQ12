@@ -1,0 +1,203 @@
+# Dependabot Configuration for EQ12 GODSTACK
+# GitHub Advanced Security - Automated Dependency Management
+# Comprehensive security updates for all package ecosystems
+
+version: 2
+updates:
+  # =============================
+  # PYTHON ECOSYSTEM
+  # =============================
+
+  # Main Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "🔒 [Security]"
+      prefix-development: "⬆️ [Deps]"
+      include: "scope"
+    labels:
+      - "security"
+      - "dependencies"
+      - "python"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    ignore:
+      # Ignore major version updates for stability
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+      ai-ml-stack:
+        patterns:
+          - "transformers"
+          - "torch*"
+          - "tensorflow*"
+          - "scikit-learn"
+          - "pandas"
+          - "numpy"
+      web-scraping:
+        patterns:
+          - "requests"
+          - "beautifulsoup4"
+          - "selenium"
+          - "playwright"
+          - "scrapy"
+      api-clients:
+        patterns:
+          - "openai"
+          - "telegram*"
+          - "*api*"
+
+  # Scraper starter module
+  - package-ecosystem: "pip"
+    directory: "/scraper_starter"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "scraper-starter"
+      - "dependencies"
+
+  # Omni scraper module
+  - package-ecosystem: "pip"
+    directory: "/omni_scraper"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "03:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "omni-scraper"
+      - "dependencies"
+
+  # =============================
+  # NODE.JS ECOSYSTEM
+  # =============================
+
+  # Main Node.js dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "03:30"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "🔒 [Security]"
+      prefix-development: "⬆️ [NPM]"
+    labels:
+      - "security"
+      - "dependencies"
+      - "nodejs"
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+      frontend-tools:
+        patterns:
+          - "webpack*"
+          - "babel*"
+          - "eslint*"
+          - "@types/*"
+
+  # Dashboard frontend
+  - package-ecosystem: "npm"
+    directory: "/dashboard"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "03:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dashboard"
+      - "dependencies"
+
+  # =============================
+  # GITHUB ACTIONS
+  # =============================
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "02:00"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "🔧 [CI]"
+      include: "scope"
+    labels:
+      - "ci-cd"
+      - "github-actions"
+      - "security"
+    groups:
+      security-actions:
+        patterns:
+          - "github/codeql-action"
+          - "actions/checkout"
+          - "github/super-linter"
+          - "gitleaks/gitleaks-action"
+      utility-actions:
+        patterns:
+          - "actions/setup-*"
+          - "actions/upload-artifact"
+          - "actions/download-artifact"
+
+  # =============================
+  # DOCKER ECOSYSTEM
+  # =============================
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "🐳 [Docker]"
+    labels:
+      - "docker"
+      - "dependencies"
+      - "security"
+
+  # Devcontainer configuration
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "03:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "devcontainer"
+      - "development"
+# =============================
+# EQ12-SPECIFIC CONFIGURATIONS
+# =============================
+
+# Security-focused configuration optimized for EQ12 GODSTACK:
+#
+# 🔒 Daily security updates for critical dependencies
+# 📦 Grouped updates by functional area (AI/ML, scraping, APIs)
+# 🎯 Business stack-specific scheduling to avoid conflicts
+# 🚨 Automatic security patch application
+# 📋 Comprehensive ecosystem coverage (Python, Node.js, Docker, Actions)
+# 🏷️ Consistent labeling for automated processing
+#
+# Critical Security Features:
+# - Immediate security updates (daily interval)
+# - Conservative approach to major version updates
+# - Comprehensive dependency coverage across all ecosystems

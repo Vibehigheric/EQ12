@@ -1,0 +1,337 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 NBA News Harvester - PowerShell Wrapper
+    Intelligence layer that correlates NBA news with current bets
+
+.DESCRIPTION
+    Comprehensive NBA RSS feed harvester that:
+    - Scans 10+ major NBA news feeds (ESPN, CBS Sports, Yahoo, RotoWire, etc.)
+    - Cross-references headlines against current SGP/parlay players and teams
+    - Flags injury keywords, market moves, and availability changes
+    - Generates clean markdown reports and JSON data
+    - Optional Telegram notifications for high-priority alerts
+
+.PARAMETER Action
+    Action to perform:
+    - Scan: Run news harvester and generate reports
+    - Alert: Send Telegram notifications for critical findings
+    - Monitor: Continuous monitoring mode (15-minute intervals)
+    - Report: View latest report
+
+.PARAMETER TopN
+    Number of top-scored news items to include (default: 30)
+
+.PARAMETER SendTelegram
+    Send summary to Telegram bot
+
+.PARAMETER VerboseOutput
+    Enable verbose logging
+
+.EXAMPLE
+    .\eq12_nba_news_harvester_wrapper.ps1 -Action Scan -TopN 20 -VerboseOutput
+    
+.EXAMPLE
+    .\eq12_nba_news_harvester_wrapper.ps1 -Action Alert -SendTelegram
+
+.NOTES
+    Author: EQ12 Intelligence Team
+    Created: November 4, 2025
+    Purpose: Real-time NBA injury/availability intelligence layer
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateSet("Scan", "Alert", "Monitor", "Report")]
+    [string]$Action,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [int]$TopN = 30,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$SendTelegram,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput
+)
+
+# Initialize
+$ErrorActionPreference = "Stop"
+$ScriptName = "EQ12 NBA News Harvester"
+$PythonScript = Join-Path $Workspace "scripts\eq12_nba_news_harvester.py"
+$ReportsDir = Join-Path $Workspace "reports"
+
+function Write-Banner {
+    param([string]$Title)
+    Write-Host "=" * 80 -ForegroundColor Cyan
+    Write-Host "📰 $Title 📰" -ForegroundColor Yellow
+    Write-Host "=" * 80 -ForegroundColor Cyan
+}
+
+function Write-Success {
+    param([string]$Message)
+    Write-Host "✅ $Message" -ForegroundColor Green
+}
+
+function Write-Warning {
+    param([string]$Message)
+    Write-Host "⚠️ $Message" -ForegroundColor Yellow
+}
+
+function Write-Error {
+    param([string]$Message)
+    Write-Host "❌ $Message" -ForegroundColor Red
+}
+
+function Test-Prerequisites {
+    Write-Host "🔍 Checking NBA news harvester prerequisites..." -ForegroundColor Cyan
+    
+    # Check Python script exists
+    if (-not (Test-Path $PythonScript)) {
+        Write-Error "NBA news harvester script not found: $PythonScript"
+        return $false
+    }
+    
+    # Check Python availability
+    try {
+        $pythonVersion = python --version 2>&1
+        Write-Host "🐍 Python: $pythonVersion" -ForegroundColor Green
+    }
+    catch {
+        Write-Error "Python not available in PATH"
+        return $false
+    }
+    
+    # Check required packages
+    $requiredPackages = @("feedparser", "pyyaml", "requests")
+    foreach ($package in $requiredPackages) {
+        try {
+            python -c "import $package" 2>$null
+            Write-Host "📦 Package available: $package" -ForegroundColor Green
+        }
+        catch {
+            Write-Warning "Installing missing package: $package"
+            pip install $package --quiet
+        }
+    }
+    
+    # Ensure directories exist
+    @($ReportsDir, (Join-Path $Workspace "cache")) | ForEach-Object {
+        if (-not (Test-Path $_)) {
+            New-Item -ItemType Directory -Path $_ -Force | Out-Null
+            Write-Host "📁 Created directory: $_" -ForegroundColor Green
+        }
+    }
+    
+    return $true
+}
+
+function Invoke-NewsScan {
+    Write-Banner "NBA NEWS INTELLIGENCE SCAN"
+    
+    if (-not (Test-Prerequisites)) {
+        Write-Error "Prerequisites check failed"
+        return $false
+    }
+    
+    Write-Host "📡 Scanning NBA RSS feeds for injury/availability intelligence..." -ForegroundColor Cyan
+    
+    # Build command arguments
+    $arguments = @(
+        "`"$PythonScript`"",
+        "--workspace", "`"$Workspace`"",
+        "--top-n", $TopN
+    )
+    
+    if ($SendTelegram) {
+        $arguments += "--send-telegram"
+    }
+    
+    try {
+        Write-Host "🔍 Running NBA news harvester..." -ForegroundColor Yellow
+        $result = & python @arguments
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "NBA news scan completed successfully"
+            Write-Host $result -ForegroundColor White
+            
+            # Show latest report info
+            $latestReport = Get-ChildItem (Join-Path $ReportsDir "nba_news_*.md") | 
+                           Sort-Object LastWriteTime -Descending | 
+                           Select-Object -First 1
+            
+            if ($latestReport) {
+                Write-Host "`n📋 LATEST REPORT:" -ForegroundColor Cyan
+                Write-Host "📍 File: $($latestReport.Name)" -ForegroundColor Green
+                Write-Host "📅 Generated: $($latestReport.LastWriteTime)" -ForegroundColor Gray
+                
+                # Extract key stats from report
+                $content = Get-Content $latestReport.FullName -Raw
+                if ($content -match "Items scanned: \*\*(\d+)\*\*") {
+                    Write-Host "🔍 Items scanned: $($Matches[1])" -ForegroundColor Cyan
+                }
+                if ($content -match "Showing top: \*\*(\d+)\*\*") {
+                    Write-Host "📊 Top items: $($Matches[1])" -ForegroundColor Cyan
+                }
+                
+                # Count injury alerts
+                $injuryAlerts = ([regex]::Matches($content, "🚑")).Count
+                if ($injuryAlerts -gt 0) {
+                    Write-Host "🚑 Injury alerts: $injuryAlerts" -ForegroundColor Red
+                }
+            }
+            
+            return $true
+        }
+        else {
+            Write-Error "NBA news scan failed with exit code: $LASTEXITCODE"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "Exception during news scan: $_"
+        return $false
+    }
+}
+
+function Invoke-AlertMode {
+    Write-Banner "NBA INJURY ALERT MODE"
+    
+    Write-Host "🚨 Scanning for critical injury/availability alerts..." -ForegroundColor Red
+    
+    # Run scan with Telegram enabled
+    $originalSendTelegram = $SendTelegram
+    $SendTelegram = $true
+    
+    $result = Invoke-NewsScan
+    
+    if ($result) {
+        Write-Host "🔔 Critical alerts processed and sent to Telegram" -ForegroundColor Green
+    }
+    
+    $SendTelegram = $originalSendTelegram
+    return $result
+}
+
+function Invoke-MonitorMode {
+    Write-Banner "NBA CONTINUOUS MONITORING MODE"
+    
+    Write-Host "🔄 Starting continuous NBA news monitoring..." -ForegroundColor Cyan
+    Write-Host "⏱️ Scan interval: 15 minutes" -ForegroundColor Gray
+    Write-Host "🛑 Press Ctrl+C to stop monitoring" -ForegroundColor Yellow
+    
+    $scanCount = 0
+    
+    try {
+        while ($true) {
+            $scanCount++
+            Write-Host "`n🔍 Monitor Scan #$scanCount - $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Cyan
+            
+            # Run quick scan
+            $result = Invoke-NewsScan
+            
+            if ($result) {
+                Write-Success "Monitor scan #$scanCount completed"
+            }
+            else {
+                Write-Warning "Monitor scan #$scanCount had issues"
+            }
+            
+            # Wait 15 minutes
+            Write-Host "⏳ Waiting 15 minutes until next scan..." -ForegroundColor Gray
+            Start-Sleep -Seconds 900  # 15 minutes
+        }
+    }
+    catch {
+        Write-Host "`n🛑 Monitoring stopped: $_" -ForegroundColor Yellow
+        return $true
+    }
+}
+
+function Show-LatestReport {
+    Write-Banner "LATEST NBA NEWS REPORT"
+    
+    # Find latest report
+    $latestReport = Get-ChildItem (Join-Path $ReportsDir "nba_news_*.md") -ErrorAction SilentlyContinue | 
+                   Sort-Object LastWriteTime -Descending | 
+                   Select-Object -First 1
+    
+    if ($latestReport) {
+        Write-Success "Latest report found: $($latestReport.Name)"
+        Write-Host "📍 Location: $($latestReport.FullName)" -ForegroundColor Cyan
+        Write-Host "📅 Generated: $($latestReport.LastWriteTime)" -ForegroundColor Gray
+        
+        if ($VerboseOutput) {
+            Write-Host "`n📖 REPORT CONTENT:" -ForegroundColor Yellow
+            Get-Content $latestReport.FullName | Write-Host
+        }
+        else {
+            Write-Host "`n📋 REPORT SUMMARY:" -ForegroundColor Yellow
+            $content = Get-Content $latestReport.FullName
+            $content[0..10] | Write-Host  # Show first 10 lines
+            Write-Host "..." -ForegroundColor Gray
+            Write-Host "(Use -VerboseOutput to see full report)" -ForegroundColor Gray
+        }
+        
+        return $true
+    }
+    else {
+        Write-Warning "No NBA news reports found"
+        Write-Host "🔧 Run a scan first to generate reports" -ForegroundColor Yellow
+        return $false
+    }
+}
+
+# Main execution
+try {
+    Write-Banner $ScriptName
+    Write-Host "📅 $(Get-Date)" -ForegroundColor Gray
+    Write-Host "🎯 Action: $Action" -ForegroundColor Cyan
+    Write-Host "📁 Workspace: $Workspace" -ForegroundColor Gray
+    Write-Host "📊 Top Items: $TopN" -ForegroundColor Gray
+    if ($SendTelegram) { Write-Host "📱 Telegram: Enabled" -ForegroundColor Green }
+    Write-Host ""
+    
+    $success = $false
+    
+    switch ($Action) {
+        "Scan" {
+            $success = Invoke-NewsScan
+        }
+        "Alert" {
+            $success = Invoke-AlertMode
+        }
+        "Monitor" {
+            $success = Invoke-MonitorMode
+        }
+        "Report" {
+            $success = Show-LatestReport
+        }
+    }
+    
+    Write-Host ""
+    if ($success) {
+        Write-Banner "NBA NEWS INTELLIGENCE COMPLETED"
+        Write-Success "NBA news intelligence operation completed successfully"
+        
+        # Show quick summary
+        $reportCount = (Get-ChildItem (Join-Path $ReportsDir "nba_news_*.md") -ErrorAction SilentlyContinue).Count
+        Write-Host "📋 Total reports generated: $reportCount" -ForegroundColor Cyan
+    }
+    else {
+        Write-Banner "OPERATION FAILED"
+        Write-Error "NBA news intelligence operation failed"
+        exit 1
+    }
+}
+catch {
+    Write-Error "Fatal error in NBA news harvester: $_"
+    Write-Host $_.ScriptStackTrace -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "🏁 Script completed: $(Get-Date)" -ForegroundColor Gray

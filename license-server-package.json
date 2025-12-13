@@ -1,0 +1,61 @@
+{
+    "name": "eq12-license-server",
+    "version": "2.0.0",
+    "description": "EQ12 Revenue Engine - License validation and subscription management",
+    "main": "eq12_license_server.js",
+    "scripts": {
+        "start": "node eq12_license_server.js",
+        "dev": "nodemon eq12_license_server.js",
+        "test": "jest",
+        "build": "echo 'No build step required'",
+        "deploy": "pm2 start eq12_license_server.js --name eq12-license-server"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "helmet": "^7.0.0",
+        "express-rate-limit": "^6.10.0",
+        "express-validator": "^7.0.1",
+        "jsonwebtoken": "^9.0.2",
+        "bcrypt": "^5.1.1",
+        "uuid": "^9.0.0",
+        "dotenv": "^16.3.1",
+        "node-cron": "^3.0.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1",
+        "jest": "^29.7.0",
+        "supertest": "^6.3.3"
+    },
+    "keywords": [
+        "license-server",
+        "subscription-management",
+        "revenue-engine",
+        "github-actions",
+        "saas",
+        "billing"
+    ],
+    "author": "EQ12 Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/EQ12-Team/eq12-license-server.git"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "pm2": {
+        "apps": [
+            {
+                "name": "eq12-license-server",
+                "script": "eq12_license_server.js",
+                "instances": "max",
+                "exec_mode": "cluster",
+                "env": {
+                    "NODE_ENV": "production",
+                    "PORT": 8000
+                }
+            }
+        ]
+    }
+}

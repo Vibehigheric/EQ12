@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>EQ12 Betting Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="header">
+            <h3>🎯 EQ12 Betting</h3>
+            <div class="status" id="api-status">●</div>
+        </div>
+
+        <div class="section">
+            <h4>📊 Generate Parlays</h4>
+            <div class="row">
+                <button id="btn-5" class="btn-primary">🎟️ 5-Leg Parlay</button>
+                <button id="btn-10" class="btn-primary">🎟️ 10-Leg Parlay</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h4>📈 Analytics</h4>
+            <div class="row">
+                <button id="btn-audit" class="btn-secondary">🧾 Audit Report</button>
+                <button id="btn-health" class="btn-secondary">❤️ Health Check</button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <pre id="out" class="out">Click a button to get started...</pre>
+        </div>
+
+        <div class="footer">
+            <div class="row">
+                <a id="open-options" href="#" class="link">⚙️ Settings</a>
+                <a id="open-dashboard" href="#" class="link">🏠 Dashboard</a>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="popup.js"></script>
+</body>
+
+</html>

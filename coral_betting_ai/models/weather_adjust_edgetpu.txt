@@ -1,0 +1,18 @@
+# WEATHER_ADJUST Model Placeholder
+        
+This is a placeholder for the weather_adjust Edge TPU model.
+
+To create this model:
+1. Train your TensorFlow model for weather_adjust
+2. Convert to TensorFlow Lite: 
+   converter = tf.lite.TFLiteConverter.from_saved_model(model_path)
+   converter.optimizations = [tf.lite.Optimize.DEFAULT]
+   tflite_model = converter.convert()
+   
+3. Compile for Edge TPU:
+   edgetpu_compiler weather_adjust.tflite
+   
+4. Place the resulting weather_adjust_edgetpu.tflite file here
+
+Expected input shape: [1, input_size]
+Expected output shape: [1, num_classes]

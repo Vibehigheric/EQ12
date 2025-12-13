@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Professional Sports Betting Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+            color: #e1e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2d3748;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00d4aa;
+            text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(45, 55, 72, 0.6);
+            border-radius: 8px;
+            border: 1px solid #4a5568;
+        }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .online { background-color: #48bb78; }
+        .warning { background-color: #ed8936; }
+        .error { background-color: #f56565; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        .main-content {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: rgba(45, 55, 72, 0.8);
+            border-radius: 12px;
+            border: 1px solid #4a5568;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #e1e8f0;
+        }
+
+        .refresh-btn {
+            background: #00d4aa;
+            color: #0f1419;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #00b894;
+            transform: scale(1.05);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #4a5568;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00d4aa;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .positive { color: #48bb78; }
+        .negative { color: #f56565; }
+
+        .opportunities-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .opportunity-item {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            margin-bottom: 0.8rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #00d4aa;
+            transition: all 0.2s ease;
+        }
+
+        .opportunity-item:hover {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            transform: translateX(5px);
+        }
+
+        .opportunity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .game-info {
+            font-weight: 600;
+            color: #e1e8f0;
+        }
+
+        .confidence-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .confidence-high {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+            border: 1px solid #48bb78;
+        }
+
+        .confidence-medium {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+            border: 1px solid #ed8936;
+        }
+
+        .confidence-low {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+            border: 1px solid #f56565;
+        }
+
+        .opportunity-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-label {
+            color: #a0aec0;
+        }
+
+        .detail-value {
+            color: #e1e8f0;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            margin-top: 0.8rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.4rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #00d4aa;
+            color: #0f1419;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #a0aec0;
+            border: 1px solid #4a5568;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .bankroll-card {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            border: 2px solid #00d4aa;
+            text-align: center;
+        }
+
+        .bankroll-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00d4aa;
+            margin-bottom: 0.5rem;
+        }
+
+        .bankroll-change {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+
+        .settings-panel {
+            background: rgba(45, 55, 72, 0.9);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #4a5568;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #00d4aa;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-switch.active::before {
+            transform: translateX(26px);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 1.1rem;
+            border: 2px dashed #4a5568;
+        }
+
+        .live-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .feed-item {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            border-left: 3px solid;
+        }
+
+        .feed-item.info { border-left-color: #3182ce; }
+        .feed-item.success { border-left-color: #48bb78; }
+        .feed-item.warning { border-left-color: #ed8936; }
+        .feed-item.error { border-left-color: #f56565; }
+
+        .feed-time {
+            font-size: 0.8rem;
+            color: #a0aec0;
+            margin-bottom: 0.25rem;
+        }
+
+        .feed-message {
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2d3748;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #4a5568;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #a0aec0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .status-indicators {
+                flex-wrap: wrap;
+            }
+        }
+
+        .loading-spinner {
+            border: 3px solid #4a5568;
+            border-top: 3px solid #00d4aa;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4aa 0%, #3182ce 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">🏆 EQ12 Sports Intelligence</div>
+            <div class="status-indicators">
+                <div class="indicator">
+                    <div class="indicator-dot online"></div>
+                    <span>Live Data</span>
+                </div>
+                <div class="indicator">
+                    <div class="indicator-dot online"></div>
+                    <span>AI Engine</span>
+                </div>
+                <div class="indicator">
+                    <div class="indicator-dot warning"></div>
+                    <span>5 Alerts</span>
+                </div>
+                <div class="indicator">
+                    <span id="lastUpdate">Last: 2:34 PM</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <main class="main-content">
+            <!-- Performance Metrics -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Performance Dashboard</h2>
+                    <button class="refresh-btn" onclick="refreshMetrics()">Refresh</button>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">87.3%</div>
+                        <div class="metric-label">Win Rate (30d)</div>
+                        <div class="metric-change positive">+2.4%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">23.7%</div>
+                        <div class="metric-label">ROI</div>
+                        <div class="metric-change positive">+4.1%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">47</div>
+                        <div class="metric-label">Bets Placed</div>
+                        <div class="metric-change positive">+12</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">+2.8</div>
+                        <div class="metric-label">Avg CLV</div>
+                        <div class="metric-change positive">+0.4</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Current Opportunities -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🎯 Current Opportunities</h2>
+                    <button class="refresh-btn" onclick="refreshOpportunities()">Refresh</button>
+                </div>
+                <div class="opportunities-list" id="opportunitiesList">
+                    <div class="opportunity-item">
+                        <div class="opportunity-header">
+                            <div class="game-info">Kansas City Chiefs @ Buffalo Bills</div>
+                            <div class="confidence-badge confidence-high">92% Confidence</div>
+                        </div>
+                        <div class="opportunity-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Selection:</span>
+                                <span class="detail-value">Chiefs +3.5</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Odds:</span>
+                                <span class="detail-value">1.91</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Edge:</span>
+                                <span class="detail-value positive">+5.2%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Stake:</span>
+                                <span class="detail-value">$127</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="placeBet(this)">Place Bet</button>
+                            <button class="btn btn-secondary" onclick="viewAnalysis(this)">Analysis</button>
+                        </div>
+                    </div>
+
+                    <div class="opportunity-item">
+                        <div class="opportunity-header">
+                            <div class="game-info">Lakers @ Celtics</div>
+                            <div class="confidence-badge confidence-medium">78% Confidence</div>
+                        </div>
+                        <div class="opportunity-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Selection:</span>
+                                <span class="detail-value">Over 220.5</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Odds:</span>
+                                <span class="detail-value">1.95</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Edge:</span>
+                                <span class="detail-value positive">+3.1%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Stake:</span>
+                                <span class="detail-value">$89</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="placeBet(this)">Place Bet</button>
+                            <button class="btn btn-secondary" onclick="viewAnalysis(this)">Analysis</button>
+                        </div>
+                    </div>
+
+                    <div class="opportunity-item">
+                        <div class="opportunity-header">
+                            <div class="game-info">Yankees @ Astros</div>
+                            <div class="confidence-badge confidence-high">89% Confidence</div>
+                        </div>
+                        <div class="opportunity-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Selection:</span>
+                                <span class="detail-value">Yankees ML</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Odds:</span>
+                                <span class="detail-value">2.15</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Edge:</span>
+                                <span class="detail-value positive">+7.3%</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Stake:</span>
+                                <span class="detail-value">$156</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" onclick="placeBet(this)">Place Bet</button>
+                            <button class="btn btn-secondary" onclick="viewAnalysis(this)">Analysis</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📈 Performance Charts</h2>
+                    <button class="refresh-btn">Update Charts</button>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-placeholder">
+                        📊 Profit/Loss Over Time Chart
+                        <br><small>Interactive chart will load here</small>
+                    </div>
+                    <div class="chart-placeholder">
+                        🎯 Win Rate by Sport
+                        <br><small>Pie chart will load here</small>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <!-- Bankroll Card -->
+            <div class="card bankroll-card">
+                <div class="card-header">
+                    <h3 class="card-title">💰 Bankroll</h3>
+                </div>
+                <div class="bankroll-amount">$5,247</div>
+                <div class="bankroll-change positive">+$247 (5.0%)</div>
+                <div class="quick-stats">
+                    <div class="quick-stat">
+                        <div style="font-weight: 600; color: #00d4aa;">$1,230</div>
+                        <div style="font-size: 0.8rem; color: #a0aec0;">Today's Action</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div style="font-weight: 600; color: #48bb78;">$89</div>
+                        <div style="font-size: 0.8rem; color: #a0aec0;">Available</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="card settings-panel">
+                <div class="card-header">
+                    <h3 class="card-title">⚙️ Settings</h3>
+                </div>
+                <div class="setting-item">
+                    <span>Auto-betting</span>
+                    <div class="toggle-switch" onclick="toggleSetting(this)"></div>
+                </div>
+                <div class="setting-item">
+                    <span>Steam Detection</span>
+                    <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                </div>
+                <div class="setting-item">
+                    <span>Arbitrage Alerts</span>
+                    <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                </div>
+                <div class="setting-item">
+                    <span>Risk Management</span>
+                    <div class="toggle-switch active" onclick="toggleSetting(this)"></div>
+                </div>
+            </div>
+
+            <!-- Live Feed -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📡 Live Feed</h3>
+                </div>
+                <div class="live-feed">
+                    <div class="feed-item success">
+                        <div class="feed-time">2:34 PM</div>
+                        <div class="feed-message">✅ Chiefs bet won (+$115)</div>
+                    </div>
+                    <div class="feed-item info">
+                        <div class="feed-time">2:31 PM</div>
+                        <div class="feed-message">🔍 New edge detected: Lakers Over</div>
+                    </div>
+                    <div class="feed-item warning">
+                        <div class="feed-time">2:28 PM</div>
+                        <div class="feed-message">⚠️ Line movement on Yankees game</div>
+                    </div>
+                    <div class="feed-item info">
+                        <div class="feed-time">2:25 PM</div>
+                        <div class="feed-message">📊 AI model updated</div>
+                    </div>
+                    <div class="feed-item success">
+                        <div class="feed-time">2:20 PM</div>
+                        <div class="feed-message">🎯 Arbitrage opportunity found</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Bet Placement Modal -->
+    <div id="betModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('betModal')">&times;</span>
+            <h3>Place Bet</h3>
+            <div style="margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label>Selection: <strong id="modalSelection"></strong></label>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Odds: <strong id="modalOdds"></strong></label>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="stakeAmount">Stake Amount:</label>
+                    <input type="number" id="stakeAmount" style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; background: #4a5568; border: 1px solid #718096; border-radius: 4px; color: white;">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Potential Return: <strong id="potentialReturn">$0.00</strong></label>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="confirmBet()" style="flex: 1;">Confirm Bet</button>
+                    <button class="btn btn-secondary" onclick="closeModal('betModal')" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = `Last: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        }
+
+        // Toggle settings
+        function toggleSetting(element) {
+            element.classList.toggle('active');
+        }
+
+        // Refresh functions
+        function refreshMetrics() {
+            console.log('Refreshing metrics...');
+            // Simulate loading
+            const refreshBtn = event.target;
+            const originalText = refreshBtn.textContent;
+            refreshBtn.innerHTML = '<div class="loading-spinner"></div>';
+            
+            setTimeout(() => {
+                refreshBtn.textContent = originalText;
+                updateTimestamp();
+            }, 2000);
+        }
+
+        function refreshOpportunities() {
+            console.log('Refreshing opportunities...');
+            updateTimestamp();
+        }
+
+        // Bet placement
+        function placeBet(button) {
+            const opportunityItem = button.closest('.opportunity-item');
+            const gameInfo = opportunityItem.querySelector('.game-info').textContent;
+            const selection = opportunityItem.querySelector('.detail-value').textContent;
+            const odds = opportunityItem.querySelectorAll('.detail-value')[1].textContent;
+            
+            document.getElementById('modalSelection').textContent = `${gameInfo} - ${selection}`;
+            document.getElementById('modalOdds').textContent = odds;
+            document.getElementById('betModal').style.display = 'block';
+            
+            // Calculate potential return on stake input
+            document.getElementById('stakeAmount').oninput = function() {
+                const stake = parseFloat(this.value) || 0;
+                const oddsValue = parseFloat(odds) || 1;
+                const potential = (stake * oddsValue).toFixed(2);
+                document.getElementById('potentialReturn').textContent = `$${potential}`;
+            };
+        }
+
+        function confirmBet() {
+            const stake = document.getElementById('stakeAmount').value;
+            if (stake && parseFloat(stake) > 0) {
+                // Simulate bet placement
+                alert(`Bet placed successfully! Stake: $${stake}`);
+                closeModal('betModal');
+                
+                // Add to live feed
+                addToLiveFeed('info', `💰 Bet placed: $${stake} stake`);
+            } else {
+                alert('Please enter a valid stake amount.');
+            }
+        }
+
+        function viewAnalysis(button) {
+            const opportunityItem = button.closest('.opportunity-item');
+            const gameInfo = opportunityItem.querySelector('.game-info').textContent;
+            alert(`Opening detailed analysis for: ${gameInfo}\n\nFeatures:\n• Team statistics comparison\n• Injury report impact\n• Weather conditions\n• Referee tendencies\n• Public betting percentages\n• Sharp money indicators`);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function addToLiveFeed(type, message) {
+            const liveFeed = document.querySelector('.live-feed');
+            const feedItem = document.createElement('div');
+            feedItem.className = `feed-item ${type}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            feedItem.innerHTML = `
+                <div class="feed-time">${timeString}</div>
+                <div class="feed-message">${message}</div>
+            `;
+            
+            liveFeed.insertBefore(feedItem, liveFeed.firstChild);
+            
+            // Remove old items if too many
+            while (liveFeed.children.length > 10) {
+                liveFeed.removeChild(liveFeed.lastChild);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimestamp();
+            
+            // Update timestamp every minute
+            setInterval(updateTimestamp, 60000);
+            
+            // Simulate live updates
+            setInterval(() => {
+                const messages = [
+                    { type: 'info', text: '📊 Line movement detected' },
+                    { type: 'success', text: '🎯 New edge identified' },
+                    { type: 'warning', text: '⚠️ Injury report update' },
+                    { type: 'info', text: '🔄 Model recalibrated' }
+                ];
+                
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                addToLiveFeed(randomMessage.type, randomMessage.text);
+            }, 30000); // Every 30 seconds
+            
+            console.log('🏆 EQ12 Sports Betting Dashboard Loaded');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                refreshOpportunities();
+            }
+        });
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('betModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

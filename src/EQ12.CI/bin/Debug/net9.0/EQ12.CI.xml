@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EQ12.CI
+</name>
+</assembly>
+<members>
+<member name="T:EQ12.CI.EQ12.CI.CIPipelineHelper">
+ <summary>CI/CD pipeline helpers for code generation and analysis</summary>
+</member>
+<member name="M:EQ12.CI.EQ12.CI.CIPipelineHelper.RunStaticAnalysis(System.String)">
+ <summary>Run static code analysis</summary>
+</member>
+<member name="M:EQ12.CI.EQ12.CI.CIPipelineHelper.GenerateDTOs(System.String)">
+ <summary>Auto-generate DTOs from models</summary>
+</member>
+<member name="M:EQ12.CI.EQ12.CI.CIPipelineHelper.ValidateSolution">
+ <summary>Validate solution integrity</summary>
+</member>
+</members>
+</doc>

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - internal-net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - /opt/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - /opt/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - internal-net
+      - proxy-net
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      # GitHub Auth (Run scripts/setup_grafana_oauth.ps1 to configure)
+      # - GF_AUTH_GITHUB_ENABLED=true
+      # - GF_AUTH_GITHUB_CLIENT_ID=
+      # - GF_AUTH_GITHUB_CLIENT_SECRET=
+      # GitLab Auth
+      # - GF_AUTH_GITLAB_ENABLED=true
+      # - GF_AUTH_GITLAB_CLIENT_ID=
+      # - GF_AUTH_GITLAB_CLIENT_SECRET=
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - internal-net
+    deploy:
+      mode: global
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    networks:
+      - internal-net
+    deploy:
+      mode: global
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  internal-net:
+    external: true
+  proxy-net:
+    external: true

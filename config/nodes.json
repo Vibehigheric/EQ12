@@ -1,0 +1,106 @@
+{
+    "cluster_name": "EQ12_GODSTACK",
+    "updated_at": "2025-12-11T21:45:00Z",
+    "nodes": [
+        {
+            "hostname": "EQ12-Manager",
+            "ip": "192.168.1.144",
+            "role": "manager",
+            "availability_tier": 0,
+            "availability_guarantee": "always_on",
+            "responsibilities": [
+                "orchestration",
+                "capital_allocation",
+                "risk_engine",
+                "parlay_engine",
+                "cli_host"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "Pi-Worker-01",
+            "ip": "192.168.1.80",
+            "cluster_ip": "192.168.100.1",
+            "role": "worker",
+            "availability_tier": 1,
+            "availability_guarantee": "conditional",
+            "responsibilities": [
+                "inference_tpu",
+                "prop_tensor",
+                "anomaly_detection"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "M70q-Worker-Ubuntu",
+            "ip": "192.168.1.130",
+            "role": "worker",
+            "availability_tier": 1,
+            "availability_guarantee": "high_performance",
+            "responsibilities": [
+                "heavy_inference_cpu",
+                "docker_swarm_manager_backup",
+                "database_host"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "VM-Worker-A",
+            "ip": "192.168.1.94",
+            "role": "worker",
+            "availability_tier": 2,
+            "availability_guarantee": "opportunistic",
+            "responsibilities": [
+                "heavy_scraping",
+                "line_monitoring"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "VM-Worker-B",
+            "ip": "192.168.1.116",
+            "role": "worker",
+            "availability_tier": 2,
+            "availability_guarantee": "vpn_dependent",
+            "responsibilities": [
+                "vpn_rotation",
+                "geofenced_queries"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "VM-Worker-C",
+            "ip": "192.168.1.126",
+            "role": "worker",
+            "availability_tier": 2,
+            "availability_guarantee": "shadow",
+            "responsibilities": [
+                "anti_book_spoofing",
+                "rate_limit_evasion"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "TCL-Display",
+            "ip": "192.168.1.249",
+            "role": "display",
+            "availability_tier": 3,
+            "availability_guarantee": "read_only",
+            "responsibilities": [
+                "visualization",
+                "dashboard_target"
+            ],
+            "excluded": false
+        },
+        {
+            "hostname": "LG-TV-Excluded",
+            "ip": "192.168.1.246",
+            "role": "none",
+            "availability_tier": 99,
+            "availability_guarantee": "none",
+            "responsibilities": [],
+            "excluded": true,
+            "exclusion_reason": "User Hard-Coded Removal"
+        }
+    ]
+}

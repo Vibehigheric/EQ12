@@ -1,0 +1,8 @@
+# Ignore private keys and runtime state
+keys/
+*.key
+*.priv
+wg0.conf
+
+# Local wireguard logs
+logs/wg.log

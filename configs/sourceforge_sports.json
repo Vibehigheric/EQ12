@@ -1,0 +1,93 @@
+{
+  "destination": "C:\\EQ12\\vendor\\sf",
+  "tools": [
+    {
+      "name": "TA-Lib",
+      "project": "ta-lib",
+      "file_hint": "ta-lib-*.msi|ta-lib-*.zip|ta-lib-*.exe",
+      "category": "features",
+      "why": "Technical indicators for pricing & feature engineering",
+      "install": "installer-or-portable"
+    },
+    {
+      "name": "GNU Octave",
+      "project": "octave",
+      "file_hint": "octave-*-w64-installer.exe",
+      "category": "numerics",
+      "why": "Monte Carlo, bankroll sims, numeric prototyping",
+      "silent_args": "/S",
+      "install": "installer",
+      "post_path": "C:\\Octave\\*\\bin"
+    },
+    {
+      "name": "gretl",
+      "project": "gretl",
+      "file_hint": "gretl-*-x64.exe",
+      "category": "econometrics",
+      "why": "ARIMA/VAR/GARCH time-series on line movement",
+      "silent_args": "/S",
+      "install": "installer",
+      "post_path": "C:\\Program Files\\gretl\\bin"
+    },
+    {
+      "name": "Weka",
+      "project": "weka",
+      "file_hint": "weka-*.exe|weka-*.jar",
+      "category": "ml",
+      "why": "Tabular ML baselines for markets/props",
+      "install": "installer-or-jar",
+      "requires": ["Java>=17"]
+    },
+    {
+      "name": "XMLStarlet",
+      "project": "xmlstar",
+      "file_hint": "xmlstarlet-*-win32.zip|xmlstarlet-*.exe",
+      "category": "etl",
+      "why": "CLI XML→JSON/CSV transforms for feeds",
+      "install": "portable"
+    },
+    {
+      "name": "Saxon-HE",
+      "project": "saxon",
+      "file_hint": "saxonHE*.zip|saxonHE*.jar",
+      "category": "etl",
+      "why": "Advanced XSLT/XPath processing of vendor XML",
+      "install": "portable"
+    },
+    {
+      "name": "HTTrack",
+      "project": "httrack",
+      "file_hint": "httrack-*.exe",
+      "category": "ingest",
+      "why": "Mirror allowed public sources (news/injuries)",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "RSSOwl",
+      "project": "rssowl",
+      "file_hint": "RSSOwl-*.zip|RSSOwl-*.exe",
+      "category": "ingest",
+      "why": "Aggregate RSS news/injury feeds",
+      "install": "portable-or-installer"
+    },
+    {
+      "name": "Apache OpenOffice",
+      "project": "openofficeorg",
+      "file_hint": "Apache_OpenOffice_*-Win_x86_install_en-US.exe",
+      "category": "analysis",
+      "why": "Quick CSV pivots without full BI",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "DB Browser for SQLite",
+      "project": "sqlitebrowser",
+      "file_hint": "DB.Browser.for.SQLite-*.win64.exe|sqlitebrowser-*.zip",
+      "category": "db",
+      "why": "Inspect EQ12 cache/telemetry DBs",
+      "silent_args": "/S",
+      "install": "installer-or-portable"
+    }
+  ]
+}

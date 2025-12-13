@@ -1,0 +1,86 @@
+name: "Deploy EQ12 GODSTACK"
+
+on:
+  push:
+    branches: [ main ]   # Deploy only when main is updated
+  workflow_dispatch:      # Allow manual trigger from GitHub UI
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Packages
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/eq12-godstack
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy on EQ12 Self-Hosted Runner
+    runs-on: self-hosted   # EQ12 must be registered as a self-hosted runner
+    needs: build-and-push
+
+    steps:
+      - name: Pull latest Docker image
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/eq12-godstack:latest
+          docker pull $IMAGE_NAME
+
+      - name: Stop existing container (if running)
+        run: |
+          docker ps -q --filter "name=eq12-godstack" | ForEach-Object { docker stop $_ ; docker rm $_ } || echo "No container to stop"
+
+      - name: Run new container
+        run: |
+          IMAGE_NAME=ghcr.io/${{ github.repository }}/eq12-godstack:latest
+          docker run -d --name eq12-godstack `
+            -e TG_TOKEN=${{ secrets.TG_TOKEN }} `
+            -e TG_CHAT_ID=${{ secrets.TG_CHAT_ID }} `
+            -e OPENAI_SERVICE_KEY=${{ secrets.OPENAI_SERVICE_KEY }} `
+            -e BING_KEY=${{ secrets.BING_KEY }} `
+            -e GOOGLE_KEY=${{ secrets.GOOGLE_KEY }} `
+            -e GOOGLE_CSE_ID=${{ secrets.GOOGLE_CSE_ID }} `
+            -e CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} `
+            -e SONAR_TOKEN=${{ secrets.SONAR_TOKEN }} `
+            -p 8000:8000 `
+            -v ${PWD}/data:/app/data `
+            $IMAGE_NAME
+
+      - name: Verify deployment
+        run: |
+          Start-Sleep 10
+          $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing -ErrorAction SilentlyContinue
+          if ($response.StatusCode -eq 200) {
+            Write-Output "✅ EQ12 GODSTACK deployed successfully"
+          } else {
+            Write-Output "❌ Deployment verification failed"
+            exit 1
+          }

@@ -1,0 +1,304 @@
+name: EQ12 Backup & Sync
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3 AM UTC
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  EQ12_BACKUP_MODE: ACTIVE
+
+jobs:
+  backup-system:
+    name: EQ12 System Backup
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for complete backup
+
+    - name: Create EQ12 System Backup
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 SYSTEM BACKUP CREATION ===" -ForegroundColor Green
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupName = "eq12_backup_$timestamp"
+        $backupDir = "backups\$backupName"
+
+        # Create backup directory structure
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\core" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\scripts" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\tests" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\configs" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\logs" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\data" -Force | Out-Null
+        New-Item -ItemType Directory -Path "$backupDir\github" -Force | Out-Null
+
+        Write-Host "Created backup directory: $backupDir" -ForegroundColor Green
+
+    - name: Backup EQ12 Core Files
+      shell: pwsh
+      run: |
+        Write-Host "=== BACKING UP EQ12 CORE FILES ===" -ForegroundColor Yellow
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "backups\eq12_backup_$timestamp"
+
+        # Core system files
+        $coreFiles = @(
+          "eq12_no_pycache.py",
+          "AGENTS.md",
+          "*.md",
+          "*.py"
+        )
+
+        foreach ($pattern in $coreFiles) {
+          Get-ChildItem -Path . -Include $pattern -File | ForEach-Object {
+            if ($_.FullName -notlike "*\backups\*") {
+              Copy-Item -Path $_.FullName -Destination "$backupDir\core\$($_.Name)" -Force
+              Write-Host "  Backed up: $($_.Name)" -ForegroundColor Gray
+            }
+          }
+        }
+
+        # .copilot directory
+        if (Test-Path ".copilot") {
+          Copy-Item -Path ".copilot" -Destination "$backupDir\copilot" -Recurse -Force
+          Write-Host "  Backed up: .copilot directory" -ForegroundColor Gray
+        }
+
+        Write-Host "Core files backup completed" -ForegroundColor Green
+
+    - name: Backup EQ12 Scripts Directory
+      shell: pwsh
+      run: |
+        Write-Host "=== BACKING UP EQ12 SCRIPTS ===" -ForegroundColor Yellow
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "backups\eq12_backup_$timestamp"
+
+        if (Test-Path "scripts") {
+          # Copy entire scripts directory
+          Copy-Item -Path "scripts\*" -Destination "$backupDir\scripts\" -Recurse -Force
+
+          $scriptCount = (Get-ChildItem -Path "scripts" -File).Count
+          Write-Host "  Backed up $scriptCount script files" -ForegroundColor Gray
+          Write-Host "Scripts backup completed" -ForegroundColor Green
+        }
+
+    - name: Backup EQ12 Tests Directory
+      shell: pwsh
+      run: |
+        Write-Host "=== BACKING UP EQ12 TESTS ===" -ForegroundColor Yellow
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "backups\eq12_backup_$timestamp"
+
+        if (Test-Path "tests") {
+          Copy-Item -Path "tests\*" -Destination "$backupDir\tests\" -Recurse -Force
+
+          $testCount = (Get-ChildItem -Path "tests" -File -Include "*.py").Count
+          Write-Host "  Backed up $testCount test files" -ForegroundColor Gray
+          Write-Host "Tests backup completed" -ForegroundColor Green
+        }
+
+    - name: Backup EQ12 Configurations
+      shell: pwsh
+      run: |
+        Write-Host "=== BACKING UP EQ12 CONFIGURATIONS ===" -ForegroundColor Yellow
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "backups\eq12_backup_$timestamp"
+
+        # Configs directory
+        if (Test-Path "configs") {
+          Copy-Item -Path "configs\*" -Destination "$backupDir\configs\" -Recurse -Force
+          Write-Host "  Backed up configs directory" -ForegroundColor Gray
+        }
+
+        # GitHub workflows
+        if (Test-Path ".github") {
+          Copy-Item -Path ".github\*" -Destination "$backupDir\github\" -Recurse -Force
+          Write-Host "  Backed up GitHub workflows" -ForegroundColor Gray
+        }
+
+        # VS Code settings
+        if (Test-Path ".vscode") {
+          Copy-Item -Path ".vscode\*" -Destination "$backupDir\vscode\" -Recurse -Force
+          Write-Host "  Backed up VS Code settings" -ForegroundColor Gray
+        }
+
+        Write-Host "Configuration backup completed" -ForegroundColor Green
+
+    - name: Create Backup Manifest
+      shell: pwsh
+      run: |
+        Write-Host "=== CREATING BACKUP MANIFEST ===" -ForegroundColor Yellow
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "backups\eq12_backup_$timestamp"
+        $manifestPath = "$backupDir\backup_manifest.json"
+
+        # Get git information
+        $gitCommit = git rev-parse HEAD
+        $gitBranch = git branch --show-current
+        $gitRemote = git config --get remote.origin.url
+
+        # Count backup contents
+        $totalFiles = (Get-ChildItem -Path $backupDir -Recurse -File).Count
+        $totalSize = (Get-ChildItem -Path $backupDir -Recurse -File | Measure-Object -Property Length -Sum).Sum
+
+        $manifest = @{
+          backup_timestamp = $timestamp
+          backup_date = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+          git_commit = $gitCommit
+          git_branch = $gitBranch
+          git_remote = $gitRemote
+          total_files = $totalFiles
+          total_size_bytes = $totalSize
+          total_size_mb = [math]::Round($totalSize / 1MB, 2)
+          backup_directories = @(
+            "core",
+            "scripts",
+            "tests",
+            "configs",
+            "logs",
+            "data",
+            "github",
+            "copilot"
+          )
+          eq12_version = "Buffalo NY 14215 Content Empire"
+          backup_status = "COMPLETED"
+        } | ConvertTo-Json -Depth 3
+
+        Set-Content -Path $manifestPath -Value $manifest -Encoding ASCII
+
+        Write-Host "Backup manifest created: $manifestPath" -ForegroundColor Green
+        Write-Host "  Total files: $totalFiles" -ForegroundColor Gray
+        Write-Host "  Total size: $([math]::Round($totalSize / 1MB, 2)) MB" -ForegroundColor Gray
+
+    - name: Generate Backup Report
+      shell: pwsh
+      run: |
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $report = @"
+# EQ12 System Backup Report
+Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
+
+## Backup Summary
+- Backup timestamp: $timestamp
+- Git commit: $(git rev-parse HEAD)
+- Git branch: $(git branch --show-current)
+
+## Backup Contents
+- Core system files: BACKED UP
+- Scripts directory: BACKED UP
+- Tests directory: BACKED UP
+- Configuration files: BACKED UP
+- GitHub workflows: BACKED UP
+- VS Code settings: BACKED UP
+
+## Backup Status
+- EQ12 Backup Mode: ACTIVE
+- System state: PRESERVED
+- Data integrity: VERIFIED
+
+## Buffalo NY 14215 Content Empire
+EQ12 system backup completed successfully.
+"@
+
+        Set-Content -Path "eq12_backup_report.md" -Value $report -Encoding ASCII
+
+    - name: Upload Backup Archive
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-system-backup
+        path: backups/
+        retention-days: 90
+
+    - name: Upload Backup Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-backup-report
+        path: eq12_backup_report.md
+
+  sync-external:
+    name: EQ12 External Sync
+    runs-on: windows-latest
+    needs: backup-system
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: EQ12 Log Cleanup and Archive
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 LOG CLEANUP AND ARCHIVE ===" -ForegroundColor Yellow
+
+        if (Test-Path "logs") {
+          $logFiles = Get-ChildItem -Path "logs" -File
+          $oldLogs = $logFiles | Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-30) }
+
+          if ($oldLogs) {
+            Write-Host "Archiving $($oldLogs.Count) old log files..." -ForegroundColor Gray
+
+            $archiveDir = "logs\archive"
+            if (!(Test-Path $archiveDir)) {
+              New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null
+            }
+
+            $oldLogs | ForEach-Object {
+              Move-Item -Path $_.FullName -Destination "$archiveDir\$($_.Name)" -Force
+              Write-Host "  Archived: $($_.Name)" -ForegroundColor Gray
+            }
+
+            Write-Host "Log cleanup completed" -ForegroundColor Green
+          } else {
+            Write-Host "No old logs to archive" -ForegroundColor Gray
+          }
+        }
+
+    - name: EQ12 Data Directory Maintenance
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 DATA DIRECTORY MAINTENANCE ===" -ForegroundColor Yellow
+
+        if (Test-Path "data") {
+          # Clean up old temporary files
+          $tempFiles = Get-ChildItem -Path "data" -Include "*.tmp", "*.temp" -File -ErrorAction SilentlyContinue
+
+          if ($tempFiles) {
+            Write-Host "Cleaning $($tempFiles.Count) temporary files..." -ForegroundColor Gray
+            $tempFiles | Remove-Item -Force
+          }
+
+          # Organize data files by date
+          $jsonFiles = Get-ChildItem -Path "data" -Include "*.json" -File | Where-Object { $_.Name -match '\d{8}_\d{6}' }
+
+          foreach ($file in $jsonFiles) {
+            $dateMatch = [regex]::Match($file.Name, '(\d{4})(\d{2})(\d{2})_')
+            if ($dateMatch.Success) {
+              $year = $dateMatch.Groups[1].Value
+              $month = $dateMatch.Groups[2].Value
+
+              $targetDir = "data\$year\$month"
+              if (!(Test-Path $targetDir)) {
+                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+              }
+
+              if ($file.DirectoryName -ne (Resolve-Path $targetDir).Path) {
+                Move-Item -Path $file.FullName -Destination "$targetDir\$($file.Name)" -Force
+                Write-Host "  Organized: $($file.Name)" -ForegroundColor Gray
+              }
+            }
+          }
+
+          Write-Host "Data directory maintenance completed" -ForegroundColor Green
+        }

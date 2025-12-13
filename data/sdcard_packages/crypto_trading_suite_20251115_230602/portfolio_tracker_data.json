@@ -1,0 +1,56 @@
+{
+  "portfolio_template": {
+    "columns": [
+      "Date",
+      "Cryptocurrency",
+      "Amount",
+      "Purchase_Price",
+      "Current_Price",
+      "Value_USD",
+      "Profit_Loss",
+      "Percentage_Change"
+    ],
+    "sample_data": [
+      [
+        "2024-01-01",
+        "Bitcoin",
+        0.025,
+        45000,
+        47000,
+        1175,
+        50,
+        4.4
+      ],
+      [
+        "2024-01-15",
+        "Ethereum",
+        1.5,
+        2800,
+        3000,
+        4500,
+        300,
+        7.1
+      ],
+      [
+        "2024-02-01",
+        "Cardano",
+        1000,
+        0.55,
+        0.48,
+        480,
+        -70,
+        -12.7
+      ]
+    ],
+    "formulas": {
+      "Value_USD": "=Amount * Current_Price",
+      "Profit_Loss": "=Value_USD - (Amount * Purchase_Price)",
+      "Percentage_Change": "=(Current_Price - Purchase_Price) / Purchase_Price * 100"
+    },
+    "risk_levels": {
+      "Conservative": "5-15% crypto allocation",
+      "Moderate": "15-25% crypto allocation",
+      "Aggressive": "25%+ crypto allocation"
+    }
+  }
+}

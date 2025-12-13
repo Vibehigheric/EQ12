@@ -1,0 +1,37 @@
+name: Build and Test EQ12
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore EQ12.sln
+      
+      - name: Build solution
+        run: dotnet build -c Release --no-restore
+      
+      - name: Run unit tests
+        run: dotnet test tests/ --configuration Release --no-build
+      
+      - name: Create release artifact
+        run: dotnet publish src/EQ12.CommandCenter/EQ12.CommandCenter.vbproj -c Release -o ./publish
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eq12-build
+          path: ./publish/

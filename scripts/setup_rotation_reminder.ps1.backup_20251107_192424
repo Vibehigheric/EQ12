@@ -1,0 +1,33 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+<#
+setup_rotation_reminder.ps1
+Registers a Windows Scheduled Task to run the rotate_reminder.ps1 script every 30 days.
+Usage (run as admin if necessary):
+  & 'C:\EQ12\scripts\setup_rotation_reminder.ps1'
+This will create a scheduled task named EQ12-Rotate-Keys that runs every 30 days as the current user.
+#>
+[CmdletBinding()]
+param()
+
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$rotateScript = Join-Path $scriptDir 'rotate_reminder.ps1'
+if (-not (Test-Path $rotateScript)) {
+    Write-Host "rotate_reminder.ps1 not found at $rotateScript. Aborting."
+    exit 1
+}
+
+$taskName = 'EQ12-Rotate-Keys'
+$action = New-ScheduledTaskAction -Execute 'PowerShell.exe' -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$rotateScript`""
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) -RepetitionInterval (New-TimeSpan -Days 30) -RepetitionDuration ([TimeSpan]::MaxValue)
+$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
+
+try {
+    Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Description 'EQ12: Rotate API keys every 30 days' -Force
+    Write-Host "Scheduled Task '$taskName" registered to run every 30 days."
+} catch {
+    Write-Host "Failed to register scheduled task: $($_.Exception.Message)"
+    Write-Host "You may need to run this script as administrator."
+}
+""

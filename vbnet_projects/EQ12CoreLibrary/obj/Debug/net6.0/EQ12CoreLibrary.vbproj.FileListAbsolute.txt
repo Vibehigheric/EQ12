@@ -1,0 +1,12 @@
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\bin\Debug\net6.0\EQ12CoreLibrary.deps.json
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\bin\Debug\net6.0\EQ12CoreLibrary.dll
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\bin\Debug\net6.0\EQ12CoreLibrary.pdb
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.vbproj.AssemblyReference.cache
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.AssemblyInfoInputs.cache
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.AssemblyInfo.vb
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.vbproj.CoreCompileInputs.cache
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.dll
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\refint\EQ12CoreLibrary.dll
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\EQ12CoreLibrary.pdb
+C:\EQ12\vbnet_projects\EQ12CoreLibrary\obj\Debug\net6.0\ref\EQ12CoreLibrary.dll

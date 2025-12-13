@@ -1,0 +1,491 @@
+﻿<!doctype html><html><head><meta charset="utf-8">
+<title>EQ12 Synergy Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+<style>
+body{background:#0b0e11;color:#e7e7e7;font-family:Segoe UI,Arial}
+.card{background:#14181d;padding:16px;margin:16px;border-radius:10px}
+h1{margin-bottom:20px}
+</style>
+</head><body>
+
+<h1>EQ12 Synergy Dashboard</h1>
+
+
+<div class="card">
+  <h2>Stocks</h2>
+  <div id="stocks"></div>
+</div>
+<script>
+fetch("stocks_latest.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Ticker</th><th>Close</th><th>EMA20</th><th>EMA50</th><th>RSI14</th><th>Momentum</th><th>Signal</th></tr>";
+    (data.results || []).forEach(r => {
+      html += <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>%</td>
+        <td></td>
+      </tr>;
+    });
+    html += "</table>";
+    document.getElementById("stocks").innerHTML = html;
+  });
+
+<div class="card">
+  <h2>Crypto</h2>
+  <div id="crypto"></div>
+</div>
+<script>
+fetch("stocks_latest.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Ticker</th><th>Close</th><th>EMA20</th><th>EMA50</th><th>RSI14</th><th>Momentum</th><th>Signal</th></tr>";
+    (data.results || []).forEach(r => {
+      html += <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>%</td>
+        <td></td>
+      </tr>;
+    });
+    html += "</table>";
+    document.getElementById("stocks").innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("stocks").innerHTML = "<p>No stock data available.</p>";
+  });
+</script>
+<script>
+fetch("crypto_latest.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Pair</th><th>Spot Price</th></tr>";
+    (data.results || []).forEach(r => {
+      html += <tr><td></td><td></td></tr>;
+    });
+    html += "</table>";
+    document.getElementById("crypto").innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("crypto").innerHTML = "<p>No crypto data available.</p>";
+  });
+</script>
+    (data.results || []).forEach(r => {
+      html += <tr><td></td><td></td></tr>;
+    });
+    html += "</table>";
+    document.getElementById("crypto").innerHTML = html;
+<script>
+fetch("jobs_controltech.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Title</th><th>Link</th><th>Date</th></tr>";
+    (data.results || []).forEach(j => {
+      html += <tr>
+        <td></td>
+        <td><a href="" target="_blank">View</a></td>
+        <td></td>
+      </tr>;
+    });
+    html += "</table>";
+    document.getElementById("jobs").innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("jobs").innerHTML = "<p>No job data available.</p>";
+  });
+</script>
+  });
+
+<div class="card">
+  <h2>Control Tech Jobs</h2>
+  <div id="jobs"></div>
+<script>
+fetch("recycle_report.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Index</th><th>Name</th><th>Path</th><th>Date</th><th>Size</th></tr>";
+    (data.items || []).forEach((r, idx) => {
+      html += <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>;
+    });
+    html += "</table>";
+    document.getElementById("recycle").innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("recycle").innerHTML = "<p>No recycle data available.</p>";
+  });
+</script>
+</div>
+<script>
+fetch("jobs_controltech.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Title</th><th>Link</th><th>Date</th></tr>";
+    (data.results || []).forEach(j => {
+      html += <tr>
+        <td></td>
+        <td><a href="" target="_blank">View</a></td>
+        <td></td>
+      </tr>;
+    });
+    html += "</table>";
+    document.getElementById("jobs").innerHTML = html;
+  });
+
+<div class="card">
+  <h2>Recycle Bin</h2>
+  <div id="recycle"></div>
+</div>
+<script>
+fetch("recycle_report.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Index</th><th>Name</th><th>Path</th><th>Date</th><th>Size</th></tr>";
+    (data.items || []).forEach((r, idx) => {
+      html += <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>;
+    });
+    html += "</table>";
+    document.getElementById("recycle").innerHTML = html;
+  });
+
+<div class="card">
+  <h2>Odds</h2>
+  <div id="odds"></div>
+</div>
+<script>
+fetch("odds_snapshot.json")
+  .then(resp => resp.json())
+  .then(data => {
+    let html = "<table><tr><th>Sport</th><th>Home</th><th>Away</th><th>Spread</th><th>Moneyline</th></tr>";
+    (data || []).forEach(sport => {
+      if (sport.events && sport.events.length) {
+        sport.events.forEach(ev => {
+          let home = ev.home_team || (ev.teams && ev.teams[0]) || "";
+          let away = ev.away_team || (ev.teams && ev.teams[1]) || "";
+          let spread = "";
+          let moneyline = "";
+          if (ev.bookmakers && ev.bookmakers.length) {
+            let bm = ev.bookmakers[0];
+            let spreadMarket = bm.markets && bm.markets.find(m => m.key === "spreads");
+            let h2hMarket = bm.markets && bm.markets.find(m => m.key === "h2h");
+            if (spreadMarket && spreadMarket.outcomes && spreadMarket.outcomes.length >= 2) {
+              spread = ${spreadMarket.outcomes[0].point || ''} / ;
+            }
+            if (h2hMarket && h2hMarket.outcomes && h2hMarket.outcomes.length >= 2) {
+              moneyline = ${h2hMarket.outcomes[0].price || ''} / ;
+            }
+          }
+          html += <tr>
+            <td></td>
+            <td>C:\Users\Ricoj100</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>;
+        });
+      }
+    });
+    html += "</table>";
+    document.getElementById("odds").innerHTML = html;
+  })
+  .catch(err => {
+    document.getElementById("odds").innerHTML = "<p>No odds data available.</p>";
+  });
+</script>
+<script>
+// Inject JSON
+const recycle = ;
+const crypto  = {"value":"{\"type\": \"crypto\", \"ts\": \"2025-09-20T19:42:41.368789+00:00\", \"pairs\": [\"BTC-USD\", \"ETH-USD\"], \"results\": [{\"pair\": \"BTC-USD\", \"coinbase_spot\": 115765.195}, {\"pair\": \"ETH-USD\", \"coinbase_spot\": 4481.185}]}","PSPath":"C:\\EQ12\\logs\\crypto_latest.json","PSParentPath":"C:\\EQ12\\logs","PSChildName":"crypto_latest.json","PSDrive":{"CurrentLocation":"EQ12","Name":"C","Provider":{"ImplementingType":"Microsoft.PowerShell.Commands.FileSystemProvider","HelpFile":"System.Management.Automation.dll-Help.xml","Name":"FileSystem","PSSnapIn":"Microsoft.PowerShell.Core","ModuleName":"Microsoft.PowerShell.Core","Module":null,"Description":"","Capabilities":52,"Home":"C:\\Users\\Ricoj100","Drives":"C TestDrive"},"Root":"C:\\","Description":"Windows","MaximumSize":null,"Credential":{"UserName":null,"Password":null},"DisplayRoot":null},"PSProvider":{"ImplementingType":{"Module":"System.Management.Automation.dll","Assembly":"System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35","TypeHandle":"System.RuntimeTypeHandle","DeclaringMethod":null,"BaseType":"System.Management.Automation.Provider.NavigationCmdletProvider","UnderlyingSystemType":"Microsoft.PowerShell.Commands.FileSystemProvider","FullName":"Microsoft.PowerShell.Commands.FileSystemProvider","AssemblyQualifiedName":"Microsoft.PowerShell.Commands.FileSystemProvider, System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35","Namespace":"Microsoft.PowerShell.Commands","GUID":"b4755d19-b6a7-38dc-ae06-4167f801062f","IsEnum":false,"GenericParameterAttributes":null,"IsSecurityCritical":true,"IsSecuritySafeCritical":false,"IsSecurityTransparent":false,"IsGenericTypeDefinition":false,"IsGenericParameter":false,"GenericParameterPosition":null,"IsGenericType":false,"IsConstructedGenericType":false,"ContainsGenericParameters":false,"StructLayoutAttribute":"System.Runtime.InteropServices.StructLayoutAttribute","Name":"FileSystemProvider","MemberType":32,"DeclaringType":null,"ReflectedType":null,"MetadataToken":33556356,"GenericTypeParameters":"","DeclaredConstructors":"Void .ctor() Void .cctor()","DeclaredEvents":"","DeclaredFields":"System.Collections.ObjectModel.Collection`1[System.Management.Automation.WildcardPattern] excludeMatcher System.Management.Automation.PSTraceSource tracer Int32 FILETRANSFERSIZE System.String ProviderName","DeclaredMembers":"System.String NormalizePath(System.String) System.IO.FileSystemInfo GetFileSystemInfo(System.String, Boolean ByRef) Boolean IsFilterSet() System.Object GetChildNamesDynamicParameters(System.String) System.Object GetChildItemsDynamicParameters(System.String, Boolean) System.Object CopyItemDynamicParameters(System.String, System.String, Boolean) Boolean IsNetworkMappedDrive(System.Management.Automation.PSDriveInfo) Boolean IsSupportedDriveForPersistence(System.Management.Automation.PSDriveInfo) System.String GetRootPathForNetworkDriveOrDosDevice(System.IO.DriveInfo) System.Collections.ObjectModel.Collection`1[System.Management.Automation.PSDriveInfo] InitializeDefaultDrives() System.Object GetItemDynamicParameters(System.String) Void InvokeDefaultAction(System.String) Void GetChildItems(System.String, Boolean, UInt32) Void GetChildNames(System.String, System.Management.Automation.ReturnContainers) Boolean CheckItemExists(System.String, Boolean ByRef) System.Object RemoveItemDynamicParameters(System.String, Boolean) Void RemoveFileInfoItem(System.IO.FileInfo, Boolean) Boolean ItemExists(System.String) System.Object ItemExistsDynamicParameters(System.String) Boolean HasChildItems(System.String) Void CopyItemLocalOrToSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void InitilizeFunctionPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) Boolean ValidRemoteSessionForScripting(System.Management.Automation.Runspaces.Runspace) Void InitilizeFunctionsPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean PathIsReservedDeviceName(System.String, System.String) Boolean IsAbsolutePath(System.String) System.String GetCommonBase(System.String, System.String) System.String CreateNormalizedRelativePathFromStack(System.Collections.Generic.Stack`1[System.String]) Boolean IsItemContainer(System.String) Void MoveDirectoryInfoUnchecked(System.IO.DirectoryInfo, System.String, Boolean) Boolean IsSameVolume(System.String, System.String) System.Object GetPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object SetPropertyDynamicParameters(System.String, System.Management.Automation.PSObject) System.Object ClearPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object GetContentWriterDynamicParameters(System.String) System.Object ClearContentDynamicParameters(System.String) Int32 SafeGetFileAttributes(System.String) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorFromPath(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorOfType(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptor(ItemType) System.Management.Automation.ErrorRecord CreateErrorRecord(System.String, System.String) System.String GetHelpMaml(System.String, System.String) System.Management.Automation.ProviderInfo Start(System.Management.Automation.ProviderInfo) System.Management.Automation.PSDriveInfo NewDrive(System.Management.Automation.PSDriveInfo) Void MapNetworkDrive(System.Management.Automation.PSDriveInfo) System.Management.Automation.PSDriveInfo RemoveDrive(System.Management.Automation.PSDriveInfo) System.String GetUNCForNetworkDrive(System.String) System.String GetSubstitutedPathForNetworkDosDevice(System.String) Boolean IsValidPath(System.String) Void GetItem(System.String) System.IO.FileSystemInfo GetFileSystemItem(System.String, Boolean ByRef, Boolean) Boolean ConvertPath(System.String, System.String, System.String ByRef, System.String ByRef) Void GetPathItems(System.String, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers) Void Dir(System.IO.DirectoryInfo, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers, InodeTracker) System.Management.Automation.FlagsExpression`1[System.IO.FileAttributes] FormatAttributeSwitchParamters() System.String Mode(System.Management.Automation.PSObject) Void RenameItem(System.String, System.String) Void NewItem(System.String, System.String, System.Object) ItemType GetItemType(System.String) Void CreateDirectory(System.String, Boolean) Boolean CreateIntermediateDirectories(System.String) Void RemoveItem(System.String, Boolean) Void RemoveDirectoryInfoItem(System.IO.DirectoryInfo, Boolean, Boolean, Boolean) Void RemoveFileSystemItem(System.IO.FileSystemInfo, Boolean) Boolean ItemExists(System.String, System.Management.Automation.ErrorRecord ByRef) Boolean DirectoryInfoHasChildItems(System.IO.DirectoryInfo) Void CopyItem(System.String, System.String, Boolean) Void CopyItemFromRemoteSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.Runspaces.PSSession) Void CopyDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void CopyFileInfoItem(System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell) Void CopyDirectoryFromRemoteSession(System.String, System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) System.Collections.ArrayList GetRemoteSourceAlternateStreams(System.Management.Automation.PowerShell, System.String) Void RemoveFunctionsPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) System.Collections.Hashtable GetRemoteFileMetadata(System.String, System.Management.Automation.PowerShell) Void SetFileMetadata(System.String, System.IO.FileInfo, System.Management.Automation.PowerShell) Void CopyFileFromRemoteSession(System.String, System.String, System.String, Boolean, System.Management.Automation.PowerShell, Int64) Boolean PerformCopyFileFromRemoteSession(System.String, System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell, Int64, Boolean, System.String) Void RemoveFunctionPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean RemoteTargetSupportsAlternateStreams(System.Management.Automation.PowerShell, System.String) System.String MakeRemotePath(System.Management.Automation.PowerShell, System.String, System.String) Boolean RemoteDirectoryExist(System.Management.Automation.PowerShell, System.String) Boolean CopyFileStreamToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell, Boolean, System.String) System.Collections.Hashtable GetFileMetadata(System.IO.FileInfo) Void SetRemoteFileMetadata(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean PerformCopyFileToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean RemoteDestinationPathIsFile(System.String, System.Management.Automation.PowerShell) System.String CreateDirectoryOnRemoteSession(System.String, Boolean, System.Management.Automation.PowerShell) System.String GetParentPath(System.String, System.String) Boolean IsUNCPath(System.String) Boolean IsUNCRoot(System.String) Boolean IsPathRoot(System.String) System.String NormalizeRelativePath(System.String, System.String) System.String NormalizeRelativePathHelper(System.String, System.String) System.String RemoveRelativeTokens(System.String) System.Collections.Generic.Stack`1[System.String] TokenizePathToStack(System.String, System.String) System.Collections.Generic.Stack`1[System.String] NormalizeThePath(System.String, System.Collections.Generic.Stack`1[System.String]) System.String GetChildName(System.String) System.String EnsureDriveIsRooted(System.String) Void MoveItem(System.String, System.String) Void MoveFileInfoItem(System.IO.FileInfo, System.String, Boolean, Boolean) Void MoveDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean) Void CopyAndDelete(System.IO.DirectoryInfo, System.String, Boolean) Void GetProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) Void SetProperty(System.String, System.Management.Automation.PSObject) Void ClearProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Management.Automation.Provider.IContentReader GetContentReader(System.String) System.Object GetContentReaderDynamicParameters(System.String) System.Management.Automation.Provider.IContentWriter GetContentWriter(System.String) Void ClearContent(System.String) Void ValidateParameters(Boolean) Void GetSecurityDescriptor(System.String, System.Security.AccessControl.AccessControlSections) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity, System.Security.AccessControl.AccessControlSections) Void \u003cRemoveDirectoryInfoItem\u003eg__WriteErrorHelper|43_0(System.Exception, \u003c\u003ec__DisplayClass43_0 ByRef) Void .ctor() Void .cctor() System.Collections.ObjectModel.Collection`1[System.Management.Automation.WildcardPattern] excludeMatcher System.Management.Automation.PSTraceSource tracer Int32 FILETRANSFERSIZE System.String ProviderName Microsoft.PowerShell.Commands.FileSystemProvider+ItemType Microsoft.PowerShell.Commands.FileSystemProvider+NativeMethods Microsoft.PowerShell.Commands.FileSystemProvider+NetResource Microsoft.PowerShell.Commands.FileSystemProvider+InodeTracker Microsoft.PowerShell.Commands.FileSystemProvider+\u003c\u003ec__DisplayClass43_0","DeclaredMethods":"System.String Mode(System.Management.Automation.PSObject) System.Object GetChildItemsDynamicParameters(System.String, Boolean) System.String NormalizePath(System.String) System.IO.FileSystemInfo GetFileSystemInfo(System.String, Boolean ByRef) Boolean IsFilterSet() System.Object GetChildNamesDynamicParameters(System.String) System.Object CopyItemDynamicParameters(System.String, System.String, Boolean) Boolean IsNetworkMappedDrive(System.Management.Automation.PSDriveInfo) Boolean IsSupportedDriveForPersistence(System.Management.Automation.PSDriveInfo) System.String GetRootPathForNetworkDriveOrDosDevice(System.IO.DriveInfo) System.Collections.ObjectModel.Collection`1[System.Management.Automation.PSDriveInfo] InitializeDefaultDrives() System.Object GetItemDynamicParameters(System.String) Void InvokeDefaultAction(System.String) Void GetChildItems(System.String, Boolean, UInt32) Void GetChildNames(System.String, System.Management.Automation.ReturnContainers) Boolean CheckItemExists(System.String, Boolean ByRef) System.Object RemoveItemDynamicParameters(System.String, Boolean) Void RemoveFileInfoItem(System.IO.FileInfo, Boolean) Boolean ItemExists(System.String) System.Object ItemExistsDynamicParameters(System.String) Boolean HasChildItems(System.String) Void CopyItemLocalOrToSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void InitilizeFunctionPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) Boolean ValidRemoteSessionForScripting(System.Management.Automation.Runspaces.Runspace) Void InitilizeFunctionsPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean PathIsReservedDeviceName(System.String, System.String) Boolean IsAbsolutePath(System.String) System.String GetCommonBase(System.String, System.String) System.String CreateNormalizedRelativePathFromStack(System.Collections.Generic.Stack`1[System.String]) Boolean IsItemContainer(System.String) Void MoveDirectoryInfoUnchecked(System.IO.DirectoryInfo, System.String, Boolean) Boolean IsSameVolume(System.String, System.String) System.Object GetPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object SetPropertyDynamicParameters(System.String, System.Management.Automation.PSObject) System.Object ClearPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object GetContentWriterDynamicParameters(System.String) System.Object ClearContentDynamicParameters(System.String) Int32 SafeGetFileAttributes(System.String) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorFromPath(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorOfType(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptor(ItemType) System.Management.Automation.ErrorRecord CreateErrorRecord(System.String, System.String) System.String GetHelpMaml(System.String, System.String) System.Management.Automation.ProviderInfo Start(System.Management.Automation.ProviderInfo) System.Management.Automation.PSDriveInfo NewDrive(System.Management.Automation.PSDriveInfo) Void MapNetworkDrive(System.Management.Automation.PSDriveInfo) System.Management.Automation.PSDriveInfo RemoveDrive(System.Management.Automation.PSDriveInfo) System.String GetUNCForNetworkDrive(System.String) System.String GetSubstitutedPathForNetworkDosDevice(System.String) Boolean IsValidPath(System.String) Void GetItem(System.String) System.IO.FileSystemInfo GetFileSystemItem(System.String, Boolean ByRef, Boolean) Boolean ConvertPath(System.String, System.String, System.String ByRef, System.String ByRef) Void GetPathItems(System.String, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers) Void Dir(System.IO.DirectoryInfo, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers, InodeTracker) System.Management.Automation.FlagsExpression`1[System.IO.FileAttributes] FormatAttributeSwitchParamters() Void RenameItem(System.String, System.String) Void NewItem(System.String, System.String, System.Object) ItemType GetItemType(System.String) Void CreateDirectory(System.String, Boolean) Boolean CreateIntermediateDirectories(System.String) Void RemoveItem(System.String, Boolean) Void RemoveDirectoryInfoItem(System.IO.DirectoryInfo, Boolean, Boolean, Boolean) Void RemoveFileSystemItem(System.IO.FileSystemInfo, Boolean) Boolean ItemExists(System.String, System.Management.Automation.ErrorRecord ByRef) Boolean DirectoryInfoHasChildItems(System.IO.DirectoryInfo) Void CopyItem(System.String, System.String, Boolean) Void CopyItemFromRemoteSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.Runspaces.PSSession) Void CopyDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void CopyFileInfoItem(System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell) Void CopyDirectoryFromRemoteSession(System.String, System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) System.Collections.ArrayList GetRemoteSourceAlternateStreams(System.Management.Automation.PowerShell, System.String) Void RemoveFunctionsPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) System.Collections.Hashtable GetRemoteFileMetadata(System.String, System.Management.Automation.PowerShell) Void SetFileMetadata(System.String, System.IO.FileInfo, System.Management.Automation.PowerShell) Void CopyFileFromRemoteSession(System.String, System.String, System.String, Boolean, System.Management.Automation.PowerShell, Int64) Boolean PerformCopyFileFromRemoteSession(System.String, System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell, Int64, Boolean, System.String) Void RemoveFunctionPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean RemoteTargetSupportsAlternateStreams(System.Management.Automation.PowerShell, System.String) System.String MakeRemotePath(System.Management.Automation.PowerShell, System.String, System.String) Boolean RemoteDirectoryExist(System.Management.Automation.PowerShell, System.String) Boolean CopyFileStreamToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell, Boolean, System.String) System.Collections.Hashtable GetFileMetadata(System.IO.FileInfo) Void SetRemoteFileMetadata(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean PerformCopyFileToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean RemoteDestinationPathIsFile(System.String, System.Management.Automation.PowerShell) System.String CreateDirectoryOnRemoteSession(System.String, Boolean, System.Management.Automation.PowerShell) System.String GetParentPath(System.String, System.String) Boolean IsUNCPath(System.String) Boolean IsUNCRoot(System.String) Boolean IsPathRoot(System.String) System.String NormalizeRelativePath(System.String, System.String) System.String NormalizeRelativePathHelper(System.String, System.String) System.String RemoveRelativeTokens(System.String) System.Collections.Generic.Stack`1[System.String] TokenizePathToStack(System.String, System.String) System.Collections.Generic.Stack`1[System.String] NormalizeThePath(System.String, System.Collections.Generic.Stack`1[System.String]) System.String GetChildName(System.String) System.String EnsureDriveIsRooted(System.String) Void MoveItem(System.String, System.String) Void MoveFileInfoItem(System.IO.FileInfo, System.String, Boolean, Boolean) Void MoveDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean) Void CopyAndDelete(System.IO.DirectoryInfo, System.String, Boolean) Void GetProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) Void SetProperty(System.String, System.Management.Automation.PSObject) Void ClearProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Management.Automation.Provider.IContentReader GetContentReader(System.String) System.Object GetContentReaderDynamicParameters(System.String) System.Management.Automation.Provider.IContentWriter GetContentWriter(System.String) Void ClearContent(System.String) Void ValidateParameters(Boolean) Void GetSecurityDescriptor(System.String, System.Security.AccessControl.AccessControlSections) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity, System.Security.AccessControl.AccessControlSections) Void \u003cRemoveDirectoryInfoItem\u003eg__WriteErrorHelper|43_0(System.Exception, \u003c\u003ec__DisplayClass43_0 ByRef)","DeclaredNestedTypes":"Microsoft.PowerShell.Commands.FileSystemProvider+ItemType Microsoft.PowerShell.Commands.FileSystemProvider+NativeMethods Microsoft.PowerShell.Commands.FileSystemProvider+NetResource Microsoft.PowerShell.Commands.FileSystemProvider+InodeTracker Microsoft.PowerShell.Commands.FileSystemProvider+\u003c\u003ec__DisplayClass43_0","DeclaredProperties":"","ImplementedInterfaces":"System.Management.Automation.IResourceSupplier System.Management.Automation.Provider.IContentCmdletProvider System.Management.Automation.Provider.IPropertyCmdletProvider System.Management.Automation.Provider.ISecurityDescriptorCmdletProvider System.Management.Automation.Provider.ICmdletProviderSupportsHelp","TypeInitializer":"Void .cctor()","IsNested":false,"Attributes":1048833,"IsVisible":true,"IsNotPublic":false,"IsPublic":true,"IsNestedPublic":false,"IsNestedPrivate":false,"IsNestedFamily":false,"IsNestedAssembly":false,"IsNestedFamANDAssem":false,"IsNestedFamORAssem":false,"IsAutoLayout":true,"IsLayoutSequential":false,"IsExplicitLayout":false,"IsClass":true,"IsInterface":false,"IsValueType":false,"IsAbstract":false,"IsSealed":true,"IsSpecialName":false,"IsImport":false,"IsSerializable":false,"IsAnsiClass":true,"IsUnicodeClass":false,"IsAutoClass":false,"IsArray":false,"IsByRef":false,"IsPointer":false,"IsPrimitive":false,"IsCOMObject":false,"HasElementType":false,"IsContextful":false,"IsMarshalByRef":false,"GenericTypeArguments":"","CustomAttributes":"[System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.String), typeof(System.IO.FileInfo) }, ProviderCmdlet = \"New-Item\")] [System.Management.Automation.OutputTypeAttribute(typeof(System.Security.AccessControl.FileSecurity), ProviderCmdlet = \"Set-Acl\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.String), typeof(System.Management.Automation.PathInfo) }, ProviderCmdlet = \"Resolve-Path\")] [System.Management.Automation.OutputTypeAttribute(typeof(System.Management.Automation.PathInfo), ProviderCmdlet = \"Push-Location\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.Byte), typeof(System.String) }, ProviderCmdlet = \"Get-Content\")] [System.Management.Automation.OutputTypeAttribute(typeof(System.IO.FileInfo), ProviderCmdlet = \"Get-Item\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.IO.FileInfo), typeof(System.IO.DirectoryInfo) }, ProviderCmdlet = \"Get-ChildItem\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.Security.AccessControl.FileSecurity), typeof(System.Security.AccessControl.DirectorySecurity) }, ProviderCmdlet = \"Get-Acl\")] [System.Management.Automation.OutputTypeAttribute(new Type[4] { typeof(System.Boolean), typeof(System.String), typeof(System.IO.FileInfo), typeof(System.IO.DirectoryInfo) }, ProviderCmdlet = \"Get-Item\")] [System.Management.Automation.OutputTypeAttribute(new Type[5] { typeof(System.Boolean), typeof(System.String), typeof(System.DateTime), typeof(System.IO.FileInfo), typeof(System.IO.DirectoryInfo) }, ProviderCmdlet = \"Get-ItemProperty\")] [System.Management.Automation.Provider.CmdletProviderAttribute(\"FileSystem\", (System.Management.Automation.Provider.ProviderCapabilities)52)]"},"HelpFile":"System.Management.Automation.dll-Help.xml","Name":"FileSystem","PSSnapIn":{"Name":"Microsoft.PowerShell.Core","IsDefault":true,"ApplicationBase":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0","AssemblyName":"System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, ProcessorArchitecture=MSIL","ModuleName":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\System.Management.Automation.dll","PSVersion":"5.1.26100.6584","Version":"3.0.0.0","Types":"types.ps1xml typesv3.ps1xml","Formats":"Certificate.format.ps1xml DotNetTypes.format.ps1xml FileSystem.format.ps1xml Help.format.ps1xml HelpV3.format.ps1xml PowerShellCore.format.ps1xml PowerShellTrace.format.ps1xml Registry.format.ps1xml","Description":"This Windows PowerShell snap-in contains cmdlets used to manage components of Windows PowerShell.","Vendor":"Microsoft Corporation","LogPipelineExecutionDetails":false},"ModuleName":"Microsoft.PowerShell.Core","Module":null,"Description":"","Capabilities":52,"Home":"C:\\Users\\Ricoj100","Drives":["C","TestDrive"]},"ReadCount":1};
+const jobs    = {"value":"{\"type\": \"jobs\", \"ts\": \"2025-09-20T19:42:44.964569+00:00\", \"total\": 6, \"results\": [{\"error\": \"403 Client Error: Forbidden for url: https://www.indeed.com/rss?q=Control%20Technician\u0026l=Buffalo%2CNY\", \"source\": \"Indeed\", \"query\": \"Control Technician\", \"location\": \"Buffalo,NY\"}, {\"error\": \"403 Client Error: Forbidden for url: https://www.indeed.com/rss?q=Control%20Technician\u0026l=Remote\", \"source\": \"Indeed\", \"query\": \"Control Technician\", \"location\": \"Remote\"}, {\"error\": \"403 Client Error: Forbidden for url: https://www.indeed.com/rss?q=Controls%20Technician\u0026l=Buffalo%2CNY\", \"source\": \"Indeed\", \"query\": \"Controls Technician\", \"location\": \"Buffalo,NY\"}, {\"error\": \"403 Client Error: Forbidden for url: https://www.indeed.com/rss?q=Controls%20Technician\u0026l=Remote\", \"source\": \"Indeed\", \"query\": \"Controls Technician\", \"location\": \"Remote\"}, {\"error\": \"403 Client Error: Forbidden for url: https://www.indeed.com/rss?q=Building%20Automation\u0026l=Buffalo%2CNY\", \"source\": \"Indeed\", \"query\": \"Building Automation\", \"location\": \"Buffalo,NY\"}, {\"error\": \"403 Client Error: Forbidden for url: https://www.indeed.com/rss?q=Building%20Automation\u0026l=Remote\", \"source\": \"Indeed\", \"query\": \"Building Automation\", \"location\": \"Remote\"}]}","PSPath":"C:\\EQ12\\logs\\jobs_controltech.json","PSParentPath":"C:\\EQ12\\logs","PSChildName":"jobs_controltech.json","PSDrive":{"CurrentLocation":"EQ12","Name":"C","Provider":{"ImplementingType":"Microsoft.PowerShell.Commands.FileSystemProvider","HelpFile":"System.Management.Automation.dll-Help.xml","Name":"FileSystem","PSSnapIn":"Microsoft.PowerShell.Core","ModuleName":"Microsoft.PowerShell.Core","Module":null,"Description":"","Capabilities":52,"Home":"C:\\Users\\Ricoj100","Drives":"C TestDrive"},"Root":"C:\\","Description":"Windows","MaximumSize":null,"Credential":{"UserName":null,"Password":null},"DisplayRoot":null},"PSProvider":{"ImplementingType":{"Module":"System.Management.Automation.dll","Assembly":"System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35","TypeHandle":"System.RuntimeTypeHandle","DeclaringMethod":null,"BaseType":"System.Management.Automation.Provider.NavigationCmdletProvider","UnderlyingSystemType":"Microsoft.PowerShell.Commands.FileSystemProvider","FullName":"Microsoft.PowerShell.Commands.FileSystemProvider","AssemblyQualifiedName":"Microsoft.PowerShell.Commands.FileSystemProvider, System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35","Namespace":"Microsoft.PowerShell.Commands","GUID":"b4755d19-b6a7-38dc-ae06-4167f801062f","IsEnum":false,"GenericParameterAttributes":null,"IsSecurityCritical":true,"IsSecuritySafeCritical":false,"IsSecurityTransparent":false,"IsGenericTypeDefinition":false,"IsGenericParameter":false,"GenericParameterPosition":null,"IsGenericType":false,"IsConstructedGenericType":false,"ContainsGenericParameters":false,"StructLayoutAttribute":"System.Runtime.InteropServices.StructLayoutAttribute","Name":"FileSystemProvider","MemberType":32,"DeclaringType":null,"ReflectedType":null,"MetadataToken":33556356,"GenericTypeParameters":"","DeclaredConstructors":"Void .ctor() Void .cctor()","DeclaredEvents":"","DeclaredFields":"System.Collections.ObjectModel.Collection`1[System.Management.Automation.WildcardPattern] excludeMatcher System.Management.Automation.PSTraceSource tracer Int32 FILETRANSFERSIZE System.String ProviderName","DeclaredMembers":"System.String Mode(System.Management.Automation.PSObject) System.Object GetChildItemsDynamicParameters(System.String, Boolean) System.String NormalizePath(System.String) System.IO.FileSystemInfo GetFileSystemInfo(System.String, Boolean ByRef) Boolean IsFilterSet() System.Object GetChildNamesDynamicParameters(System.String) System.Object CopyItemDynamicParameters(System.String, System.String, Boolean) Boolean IsNetworkMappedDrive(System.Management.Automation.PSDriveInfo) Boolean IsSupportedDriveForPersistence(System.Management.Automation.PSDriveInfo) System.String GetRootPathForNetworkDriveOrDosDevice(System.IO.DriveInfo) System.Collections.ObjectModel.Collection`1[System.Management.Automation.PSDriveInfo] InitializeDefaultDrives() System.Object GetItemDynamicParameters(System.String) Void InvokeDefaultAction(System.String) Void GetChildItems(System.String, Boolean, UInt32) Void GetChildNames(System.String, System.Management.Automation.ReturnContainers) Boolean CheckItemExists(System.String, Boolean ByRef) System.Object RemoveItemDynamicParameters(System.String, Boolean) Void RemoveFileInfoItem(System.IO.FileInfo, Boolean) Boolean ItemExists(System.String) System.Object ItemExistsDynamicParameters(System.String) Boolean HasChildItems(System.String) Void CopyItemLocalOrToSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void InitilizeFunctionPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) Boolean ValidRemoteSessionForScripting(System.Management.Automation.Runspaces.Runspace) Void InitilizeFunctionsPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean PathIsReservedDeviceName(System.String, System.String) Boolean IsAbsolutePath(System.String) System.String GetCommonBase(System.String, System.String) System.String CreateNormalizedRelativePathFromStack(System.Collections.Generic.Stack`1[System.String]) Boolean IsItemContainer(System.String) Void MoveDirectoryInfoUnchecked(System.IO.DirectoryInfo, System.String, Boolean) Boolean IsSameVolume(System.String, System.String) System.Object GetPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object SetPropertyDynamicParameters(System.String, System.Management.Automation.PSObject) System.Object ClearPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object GetContentWriterDynamicParameters(System.String) System.Object ClearContentDynamicParameters(System.String) Int32 SafeGetFileAttributes(System.String) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorFromPath(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorOfType(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptor(ItemType) System.Management.Automation.ErrorRecord CreateErrorRecord(System.String, System.String) System.String GetHelpMaml(System.String, System.String) System.Management.Automation.ProviderInfo Start(System.Management.Automation.ProviderInfo) System.Management.Automation.PSDriveInfo NewDrive(System.Management.Automation.PSDriveInfo) Void MapNetworkDrive(System.Management.Automation.PSDriveInfo) System.Management.Automation.PSDriveInfo RemoveDrive(System.Management.Automation.PSDriveInfo) System.String GetUNCForNetworkDrive(System.String) System.String GetSubstitutedPathForNetworkDosDevice(System.String) Boolean IsValidPath(System.String) Void GetItem(System.String) System.IO.FileSystemInfo GetFileSystemItem(System.String, Boolean ByRef, Boolean) Boolean ConvertPath(System.String, System.String, System.String ByRef, System.String ByRef) Void GetPathItems(System.String, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers) Void Dir(System.IO.DirectoryInfo, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers, InodeTracker) System.Management.Automation.FlagsExpression`1[System.IO.FileAttributes] FormatAttributeSwitchParamters() Void RenameItem(System.String, System.String) Void NewItem(System.String, System.String, System.Object) ItemType GetItemType(System.String) Void CreateDirectory(System.String, Boolean) Boolean CreateIntermediateDirectories(System.String) Void RemoveItem(System.String, Boolean) Void RemoveDirectoryInfoItem(System.IO.DirectoryInfo, Boolean, Boolean, Boolean) Void RemoveFileSystemItem(System.IO.FileSystemInfo, Boolean) Boolean ItemExists(System.String, System.Management.Automation.ErrorRecord ByRef) Boolean DirectoryInfoHasChildItems(System.IO.DirectoryInfo) Void CopyItem(System.String, System.String, Boolean) Void CopyItemFromRemoteSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.Runspaces.PSSession) Void CopyDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void CopyFileInfoItem(System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell) Void CopyDirectoryFromRemoteSession(System.String, System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) System.Collections.ArrayList GetRemoteSourceAlternateStreams(System.Management.Automation.PowerShell, System.String) Void RemoveFunctionsPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) System.Collections.Hashtable GetRemoteFileMetadata(System.String, System.Management.Automation.PowerShell) Void SetFileMetadata(System.String, System.IO.FileInfo, System.Management.Automation.PowerShell) Void CopyFileFromRemoteSession(System.String, System.String, System.String, Boolean, System.Management.Automation.PowerShell, Int64) Boolean PerformCopyFileFromRemoteSession(System.String, System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell, Int64, Boolean, System.String) Void RemoveFunctionPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean RemoteTargetSupportsAlternateStreams(System.Management.Automation.PowerShell, System.String) System.String MakeRemotePath(System.Management.Automation.PowerShell, System.String, System.String) Boolean RemoteDirectoryExist(System.Management.Automation.PowerShell, System.String) Boolean CopyFileStreamToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell, Boolean, System.String) System.Collections.Hashtable GetFileMetadata(System.IO.FileInfo) Void SetRemoteFileMetadata(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean PerformCopyFileToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean RemoteDestinationPathIsFile(System.String, System.Management.Automation.PowerShell) System.String CreateDirectoryOnRemoteSession(System.String, Boolean, System.Management.Automation.PowerShell) System.String GetParentPath(System.String, System.String) Boolean IsUNCPath(System.String) Boolean IsUNCRoot(System.String) Boolean IsPathRoot(System.String) System.String NormalizeRelativePath(System.String, System.String) System.String NormalizeRelativePathHelper(System.String, System.String) System.String RemoveRelativeTokens(System.String) System.Collections.Generic.Stack`1[System.String] TokenizePathToStack(System.String, System.String) System.Collections.Generic.Stack`1[System.String] NormalizeThePath(System.String, System.Collections.Generic.Stack`1[System.String]) System.String GetChildName(System.String) System.String EnsureDriveIsRooted(System.String) Void MoveItem(System.String, System.String) Void MoveFileInfoItem(System.IO.FileInfo, System.String, Boolean, Boolean) Void MoveDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean) Void CopyAndDelete(System.IO.DirectoryInfo, System.String, Boolean) Void GetProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) Void SetProperty(System.String, System.Management.Automation.PSObject) Void ClearProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Management.Automation.Provider.IContentReader GetContentReader(System.String) System.Object GetContentReaderDynamicParameters(System.String) System.Management.Automation.Provider.IContentWriter GetContentWriter(System.String) Void ClearContent(System.String) Void ValidateParameters(Boolean) Void GetSecurityDescriptor(System.String, System.Security.AccessControl.AccessControlSections) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity, System.Security.AccessControl.AccessControlSections) Void \u003cRemoveDirectoryInfoItem\u003eg__WriteErrorHelper|43_0(System.Exception, \u003c\u003ec__DisplayClass43_0 ByRef) Void .ctor() Void .cctor() System.Collections.ObjectModel.Collection`1[System.Management.Automation.WildcardPattern] excludeMatcher System.Management.Automation.PSTraceSource tracer Int32 FILETRANSFERSIZE System.String ProviderName Microsoft.PowerShell.Commands.FileSystemProvider+ItemType Microsoft.PowerShell.Commands.FileSystemProvider+NativeMethods Microsoft.PowerShell.Commands.FileSystemProvider+NetResource Microsoft.PowerShell.Commands.FileSystemProvider+InodeTracker Microsoft.PowerShell.Commands.FileSystemProvider+\u003c\u003ec__DisplayClass43_0","DeclaredMethods":"System.String Mode(System.Management.Automation.PSObject) System.Object GetChildItemsDynamicParameters(System.String, Boolean) System.String NormalizePath(System.String) System.IO.FileSystemInfo GetFileSystemInfo(System.String, Boolean ByRef) Boolean IsFilterSet() System.Object GetChildNamesDynamicParameters(System.String) System.Object CopyItemDynamicParameters(System.String, System.String, Boolean) Boolean IsNetworkMappedDrive(System.Management.Automation.PSDriveInfo) Boolean IsSupportedDriveForPersistence(System.Management.Automation.PSDriveInfo) System.String GetRootPathForNetworkDriveOrDosDevice(System.IO.DriveInfo) System.Collections.ObjectModel.Collection`1[System.Management.Automation.PSDriveInfo] InitializeDefaultDrives() System.Object GetItemDynamicParameters(System.String) Void InvokeDefaultAction(System.String) Void GetChildItems(System.String, Boolean, UInt32) Void GetChildNames(System.String, System.Management.Automation.ReturnContainers) Boolean CheckItemExists(System.String, Boolean ByRef) System.Object RemoveItemDynamicParameters(System.String, Boolean) Void RemoveFileInfoItem(System.IO.FileInfo, Boolean) Boolean ItemExists(System.String) System.Object ItemExistsDynamicParameters(System.String) Boolean HasChildItems(System.String) Void CopyItemLocalOrToSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void InitilizeFunctionPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) Boolean ValidRemoteSessionForScripting(System.Management.Automation.Runspaces.Runspace) Void InitilizeFunctionsPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean PathIsReservedDeviceName(System.String, System.String) Boolean IsAbsolutePath(System.String) System.String GetCommonBase(System.String, System.String) System.String CreateNormalizedRelativePathFromStack(System.Collections.Generic.Stack`1[System.String]) Boolean IsItemContainer(System.String) Void MoveDirectoryInfoUnchecked(System.IO.DirectoryInfo, System.String, Boolean) Boolean IsSameVolume(System.String, System.String) System.Object GetPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object SetPropertyDynamicParameters(System.String, System.Management.Automation.PSObject) System.Object ClearPropertyDynamicParameters(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Object GetContentWriterDynamicParameters(System.String) System.Object ClearContentDynamicParameters(System.String) Int32 SafeGetFileAttributes(System.String) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorFromPath(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptorOfType(System.String, System.Security.AccessControl.AccessControlSections) System.Security.AccessControl.ObjectSecurity NewSecurityDescriptor(ItemType) System.Management.Automation.ErrorRecord CreateErrorRecord(System.String, System.String) System.String GetHelpMaml(System.String, System.String) System.Management.Automation.ProviderInfo Start(System.Management.Automation.ProviderInfo) System.Management.Automation.PSDriveInfo NewDrive(System.Management.Automation.PSDriveInfo) Void MapNetworkDrive(System.Management.Automation.PSDriveInfo) System.Management.Automation.PSDriveInfo RemoveDrive(System.Management.Automation.PSDriveInfo) System.String GetUNCForNetworkDrive(System.String) System.String GetSubstitutedPathForNetworkDosDevice(System.String) Boolean IsValidPath(System.String) Void GetItem(System.String) System.IO.FileSystemInfo GetFileSystemItem(System.String, Boolean ByRef, Boolean) Boolean ConvertPath(System.String, System.String, System.String ByRef, System.String ByRef) Void GetPathItems(System.String, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers) Void Dir(System.IO.DirectoryInfo, Boolean, UInt32, Boolean, System.Management.Automation.ReturnContainers, InodeTracker) System.Management.Automation.FlagsExpression`1[System.IO.FileAttributes] FormatAttributeSwitchParamters() Void RenameItem(System.String, System.String) Void NewItem(System.String, System.String, System.Object) ItemType GetItemType(System.String) Void CreateDirectory(System.String, Boolean) Boolean CreateIntermediateDirectories(System.String) Void RemoveItem(System.String, Boolean) Void RemoveDirectoryInfoItem(System.IO.DirectoryInfo, Boolean, Boolean, Boolean) Void RemoveFileSystemItem(System.IO.FileSystemInfo, Boolean) Boolean ItemExists(System.String, System.Management.Automation.ErrorRecord ByRef) Boolean DirectoryInfoHasChildItems(System.IO.DirectoryInfo) Void CopyItem(System.String, System.String, Boolean) Void CopyItemFromRemoteSession(System.String, System.String, Boolean, Boolean, System.Management.Automation.Runspaces.PSSession) Void CopyDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) Void CopyFileInfoItem(System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell) Void CopyDirectoryFromRemoteSession(System.String, System.String, System.String, Boolean, Boolean, System.Management.Automation.PowerShell) System.Collections.ArrayList GetRemoteSourceAlternateStreams(System.Management.Automation.PowerShell, System.String) Void RemoveFunctionsPSCopyFileFromRemoteSession(System.Management.Automation.PowerShell) System.Collections.Hashtable GetRemoteFileMetadata(System.String, System.Management.Automation.PowerShell) Void SetFileMetadata(System.String, System.IO.FileInfo, System.Management.Automation.PowerShell) Void CopyFileFromRemoteSession(System.String, System.String, System.String, Boolean, System.Management.Automation.PowerShell, Int64) Boolean PerformCopyFileFromRemoteSession(System.String, System.IO.FileInfo, System.String, Boolean, System.Management.Automation.PowerShell, Int64, Boolean, System.String) Void RemoveFunctionPSCopyFileToRemoteSession(System.Management.Automation.PowerShell) Boolean RemoteTargetSupportsAlternateStreams(System.Management.Automation.PowerShell, System.String) System.String MakeRemotePath(System.Management.Automation.PowerShell, System.String, System.String) Boolean RemoteDirectoryExist(System.Management.Automation.PowerShell, System.String) Boolean CopyFileStreamToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell, Boolean, System.String) System.Collections.Hashtable GetFileMetadata(System.IO.FileInfo) Void SetRemoteFileMetadata(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean PerformCopyFileToRemoteSession(System.IO.FileInfo, System.String, System.Management.Automation.PowerShell) Boolean RemoteDestinationPathIsFile(System.String, System.Management.Automation.PowerShell) System.String CreateDirectoryOnRemoteSession(System.String, Boolean, System.Management.Automation.PowerShell) System.String GetParentPath(System.String, System.String) Boolean IsUNCPath(System.String) Boolean IsUNCRoot(System.String) Boolean IsPathRoot(System.String) System.String NormalizeRelativePath(System.String, System.String) System.String NormalizeRelativePathHelper(System.String, System.String) System.String RemoveRelativeTokens(System.String) System.Collections.Generic.Stack`1[System.String] TokenizePathToStack(System.String, System.String) System.Collections.Generic.Stack`1[System.String] NormalizeThePath(System.String, System.Collections.Generic.Stack`1[System.String]) System.String GetChildName(System.String) System.String EnsureDriveIsRooted(System.String) Void MoveItem(System.String, System.String) Void MoveFileInfoItem(System.IO.FileInfo, System.String, Boolean, Boolean) Void MoveDirectoryInfoItem(System.IO.DirectoryInfo, System.String, Boolean) Void CopyAndDelete(System.IO.DirectoryInfo, System.String, Boolean) Void GetProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) Void SetProperty(System.String, System.Management.Automation.PSObject) Void ClearProperty(System.String, System.Collections.ObjectModel.Collection`1[System.String]) System.Management.Automation.Provider.IContentReader GetContentReader(System.String) System.Object GetContentReaderDynamicParameters(System.String) System.Management.Automation.Provider.IContentWriter GetContentWriter(System.String) Void ClearContent(System.String) Void ValidateParameters(Boolean) Void GetSecurityDescriptor(System.String, System.Security.AccessControl.AccessControlSections) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity) Void SetSecurityDescriptor(System.String, System.Security.AccessControl.ObjectSecurity, System.Security.AccessControl.AccessControlSections) Void \u003cRemoveDirectoryInfoItem\u003eg__WriteErrorHelper|43_0(System.Exception, \u003c\u003ec__DisplayClass43_0 ByRef)","DeclaredNestedTypes":"Microsoft.PowerShell.Commands.FileSystemProvider+ItemType Microsoft.PowerShell.Commands.FileSystemProvider+NativeMethods Microsoft.PowerShell.Commands.FileSystemProvider+NetResource Microsoft.PowerShell.Commands.FileSystemProvider+InodeTracker Microsoft.PowerShell.Commands.FileSystemProvider+\u003c\u003ec__DisplayClass43_0","DeclaredProperties":"","ImplementedInterfaces":"System.Management.Automation.IResourceSupplier System.Management.Automation.Provider.IContentCmdletProvider System.Management.Automation.Provider.IPropertyCmdletProvider System.Management.Automation.Provider.ISecurityDescriptorCmdletProvider System.Management.Automation.Provider.ICmdletProviderSupportsHelp","TypeInitializer":"Void .cctor()","IsNested":false,"Attributes":1048833,"IsVisible":true,"IsNotPublic":false,"IsPublic":true,"IsNestedPublic":false,"IsNestedPrivate":false,"IsNestedFamily":false,"IsNestedAssembly":false,"IsNestedFamANDAssem":false,"IsNestedFamORAssem":false,"IsAutoLayout":true,"IsLayoutSequential":false,"IsExplicitLayout":false,"IsClass":true,"IsInterface":false,"IsValueType":false,"IsAbstract":false,"IsSealed":true,"IsSpecialName":false,"IsImport":false,"IsSerializable":false,"IsAnsiClass":true,"IsUnicodeClass":false,"IsAutoClass":false,"IsArray":false,"IsByRef":false,"IsPointer":false,"IsPrimitive":false,"IsCOMObject":false,"HasElementType":false,"IsContextful":false,"IsMarshalByRef":false,"GenericTypeArguments":"","CustomAttributes":"[System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.String), typeof(System.IO.FileInfo) }, ProviderCmdlet = \"New-Item\")] [System.Management.Automation.OutputTypeAttribute(typeof(System.Security.AccessControl.FileSecurity), ProviderCmdlet = \"Set-Acl\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.String), typeof(System.Management.Automation.PathInfo) }, ProviderCmdlet = \"Resolve-Path\")] [System.Management.Automation.OutputTypeAttribute(typeof(System.Management.Automation.PathInfo), ProviderCmdlet = \"Push-Location\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.Byte), typeof(System.String) }, ProviderCmdlet = \"Get-Content\")] [System.Management.Automation.OutputTypeAttribute(typeof(System.IO.FileInfo), ProviderCmdlet = \"Get-Item\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.IO.FileInfo), typeof(System.IO.DirectoryInfo) }, ProviderCmdlet = \"Get-ChildItem\")] [System.Management.Automation.OutputTypeAttribute(new Type[2] { typeof(System.Security.AccessControl.FileSecurity), typeof(System.Security.AccessControl.DirectorySecurity) }, ProviderCmdlet = \"Get-Acl\")] [System.Management.Automation.OutputTypeAttribute(new Type[4] { typeof(System.Boolean), typeof(System.String), typeof(System.IO.FileInfo), typeof(System.IO.DirectoryInfo) }, ProviderCmdlet = \"Get-Item\")] [System.Management.Automation.OutputTypeAttribute(new Type[5] { typeof(System.Boolean), typeof(System.String), typeof(System.DateTime), typeof(System.IO.FileInfo), typeof(System.IO.DirectoryInfo) }, ProviderCmdlet = \"Get-ItemProperty\")] [System.Management.Automation.Provider.CmdletProviderAttribute(\"FileSystem\", (System.Management.Automation.Provider.ProviderCapabilities)52)]"},"HelpFile":"System.Management.Automation.dll-Help.xml","Name":"FileSystem","PSSnapIn":{"Name":"Microsoft.PowerShell.Core","IsDefault":true,"ApplicationBase":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0","AssemblyName":"System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, ProcessorArchitecture=MSIL","ModuleName":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\System.Management.Automation.dll","PSVersion":"5.1.26100.6584","Version":"3.0.0.0","Types":"types.ps1xml typesv3.ps1xml","Formats":"Certificate.format.ps1xml DotNetTypes.format.ps1xml FileSystem.format.ps1xml Help.format.ps1xml HelpV3.format.ps1xml PowerShellCore.format.ps1xml PowerShellTrace.format.ps1xml Registry.format.ps1xml","Description":"This Windows PowerShell snap-in contains cmdlets used to manage components of Windows PowerShell.","Vendor":"Microsoft Corporation","LogPipelineExecutionDetails":false},"ModuleName":"Microsoft.PowerShell.Core","Module":null,"Description":"","Capabilities":52,"Home":"C:\\Users\\Ricoj100","Drives":["C","TestDrive"]},"ReadCount":1};
+
+// Show recycle JSON as text
+document.getElementById('recycle').textContent = JSON.stringify(recycle,null,2);
+
+// Crypto chart example (BTC vs ETH spot)
+if(crypto.results){
+  const labels = crypto.results.map(r=>r.pair);
+  const prices = crypto.results.map(r=>r.coinbase_spot);
+  new Chart(document.getElementById('cryptoChart'),{
+    type:'bar',
+    data:{labels:labels,datasets:[{label:"Coinbase Spot",data:prices,backgroundColor:"#4bc0c0"}]}
+  });
+}
+
+// Build jobs table
+$(document).ready(function(){
+  if(jobs.results){
+    jobs.results.forEach(j=>{
+      $('#jobsTable tbody').append(
+        <tr><td></td><td><a href="" target="_blank">Link</a></td><td></td></tr>
+      )
+    });
+    $('#jobsTable').DataTable();
+  }
+});
+</script>
+</body></html>
+<h2>Sports Odds</h2><table border=1><tr><th>Match</th><th>Bookmaker</th><th>Odds</th></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>DraftKings</td><td>Atlanta Falcons: -218 | Carolina Panthers: 180</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>BetUS</td><td>Atlanta Falcons: -230 | Carolina Panthers: 195</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>Caesars</td><td>Atlanta Falcons: -238 | Carolina Panthers: 195</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>FanDuel</td><td>Atlanta Falcons: -225 | Carolina Panthers: 188</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>MyBookie.ag</td><td>Atlanta Falcons: -251 | Carolina Panthers: 198</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>BetOnline.ag</td><td>Atlanta Falcons: -230 | Carolina Panthers: 192</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>LowVig.ag</td><td>Atlanta Falcons: -230 | Carolina Panthers: 192</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>BetRivers</td><td>Atlanta Falcons: -250 | Carolina Panthers: 190</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>Bovada</td><td>Atlanta Falcons: -250 | Carolina Panthers: 210</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>BetMGM</td><td>Atlanta Falcons: -250 | Carolina Panthers: 200</td></tr>
+<tr><td>Carolina Panthers vs Atlanta Falcons</td><td>Fanatics</td><td>Atlanta Falcons: -240 | Carolina Panthers: 190</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>DraftKings</td><td>Cincinnati Bengals: 136 | Minnesota Vikings: -162</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>BetUS</td><td>Cincinnati Bengals: 134 | Minnesota Vikings: -155</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>Caesars</td><td>Cincinnati Bengals: 130 | Minnesota Vikings: -157</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>FanDuel</td><td>Cincinnati Bengals: 130 | Minnesota Vikings: -154</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>MyBookie.ag</td><td>Cincinnati Bengals: 132 | Minnesota Vikings: -162</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>BetOnline.ag</td><td>Cincinnati Bengals: 139 | Minnesota Vikings: -159</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>LowVig.ag</td><td>Cincinnati Bengals: 139 | Minnesota Vikings: -159</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>BetRivers</td><td>Cincinnati Bengals: 123 | Minnesota Vikings: -157</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>Bovada</td><td>Cincinnati Bengals: 135 | Minnesota Vikings: -160</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>Fanatics</td><td>Cincinnati Bengals: 125 | Minnesota Vikings: -150</td></tr>
+<tr><td>Minnesota Vikings vs Cincinnati Bengals</td><td>BetMGM</td><td>Cincinnati Bengals: 130 | Minnesota Vikings: -155</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>DraftKings</td><td>Cleveland Browns: 370 | Green Bay Packers: -485</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>BetUS</td><td>Cleveland Browns: 355 | Green Bay Packers: -450</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>Caesars</td><td>Cleveland Browns: 335 | Green Bay Packers: -440</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>FanDuel</td><td>Cleveland Browns: 315 | Green Bay Packers: -400</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>MyBookie.ag</td><td>Cleveland Browns: 355 | Green Bay Packers: -490</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>BetOnline.ag</td><td>Cleveland Browns: 337 | Green Bay Packers: -430</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>LowVig.ag</td><td>Cleveland Browns: 337 | Green Bay Packers: -430</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>BetRivers</td><td>Cleveland Browns: 330 | Green Bay Packers: -480</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>Bovada</td><td>Cleveland Browns: 335 | Green Bay Packers: -450</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>Fanatics</td><td>Cleveland Browns: 330 | Green Bay Packers: -425</td></tr>
+<tr><td>Cleveland Browns vs Green Bay Packers</td><td>BetMGM</td><td>Cleveland Browns: 340 | Green Bay Packers: -450</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>DraftKings</td><td>Houston Texans: 105 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>BetUS</td><td>Houston Texans: 105 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>Caesars</td><td>Houston Texans: 105 | Jacksonville Jaguars: -127</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>FanDuel</td><td>Houston Texans: 110 | Jacksonville Jaguars: -130</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>MyBookie.ag</td><td>Houston Texans: -103 | Jacksonville Jaguars: -119</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>LowVig.ag</td><td>Houston Texans: 105 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>BetOnline.ag</td><td>Houston Texans: 105 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>BetRivers</td><td>Houston Texans: 100 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>Bovada</td><td>Houston Texans: 110 | Jacksonville Jaguars: -130</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>Fanatics</td><td>Houston Texans: 105 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Jacksonville Jaguars vs Houston Texans</td><td>BetMGM</td><td>Houston Texans: 105 | Jacksonville Jaguars: -125</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>DraftKings</td><td>Las Vegas Raiders: 130 | Washington Commanders: -155</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>BetUS</td><td>Las Vegas Raiders: 129 | Washington Commanders: -150</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>Caesars</td><td>Las Vegas Raiders: 130 | Washington Commanders: -155</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>FanDuel</td><td>Las Vegas Raiders: 130 | Washington Commanders: -154</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>MyBookie.ag</td><td>Las Vegas Raiders: 127 | Washington Commanders: -156</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>BetOnline.ag</td><td>Las Vegas Raiders: 129 | Washington Commanders: -149</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>LowVig.ag</td><td>Las Vegas Raiders: 129 | Washington Commanders: -149</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>BetRivers</td><td>Las Vegas Raiders: 128 | Washington Commanders: -165</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>Bovada</td><td>Las Vegas Raiders: 120 | Washington Commanders: -140</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>Fanatics</td><td>Las Vegas Raiders: 125 | Washington Commanders: -150</td></tr>
+<tr><td>Washington Commanders vs Las Vegas Raiders</td><td>BetMGM</td><td>Las Vegas Raiders: 130 | Washington Commanders: -155</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>DraftKings</td><td>New England Patriots: 110 | Pittsburgh Steelers: -130</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>BetUS</td><td>New England Patriots: 110 | Pittsburgh Steelers: -130</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>Caesars</td><td>New England Patriots: 110 | Pittsburgh Steelers: -130</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>FanDuel</td><td>New England Patriots: 108 | Pittsburgh Steelers: -126</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>MyBookie.ag</td><td>New England Patriots: 101 | Pittsburgh Steelers: -123</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>BetOnline.ag</td><td>New England Patriots: 112 | Pittsburgh Steelers: -132</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>LowVig.ag</td><td>New England Patriots: 112 | Pittsburgh Steelers: -132</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>BetRivers</td><td>New England Patriots: 102 | Pittsburgh Steelers: -130</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>Bovada</td><td>New England Patriots: 110 | Pittsburgh Steelers: -130</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>Fanatics</td><td>New England Patriots: 105 | Pittsburgh Steelers: -125</td></tr>
+<tr><td>New England Patriots vs Pittsburgh Steelers</td><td>BetMGM</td><td>New England Patriots: 110 | Pittsburgh Steelers: -130</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>DraftKings</td><td>New York Jets: 250 | Tampa Bay Buccaneers: -310</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>Caesars</td><td>New York Jets: 260 | Tampa Bay Buccaneers: -335</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>FanDuel</td><td>New York Jets: 250 | Tampa Bay Buccaneers: -310</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>MyBookie.ag</td><td>New York Jets: 251 | Tampa Bay Buccaneers: -329</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>LowVig.ag</td><td>New York Jets: 249 | Tampa Bay Buccaneers: -305</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>BetOnline.ag</td><td>New York Jets: 249 | Tampa Bay Buccaneers: -305</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>BetRivers</td><td>New York Jets: 245 | Tampa Bay Buccaneers: -335</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>BetUS</td><td>New York Jets: 253 | Tampa Bay Buccaneers: -305</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>Bovada</td><td>New York Jets: 255 | Tampa Bay Buccaneers: -310</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>Fanatics</td><td>New York Jets: 250 | Tampa Bay Buccaneers: -325</td></tr>
+<tr><td>Tampa Bay Buccaneers vs New York Jets</td><td>BetMGM</td><td>New York Jets: 260 | Tampa Bay Buccaneers: -325</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>DraftKings</td><td>Indianapolis Colts: -225 | Tennessee Titans: 185</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>BetMGM</td><td>Indianapolis Colts: -220 | Tennessee Titans: 180</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>BetUS</td><td>Indianapolis Colts: -230 | Tennessee Titans: 195</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>Caesars</td><td>Indianapolis Colts: -225 | Tennessee Titans: 180</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>FanDuel</td><td>Indianapolis Colts: -235 | Tennessee Titans: 194</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>MyBookie.ag</td><td>Indianapolis Colts: -248 | Tennessee Titans: 194</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>BetOnline.ag</td><td>Indianapolis Colts: -210 | Tennessee Titans: 180</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>LowVig.ag</td><td>Indianapolis Colts: -210 | Tennessee Titans: 180</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>BetRivers</td><td>Indianapolis Colts: -215 | Tennessee Titans: 165</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>Bovada</td><td>Indianapolis Colts: -225 | Tennessee Titans: 185</td></tr>
+<tr><td>Tennessee Titans vs Indianapolis Colts</td><td>Fanatics</td><td>Indianapolis Colts: -225 | Tennessee Titans: 185</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>DraftKings</td><td>Los Angeles Rams: 154 | Philadelphia Eagles: -185</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>BetUS</td><td>Los Angeles Rams: 163 | Philadelphia Eagles: -190</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>Caesars</td><td>Los Angeles Rams: 152 | Philadelphia Eagles: -180</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>FanDuel</td><td>Los Angeles Rams: 156 | Philadelphia Eagles: -186</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>MyBookie.ag</td><td>Los Angeles Rams: 154 | Philadelphia Eagles: -191</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>BetOnline.ag</td><td>Los Angeles Rams: 161 | Philadelphia Eagles: -185</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>LowVig.ag</td><td>Los Angeles Rams: 161 | Philadelphia Eagles: -185</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>BetRivers</td><td>Los Angeles Rams: 155 | Philadelphia Eagles: -195</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>Bovada</td><td>Los Angeles Rams: 170 | Philadelphia Eagles: -200</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>Fanatics</td><td>Los Angeles Rams: 145 | Philadelphia Eagles: -175</td></tr>
+<tr><td>Philadelphia Eagles vs Los Angeles Rams</td><td>BetMGM</td><td>Los Angeles Rams: 155 | Philadelphia Eagles: -190</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>DraftKings</td><td>Denver Broncos: 136 | Los Angeles Chargers: -162</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>BetUS</td><td>Denver Broncos: 129 | Los Angeles Chargers: -150</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>Caesars</td><td>Denver Broncos: 130 | Los Angeles Chargers: -155</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>FanDuel</td><td>Denver Broncos: 134 | Los Angeles Chargers: -158</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>MyBookie.ag</td><td>Denver Broncos: 136 | Los Angeles Chargers: -168</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>LowVig.ag</td><td>Denver Broncos: 130 | Los Angeles Chargers: -150</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>BetOnline.ag</td><td>Denver Broncos: 130 | Los Angeles Chargers: -150</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>BetRivers</td><td>Denver Broncos: 116 | Los Angeles Chargers: -148</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>Bovada</td><td>Denver Broncos: 130 | Los Angeles Chargers: -150</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>BetMGM</td><td>Denver Broncos: 130 | Los Angeles Chargers: -155</td></tr>
+<tr><td>Los Angeles Chargers vs Denver Broncos</td><td>Fanatics</td><td>Denver Broncos: 125 | Los Angeles Chargers: -150</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>DraftKings</td><td>New Orleans Saints: 295 | Seattle Seahawks: -375</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>BetUS</td><td>New Orleans Saints: 305 | Seattle Seahawks: -380</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>FanDuel</td><td>New Orleans Saints: 310 | Seattle Seahawks: -390</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>MyBookie.ag</td><td>New Orleans Saints: 317 | Seattle Seahawks: -429</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>BetOnline.ag</td><td>New Orleans Saints: 303 | Seattle Seahawks: -380</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>LowVig.ag</td><td>New Orleans Saints: 303 | Seattle Seahawks: -380</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>BetRivers</td><td>New Orleans Saints: 295 | Seattle Seahawks: -420</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>Bovada</td><td>New Orleans Saints: 305 | Seattle Seahawks: -410</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>BetMGM</td><td>New Orleans Saints: 310 | Seattle Seahawks: -400</td></tr>
+<tr><td>Seattle Seahawks vs New Orleans Saints</td><td>Fanatics</td><td>New Orleans Saints: 300 | Seattle Seahawks: -375</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>DraftKings</td><td>Chicago Bears: 100 | Dallas Cowboys: -120</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>Caesars</td><td>Chicago Bears: 100 | Dallas Cowboys: -120</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>FanDuel</td><td>Chicago Bears: 106 | Dallas Cowboys: -124</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>MyBookie.ag</td><td>Chicago Bears: -102 | Dallas Cowboys: -120</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>BetOnline.ag</td><td>Chicago Bears: -101 | Dallas Cowboys: -119</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>LowVig.ag</td><td>Chicago Bears: -101 | Dallas Cowboys: -119</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>BetRivers</td><td>Chicago Bears: -108 | Dallas Cowboys: -118</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>Bovada</td><td>Chicago Bears: 105 | Dallas Cowboys: -125</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>BetMGM</td><td>Chicago Bears: 105 | Dallas Cowboys: -125</td></tr>
+<tr><td>Chicago Bears vs Dallas Cowboys</td><td>Fanatics</td><td>Chicago Bears: 100 | Dallas Cowboys: -120</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>DraftKings</td><td>Arizona Cardinals: 110 | San Francisco 49ers: -130</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>BetMGM</td><td>Arizona Cardinals: 120 | San Francisco 49ers: -145</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>BetUS</td><td>Arizona Cardinals: 110 | San Francisco 49ers: -130</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>Caesars</td><td>Arizona Cardinals: 115 | San Francisco 49ers: -135</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>FanDuel</td><td>Arizona Cardinals: 114 | San Francisco 49ers: -134</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>MyBookie.ag</td><td>Arizona Cardinals: 109 | San Francisco 49ers: -133</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>LowVig.ag</td><td>Arizona Cardinals: 110 | San Francisco 49ers: -130</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>BetOnline.ag</td><td>Arizona Cardinals: 110 | San Francisco 49ers: -130</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>BetRivers</td><td>Arizona Cardinals: 104 | San Francisco 49ers: -132</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>Bovada</td><td>Arizona Cardinals: 110 | San Francisco 49ers: -130</td></tr>
+<tr><td>San Francisco 49ers vs Arizona Cardinals</td><td>Fanatics</td><td>Arizona Cardinals: 110 | San Francisco 49ers: -130</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>DraftKings</td><td>Kansas City Chiefs: -325 | New York Giants: 260</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>BetUS</td><td>Kansas City Chiefs: -290 | New York Giants: 240</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>Caesars</td><td>Kansas City Chiefs: -335 | New York Giants: 260</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>FanDuel</td><td>Kansas City Chiefs: -290 | New York Giants: 235</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>MyBookie.ag</td><td>Kansas City Chiefs: -302 | New York Giants: 234</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>BetOnline.ag</td><td>Kansas City Chiefs: -320 | New York Giants: 260</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>LowVig.ag</td><td>Kansas City Chiefs: -320 | New York Giants: 260</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>BetRivers</td><td>Kansas City Chiefs: -335 | New York Giants: 245</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>Bovada</td><td>Kansas City Chiefs: -320 | New York Giants: 260</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>BetMGM</td><td>Kansas City Chiefs: -295 | New York Giants: 240</td></tr>
+<tr><td>New York Giants vs Kansas City Chiefs</td><td>Fanatics</td><td>Kansas City Chiefs: -325 | New York Giants: 250</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>DraftKings</td><td>Baltimore Ravens: -225 | Detroit Lions: 185</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>Caesars</td><td>Baltimore Ravens: -240 | Detroit Lions: 196</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>FanDuel</td><td>Baltimore Ravens: -240 | Detroit Lions: 198</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>MyBookie.ag</td><td>Baltimore Ravens: -248 | Detroit Lions: 196</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>BetOnline.ag</td><td>Baltimore Ravens: -245 | Detroit Lions: 203</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>LowVig.ag</td><td>Baltimore Ravens: -245 | Detroit Lions: 203</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>BetRivers</td><td>Baltimore Ravens: -245 | Detroit Lions: 190</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>BetUS</td><td>Baltimore Ravens: -250 | Detroit Lions: 210</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>Bovada</td><td>Baltimore Ravens: -240 | Detroit Lions: 200</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>BetMGM</td><td>Baltimore Ravens: -235 | Detroit Lions: 195</td></tr>
+<tr><td>Baltimore Ravens vs Detroit Lions</td><td>Fanatics</td><td>Baltimore Ravens: -225 | Detroit Lions: 185</td></tr>
+<tr><td>Arizona Cardinals vs Seattle Seahawks</td><td>DraftKings</td><td>Arizona Cardinals: -130 | Seattle Seahawks: 110</td></tr>
+<tr><td>Arizona Cardinals vs Seattle Seahawks</td><td>FanDuel</td><td>Arizona Cardinals: -136 | Seattle Seahawks: 116</td></tr>
+<tr><td>Arizona Cardinals vs Seattle Seahawks</td><td>MyBookie.ag</td><td>Arizona Cardinals: -140 | Seattle Seahawks: 110</td></tr>
+<tr><td>Arizona Cardinals vs Seattle Seahawks</td><td>BetRivers</td><td>Arizona Cardinals: -137 | Seattle Seahawks: 108</td></tr>
+<tr><td>Arizona Cardinals vs Seattle Seahawks</td><td>Bovada</td><td>Arizona Cardinals: -145 | Seattle Seahawks: 125</td></tr>
+<tr><td>Pittsburgh Steelers vs Minnesota Vikings</td><td>DraftKings</td><td>Minnesota Vikings: 105 | Pittsburgh Steelers: -125</td></tr>
+<tr><td>Pittsburgh Steelers vs Minnesota Vikings</td><td>FanDuel</td><td>Minnesota Vikings: 118 | Pittsburgh Steelers: -138</td></tr>
+<tr><td>Pittsburgh Steelers vs Minnesota Vikings</td><td>MyBookie.ag</td><td>Minnesota Vikings: 106 | Pittsburgh Steelers: -140</td></tr>
+<tr><td>Pittsburgh Steelers vs Minnesota Vikings</td><td>Bovada</td><td>Minnesota Vikings: 125 | Pittsburgh Steelers: -145</td></tr>
+<tr><td>Pittsburgh Steelers vs Minnesota Vikings</td><td>BetRivers</td><td>Minnesota Vikings: 106 | Pittsburgh Steelers: -134</td></tr>
+<tr><td>Buffalo Bills vs New Orleans Saints</td><td>DraftKings</td><td>Buffalo Bills: -1350 | New Orleans Saints: 800</td></tr>
+<tr><td>Buffalo Bills vs New Orleans Saints</td><td>FanDuel</td><td>Buffalo Bills: -1350 | New Orleans Saints: 810</td></tr>
+<tr><td>Buffalo Bills vs New Orleans Saints</td><td>MyBookie.ag</td><td>Buffalo Bills: -1887 | New Orleans Saints: 730</td></tr>
+<tr><td>Buffalo Bills vs New Orleans Saints</td><td>BetRivers</td><td>Buffalo Bills: -1430 | New Orleans Saints: 650</td></tr>
+<tr><td>Atlanta Falcons vs Washington Commanders</td><td>DraftKings</td><td>Atlanta Falcons: -110 | Washington Commanders: -110</td></tr>
+<tr><td>Atlanta Falcons vs Washington Commanders</td><td>FanDuel</td><td>Atlanta Falcons: 100 | Washington Commanders: -118</td></tr>
+<tr><td>Atlanta Falcons vs Washington Commanders</td><td>MyBookie.ag</td><td>Atlanta Falcons: -109 | Washington Commanders: -121</td></tr>
+<tr><td>Atlanta Falcons vs Washington Commanders</td><td>BetRivers</td><td>Atlanta Falcons: 100 | Washington Commanders: -127</td></tr>
+<tr><td>New England Patriots vs Carolina Panthers</td><td>DraftKings</td><td>Carolina Panthers: 210 | New England Patriots: -258</td></tr>
+<tr><td>New England Patriots vs Carolina Panthers</td><td>FanDuel</td><td>Carolina Panthers: 190 | New England Patriots: -230</td></tr>
+<tr><td>New England Patriots vs Carolina Panthers</td><td>MyBookie.ag</td><td>Carolina Panthers: 197 | New England Patriots: -275</td></tr>
+<tr><td>New England Patriots vs Carolina Panthers</td><td>BetRivers</td><td>Carolina Panthers: 188 | New England Patriots: -250</td></tr>
+<tr><td>New England Patriots vs Carolina Panthers</td><td>Bovada</td><td>Carolina Panthers: 205 | New England Patriots: -245</td></tr>
+<tr><td>Detroit Lions vs Cleveland Browns</td><td>DraftKings</td><td>Cleveland Browns: 400 | Detroit Lions: -535</td></tr>
+<tr><td>Detroit Lions vs Cleveland Browns</td><td>FanDuel</td><td>Cleveland Browns: 385 | Detroit Lions: -500</td></tr>
+<tr><td>Detroit Lions vs Cleveland Browns</td><td>MyBookie.ag</td><td>Cleveland Browns: 380 | Detroit Lions: -625</td></tr>
+<tr><td>Detroit Lions vs Cleveland Browns</td><td>BetRivers</td><td>Cleveland Browns: 340 | Detroit Lions: -500</td></tr>
+<tr><td>Detroit Lions vs Cleveland Browns</td><td>Bovada</td><td>Cleveland Browns: 390 | Detroit Lions: -550</td></tr>
+<tr><td>Houston Texans vs Tennessee Titans</td><td>DraftKings</td><td>Houston Texans: -325 | Tennessee Titans: 260</td></tr>
+<tr><td>Houston Texans vs Tennessee Titans</td><td>FanDuel</td><td>Houston Texans: -370 | Tennessee Titans: 295</td></tr>
+<tr><td>Houston Texans vs Tennessee Titans</td><td>MyBookie.ag</td><td>Houston Texans: -350 | Tennessee Titans: 242</td></tr>
+<tr><td>Houston Texans vs Tennessee Titans</td><td>BetRivers</td><td>Houston Texans: -360 | Tennessee Titans: 260</td></tr>
+<tr><td>Houston Texans vs Tennessee Titans</td><td>Bovada</td><td>Houston Texans: -410 | Tennessee Titans: 305</td></tr>
+<tr><td>New York Giants vs Los Angeles Chargers</td><td>DraftKings</td><td>Los Angeles Chargers: -238 | New York Giants: 195</td></tr>
+<tr><td>New York Giants vs Los Angeles Chargers</td><td>FanDuel</td><td>Los Angeles Chargers: -260 | New York Giants: 215</td></tr>
+<tr><td>New York Giants vs Los Angeles Chargers</td><td>MyBookie.ag</td><td>Los Angeles Chargers: -260 | New York Giants: 187</td></tr>
+<tr><td>New York Giants vs Los Angeles Chargers</td><td>BetRivers</td><td>Los Angeles Chargers: -250 | New York Giants: 195</td></tr>
+<tr><td>New York Giants vs Los Angeles Chargers</td><td>Bovada</td><td>Los Angeles Chargers: -275 | New York Giants: 225</td></tr>
+<tr><td>Tampa Bay Buccaneers vs Philadelphia Eagles</td><td>DraftKings</td><td>Philadelphia Eagles: -148 | Tampa Bay Buccaneers: 124</td></tr>
+<tr><td>Tampa Bay Buccaneers vs Philadelphia Eagles</td><td>FanDuel</td><td>Philadelphia Eagles: -162 | Tampa Bay Buccaneers: 136</td></tr>
+<tr><td>Tampa Bay Buccaneers vs Philadelphia Eagles</td><td>MyBookie.ag</td><td>Philadelphia Eagles: -154 | Tampa Bay Buccaneers: 115</td></tr>
+<tr><td>Tampa Bay Buccaneers vs Philadelphia Eagles</td><td>BetRivers</td><td>Philadelphia Eagles: -155 | Tampa Bay Buccaneers: 117</td></tr>
+<tr><td>Tampa Bay Buccaneers vs Philadelphia Eagles</td><td>Bovada</td><td>Philadelphia Eagles: -160 | Tampa Bay Buccaneers: 135</td></tr>
+<tr><td>Los Angeles Rams vs Indianapolis Colts</td><td>DraftKings</td><td>Indianapolis Colts: 200 | Los Angeles Rams: -245</td></tr>
+<tr><td>Los Angeles Rams vs Indianapolis Colts</td><td>FanDuel</td><td>Indianapolis Colts: 184 | Los Angeles Rams: -220</td></tr>
+<tr><td>Los Angeles Rams vs Indianapolis Colts</td><td>MyBookie.ag</td><td>Indianapolis Colts: 176 | Los Angeles Rams: -242</td></tr>
+<tr><td>Los Angeles Rams vs Indianapolis Colts</td><td>BetRivers</td><td>Indianapolis Colts: 180 | Los Angeles Rams: -240</td></tr>
+<tr><td>Los Angeles Rams vs Indianapolis Colts</td><td>Bovada</td><td>Indianapolis Colts: 190 | Los Angeles Rams: -230</td></tr>
+<tr><td>San Francisco 49ers vs Jacksonville Jaguars</td><td>DraftKings</td><td>Jacksonville Jaguars: 164 | San Francisco 49ers: -198</td></tr>
+<tr><td>San Francisco 49ers vs Jacksonville Jaguars</td><td>FanDuel</td><td>Jacksonville Jaguars: 158 | San Francisco 49ers: -188</td></tr>
+<tr><td>San Francisco 49ers vs Jacksonville Jaguars</td><td>MyBookie.ag</td><td>Jacksonville Jaguars: 164 | San Francisco 49ers: -224</td></tr>
+<tr><td>San Francisco 49ers vs Jacksonville Jaguars</td><td>BetRivers</td><td>Jacksonville Jaguars: 140 | San Francisco 49ers: -180</td></tr>
+<tr><td>San Francisco 49ers vs Jacksonville Jaguars</td><td>Bovada</td><td>Jacksonville Jaguars: 165 | San Francisco 49ers: -195</td></tr>
+<tr><td>Kansas City Chiefs vs Baltimore Ravens</td><td>DraftKings</td><td>Baltimore Ravens: -135 | Kansas City Chiefs: 114</td></tr>
+<tr><td>Kansas City Chiefs vs Baltimore Ravens</td><td>FanDuel</td><td>Baltimore Ravens: -138 | Kansas City Chiefs: 118</td></tr>
+<tr><td>Kansas City Chiefs vs Baltimore Ravens</td><td>MyBookie.ag</td><td>Baltimore Ravens: -149 | Kansas City Chiefs: 112</td></tr>
+<tr><td>Kansas City Chiefs vs Baltimore Ravens</td><td>BetRivers</td><td>Baltimore Ravens: -150 | Kansas City Chiefs: 112</td></tr>
+<tr><td>Kansas City Chiefs vs Baltimore Ravens</td><td>Bovada</td><td>Baltimore Ravens: -160 | Kansas City Chiefs: 135</td></tr>
+<tr><td>Las Vegas Raiders vs Chicago Bears</td><td>DraftKings</td><td>Chicago Bears: 105 | Las Vegas Raiders: -125</td></tr>
+<tr><td>Las Vegas Raiders vs Chicago Bears</td><td>FanDuel</td><td>Chicago Bears: 108 | Las Vegas Raiders: -126</td></tr>
+<tr><td>Las Vegas Raiders vs Chicago Bears</td><td>MyBookie.ag</td><td>Chicago Bears: 103 | Las Vegas Raiders: -137</td></tr>
+<tr><td>Las Vegas Raiders vs Chicago Bears</td><td>BetRivers</td><td>Chicago Bears: 105 | Las Vegas Raiders: -134</td></tr>
+<tr><td>Las Vegas Raiders vs Chicago Bears</td><td>Bovada</td><td>Chicago Bears: 120 | Las Vegas Raiders: -140</td></tr>
+<tr><td>Dallas Cowboys vs Green Bay Packers</td><td>DraftKings</td><td>Dallas Cowboys: 200 | Green Bay Packers: -245</td></tr>
+<tr><td>Dallas Cowboys vs Green Bay Packers</td><td>FanDuel</td><td>Dallas Cowboys: 198 | Green Bay Packers: -240</td></tr>
+<tr><td>Dallas Cowboys vs Green Bay Packers</td><td>MyBookie.ag</td><td>Dallas Cowboys: 178 | Green Bay Packers: -246</td></tr>
+<tr><td>Dallas Cowboys vs Green Bay Packers</td><td>BetRivers</td><td>Dallas Cowboys: 188 | Green Bay Packers: -250</td></tr>
+<tr><td>Dallas Cowboys vs Green Bay Packers</td><td>Bovada</td><td>Dallas Cowboys: 210 | Green Bay Packers: -250</td></tr>
+<tr><td>Miami Dolphins vs New York Jets</td><td>DraftKings</td><td>Miami Dolphins: -148 | New York Jets: 124</td></tr>
+<tr><td>Miami Dolphins vs New York Jets</td><td>FanDuel</td><td>Miami Dolphins: -158 | New York Jets: 134</td></tr>
+<tr><td>Miami Dolphins vs New York Jets</td><td>MyBookie.ag</td><td>Miami Dolphins: -155 | New York Jets: 116</td></tr>
+<tr><td>Miami Dolphins vs New York Jets</td><td>BetRivers</td><td>Miami Dolphins: -157 | New York Jets: 120</td></tr>
+<tr><td>Denver Broncos vs Cincinnati Bengals</td><td>DraftKings</td><td>Cincinnati Bengals: 225 | Denver Broncos: -278</td></tr>
+<tr><td>Denver Broncos vs Cincinnati Bengals</td><td>FanDuel</td><td>Cincinnati Bengals: 225 | Denver Broncos: -275</td></tr>
+<tr><td>Denver Broncos vs Cincinnati Bengals</td><td>MyBookie.ag</td><td>Cincinnati Bengals: 218 | Denver Broncos: -310</td></tr>
+<tr><td>Denver Broncos vs Cincinnati Bengals</td><td>BetRivers</td><td>Cincinnati Bengals: 215 | Denver Broncos: -286</td></tr>
+<tr><td>Denver Broncos vs Cincinnati Bengals</td><td>Bovada</td><td>Cincinnati Bengals: 255 | Denver Broncos: -310</td></tr>
+</table>
+</body></html>

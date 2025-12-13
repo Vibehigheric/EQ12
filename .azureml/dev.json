@@ -1,0 +1,11 @@
+{
+  "subscription_id": "REPLACE_WITH_YOUR_SUBSCRIPTION_ID",
+  "resource_group": "eq12-dev",
+  "workspace_name": "eq12-ml-dev",
+  "workspace_location": "eastus",
+  "compute_name": "cpu-cluster-dev",
+  "compute_size": "Standard_D2s_v3",
+  "environment_name": "eq12-dev-env",
+  "registered_model_name": "EQ12BettingOptimizer",
+  "api_base": "https://eq12-ml-dev.eastus.inference.ml.azure.com"
+}

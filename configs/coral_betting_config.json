@@ -1,0 +1,141 @@
+{
+  "coral_betting_ai": {
+    "version": "1.0.0",
+    "description": "EQ12 Coral Edge TPU Sports Betting AI Configuration",
+    "workspace_path": "c:/EQ12",
+    "models": {
+      "ev_predictor": {
+        "file": "ev_predictor_edgetpu.tflite",
+        "input_shape": [1, 32],
+        "output_shape": [1, 2],
+        "description": "Expected Value prediction model",
+        "training_data_size": 10000,
+        "accuracy": 0.85
+      },
+      "prop_scorer": {
+        "file": "prop_scorer_edgetpu.tflite", 
+        "input_shape": [1, 16],
+        "output_shape": [1, 1],
+        "description": "Player prop bet scoring model",
+        "training_data_size": 25000,
+        "accuracy": 0.78
+      },
+      "weather_adjust": {
+        "file": "weather_adjust_edgetpu.tflite",
+        "input_shape": [1, 8],
+        "output_shape": [1, 1],
+        "description": "Weather-adjusted totals model",
+        "training_data_size": 5000,
+        "accuracy": 0.72
+      },
+      "mlb_hr_lstm": {
+        "file": "mlb_hr_lstm_edgetpu.tflite",
+        "input_shape": [1, 20],
+        "output_shape": [1, 1],
+        "description": "MLB home run prediction LSTM",
+        "training_data_size": 15000,
+        "accuracy": 0.81
+      },
+      "soccer_goal_predict": {
+        "file": "soccer_goal_predict_edgetpu.tflite",
+        "input_shape": [1, 12],
+        "output_shape": [1, 1],
+        "description": "Soccer anytime scorer prediction",
+        "training_data_size": 8000,
+        "accuracy": 0.76
+      }
+    },
+    "api_endpoints": {
+      "odds_api": {
+        "base_url": "https://api.the-odds-api.com/v4",
+        "rate_limit": 500,
+        "timeout": 30
+      },
+      "sportsdata": {
+        "base_url": "https://api.sportsdata.io",
+        "rate_limit": 1000,
+        "timeout": 30
+      },
+      "telegram": {
+        "base_url": "https://api.telegram.org",
+        "timeout": 10
+      }
+    },
+    "alert_settings": {
+      "bet_alerts": {
+        "enabled": true,
+        "min_ev": 0.3,
+        "min_confidence": 0.6,
+        "max_alerts_per_hour": 10
+      },
+      "parlay_alerts": {
+        "enabled": true,
+        "min_parlay_score": 0.3,
+        "max_legs": 8,
+        "max_alerts_per_day": 5
+      },
+      "system_alerts": {
+        "enabled": true,
+        "performance_threshold": 100,
+        "error_threshold": 5
+      }
+    },
+    "optimization_parameters": {
+      "parlay_generation": {
+        "min_legs": 3,
+        "max_legs": 10,
+        "min_total_odds": 3.0,
+        "max_total_odds": 100.0,
+        "correlation_threshold": 0.3,
+        "max_combinations": 10000
+      },
+      "ev_filtering": {
+        "min_ev_score": 0.1,
+        "min_confidence": 0.5,
+        "risk_adjustment_factor": 0.8
+      }
+    },
+    "data_collection": {
+      "sports_coverage": [
+        "americanfootball_nfl",
+        "basketball_nba", 
+        "baseball_mlb",
+        "icehockey_nhl",
+        "soccer_epl",
+        "soccer_uefa_champions_league"
+      ],
+      "markets_covered": [
+        "h2h",
+        "spreads", 
+        "totals",
+        "player_props",
+        "anytime_scorer"
+      ],
+      "update_intervals": {
+        "live_odds": 30,
+        "rss_feeds": 300,
+        "player_stats": 3600
+      }
+    },
+    "reporting": {
+      "daily_report": {
+        "enabled": true,
+        "generation_time": "00:00",
+        "include_charts": true,
+        "email_recipients": []
+      },
+      "performance_report": {
+        "enabled": true,
+        "frequency": "weekly",
+        "metrics_retention_days": 90
+      }
+    },
+    "file_management": {
+      "max_result_files": 100,
+      "max_log_files": 50,
+      "cleanup_schedule": "daily",
+      "backup_enabled": true,
+      "compression_enabled": true
+    }
+  }
+}

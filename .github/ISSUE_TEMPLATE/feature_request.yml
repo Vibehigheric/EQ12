@@ -1,0 +1,140 @@
+name: 🚀 Feature Request
+description: Suggest a new feature for EQ12 GODSTACK
+title: "[FEATURE]: "
+labels: ["enhancement", "feature-request"]
+assignees: ["Vibehigheric"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 Feature Request for EQ12 GODSTACK
+        
+        Suggest a new feature or enhancement to make EQ12 GODSTACK even more powerful!
+
+  - type: checkboxes
+    id: target-stack
+    attributes:
+      label: "🎯 Target EQ12 Stack"
+      description: "Which business stack would benefit from this feature?"
+      options:
+        - label: "🏈 Betting / OddsAPI - Gambling intelligence"
+        - label: "✈️ Travel / Affiliate - Travel automation"
+        - label: "🌿 Cannabis / CBD - Regulatory compliance"
+        - label: "🚗 Fleet / Turo - Vehicle management" 
+        - label: "🏠 Credit / Housing - Financial tracking"
+        - label: "🎓 Education - Learning automation"
+        - label: "🛒 AliDropship - E-commerce automation"
+        - label: "⚙️ Core GODSTACK - Meta-intelligence"
+        - label: "🔗 Cross-Stack - Multiple stacks benefit"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "⚡ Priority Level"
+      description: "How important is this feature?"
+      options:
+        - "🔴 Critical - Revenue blocking or major efficiency gain"
+        - "🟠 High - Significant improvement to automation"
+        - "🟡 Medium - Nice to have enhancement" 
+        - "🟢 Low - Minor convenience improvement"
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "📝 Feature Description"
+      description: "Describe the feature you'd like to see"
+      placeholder: "Clear description of the desired feature..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: business-case
+    attributes:
+      label: "💰 Business Case"
+      description: "How would this feature benefit EQ12 operations?"
+      placeholder: |
+        - Revenue impact: $X per month
+        - Time savings: X hours per week
+        - Automation improvement: X% efficiency gain
+        - Risk reduction: Prevents X type of issues
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: "🛠️ Proposed Solution"
+      description: "How do you envision this feature working?"
+      placeholder: |
+        Detailed description of how the feature should work:
+        1. User does X
+        2. System responds with Y
+        3. Result is Z
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔄 Alternative Solutions"
+      description: "Are there other ways to solve this problem?"
+      placeholder: "Alternative approaches or workarounds..."
+
+  - type: checkboxes
+    id: implementation-scope
+    attributes:
+      label: "🔧 Implementation Areas"
+      description: "Which components might need changes?"
+      options:
+        - label: "📊 Dashboard - Web interface updates"
+        - label: "🤖 AI/ML - Enrichment or analysis features"
+        - label: "🗄️ Database - Data structure changes"
+        - label: "⏰ Task Scheduler - Automation workflows"
+        - label: "📱 Telegram - Notification enhancements"
+        - label: "🌐 API - External service integrations"
+        - label: "🔍 Scraping - Data collection improvements"
+        - label: "🔐 Security - Authentication or compliance"
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: "📈 Estimated Complexity"
+      description: "How complex do you think this feature would be?"
+      options:
+        - "🟢 Simple - Few hours to implement"
+        - "🟡 Medium - 1-3 days of development"
+        - "🟠 Complex - 1-2 weeks of development" 
+        - "🔴 Major - Weeks of development, multiple components"
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "✅ Acceptance Criteria"
+      description: "How will we know this feature is complete?"
+      placeholder: |
+        - [ ] Feature does X successfully
+        - [ ] Integration with Y works
+        - [ ] Performance meets Z criteria
+        - [ ] Tests pass for all scenarios
+
+  - type: checkboxes
+    id: compliance-check
+    attributes:
+      label: "📋 Compliance Considerations"
+      description: "Does this feature involve sensitive areas?"
+      options:
+        - label: "⚠️ May involve gambling/betting regulations"
+        - label: "⚠️ May involve cannabis/CBD compliance"
+        - label: "⚠️ May involve financial/credit regulations"
+        - label: "⚠️ May require additional security measures"
+        - label: "✅ No compliance concerns identified"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "📎 Additional Context"
+      description: "Screenshots, mockups, references, or other helpful context"
+      placeholder: "Any additional information, links, or examples..."

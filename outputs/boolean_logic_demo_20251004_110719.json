@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-10-04T11:07:19.590731",
+  "system_conditions": {
+    "user_logged_in": true,
+    "has_admin_rights": false,
+    "has_vip_access": false,
+    "betting_window_open": true,
+    "maintenance_mode": false,
+    "sufficient_bankroll": true,
+    "game_started": false,
+    "live_odds_available": true,
+    "emergency_override": false,
+    "api_keys_valid": true,
+    "ncaa_week7_active": true,
+    "parlay_generation_enabled": true,
+    "conference_data_loaded": true,
+    "sentiment_analysis_ready": true
+  },
+  "and_operations": {
+    "admin_betting": false,
+    "parlay_placement": true,
+    "ncaa_system_ready": true
+  },
+  "or_operations": {
+    "betting_access": true,
+    "live_betting": true,
+    "data_available": true
+  },
+  "not_operations": {
+    "system_operational": true,
+    "window_status": true,
+    "security_check": true,
+    "risk_managed": false
+  },
+  "xor_operations": {
+    "exclusive_access": false,
+    "valid_system_state": true,
+    "data_priority": false
+  },
+  "complex_validation": {
+    "parlay_authorized": true,
+    "high_risk_detected": true,
+    "ncaa_week7_ready": true,
+    "emergency_access": false,
+    "decision_score": 0.8,
+    "final_decision": "✅ PROCEED WITH CONFIDENCE"
+  }
+}

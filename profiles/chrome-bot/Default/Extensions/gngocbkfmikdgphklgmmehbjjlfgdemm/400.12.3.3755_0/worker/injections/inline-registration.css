@@ -1,0 +1,62 @@
+.reg-container.sb #reg form button {
+  background: #f5a623;
+}
+.reg-container.sb #reg-status.success {
+  background: #69B8D6;
+  color: white;
+}
+.reg-container.mp #reg-status.success {
+  background: #f56743;
+}
+.reg-container #reg {
+  height: 69px;
+  position: relative;
+}
+.reg-container #reg #reg-reward {
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  left: 70px;
+  top: 5px;
+}
+.reg-container #reg form {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 30px;
+  display: flex;
+  flex-direction: row-reverse;
+}
+.reg-container #reg form button, .reg-container #reg form input {
+  margin-right: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.reg-container #reg form button {
+  border: solid 1px white;
+  cursor: pointer;
+  font-weight: 700;
+  color: white;
+  background: #f5a623;
+}
+.reg-container #reg form input {
+  width: 180px;
+  border: solid 1px #CCC;
+  color: #555;
+  outline: 0;
+}
+.reg-container #reg-status {
+  font-size: 12px;
+  padding: 10px;
+  color: black;
+}
+.reg-container #reg-status.error {
+  background: #ea8781;
+}
+.reg-container #reg-status.success {
+  color: white;
+}
+.reg-container #reg-status b {
+  display: block;
+}

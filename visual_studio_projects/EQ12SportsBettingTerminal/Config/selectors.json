@@ -1,0 +1,201 @@
+{
+    "DraftKings": {
+        "name": "DraftKings Sportsbook",
+        "league_urls": {
+            "mlb": "https://sportsbook.draftkings.com/leagues/baseball/mlb",
+            "nfl": "https://sportsbook.draftkings.com/leagues/football/nfl",
+            "nba": "https://sportsbook.draftkings.com/leagues/basketball/nba",
+            "nhl": "https://sportsbook.draftkings.com/leagues/hockey/nhl"
+        },
+        "selectors": {
+            "game_container": "[data-test-id='event-cell'], .sportsbook-table__body tr",
+            "odds_items": "[data-test-id='odds'], .sportsbook-odds",
+            "team_names": ".event-cell__name, .sportsbook-outcome-cell__label",
+            "odds_values": ".sportsbook-odds__value, [data-test-id='odds-value']",
+            "game_time": ".event-cell__start-time, .sportsbook-event-accordion__start-time",
+            "market_tabs": "[data-test-id='market-tab'], .sportsbook-tabbed-subheader__tab",
+            "moneyline_tab": "[data-test-id='Moneyline'], [title='Moneyline']",
+            "spread_tab": "[data-test-id='Point Spread'], [title='Point Spread']",
+            "total_tab": "[data-test-id='Game Total'], [title='Game Total']"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".sportsbook-table, [data-test-id='sportsbook-table']",
+            "odds_load_selector": ".sportsbook-odds__value",
+            "max_wait_seconds": 10
+        }
+    },
+    "FanDuel": {
+        "name": "FanDuel Sportsbook",
+        "league_urls": {
+            "mlb": "https://sportsbook.fanduel.com/baseball/mlb",
+            "nfl": "https://sportsbook.fanduel.com/football/nfl",
+            "nba": "https://sportsbook.fanduel.com/basketball/nba",
+            "nhl": "https://sportsbook.fanduel.com/hockey/nhl"
+        },
+        "selectors": {
+            "game_container": "[data-test-id='ArrowAction'], .event-row",
+            "odds_items": "[data-test-id='SelectionButton'], .odds-button",
+            "team_names": ".market-name, .team-name",
+            "odds_values": ".selection-price, .odds-value",
+            "game_time": ".event-time, .start-time",
+            "market_tabs": "[data-test-id='MarketGroupButton'], .market-tab",
+            "moneyline_tab": "[aria-label*='Moneyline'], [data-test-id*='Moneyline']",
+            "spread_tab": "[aria-label*='Spread'], [data-test-id*='Spread']",
+            "total_tab": "[aria-label*='Total'], [data-test-id*='Total']"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".coupon-content, .sportsbook-content",
+            "odds_load_selector": ".selection-price",
+            "max_wait_seconds": 10
+        }
+    },
+    "BetMGM": {
+        "name": "BetMGM Sportsbook",
+        "league_urls": {
+            "mlb": "https://sports.betmgm.com/en/sports/baseball-23/betting/usa-9/mlb-75",
+            "nfl": "https://sports.betmgm.com/en/sports/football-7/betting/usa-9/nfl-35",
+            "nba": "https://sports.betmgm.com/en/sports/basketball-4/betting/usa-9/nba-6004",
+            "nhl": "https://sports.betmgm.com/en/sports/ice-hockey-12/betting/usa-9/nhl-34"
+        },
+        "selectors": {
+            "game_container": ".grid-event, .sports-event",
+            "odds_items": ".option, .selection",
+            "team_names": ".participant, .team-name",
+            "odds_values": ".option-value, .odds",
+            "game_time": ".start-time, .event-time",
+            "market_tabs": ".market-tab, .bet-type-tab",
+            "moneyline_tab": "[data-testid*='moneyline'], .moneyline",
+            "spread_tab": "[data-testid*='spread'], .spread",
+            "total_tab": "[data-testid*='total'], .total"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".grid-wrapper, .sports-grid",
+            "odds_load_selector": ".option-value",
+            "max_wait_seconds": 10
+        }
+    },
+    "Caesars": {
+        "name": "Caesars Sportsbook",
+        "league_urls": {
+            "mlb": "https://www.caesars.com/sportsbook-and-casino/sportsbook/baseball/mlb",
+            "nfl": "https://www.caesars.com/sportsbook-and-casino/sportsbook/football/nfl",
+            "nba": "https://www.caesars.com/sportsbook-and-casino/sportsbook/basketball/nba",
+            "nhl": "https://www.caesars.com/sportsbook-and-casino/sportsbook/hockey/nhl"
+        },
+        "selectors": {
+            "game_container": ".event, .game-row",
+            "odds_items": ".bet-btn, .odds-button",
+            "team_names": ".competitor, .team",
+            "odds_values": ".odds-value, .price",
+            "game_time": ".event-time, .game-time",
+            "market_tabs": ".market-header, .bet-type",
+            "moneyline_tab": "[data-cy*='moneyline'], .moneyline-market",
+            "spread_tab": "[data-cy*='spread'], .spread-market",
+            "total_tab": "[data-cy*='total'], .total-market"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".sports-grid, .events-container",
+            "odds_load_selector": ".odds-value",
+            "max_wait_seconds": 10
+        }
+    },
+    "PointsBet": {
+        "name": "PointsBet Sportsbook",
+        "league_urls": {
+            "mlb": "https://pointsbet.com/sports/baseball/mlb",
+            "nfl": "https://pointsbet.com/sports/american-football/nfl",
+            "nba": "https://pointsbet.com/sports/basketball/nba",
+            "nhl": "https://pointsbet.com/sports/ice-hockey/nhl"
+        },
+        "selectors": {
+            "game_container": ".event-item, .match-row",
+            "odds_items": ".outcome, .bet-outcome",
+            "team_names": ".team-name, .competitor-name",
+            "odds_values": ".odds, .price-value",
+            "game_time": ".match-time, .event-start",
+            "market_tabs": ".market-type, .bet-type-selector",
+            "moneyline_tab": "[data-automation-id*='moneyline']",
+            "spread_tab": "[data-automation-id*='spread']",
+            "total_tab": "[data-automation-id*='total']"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".sports-events, .matches-list",
+            "odds_load_selector": ".odds",
+            "max_wait_seconds": 10
+        }
+    },
+    "WynnBET": {
+        "name": "WynnBET Sportsbook",
+        "league_urls": {
+            "mlb": "https://co.wynnbet.com/sports/baseball/mlb",
+            "nfl": "https://co.wynnbet.com/sports/american-football/nfl",
+            "nba": "https://co.wynnbet.com/sports/basketball/nba",
+            "nhl": "https://co.wynnbet.com/sports/ice-hockey/nhl"
+        },
+        "selectors": {
+            "game_container": ".event-card, .game-card",
+            "odds_items": ".outcome-button, .selection-btn",
+            "team_names": ".team-name, .participant-name",
+            "odds_values": ".odds-display, .price-display",
+            "game_time": ".start-time, .event-datetime",
+            "market_tabs": ".market-selector, .bet-type-tab",
+            "moneyline_tab": "[title*='Money Line'], .moneyline-tab",
+            "spread_tab": "[title*='Point Spread'], .spread-tab",
+            "total_tab": "[title*='Total Points'], .total-tab"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".events-grid, .sportsbook-grid",
+            "odds_load_selector": ".odds-display",
+            "max_wait_seconds": 10
+        }
+    },
+    "Barstool": {
+        "name": "Barstool Sportsbook",
+        "league_urls": {
+            "mlb": "https://www.barstoolsportsbook.com/sports/baseball/mlb",
+            "nfl": "https://www.barstoolsportsbook.com/sports/football/nfl",
+            "nba": "https://www.barstoolsportsbook.com/sports/basketball/nba",
+            "nhl": "https://www.barstoolsportsbook.com/sports/hockey/nhl"
+        },
+        "selectors": {
+            "game_container": ".match, .event-row",
+            "odds_items": ".bet-button, .outcome-btn",
+            "team_names": ".team, .competitor",
+            "odds_values": ".odds, .bet-price",
+            "game_time": ".match-time, .game-start",
+            "market_tabs": ".market-tab, .betting-type",
+            "moneyline_tab": "[data-testid*='moneyline']",
+            "spread_tab": "[data-testid*='spread']",
+            "total_tab": "[data-testid*='total']"
+        },
+        "wait_conditions": {
+            "page_load_selector": ".sports-content, .betting-grid",
+            "odds_load_selector": ".odds",
+            "max_wait_seconds": 10
+        }
+    },
+    "scraping_settings": {
+        "default_delays": {
+            "between_requests_ms": 2000,
+            "page_load_timeout_ms": 15000,
+            "element_wait_timeout_ms": 5000,
+            "scroll_delay_ms": 1000
+        },
+        "retry_settings": {
+            "max_retries": 3,
+            "retry_delay_ms": 5000,
+            "exponential_backoff": true
+        },
+        "browser_settings": {
+            "window_size": "1920,1080",
+            "user_agents": [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ],
+            "disable_images": true,
+            "disable_javascript": false,
+            "enable_cookies": true
+        }
+    }
+}

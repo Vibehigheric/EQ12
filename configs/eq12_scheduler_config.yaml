@@ -1,0 +1,184 @@
+jobs:
+- description: API health and quota monitoring
+  enabled: true
+  function: heartbeat_check
+  interval_seconds: 300
+  name: api_heartbeat
+  params: {}
+  priority: 1
+  timeout_seconds: 30
+- description: Timezone and clock accuracy check
+  enabled: true
+  function: clock_sanity_check
+  interval_seconds: 60
+  name: clock_sanity
+  params: {}
+  priority: 1
+  timeout_seconds: 15
+- description: DK/FD/BetMGM availability monitoring
+  enabled: true
+  function: book_availability_snapshot
+  interval_seconds: 180
+  name: book_availability
+  params: {}
+  priority: 2
+  timeout_seconds: 45
+- description: Standard odds polling (30-60s)
+  enabled: true
+  function: odds_polling
+  interval_seconds: 45
+  name: odds_polling_standard
+  params:
+    markets:
+    - h2h
+    - spreads
+    - totals
+    time_window: 24h
+  priority: 3
+  timeout_seconds: 60
+- description: High-frequency polling for steaming window
+  enabled: true
+  function: steaming_window_polling
+  interval_seconds: 15
+  name: odds_polling_steam_window
+  params:
+    markets:
+    - h2h
+    - spreads
+    - totals
+    steam_window_minutes: 10
+  priority: 5
+  timeout_seconds: 30
+- description: Line movement and steam alerts
+  enabled: true
+  function: steam_detection
+  interval_seconds: 30
+  name: steam_detection
+  params:
+    point_threshold: 0.5
+    price_threshold: 10
+    time_window_minutes: 10
+  priority: 4
+  timeout_seconds: 45
+- description: Moneyline value opportunities
+  enabled: true
+  function: hunt_moneylines
+  interval_seconds: 90
+  name: value_hunting_moneylines
+  params:
+    min_ev_percent: 2.0
+  priority: 3
+  timeout_seconds: 60
+- description: Spread hooks value hunting
+  enabled: true
+  function: hunt_spread_hooks
+  interval_seconds: 120
+  name: value_hunting_spread_hooks
+  params:
+    hook_numbers:
+    - -10.5
+    - -9.5
+    - -7.5
+    - -6.5
+    - -3.5
+    - -2.5
+    - -1.5
+    - -0.5
+    - 0.5
+    - 1.5
+    - 2.5
+    - 3.5
+    - 6.5
+    - 7.5
+    - 9.5
+    - 10.5
+    min_ev_percent: 2.5
+  priority: 3
+  timeout_seconds: 60
+- description: Total hooks value hunting
+  enabled: true
+  function: hunt_total_hooks
+  interval_seconds: 120
+  name: value_hunting_total_hooks
+  params:
+    hook_numbers:
+    - 37.5
+    - 38.5
+    - 39.5
+    - 40.5
+    - 41.5
+    - 42.5
+    - 43.5
+    - 44.5
+    - 45.5
+    - 46.5
+    - 47.5
+    - 48.5
+    - 49.5
+    - 50.5
+    - 51.5
+    - 52.5
+    min_ev_percent: 2.5
+  priority: 3
+  timeout_seconds: 60
+- description: DraftKings parlay construction
+  enabled: true
+  function: build_book_parlays
+  interval_seconds: 180
+  name: parlay_builder_draftkings
+  params:
+    book: draftkings
+    strategies:
+    - balanced
+    - conservative
+    - spreads_only
+    - totals_only
+  priority: 2
+  timeout_seconds: 90
+- description: FanDuel parlay construction
+  enabled: true
+  function: build_book_parlays
+  interval_seconds: 180
+  name: parlay_builder_fanduel
+  params:
+    book: fanduel
+    strategies:
+    - balanced
+    - conservative
+    - spreads_only
+    - totals_only
+  priority: 2
+  timeout_seconds: 90
+- description: BetMGM parlay construction
+  enabled: true
+  function: build_book_parlays
+  interval_seconds: 180
+  name: parlay_builder_betmgm
+  params:
+    book: betmgm
+    strategies:
+    - balanced
+    - conservative
+    - spreads_only
+    - totals_only
+  priority: 2
+  timeout_seconds: 90
+- description: Settlement grading and CLV calculation
+  enabled: true
+  function: settlement_and_clv
+  interval_seconds: 1200
+  name: settlement_and_clv
+  params:
+    days_back: 2
+  priority: 1
+  timeout_seconds: 120
+- description: Data quality and ops monitoring
+  enabled: true
+  function: data_quality_check
+  interval_seconds: 180
+  name: data_quality_check
+  params:
+    missing_market_alert: true
+    stale_threshold_minutes: 3
+  priority: 1
+  timeout_seconds: 60

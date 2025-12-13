@@ -1,0 +1,65 @@
+name: Lint Commit Messages
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install commitlint
+        run: |
+          npm install --save-dev @commitlint/config-conventional @commitlint/cli
+
+      - name: Validate commitlint config
+        run: |
+          if [[ ! -f ".commitlintrc.js" ]]; then
+            echo "⚠️ No .commitlintrc.js found, using default config"
+            echo "module.exports = {extends: ['@commitlint/config-conventional']};" > commitlint.config.js
+          else
+            echo "✅ Using existing .commitlintrc.js config"
+          fi
+
+      - name: Run commitlint on PR commits
+        if: github.event_name == 'pull_request'
+        run: |
+          # Lint all commits in the PR
+          npx commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.event.pull_request.head.sha }} --verbose
+
+      - name: Run commitlint on push
+        if: github.event_name == 'push'
+        run: |
+          # Lint the latest commit on push to main
+          npx commitlint --from=HEAD~1 --to=HEAD --verbose
+
+      - name: Show commit message examples on failure
+        if: failure()
+        run: |
+          echo "❌ Commit message validation failed!"
+          echo ""
+          echo "📋 EQ12 Commit Message Examples:"
+          echo "✅ feat(extension): Add audit tab to popup interface"
+          echo "✅ fix(api): Correct odds normalization in parlay endpoint"
+          echo "✅ bet(parlay): Generate MLB/NFL mixed 10-leg slips"
+          echo "✅ agent(pipeline): Orchestrate EV and props agents"
+          echo "✅ ext(chrome): Add audit tab to popup"
+          echo "✅ infra(vpn): Auto-reconnect WireGuard if dropped"
+          echo "✅ audit(compliance): Include VPN logs in audit output"
+          echo "✅ chore(deps): Bump fastapi from 0.100.0 to 0.101.0"
+          echo ""
+          echo "📖 Format: type(scope): Description"
+          echo "🔗 Docs: https://www.conventionalcommits.org/"

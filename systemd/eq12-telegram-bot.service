@@ -1,0 +1,38 @@
+[Unit]
+Description=EQ12 Telegram Bot - Multi-stack automation and monitoring
+After=network.target network-online.target
+Wants=network-online.target
+StartLimitBurst=3
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+User=eq12
+Group=eq12
+WorkingDirectory=/home/eq12/EQ12
+ExecStart=/usr/bin/python3 /home/eq12/EQ12/eq12_bot.py
+Restart=always
+RestartSec=10
+KillMode=process
+TimeoutStopSec=30
+
+# Environment variables (adjust paths as needed)
+Environment="TG_TOKEN="
+Environment="TG_CHAT_ID="
+Environment="PYTHONPATH=/home/eq12/EQ12"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+
+# Security settings
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/home/eq12/EQ12/logs /home/eq12/EQ12
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=eq12-telegram-bot
+
+[Install]
+WantedBy=multi-user.target

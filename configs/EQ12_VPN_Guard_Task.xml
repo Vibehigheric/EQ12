@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Date>2025-09-27T12:00:00.0000000</Date>
+    <Author>EQ12</Author>
+    <Description>EQ12 VPN Guard - Automated WireGuard VPN connection and betting pipeline management</Description>
+    <Documentation>Ensures secure VPN connection before running EQ12 betting operations. Monitors connection health and provides automatic reconnection with audit logging.</Documentation>
+  </RegistrationInfo>
+  <Triggers>
+    <!-- Trigger 1: At system startup -->
+    <BootTrigger>
+      <Enabled>true</Enabled>
+      <Delay>PT2M</Delay>
+    </BootTrigger>
+    <!-- Trigger 2: At user logon (backup trigger) -->
+    <LogonTrigger>
+      <Enabled>true</Enabled>
+      <Delay>PT1M</Delay>
+    </LogonTrigger>
+    <!-- Trigger 3: Daily at 6:00 AM (restart for stability) -->
+    <CalendarTrigger>
+      <StartBoundary>2025-09-27T06:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <UserId>S-1-5-18</UserId>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>true</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <DisallowStartOnRemoteAppSession>false</DisallowStartOnRemoteAppSession>
+    <UseUnifiedSchedulingEngine>true</UseUnifiedSchedulingEngine>
+    <WakeToRun>true</WakeToRun>
+    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>
+    <Priority>4</Priority>
+    <RestartPolicy>
+      <Interval>PT1M</Interval>
+      <Count>3</Count>
+    </RestartPolicy>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe</Command>
+      <Arguments>-ExecutionPolicy Bypass -WindowStyle Hidden -File "C:\EQ12\eq12_vpn_guard.ps1" -VpnConfig "eq12-betting" -RunPipeline -KillOnVpnDrop -MonitorIntervalSeconds 30 -MaxReconnectAttempts 5</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>

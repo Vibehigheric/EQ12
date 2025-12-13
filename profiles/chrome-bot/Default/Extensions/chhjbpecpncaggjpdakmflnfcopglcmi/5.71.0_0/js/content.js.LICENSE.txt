@@ -1,0 +1,9 @@
+/*!
+ * Rakuten Cash Back Button v5.71.0
+ * Copyrights 2025 Ebates Inc. dba Rakuten
+ */
+
+/*!
+* focus-trap 7.6.5
+* @license MIT, https://github.com/focus-trap/focus-trap/blob/master/LICENSE
+*/

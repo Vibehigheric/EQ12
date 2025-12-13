@@ -1,0 +1,62 @@
+name: Daily EQ12 Optimizer & Analytics
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 6 AM UTC daily
+  workflow_dispatch:
+
+jobs:
+  backtest-and-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Restore .NET solution
+        run: dotnet restore EQ12.sln
+      
+      - name: Build EQ12
+        run: dotnet build -c Release --no-restore
+      
+      - name: Run backtester
+        run: python scripts/backtester.py --days 90 --output reports/backtest.json
+      
+      - name: Generate analytics report
+        run: python scripts/analytics_report.py --metric all --output reports/daily_summary.csv
+      
+      - name: Sync Gumroad earnings
+        env:
+          GUMROAD_TOKEN: ${{ secrets.GUMROAD_TOKEN }}
+        run: python scripts/gumroad_sync.py --update
+      
+      - name: Update bankroll status
+        run: python scripts/eq12_bankroll_manager.py --action report
+      
+      - name: Commit and push reports
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add reports/
+          git commit -m "Daily backtest and analytics report [$(date)]" || echo "No changes"
+          git push
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-reports
+          path: reports/
+          retention-days: 30

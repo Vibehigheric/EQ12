@@ -1,0 +1,84 @@
+<div class="cashback_popup step1" id="cashback_popup">
+  <div class="cashback_popup_header">
+    <div class="cnet-logo">
+      <img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg"/>
+    </div>
+    <div class="cashback_options">
+      <svg width="18" height="4" viewBox="0 0 18 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="2" cy="2" r="2" fill="#737373"/>
+        <circle cx="9" cy="2" r="2" fill="#737373"/>
+        <circle cx="16" cy="2" r="2" fill="#737373"/>
+      </svg>
+    </div>
+    <div class="cashback_close closecashback">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15.2529 17.7894L8.99928 11.5351L2.74639 17.7894C2.6797 17.8561 2.60049 17.9091 2.51331 17.9453C2.42613 17.9814 2.33268 18 2.23831 18C2.14393 18 2.05048 17.9814 1.9633 17.9453C1.87612 17.9091 1.79691 17.8561 1.73022 17.7894L0.210622 16.2691C0.143852 16.2024 0.0908821 16.1232 0.054742 16.036C0.0186019 15.9488 0 15.8554 0 15.761C0 15.6666 0.0186019 15.5732 0.054742 15.486C0.0908821 15.3988 0.143852 15.3196 0.210622 15.2529L6.46423 8.99928L0.210622 2.74639C0.143852 2.6797 0.0908821 2.60049 0.054742 2.51331C0.0186019 2.42613 0 2.33268 0 2.23831C0 2.14393 0.0186019 2.05048 0.054742 1.9633C0.0908821 1.87612 0.143852 1.79691 0.210622 1.73022L1.73022 0.210622C1.79691 0.143852 1.87612 0.0908821 1.9633 0.054742C2.05048 0.0186019 2.14393 0 2.23831 0C2.33268 0 2.42613 0.0186019 2.51331 0.054742C2.60049 0.0908821 2.6797 0.143852 2.74639 0.210622L8.99928 6.46423L15.2529 0.210622C15.3196 0.143852 15.3988 0.0908821 15.486 0.054742C15.5732 0.0186019 15.6666 0 15.761 0C15.8554 0 15.9488 0.0186019 16.036 0.054742C16.1232 0.0908821 16.2024 0.143852 16.2691 0.210622L17.7894 1.73022C17.8561 1.79691 17.9091 1.87612 17.9453 1.9633C17.9814 2.05048 18 2.14393 18 2.23831C18 2.33268 17.9814 2.42613 17.9453 2.51331C17.9091 2.60049 17.8561 2.6797 17.7894 2.74639L11.5351 8.99928L17.7894 15.2529C17.8561 15.3196 17.9091 15.3988 17.9453 15.486C17.9814 15.5732 18 15.6666 18 15.761C18 15.8554 17.9814 15.9488 17.9453 16.036C17.9091 16.1232 17.8561 16.2024 17.7894 16.2691L16.2691 17.7894C16.2024 17.8561 16.1232 17.9091 16.036 17.9453C15.9488 17.9814 15.8554 18 15.761 18C15.6666 18 15.5732 17.9814 15.486 17.9453C15.3988 17.9091 15.3196 17.8561 15.2529 17.7894Z" fill="#737373"/>
+        </svg>
+    </div>
+  </div>
+  <div class="cashback_popup_content">
+    <div class="cashback_head hide">
+      <img class="cashback_head_image" src="chrome-extension://{{ extension_id }}/images/processing.png"/>
+    </div>
+    <div class="cashback_message">
+      Get up to {{ X.X% }} cash back
+    </div>
+    <div class="cashback_message_purchased hide">
+      Eligible purchases will earn rewards
+    </div>
+    <button class="cashback_button hide">
+      Activate
+    </button>
+  </div>
+  <div class="cashback_popup_footer">
+    <div class="cashback_steps">
+      <div class="cashback_steps-rewards">View Rewards
+      </div>
+      <div class="cashback_steps-offers">Offer Details & Terms
+      </div>
+    </div>
+  </div>
+  <div class="cashback_steps-offers-details cashback_details hide">
+  </div>
+  <div class="cashback_steps-terms-details hide">
+    <div class="cashback_steps-terms-head">
+      <svg width="12" height="18" viewBox="0 0 12 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M0.54031 10.5456L9.87879 1.20714C10.2693 0.816615 10.9025 0.816614 11.293 1.20714L11.5288 1.44292C11.9193 1.83344 11.9193 2.46661 11.5288 2.85713L2.88586 11.5L11.5286 20.1428C11.9192 20.5333 11.9192 21.1665 11.5286 21.557L11.2928 21.7928C10.9023 22.1833 10.2692 22.1833 9.87863 21.7928L0.292893 12.2071C-0.097631 11.8165 -0.0976311 11.1834 0.292893 10.7928L0.528673 10.5571C0.532528 10.5532 0.536408 10.5494 0.54031 10.5456Z" fill="#2A2A2A"/>
+      </svg>
+      <h2>Terms & Conditions</h2>
+    </div>
+    <div class="cashback_steps-terms-details-content cashback_details">
+      <p>Effective Date: November 12, 2021</p>
+      <p>Following is a summary of offer terms and conditions. You can access full terms of service <a class="cashback_steps-terms-link" href="https://www.redventures.com/legal/cmg-terms-of-use" target="_blank">here.</a></p>
+      <p>Acceptance of terms. By using the Services, you acknowledge that you have read and understood the terms and conditions, and that you agree to be legally bound by all of its terms. You also acknowledge that you have had an opportunity to review and you agree to the terms of our <a class="cashback_steps-terms-link" href="https://www.redventures.com/legal/privacy-policy" target="_blank">Privacy Policy</a>. If you do not agree to all of the terms and conditions, then you are not allowed to participate in or use the Services.</p>
+      <p>Eligibility. You represent and warrant that you are at least eighteen (18) years of age. If you are under age eighteen (18), you may not, under any circumstances or for any reason, use the Services.</p>
+      <p>Rewards. The services enable you to access and earn rewards, subject to the guidelines herein (“Services”).  For clarification, the rewards covered by this program are not a gift certificate, store gift card, or general-use prepaid card.</p>
+      <p>The Services may include cashback and referral bonuses activated by the creation of trackable links (“Links”) for a Merchant. Links are configured to track and attribute transactions to you so that you may earn a reward if you or someone to whom you send a Link completes a qualifying transaction with a Merchant.</p>
+      <p>Some transactions may not earn rewards or may earn at a rate which is different from the rate indicated by the service.  You are not guaranteed to earn a reward from a transaction for several reasons, without notice to you, including, without limitation:</p>
+        <ul>
+          <li>Merchants may alter terms, conditions, or commission rates;</li>
+          <li>Merchants may discontinue their programs.</li>
+          <li>Merchants may exclude certain products from Reward eligibility.</li>
+          <li>Merchants may have technical failures which result in transactions failing to be tracked or attributed to you.</li>
+          <li>Links may fail to function properly.</li>
+          <li>Links may be disabled by web browsers or ad blockers.</li>
+          <li>Merchants may reject transactions due to suspected policy violations.</li>
+        </ul>
+      <p>Other: charge-backs, product returns, accounting error, Merchant non-payment, fraudulent transactions, our inability to contact you in order to validate transactions, your inappropriate distribution of Links, or your failure to comply with Merchant policies.</p>
+      <p>If the Merchant pays less than expected amount or does not pay a commission for the transaction, we reserve the right, in our sole discretion, to adjust or cancel the reward. Furthermore, we reserve the right, in our sole discretion, to withhold, cancel or adjust the amount of any reward, for any reason at any time. By using the Services, you accept this condition.</p>
+      <p>Payout timing. We only provide a reward to you after a transaction is successfully tracked and completed and after we receive payment for that specific transaction from the Merchant. Merchants usually have holdback periods during which they hold a pending payment for a specified period, for example, until the expiration of a return policy and/or until a service is consumed. Rewards remain in a pending state until we receive payment from the Merchant for the associated transaction. After we receive payment from a Merchant for your specific transaction, we remit rewards in monthly batches. Rewards may be remitted automatically to your selected payment method or we may provide an interface for you to request withdrawal.</p>
+      <p>Payout Threshold. Withdrawal of confirmed funds may be subject to a minimum payout threshold, which may change from time to time, in our sole discretion, without notice to you. If there is a payment threshold and your balance is below that threshold, rewards will remain in your account and your balance may roll forward to subsequent payment periods until the minimum payment threshold is achieved.</p>
+      <p>Coupons. Some rewards may include coupons, discounts or promotions from Merchants (“Offers”). We do not guarantee that merchants will honor Offers. Offer codes may be expired or invalid. Offers may not be eligible for your transaction, based upon exclusions, terms and conditions determined by Merchants.</p>
+      <p>Dormant accounts.  If you have pending rewards, and your account has no new activity (defined as the earning of a pending reward) for a period of one hundred and eighty (180) days, we reserve the right to assess a monthly Dormant Account Fee of up to $5.00 USD, until such time as your reward balance reaches $0.00. Any Dormant Account Fee which we apply may or may not be displayed in your user dashboard or other presentations of your account balance.  If your account has no new activity for a period of 12 months, we reserve the right to void any remaining balance of rewards in your account.</p>
+      <p>Tax. You are obligated to independently assess and comply with all relevant tax and legal requirements. We shall not provide you with tax or legal advice.</p>
+      <p>Cookies. Some Merchants may place cookies (or other forms of tracking beacons) on your device to recognize your device during a subsequent visit. If you, or those clicking on your shared Link, block or delete cookies, tracking and attribution may be inoperable, in which case no reward shall be earned.</p>
+      <p>Third-Party Services. We do not endorse, warrant or guarantee the products, services or content of Merchants or other third-parties. We are not an agent or broker or otherwise responsible for Merchants’ activities, policies, products or services.</p>
+      <p><a class="cashback_steps-terms-link" href="https://www.redventures.com/legal/cmg-terms-of-use" target="_blank">See full CNET Shopping terms of service.</a></p>
+    </div>
+  </div>
+  <div class="cashback_steps-terms hide">Click to read Terms & Conditions
+  </div>
+  <div class="cashback_options_expanded hide">
+  </div>
+</div>
+

@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "f/DqUMvwnEM=",
+  "success": true,
+  "projectFilePath": "C:\\EQ12\\WindowsDataSentinel\\src\\VBDataCollector\\VBDataCollector.vbproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ricoj100\\.nuget\\packages\\stub.system.data.sqlite.core.netstandard\\1.0.118\\stub.system.data.sqlite.core.netstandard.1.0.118.nupkg.sha512",
+    "C:\\Users\\Ricoj100\\.nuget\\packages\\system.data.sqlite.core\\1.0.118\\system.data.sqlite.core.1.0.118.nupkg.sha512",
+    "C:\\Users\\Ricoj100\\.nuget\\packages\\system.io.pipelines\\9.0.0\\system.io.pipelines.9.0.0.nupkg.sha512",
+    "C:\\Users\\Ricoj100\\.nuget\\packages\\system.servicemodel.syndication\\8.0.0\\system.servicemodel.syndication.8.0.0.nupkg.sha512",
+    "C:\\Users\\Ricoj100\\.nuget\\packages\\system.text.encodings.web\\9.0.0\\system.text.encodings.web.9.0.0.nupkg.sha512",
+    "C:\\Users\\Ricoj100\\.nuget\\packages\\system.text.json\\9.0.0\\system.text.json.9.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

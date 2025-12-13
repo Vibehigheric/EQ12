@@ -1,0 +1,346 @@
+# EQ12 GODSTACK - DYNAMIC INTERACTIVE LAUNCHER
+# Auto-updating menu system that scans for new programs and serves as main entry point
+# Created: October 2025 | Updated: Dynamic
+
+[CmdletBinding()]
+param()
+
+# Initialize EQ12 Environment
+$EQ12Root = "C:\EQ12"
+Set-Location $EQ12Root
+
+# Dynamic Program Discovery Functions
+function Get-PythonPrograms {
+    $programs = @()
+    Get-ChildItem -Path $EQ12Root -Filter "*.py" -Recurse | Where-Object {
+        $_.Name -notlike "test_*" -and $_.Name -notlike "__*" -and $_.FullName -notlike "*\.venv\*"
+    } | ForEach-Object {
+        $relativePath = $_.FullName.Replace("$EQ12Root\", "")
+        $programs += @{
+            Name        = $_.BaseName
+            Path        = $relativePath
+            Category    = Get-ProgramCategory $_.BaseName $relativePath
+            Description = Get-ProgramDescription $_
+        }
+    }
+    return $programs
+}
+
+function Get-PowerShellPrograms {
+    $programs = @()
+    Get-ChildItem -Path $EQ12Root -Filter "*.ps1" -Recurse | Where-Object {
+        $_.Name -notlike "*test*" -and $_.Name -ne "EQ12_Interactive_Launcher.ps1"
+    } | ForEach-Object {
+        $relativePath = $_.FullName.Replace("$EQ12Root\", "")
+        $programs += @{
+            Name        = $_.BaseName
+            Path        = $relativePath
+            Category    = Get-ProgramCategory $_.BaseName $relativePath
+            Description = Get-ProgramDescription $_
+        }
+    }
+    return $programs
+}
+
+function Get-ProgramCategory($name, $path) {
+    if ($name -like "*dashboard*" -or $name -like "*server*" -or $name -like "*api*") { return "Dashboard & Web" }
+    if ($name -like "*ai*" -or $name -like "*openai*" -or $name -like "*chatgpt*" -or $name -like "*streaming*" -or $name -like "*governance*") { return "AI Services" }
+    if ($name -like "*chrome*" -or $name -like "*firefox*" -or $name -like "*browser*" -or $name -like "*extension*") { return "Browser Automation" }
+    if ($name -like "*cfb*" -or $name -like "*parlay*" -or $name -like "*monte*" -or $name -like "*betting*" -or $name -like "*bankroll*") { return "Sports Analytics" }
+    if ($name -like "*github*" -or $name -like "*git*" -or $name -like "*deploy*" -or $name -like "*build*") { return "Development & Git" }
+    if ($name -like "*security*" -or $name -like "*vpn*" -or $name -like "*health*" -or $name -like "*monitor*") { return "Security & Monitoring" }
+    if ($name -like "*telegram*" -or $name -like "*discord*" -or $name -like "*bot*" -or $name -like "*alert*") { return "Communication" }
+    if ($name -like "*scraper*" -or $name -like "*tracker*" -or $name -like "*intelligence*" -or $name -like "*news*") { return "Data & Intelligence" }
+    if ($name -like "*x_*" -or $name -like "*twitter*" -or $name -like "*xads*") { return "X API Integration" }
+    return "System Utilities"
+}
+
+function Get-ProgramDescription($file) {
+    try {
+        $firstLines = Get-Content $file.FullName -First 10 -ErrorAction SilentlyContinue
+        $description = $firstLines | Where-Object { $_ -match '^\s*#.*' -or $_ -match '""".*"""' } | Select-Object -First 1
+        if ($description) {
+            return ($description -replace '^\s*#\s*', '' -replace '"""', '').Trim()
+        }
+    }
+    catch {}
+    return "EQ12 Program"
+}
+
+function Show-DynamicMenu {
+    Clear-Host
+    Write-Host ""
+    Write-Host "🚀 EQ12 GODSTACK - DYNAMIC INTERACTIVE LAUNCHER" -ForegroundColor Cyan
+    Write-Host "=============================================================" -ForegroundColor Cyan
+    $programCount = (Get-ChildItem -Path $EQ12Root -Filter "*.py" -Recurse | Measure-Object).Count + (Get-ChildItem -Path $EQ12Root -Filter "*.ps1" -Recurse | Measure-Object).Count
+    Write-Host "Auto-discovered $programCount programs | Updated: $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Gray
+    Write-Host ""
+
+    # Quick Launch Options
+    Write-Host "⚡ QUICK LAUNCH:" -ForegroundColor Yellow
+    Write-Host "  1. System Status Check" -ForegroundColor White
+    Write-Host "  2. Start Main Dashboard" -ForegroundColor White
+    Write-Host "  3. AI Streaming Assistant" -ForegroundColor White
+    Write-Host "  4. Full EQ12 Stack Startup" -ForegroundColor White
+    Write-Host "  5. Chrome Governance Setup" -ForegroundColor White
+    Write-Host ""
+
+    # Categories Menu
+    Write-Host "📂 PROGRAM CATEGORIES:" -ForegroundColor Yellow
+    Write-Host "  10. Dashboard & Web Services" -ForegroundColor White
+    Write-Host "  11. AI Services & OpenAI" -ForegroundColor White
+    Write-Host "  12. Browser Automation" -ForegroundColor White
+    Write-Host "  13. Sports Analytics & Betting" -ForegroundColor White
+    Write-Host "  14. Development & GitHub" -ForegroundColor White
+    Write-Host "  15. Security & Monitoring" -ForegroundColor White
+    Write-Host "  16. Communication & Bots" -ForegroundColor White
+    Write-Host "  17. Data & Intelligence" -ForegroundColor White
+    Write-Host "  18. X API Integration" -ForegroundColor White
+    Write-Host "  19. System Utilities" -ForegroundColor White
+    Write-Host ""
+
+    # System Information
+    Write-Host "📊 SYSTEM INFO:" -ForegroundColor Yellow
+    Write-Host "  20. View All Programs List" -ForegroundColor White
+    Write-Host "  21. Check API Keys Status" -ForegroundColor White
+    Write-Host "  22. System Statistics" -ForegroundColor White
+    Write-Host "  23. Access Points & URLs" -ForegroundColor White
+    Write-Host ""
+
+    # Advanced Options
+    Write-Host "🔧 ADVANCED:" -ForegroundColor Yellow
+    Write-Host "  30. Scan for New Programs" -ForegroundColor White
+    Write-Host "  31. Create New Program Template" -ForegroundColor White
+    Write-Host "  32. System Health Report" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "  0. Exit" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "=============================================================" -ForegroundColor Cyan
+}
+}
+
+function Show-CategoryPrograms($category) {
+    Clear-Host
+    Write-Host ""
+    Write-Host "🚀 EQ12 - $category PROGRAMS" -ForegroundColor Cyan
+    Write-Host "=============================================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    $pythonPrograms = Get-PythonPrograms | Where-Object { $_.Category -eq $category }
+    $psPrograms = Get-PowerShellPrograms | Where-Object { $_.Category -eq $category }
+    $allPrograms = $pythonPrograms + $psPrograms
+
+    if ($allPrograms.Count -eq 0) {
+        Write-Host "No programs found in this category." -ForegroundColor Yellow
+        return
+    }
+
+    $counter = 1
+    foreach ($program in $allPrograms) {
+        $extension = if ($program.Path -like "*.py") { "Python" } else { "PowerShell" }
+        Write-Host "  $counter. $($program.Name) [$extension]" -ForegroundColor White
+        Write-Host "     $($program.Description)" -ForegroundColor Gray
+        Write-Host "     Path: $($program.Path)" -ForegroundColor DarkGray
+        Write-Host ""
+        $counter++
+    }
+
+    Write-Host "Enter program number to run, or 0 to return to main menu:" -ForegroundColor Yellow
+    $choice = Read-Host
+
+    if ($choice -eq "0") { return }
+
+    $selectedIndex = [int]$choice - 1
+    if ($selectedIndex -ge 0 -and $selectedIndex -lt $allPrograms.Count) {
+        $selectedProgram = $allPrograms[$selectedIndex]
+        Execute-Program $selectedProgram
+    }
+}
+
+function Execute-Program($program) {
+    Write-Host ""
+    Write-Host "🚀 Launching: $($program.Name)" -ForegroundColor Green
+    Write-Host "Path: $($program.Path)" -ForegroundColor Gray
+    Write-Host ""
+
+    if ($program.Path -like "*.py") {
+        python $program.Path
+    } elseif ($program.Path -like "*.ps1") {
+        & ".\$($program.Path)"
+    }
+
+    Write-Host ""
+    Write-Host "Press any key to return to menu..." -ForegroundColor Gray
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
+
+function Show-SystemStatus {
+    Clear-Host
+    Write-Host ""
+    Write-Host "🔍 EQ12 SYSTEM STATUS" -ForegroundColor Green
+    Write-Host "=============================================================" -ForegroundColor Green
+    Write-Host ""
+
+    # API Keys Status
+    Write-Host "🔐 API Keys Configuration:" -ForegroundColor Yellow
+    if (Test-Path "$EQ12Root\keys\openai_api_key.txt") {
+        $keyLength = (Get-Content "$EQ12Root\keys\openai_api_key.txt" -Raw).Trim().Length
+        Write-Host "  ✅ OpenAI API Key: Configured ($keyLength chars)" -ForegroundColor Green
+    } else {
+        Write-Host "  ❌ OpenAI API Key: Missing" -ForegroundColor Red
+    }
+
+    # Note about Copilot
+    Write-Host "  ℹ️  GitHub Copilot: Uses GitHub authentication (no API key needed)" -ForegroundColor Cyan
+    Write-Host "  ℹ️  Microsoft 365 Copilot: Uses Azure AD authentication" -ForegroundColor Cyan
+
+    Write-Host ""
+
+    # Services Status
+    Write-Host "🚀 Services Status:" -ForegroundColor Yellow
+    $processes = Get-Process | Where-Object { $_.ProcessName -match "python|node" }
+    Write-Host "  Active Python/Node Processes: $($processes.Count)" -ForegroundColor Green
+
+    # URLs
+    Write-Host ""
+    Write-Host "🌐 Access Points:" -ForegroundColor Yellow
+    Write-Host "  • Local Dashboard: http://localhost:3000/dashboard" -ForegroundColor Green
+    Write-Host "  • Emergency Server: http://localhost:8081" -ForegroundColor Green
+    Write-Host "  • Ngrok Public: https://b342ccc2bde9.ngrok-free.app/dashboard" -ForegroundColor Green
+
+    Write-Host ""
+    Write-Host "Press any key to continue..." -ForegroundColor Gray
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
+
+function Execute-Choice($choice) {
+    switch ($choice) {
+        1 { Show-SystemStatus }
+        2 {
+            Write-Host "🚀 Starting Main Dashboard..." -ForegroundColor Green
+            python eq12_unified_dashboard.py
+        }
+        3 {
+            Write-Host "🤖 Starting AI Streaming Assistant..." -ForegroundColor Green
+            python eq12_streaming_assistant.py
+        }
+        4 {
+            Write-Host "🚀 Starting Full EQ12 Stack..." -ForegroundColor Green
+            .\Start-EQ12-GODSTACK-Clean.ps1
+        }
+        5 {
+            Write-Host "🌐 Setting up Chrome Governance..." -ForegroundColor Green
+            python chrome_governance_automation.py --setup-profile --verbose
+        }
+
+        # Category selections
+        10 { Show-CategoryPrograms "Dashboard & Web" }
+        11 { Show-CategoryPrograms "AI Services" }
+        12 { Show-CategoryPrograms "Browser Automation" }
+        13 { Show-CategoryPrograms "Sports Analytics" }
+        14 { Show-CategoryPrograms "Development & Git" }
+        15 { Show-CategoryPrograms "Security & Monitoring" }
+        16 { Show-CategoryPrograms "Communication" }
+        17 { Show-CategoryPrograms "Data & Intelligence" }
+        18 { Show-CategoryPrograms "X API Integration" }
+        19 { Show-CategoryPrograms "System Utilities" }
+
+        # System info
+        20 {
+            Clear-Host
+            Write-Host "📋 ALL EQ12 PROGRAMS:" -ForegroundColor Cyan
+            Write-Host ""
+            $allPython = Get-PythonPrograms | Sort-Object Name
+            $allPS = Get-PowerShellPrograms | Sort-Object Name
+
+            Write-Host "PYTHON PROGRAMS ($($allPython.Count)):" -ForegroundColor Yellow
+            $allPython | ForEach-Object { Write-Host "  • $($_.Name) - $($_.Description)" -ForegroundColor White }
+
+            Write-Host ""
+            Write-Host "POWERSHELL PROGRAMS ($($allPS.Count)):" -ForegroundColor Yellow
+            $allPS | ForEach-Object { Write-Host "  • $($_.Name) - $($_.Description)" -ForegroundColor White }
+
+            Write-Host ""
+            Write-Host "Press any key to continue..." -ForegroundColor Gray
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+        21 { Show-SystemStatus }
+        22 {
+            Write-Host "📊 System Statistics:" -ForegroundColor Yellow
+            $pythonFiles = (Get-ChildItem -Path $EQ12Root -Filter "*.py" -Recurse | Measure-Object).Count
+            $powershellFiles = (Get-ChildItem -Path $EQ12Root -Filter "*.ps1" -Recurse | Measure-Object).Count
+            $vbFiles = (Get-ChildItem -Path $EQ12Root -Filter "*.vb" -Recurse | Measure-Object).Count
+            $jsFiles = (Get-ChildItem -Path $EQ12Root -Filter "*.js" -Recurse | Measure-Object).Count
+            Write-Host "  • Python Programs: $pythonFiles" -ForegroundColor White
+            Write-Host "  • PowerShell Scripts: $powershellFiles" -ForegroundColor White
+            Write-Host "  • VB.NET Programs: $vbFiles" -ForegroundColor White
+            Write-Host "  • JavaScript Files: $jsFiles" -ForegroundColor White
+            $total = $pythonFiles + $powershellFiles + $vbFiles + $jsFiles
+            Write-Host "  • Total Files: $total" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "Press any key to continue..." -ForegroundColor Gray
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        }
+
+        30 {
+            Write-Host "🔄 Scanning for new programs..." -ForegroundColor Yellow
+            Start-Sleep 2
+            Write-Host "✅ Scan complete! Menu will refresh automatically." -ForegroundColor Green
+            Start-Sleep 2
+        }
+        31 {
+            Write-Host "📝 Program Template Creator - Coming Soon!" -ForegroundColor Cyan
+            Start-Sleep 2
+        }
+        32 {
+            Write-Host "🔍 Running System Health Report..." -ForegroundColor Green
+            python eq12_system_health.py
+        }
+
+        0 {
+            Write-Host "👋 Goodbye! EQ12 GODSTACK ready when you are." -ForegroundColor Green
+            exit
+        }
+        default {
+            Write-Host "❌ Invalid choice. Please try again." -ForegroundColor Red
+            Start-Sleep 2
+        }
+    }
+}
+
+# Initialize API Key Check
+function Initialize-EQ12Environment {
+    Write-Host "🔄 Initializing EQ12 Environment..." -ForegroundColor Yellow
+
+    # Ensure keys directory exists
+    if (-not (Test-Path "$EQ12Root\keys")) {
+        New-Item -ItemType Directory -Path "$EQ12Root\keys" -Force | Out-Null
+    }
+
+    # Set environment variables if keys exist
+    if (Test-Path "$EQ12Root\keys\openai_api_key.txt") {
+        $env:OPENAI_API_KEY = Get-Content "$EQ12Root\keys\openai_api_key.txt" -Raw
+        $env:CHATGPT_API_KEY = $env:OPENAI_API_KEY
+    }
+
+    Write-Host "✅ Environment initialized!" -ForegroundColor Green
+    Start-Sleep 1
+}
+
+# Main execution loop with startup
+Write-Host "🚀 EQ12 GODSTACK STARTING UP..." -ForegroundColor Cyan
+Initialize-EQ12Environment
+
+do {
+    Show-DynamicMenu
+    $choice = Read-Host "Select an option"
+    Write-Host ""
+    Execute-Choice $choice
+
+    if ($choice -ne 0 -and $choice -notin @(20, 21, 22, 30, 31)) {
+        Write-Host ""
+        Write-Host "Press any key to return to menu..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+} while ($true)

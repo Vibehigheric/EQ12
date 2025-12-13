@@ -1,0 +1,409 @@
+[CmdletBinding()]
+param(
+    [Parameter(HelpMessage="Run comprehensive security scan")]
+    [switch]$Scan,
+    
+    [Parameter(HelpMessage="Install Snyk CLI")]
+    [switch]$InstallSnyk,
+    
+    [Parameter(HelpMessage="Authenticate Snyk CLI")]
+    [switch]$Auth,
+    
+    [Parameter(HelpMessage="Generate security report only")]
+    [switch]$ReportOnly,
+    
+    [Parameter(HelpMessage="Enable verbose logging")]
+    [switch]$Verbose,
+    
+    [Parameter(HelpMessage="Setup Windows Task Scheduler for automated scans")]
+    [switch]$SetupScheduler,
+    
+    [Parameter(HelpMessage="Show security status dashboard")]
+    [switch]$Dashboard
+)
+
+# EQ12 Snyk Security Integration PowerShell Wrapper
+# Provides Windows-specific automation and task scheduling for security scans
+
+Write-Host "🔒 EQ12 Snyk Security Integration" -ForegroundColor Cyan
+Write-Host "Comprehensive security scanning for EQ12 betting platform" -ForegroundColor Gray
+
+# Script configuration
+$ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$ProjectRoot = Split-Path -Parent $ScriptRoot
+$PythonScript = Join-Path $ScriptRoot "eq12_snyk_security_integration.py"
+$LogsDir = Join-Path $ProjectRoot "logs"
+$ConfigDir = Join-Path $ProjectRoot "configs"
+
+# Ensure directories exist
+if (-not (Test-Path $LogsDir)) {
+    New-Item -ItemType Directory -Path $LogsDir -Force | Out-Null
+}
+
+if (-not (Test-Path $ConfigDir)) {
+    New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
+}
+
+function Write-EQ12Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "[$Timestamp] [$Level] $Message"
+    
+    $LogFile = Join-Path $LogsDir "snyk_security_wrapper.log"
+    Add-Content -Path $LogFile -Value $LogEntry
+    
+    switch ($Level) {
+        "ERROR" { Write-Error $Message }
+        "WARN" { Write-Warning $Message }
+        "INFO" { Write-Host $Message -ForegroundColor Green }
+        "DEBUG" { if ($Verbose) { Write-Host $Message -ForegroundColor Gray } }
+    }
+}
+
+function Test-SnykToken {
+    """Check if Snyk API token is configured"""
+    $Token = $env:SNYK_TOKEN
+    if (-not $Token) {
+        Write-EQ12Log "SNYK_TOKEN environment variable not set" "WARN"
+        Write-Host "To set up Snyk authentication:" -ForegroundColor Yellow
+        Write-Host "1. Get your API token from https://app.snyk.io/account" -ForegroundColor Yellow
+        Write-Host "2. Set environment variable: `$env:SNYK_TOKEN = 'your-token'" -ForegroundColor Yellow
+        Write-Host "3. Or run: .\eq12_snyk_security.ps1 -Auth" -ForegroundColor Yellow
+        return $false
+    }
+    Write-EQ12Log "SNYK_TOKEN found in environment" "INFO"
+    return $true
+}
+
+function Install-SnykCLI {
+    """Install Snyk CLI using multiple methods"""
+    Write-EQ12Log "Installing Snyk CLI..." "INFO"
+    
+    # Method 1: Try npm installation
+    try {
+        $NpmResult = npm install -g snyk 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "Snyk CLI installed via npm" "INFO"
+            return $true
+        }
+    }
+    catch {
+        Write-EQ12Log "npm installation failed: $_" "WARN"
+    }
+    
+    # Method 2: Try Scoop (Windows package manager)
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        try {
+            scoop bucket add snyk https://github.com/snyk/scoop-snyk
+            scoop install snyk
+            if ($LASTEXITCODE -eq 0) {
+                Write-EQ12Log "Snyk CLI installed via Scoop" "INFO"
+                return $true
+            }
+        }
+        catch {
+            Write-EQ12Log "Scoop installation failed: $_" "WARN"
+        }
+    }
+    
+    # Method 3: Download standalone executable
+    try {
+        Write-EQ12Log "Downloading Snyk CLI standalone executable..." "INFO"
+        $SnykUrl = "https://downloads.snyk.io/cli/stable/snyk-win.exe"
+        $SnykPath = Join-Path $ProjectRoot "snyk.exe"
+        
+        Invoke-WebRequest -Uri $SnykUrl -OutFile $SnykPath -UseBasicParsing
+        
+        if (Test-Path $SnykPath) {
+            Write-EQ12Log "Snyk CLI downloaded to $SnykPath" "INFO"
+            
+            # Add to PATH for current session
+            $env:PATH += ";$ProjectRoot"
+            
+            return $true
+        }
+    }
+    catch {
+        Write-EQ12Log "Standalone download failed: $_" "ERROR"
+    }
+    
+    return $false
+}
+
+function Test-SnykInstallation {
+    """Check if Snyk CLI is installed and accessible"""
+    try {
+        $Version = snyk --version 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "Snyk CLI version: $Version" "INFO"
+            return $true
+        }
+    }
+    catch {
+        Write-EQ12Log "Snyk CLI not found" "WARN"
+    }
+    return $false
+}
+
+function Set-SnykAuthentication {
+    """Configure Snyk authentication"""
+    Write-EQ12Log "Setting up Snyk authentication..." "INFO"
+    
+    if (-not $env:SNYK_TOKEN) {
+        Write-Host "Please enter your Snyk API token:" -ForegroundColor Yellow
+        Write-Host "Get it from: https://app.snyk.io/account" -ForegroundColor Cyan
+        $Token = Read-Host "Snyk API Token" -AsSecureString
+        
+        # Convert SecureString to plain text for environment variable
+        $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Token)
+        $PlainToken = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+        
+        # Set for current session
+        $env:SNYK_TOKEN = $PlainToken
+        
+        # Set permanently for user
+        [Environment]::SetEnvironmentVariable("SNYK_TOKEN", $PlainToken, "User")
+        
+        Write-EQ12Log "SNYK_TOKEN set in environment" "INFO"
+    }
+    
+    # Authenticate CLI
+    try {
+        $AuthResult = snyk auth $env:SNYK_TOKEN 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "Snyk authentication successful" "INFO"
+            return $true
+        } else {
+            Write-EQ12Log "Snyk authentication failed: $AuthResult" "ERROR"
+        }
+    }
+    catch {
+        Write-EQ12Log "Authentication error: $_" "ERROR"
+    }
+    
+    return $false
+}
+
+function New-SecurityScanTask {
+    """Create Windows Task Scheduler task for automated security scans"""
+    Write-EQ12Log "Setting up automated security scan task..." "INFO"
+    
+    $TaskName = "EQ12-Security-Scan"
+    $TaskDescription = "Automated security scanning for EQ12 platform using Snyk"
+    $ScriptPath = $MyInvocation.MyCommand.Path
+    
+    # Create task action
+    $Action = New-ScheduledTaskAction -Execute "powershell.exe" `
+        -Argument "-ExecutionPolicy Bypass -File `"$ScriptPath`" -Scan -Verbose"
+    
+    # Create task trigger (daily at 2 AM)
+    $Trigger = New-ScheduledTaskTrigger -Daily -At "02:00"
+    
+    # Create task settings
+    $Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+        -StartWhenAvailable -RunOnlyIfNetworkAvailable
+    
+    # Create task principal (run as current user)
+    $Principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType InteractiveOrPassword
+    
+    try {
+        # Register the task
+        Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger `
+            -Settings $Settings -Principal $Principal -Description $TaskDescription -Force
+        
+        Write-EQ12Log "Scheduled task '$TaskName' created successfully" "INFO"
+        Write-Host "✅ Automated security scans will run daily at 2:00 AM" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-EQ12Log "Failed to create scheduled task: $_" "ERROR"
+        return $false
+    }
+}
+
+function Show-SecurityDashboard {
+    """Display security status dashboard"""
+    Write-Host "`n" + "="*80 -ForegroundColor Cyan
+    Write-Host "🔒 EQ12 SECURITY DASHBOARD" -ForegroundColor Cyan
+    Write-Host "="*80 -ForegroundColor Cyan
+    
+    # Check Snyk installation
+    Write-Host "`n🔧 SECURITY TOOLS STATUS:" -ForegroundColor Yellow
+    if (Test-SnykInstallation) {
+        Write-Host "✅ Snyk CLI: Installed" -ForegroundColor Green
+    } else {
+        Write-Host "❌ Snyk CLI: Not Installed" -ForegroundColor Red
+    }
+    
+    # Check authentication
+    if (Test-SnykToken) {
+        Write-Host "✅ Snyk Token: Configured" -ForegroundColor Green
+    } else {
+        Write-Host "❌ Snyk Token: Not Configured" -ForegroundColor Red
+    }
+    
+    # Check for recent scan results
+    Write-Host "`n📊 RECENT SCAN RESULTS:" -ForegroundColor Yellow
+    $RecentReports = Get-ChildItem -Path $LogsDir -Filter "security_report_*.json" | 
+                    Sort-Object LastWriteTime -Descending | Select-Object -First 3
+    
+    if ($RecentReports) {
+        foreach ($Report in $RecentReports) {
+            $ReportData = Get-Content $Report.FullName | ConvertFrom-Json
+            $Summary = $ReportData.executive_summary
+            $ScanTime = [DateTime]::Parse($ReportData.report_metadata.generated_at).ToString("yyyy-MM-dd HH:mm")
+            
+            Write-Host "📄 $ScanTime - Total: $($Summary.total_vulnerabilities) " -NoNewline -ForegroundColor Gray
+            Write-Host "Critical: $($Summary.critical_vulnerabilities) " -NoNewline -ForegroundColor Red
+            Write-Host "High: $($Summary.high_vulnerabilities)" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "No recent security scan reports found" -ForegroundColor Gray
+    }
+    
+    # Check scheduled task
+    Write-Host "`n⏰ AUTOMATION STATUS:" -ForegroundColor Yellow
+    try {
+        $Task = Get-ScheduledTask -TaskName "EQ12-Security-Scan" -ErrorAction SilentlyContinue
+        if ($Task) {
+            $LastRun = $Task.LastRunTime
+            $NextRun = $Task.NextRunTime
+            Write-Host "✅ Scheduled scans: Enabled" -ForegroundColor Green
+            if ($LastRun) {
+                Write-Host "   Last run: $LastRun" -ForegroundColor Gray
+            }
+            if ($NextRun) {
+                Write-Host "   Next run: $NextRun" -ForegroundColor Gray
+            }
+        } else {
+            Write-Host "❌ Scheduled scans: Not configured" -ForegroundColor Red
+        }
+    }
+    catch {
+        Write-Host "❌ Cannot check scheduled task status" -ForegroundColor Red
+    }
+    
+    Write-Host "`n" + "="*80 -ForegroundColor Cyan
+}
+
+function Invoke-PythonSecurityScan {
+    """Execute the Python security scanning script"""
+    param([string[]]$Arguments)
+    
+    Write-EQ12Log "Executing Python security scan..." "INFO"
+    
+    # Check Python availability
+    if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+        Write-EQ12Log "Python not found in PATH" "ERROR"
+        Write-Host "Please ensure Python is installed and available in PATH" -ForegroundColor Red
+        return $false
+    }
+    
+    # Build Python command
+    $PythonArgs = @($PythonScript) + $Arguments
+    
+    try {
+        Write-EQ12Log "Running: python $($PythonArgs -join ' ')" "DEBUG"
+        
+        # Execute Python script
+        $Process = Start-Process -FilePath "python" -ArgumentList $PythonArgs `
+            -NoNewWindow -PassThru -Wait
+        
+        $ExitCode = $Process.ExitCode
+        Write-EQ12Log "Python script completed with exit code: $ExitCode" "INFO"
+        
+        return ($ExitCode -eq 0)
+    }
+    catch {
+        Write-EQ12Log "Failed to execute Python script: $_" "ERROR"
+        return $false
+    }
+}
+
+# Main execution logic
+try {
+    Write-EQ12Log "EQ12 Snyk Security Integration started" "INFO"
+    
+    if ($Dashboard) {
+        Show-SecurityDashboard
+        exit 0
+    }
+    
+    if ($InstallSnyk) {
+        if (Install-SnykCLI) {
+            Write-Host "✅ Snyk CLI installation completed successfully" -ForegroundColor Green
+        } else {
+            Write-Host "❌ Snyk CLI installation failed" -ForegroundColor Red
+            exit 1
+        }
+    }
+    
+    if ($Auth) {
+        if (Set-SnykAuthentication) {
+            Write-Host "✅ Snyk authentication completed successfully" -ForegroundColor Green
+        } else {
+            Write-Host "❌ Snyk authentication failed" -ForegroundColor Red
+            exit 1
+        }
+    }
+    
+    if ($SetupScheduler) {
+        if (New-SecurityScanTask) {
+            Write-Host "✅ Automated security scanning configured" -ForegroundColor Green
+        } else {
+            Write-Host "❌ Failed to configure automated scanning" -ForegroundColor Red
+            exit 1
+        }
+    }
+    
+    if ($Scan -or $ReportOnly) {
+        # Prepare Python arguments
+        $PythonArgs = @()
+        if ($Scan) { $PythonArgs += "--scan" }
+        if ($ReportOnly) { $PythonArgs += "--report-only" }
+        if ($Verbose) { $PythonArgs += "--verbose" }
+        
+        Write-Host "🔒 Starting comprehensive security scan..." -ForegroundColor Cyan
+        
+        if (Invoke-PythonSecurityScan -Arguments $PythonArgs) {
+            Write-Host "✅ Security scan completed successfully" -ForegroundColor Green
+            
+            # Show quick summary from latest report
+            $LatestReport = Get-ChildItem -Path $LogsDir -Filter "security_report_*.json" | 
+                           Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            
+            if ($LatestReport) {
+                Write-Host "`n📊 Quick Summary:" -ForegroundColor Yellow
+                $ReportData = Get-Content $LatestReport.FullName | ConvertFrom-Json
+                $Summary = $ReportData.executive_summary
+                
+                Write-Host "Total Vulnerabilities: $($Summary.total_vulnerabilities)" -ForegroundColor Gray
+                Write-Host "Critical: $($Summary.critical_vulnerabilities) | High: $($Summary.high_vulnerabilities) | Medium: $($Summary.medium_vulnerabilities) | Low: $($Summary.low_vulnerabilities)" -ForegroundColor Gray
+                Write-Host "Detailed report: $($LatestReport.FullName)" -ForegroundColor Cyan
+            }
+        } else {
+            Write-Host "❌ Security scan failed" -ForegroundColor Red
+            exit 1
+        }
+    }
+    
+    # If no specific action, show help
+    if (-not ($Scan -or $InstallSnyk -or $Auth -or $SetupScheduler -or $ReportOnly -or $Dashboard)) {
+        Write-Host "`nEQ12 Snyk Security Integration - Available Options:" -ForegroundColor Yellow
+        Write-Host "  -Scan              Run comprehensive security scan" -ForegroundColor Gray
+        Write-Host "  -InstallSnyk       Install Snyk CLI" -ForegroundColor Gray
+        Write-Host "  -Auth              Configure Snyk authentication" -ForegroundColor Gray
+        Write-Host "  -SetupScheduler    Setup automated daily scans" -ForegroundColor Gray
+        Write-Host "  -Dashboard         Show security status dashboard" -ForegroundColor Gray
+        Write-Host "  -ReportOnly        Generate report from existing scan data" -ForegroundColor Gray
+        Write-Host "  -Verbose           Enable verbose logging" -ForegroundColor Gray
+        Write-Host "`nExample: .\eq12_snyk_security.ps1 -Scan -Verbose" -ForegroundColor Cyan
+    }
+    
+    Write-EQ12Log "EQ12 Snyk Security Integration completed successfully" "INFO"
+}
+catch {
+    Write-EQ12Log "Unexpected error: $_" "ERROR"
+    Write-Host "❌ Security integration failed: $_" -ForegroundColor Red
+    exit 1
+}

@@ -1,0 +1,327 @@
+#!/usr/bin/env python3
+"""
+EQ12 Bet Settlement CLI
+Easy command-line interface for settling bets and managing bankroll
+"""
+
+import argparse
+import sys
+from pathlib import Path
+
+# Add src to path for imports
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
+try:
+    from src.core.bankroll_tracker import BankrollTracker, get_bankroll_stats
+    from src.core.discord_integration import DiscordIntegration
+except ImportError as e:
+    print(f"❌ Import error: {e}")
+    print("   Make sure you're running from the sports-betting-optimizer directory")
+    sys.exit(1)
+
+
+def list_pending_slips(bankroll_file: str) -> None:
+    """List all pending slips"""
+    print("📋 Pending Slips:")
+    print("-" * 80)
+
+    try:
+        import csv
+
+        with open(bankroll_file, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            pending_slips = []
+
+            for row in reader:
+                if row.get("result") == "pending" and row.get("id") != "INIT":
+                    pending_slips.append(row)
+
+        if not pending_slips:
+            print("✅ No pending slips found!")
+            return
+
+        for i, slip in enumerate(pending_slips, 1):
+            print(f"{i}. ID: {slip.get('id', 'Unknown')}")
+            print(f"   Sport: {slip.get('sport', 'Unknown').upper()}")
+            print(f"   Stake: ${float(slip.get('stake', 0)):.2f}")
+            print(f"   Expected Value: ${float(slip.get('ev', 0)):.2f}")
+            print(f"   Date: {slip.get('timestamp', 'Unknown')[:10]}")
+            print()
+
+    except FileNotFoundError:
+        print("❌ Bankroll file not found. Run the optimizer first to create slips.")
+    except Exception as e:
+        print(f"❌ Error listing slips: {e}")
+
+
+def settle_bet(
+    slip_id: str,
+    result: str,
+    payout: float,
+    bankroll_file: str,
+    discord_webhook: str | None = None,
+) -> None:
+    """Settle a specific bet"""
+    print(f"⚖️ Settling slip: {slip_id}")
+
+    try:
+        tracker = BankrollTracker(bankroll_file, discord_webhook=discord_webhook)
+        success, settlement_info = tracker.settle_slip(slip_id, result, payout)
+
+        if success:
+            print("✅ Settlement successful!")
+            print(f"   Result: {settlement_info['result'].upper()}")
+            print(f"   Profit/Loss: ${settlement_info['profit_loss']:.2f}")
+            print(f"   New Balance: ${settlement_info['new_balance']:.2f}")
+
+            # Send Discord notification if webhook provided
+            if discord_webhook:
+                discord = DiscordIntegration(discord_webhook)
+                discord.send_settlement_notification(settlement_info)
+        else:
+            print(f"❌ Settlement failed: {settlement_info.get('error', 'Unknown error')}")
+
+    except Exception as e:
+        print(f"❌ Settlement error: {e}")
+
+
+def show_stats(bankroll_file: str) -> None:
+    """Show comprehensive bankroll statistics"""
+    print("📊 Bankroll Statistics:")
+    print("=" * 50)
+
+    try:
+        stats = get_bankroll_stats(bankroll_file)
+
+        print(f"💰 Current Balance: ${stats['current_balance']:.2f}")
+        print(f"📊 Total Slips: {stats['total_slips']}")
+        print(f"⏳ Pending: {stats['pending']}")
+        print(f"✅ Settled: {stats['settled']}")
+        print()
+
+        if stats["settled"] > 0:
+            print("🏆 Performance:")
+            print(f"   Won: {stats['won']} ({stats['win_rate']:.1f}%)")
+            print(f"   Lost: {stats['lost']}")
+            print(f"   Push: {stats['push']}")
+            print()
+
+        print(f"💸 Total Wagered: ${stats['total_wagered']:.2f}")
+        print(f"📈 Total P/L: ${stats['total_profit_loss']:.2f}")
+        print(f"📊 ROI: {stats['roi']:.2f}%")
+
+    except Exception as e:
+        print(f"❌ Error getting stats: {e}")
+
+
+def interactive_settlement(bankroll_file: str, discord_webhook: str | None = None) -> None:
+    """Interactive settlement mode"""
+    print("🎮 Interactive Settlement Mode")
+    print("Type 'help' for commands, 'quit' to exit")
+    print()
+
+    while True:
+        try:
+            cmd = input("EQ12> ").strip().lower()
+
+            if cmd in ["quit", "exit", "q"]:
+                print("👋 Goodbye!")
+                break
+            if cmd in ["help", "h"]:
+                print("\nCommands:")
+                print("  list, ls       - List pending slips")
+                print("  stats, st      - Show bankroll stats")
+                print("  settle <id>    - Settle a slip")
+                print("  won <id> <payout> - Mark slip as won")
+                print("  lost <id>      - Mark slip as lost")
+                print("  push <id>      - Mark slip as push")
+                print("  help, h        - Show this help")
+                print("  quit, q        - Exit")
+                print()
+            elif cmd in ["list", "ls"]:
+                list_pending_slips(bankroll_file)
+            elif cmd in ["stats", "st"]:
+                show_stats(bankroll_file)
+            elif cmd.startswith("won "):
+                parts = cmd.split()
+                if len(parts) >= 3:
+                    slip_id = parts[1]
+                    try:
+                        payout = float(parts[2])
+                        settle_bet(slip_id, "won", payout, bankroll_file, discord_webhook)
+                    except ValueError:
+                        print("❌ Invalid payout amount")
+                else:
+                    print("❌ Usage: won <slip_id> <payout_amount>")
+            elif cmd.startswith("lost "):
+                parts = cmd.split()
+                if len(parts) >= 2:
+                    slip_id = parts[1]
+                    settle_bet(slip_id, "lost", 0, bankroll_file, discord_webhook)
+                else:
+                    print("❌ Usage: lost <slip_id>")
+            elif cmd.startswith("push "):
+                parts = cmd.split()
+                if len(parts) >= 2:
+                    slip_id = parts[1]
+                    # For push, payout equals original stake
+                    try:
+                        import csv
+
+                        with open(bankroll_file, encoding="utf-8") as f:
+                            reader = csv.DictReader(f)
+                            for row in reader:
+                                if row.get("id") == slip_id:
+                                    stake = float(row.get("stake", 0))
+                                    settle_bet(
+                                        slip_id,
+                                        "push",
+                                        stake,
+                                        bankroll_file,
+                                        discord_webhook,
+                                    )
+                                    break
+                            else:
+                                print(f"❌ Slip {slip_id} not found")
+                    except Exception as e:
+                        print(f"❌ Error processing push: {e}")
+                else:
+                    print("❌ Usage: push <slip_id>")
+            elif cmd.startswith("settle "):
+                slip_id = cmd.split()[1] if len(cmd.split()) > 1 else ""
+                if slip_id:
+                    print(f"Settling {slip_id}:")
+                    result = input("Result (won/lost/push): ").strip().lower()
+                    if result in ["won", "lost", "push"]:
+                        if result == "won":
+                            try:
+                                payout = float(input("Payout amount: $"))
+                                settle_bet(
+                                    slip_id,
+                                    result,
+                                    payout,
+                                    bankroll_file,
+                                    discord_webhook,
+                                )
+                            except ValueError:
+                                print("❌ Invalid payout amount")
+                        else:
+                            # For lost, payout is 0; for push, get stake from file
+                            payout = 0
+                            if result == "push":
+                                try:
+                                    import csv
+
+                                    with open(bankroll_file) as f:
+                                        reader = csv.DictReader(f)
+                                        for row in reader:
+                                            if row.get("id") == slip_id:
+                                                payout = float(row.get("stake", 0))
+                                                break
+                                except:
+                                    pass
+                            settle_bet(slip_id, result, payout, bankroll_file, discord_webhook)
+                    else:
+                        print("❌ Result must be 'won', 'lost', or 'push'")
+                else:
+                    print("❌ Usage: settle <slip_id>")
+            else:
+                print(f"❌ Unknown command: {cmd}")
+                print("   Type 'help' for available commands")
+
+        except KeyboardInterrupt:
+            print("\n👋 Goodbye!")
+            break
+        except EOFError:
+            print("\n👋 Goodbye!")
+            break
+        except Exception as e:
+            print(f"❌ Error: {e}")
+
+
+def main():
+    """Main CLI entry point"""
+    parser = argparse.ArgumentParser(
+        description="EQ12 Bet Settlement CLI",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python settle_bets.py --list
+  python settle_bets.py --settle "2025-10-03-nfl-mystery" --result won --payout 250
+  python settle_bets.py --stats
+  python settle_bets.py --interactive
+        """,
+    )
+
+    parser.add_argument(
+        "--bankroll-file",
+        "-b",
+        default="../betting-bridge/data/bankroll.csv",
+        help="Path to bankroll CSV file",
+    )
+
+    parser.add_argument("--discord-webhook", "-d", help="Discord webhook URL for notifications")
+
+    parser.add_argument("--list", "-l", action="store_true", help="List all pending slips")
+
+    parser.add_argument("--stats", "-s", action="store_true", help="Show bankroll statistics")
+
+    parser.add_argument("--settle", help="Slip ID to settle")
+
+    parser.add_argument("--result", "-r", choices=["won", "lost", "push"], help="Settlement result")
+
+    parser.add_argument("--payout", "-p", type=float, help="Payout amount (for wins)")
+
+    parser.add_argument(
+        "--interactive",
+        "-i",
+        action="store_true",
+        help="Enter interactive settlement mode",
+    )
+
+    args = parser.parse_args()
+
+    print("⚖️ EQ12 Bet Settlement CLI")
+    print("=" * 40)
+
+    # Convert relative path to absolute
+    bankroll_file = str(Path(args.bankroll_file).resolve())
+
+    if args.interactive:
+        interactive_settlement(bankroll_file, args.discord_webhook)
+    elif args.list:
+        list_pending_slips(bankroll_file)
+    elif args.stats:
+        show_stats(bankroll_file)
+    elif args.settle:
+        if not args.result:
+            print("❌ --result is required when settling a bet")
+            sys.exit(1)
+
+        payout = args.payout or 0
+        if args.result == "won" and not args.payout:
+            print("❌ --payout is required for winning bets")
+            sys.exit(1)
+
+        # For push, payout should equal stake - get it from file
+        if args.result == "push" and not args.payout:
+            try:
+                import csv
+
+                with open(bankroll_file) as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if row.get("id") == args.settle:
+                            payout = float(row.get("stake", 0))
+                            break
+            except:
+                pass
+
+        settle_bet(args.settle, args.result, payout, bankroll_file, args.discord_webhook)
+    else:
+        # Default to interactive mode
+        interactive_settlement(bankroll_file, args.discord_webhook)
+
+
+if __name__ == "__main__":
+    main()

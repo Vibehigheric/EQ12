@@ -1,0 +1,213 @@
+name: Release EQ12 Browser Extensions
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # Example: v1.2.3
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.2.3)'
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for changelog
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'eq12-firefox-ext/package-lock.json'
+
+      - name: Extract version from tag or input
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        working-directory: eq12-firefox-ext
+        run: npm ci
+
+      - name: Bump manifest versions
+        working-directory: eq12-firefox-ext
+        run: |
+          # Update version in both manifest files
+          for mf in manifest.firefox.json manifest.chromium.json; do
+            if [[ -f "$mf" ]]; then
+              jq --arg v "$VERSION" '.version=$v' "$mf" > "tmp.$mf" && mv "tmp.$mf" "$mf"
+              echo "Updated $mf to version $VERSION"
+            fi
+          done
+
+          # Also update package.json version
+          if [[ -f "package.json" ]]; then
+            jq --arg v "$VERSION" '.version=$v' package.json > tmp.package.json && mv tmp.package.json package.json
+            echo "Updated package.json to version $VERSION"
+          fi
+
+      - name: Build Firefox extension
+        working-directory: eq12-firefox-ext
+        run: |
+          # Use Windows-compatible build commands
+          npm run clean || true
+          mkdir -p dist-firefox
+          cp -r src/* dist-firefox/
+          cp -r icons dist-firefox/
+          cp manifest.firefox.json dist-firefox/manifest.json
+          echo "Firefox extension built successfully"
+
+      - name: Build Chromium extension
+        working-directory: eq12-firefox-ext
+        run: |
+          mkdir -p dist-chromium
+          cp -r src/* dist-chromium/
+          cp -r icons dist-chromium/
+          cp manifest.chromium.json dist-chromium/manifest.json
+          echo "Chromium extension built successfully"
+
+      - name: Validate extension builds
+        working-directory: eq12-firefox-ext
+        run: |
+          # Check that manifest files exist and have correct version
+          if [[ ! -f "dist-firefox/manifest.json" ]]; then
+            echo "❌ Firefox manifest not found"
+            exit 1
+          fi
+          if [[ ! -f "dist-chromium/manifest.json" ]]; then
+            echo "❌ Chromium manifest not found"
+            exit 1
+          fi
+
+          # Verify versions
+          FF_VERSION=$(jq -r '.version' dist-firefox/manifest.json)
+          CR_VERSION=$(jq -r '.version' dist-chromium/manifest.json)
+
+          if [[ "$FF_VERSION" != "$VERSION" ]]; then
+            echo "❌ Firefox version mismatch: $FF_VERSION != $VERSION"
+            exit 1
+          fi
+          if [[ "$CR_VERSION" != "$VERSION" ]]; then
+            echo "❌ Chromium version mismatch: $CR_VERSION != $VERSION"
+            exit 1
+          fi
+
+          echo "✅ Extension versions validated: $VERSION"
+
+      - name: Package Firefox extension
+        working-directory: eq12-firefox-ext
+        run: |
+          cd dist-firefox
+          zip -r "../eq12-firefox-ext-${VERSION}.zip" .
+          cd ..
+          echo "Firefox package size: $(du -h eq12-firefox-ext-${VERSION}.zip | cut -f1)"
+
+      - name: Package Chromium extension
+        working-directory: eq12-firefox-ext
+        run: |
+          cd dist-chromium
+          zip -r "../eq12-chromium-ext-${VERSION}.zip" .
+          cd ..
+          echo "Chromium package size: $(du -h eq12-chromium-ext-${VERSION}.zip | cut -f1)"
+
+      - name: Generate changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: ".github/changelog-config.json"
+          fromTag: ""  # Auto-detect previous tag
+          toTag: ${{ env.TAG_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release body
+        id: release_body
+        run: |
+          cat << 'EOF' > release_body.md
+          # 🎯 EQ12 Browser Extension v${{ env.VERSION }}
+
+          Auto-built release of the EQ12 Betting Dashboard browser extensions.
+
+          ## 📦 Downloads
+          - **Firefox**: `eq12-firefox-ext-${{ env.VERSION }}.zip`
+          - **Chrome/Edge**: `eq12-chromium-ext-${{ env.VERSION }}.zip`
+
+          ## 🚀 Installation
+
+          ### Firefox
+          1. Download the Firefox zip file
+          2. Go to `about:debugging#/runtime/this-firefox`
+          3. Click "Load Temporary Add-on"
+          4. Select the downloaded zip file
+
+          ### Chrome/Edge
+          1. Download the Chromium zip file
+          2. Extract the zip file
+          3. Go to `chrome://extensions/` (or `edge://extensions/`)
+          4. Enable "Developer mode"
+          5. Click "Load unpacked" and select the extracted folder
+
+          ## 🔧 Configuration
+          - API Base: `http://localhost:8000`
+          - API Key: `eq12-test-key-2025`
+          - Set these in the extension's Options page
+
+          ## 🌟 Features
+          - 🎟️ Generate 5-leg and 10-leg parlays
+          - 📊 Real-time audit reports and analytics
+          - 🟢 EV highlighting on major sportsbooks
+          - ❤️ System health monitoring
+          - ⚙️ Configurable API settings
+
+          ---
+
+          ## 📋 Changelog
+          ${{ steps.changelog.outputs.changelog }}
+          EOF
+
+          echo "Release body generated successfully"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            eq12-firefox-ext/eq12-firefox-ext-${{ env.VERSION }}.zip
+            eq12-firefox-ext/eq12-chromium-ext-${{ env.VERSION }}.zip
+          tag_name: ${{ env.TAG_NAME }}
+          name: "🎯 EQ12 Extensions v${{ env.VERSION }}"
+          body_path: release_body.md
+          draft: false
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eq12-extensions-v${{ env.VERSION }}
+          path: |
+            eq12-firefox-ext/eq12-firefox-ext-${{ env.VERSION }}.zip
+            eq12-firefox-ext/eq12-chromium-ext-${{ env.VERSION }}.zip
+          retention-days: 90
+
+      - name: Post-release summary
+        run: |
+          echo "🎉 EQ12 Extensions v${{ env.VERSION }} released successfully!"
+          echo "📦 Firefox: eq12-firefox-ext-${{ env.VERSION }}.zip"
+          echo "📦 Chromium: eq12-chromium-ext-${{ env.VERSION }}.zip"
+          echo "🔗 Release: https://github.com/${{ github.repository }}/releases/tag/${{ env.TAG_NAME }}"

@@ -1,0 +1,18 @@
+# MLB_HR_LSTM Model Placeholder
+        
+This is a placeholder for the mlb_hr_lstm Edge TPU model.
+
+To create this model:
+1. Train your TensorFlow model for mlb_hr_lstm
+2. Convert to TensorFlow Lite: 
+   converter = tf.lite.TFLiteConverter.from_saved_model(model_path)
+   converter.optimizations = [tf.lite.Optimize.DEFAULT]
+   tflite_model = converter.convert()
+   
+3. Compile for Edge TPU:
+   edgetpu_compiler mlb_hr_lstm.tflite
+   
+4. Place the resulting mlb_hr_lstm_edgetpu.tflite file here
+
+Expected input shape: [1, input_size]
+Expected output shape: [1, num_classes]

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21px" height="24px" viewBox="0 0 21 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61 (89581) - https://sketch.com -->
+    <title>calculator</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="770" y="121" width="360" height="500" rx="14"></rect>
+        <filter x="-21.9%" y="-9.4%" width="143.9%" height="131.6%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="32" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="21" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.243137255   0 0 0 0 0.282352941   0 0 0 0 0.435294118  0 0 0 0.06 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Price-alert-pop-ups" transform="translate(-803.000000, -582.000000)" opacity="1">
+            <g id="Rectangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+            </g>
+            <g id="calculator" transform="translate(804.000000, 583.000000)" stroke="#3E486F" stroke-linecap="round" stroke-width="1.5">
+                <path d="M16.4816667,0.444888889 C12.0197869,-0.147883606 7.49910197,-0.147883606 3.03722222,0.444888889 C1.60442585,0.719492323 0.579069453,1.98814487 0.611111111,3.44666667 L0.611111111,18.5533333 C0.5713799,20.0102784 1.59346641,21.2812882 3.025,21.5551111 C7.49506315,22.1478885 12.0238257,22.1478885 16.4938889,21.5551111 C17.9296064,21.2810003 18.960704,20.0148124 18.9383333,18.5533333 L18.9383333,3.44666667 C18.9571284,1.98223395 17.9208947,0.716069811 16.4816667,0.444888889 Z" id="Path"></path>
+                <line x1="6.11111111" y1="8.55555556" x2="6.11111111" y2="12.2222222" id="Path"></line>
+                <line x1="4.27777778" y1="10.3888889" x2="7.94444444" y2="10.3888889" id="Path"></line>
+                <line x1="7.63888889" y1="14.9722222" x2="4.58333333" y2="18.0277778" id="Path"></line>
+                <line x1="4.58333333" y1="14.9722222" x2="7.63888889" y2="18.0277778" id="Path"></line>
+                <line x1="11.6111111" y1="10.3888889" x2="15.2777778" y2="10.3888889" id="Path"></line>
+                <line x1="11.6111111" y1="15.2777778" x2="15.2777778" y2="15.2777778" id="Path"></line>
+                <line x1="11.6111111" y1="17.7222222" x2="15.2777778" y2="17.7222222" id="Path"></line>
+                <line x1="3.05555556" y1="5.5" x2="18.9444444" y2="5.5" id="Path"></line>
+            </g>
+        </g>
+    </g>
+</svg>

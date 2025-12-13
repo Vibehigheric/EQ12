@@ -1,0 +1,410 @@
+name: EQ12 Sensitive Module Compliance
+
+on:
+  pull_request:
+    paths:
+      - 'betting/**'
+      - 'cannabis/**'
+      - 'credit/**'
+      - 'housing/**'
+      - 'fleet/**'
+      - 'enrichment/**'
+      - '**/*betting*'
+      - '**/*cannabis*'
+      - '**/*credit*'
+      - '**/*gambling*'
+      - '**/*odds*'
+      - '**/*parlay*'
+      - 'odds_parser.py'
+      - 'parlay_builder.py'
+      - '*.xml'
+      - '.env*'
+      - '**/secrets/**'
+      - '**/keys/**'
+
+env:
+  SENSITIVE_MODULE_DETECTED: true
+
+jobs:
+  # ===================================
+  # SENSITIVE MODULE DETECTION
+  # ===================================
+  
+  detect-sensitive:
+    name: "🚨 Sensitive Module Detection"
+    runs-on: ubuntu-latest
+    outputs:
+      sensitive-betting: ${{ steps.detect.outputs.betting }}
+      sensitive-cannabis: ${{ steps.detect.outputs.cannabis }}
+      sensitive-credit: ${{ steps.detect.outputs.credit }}
+      sensitive-secrets: ${{ steps.detect.outputs.secrets }}
+      requires-approval: ${{ steps.detect.outputs.approval }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Detect sensitive module changes
+        id: detect
+        run: |
+          # Get changed files in this PR
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD || git diff --name-only HEAD~1)
+          
+          echo "🔍 Analyzing changed files for sensitive modules:"
+          echo "$CHANGED_FILES"
+          
+          # Check for betting/gambling content
+          if echo "$CHANGED_FILES" | grep -E "(betting|gambling|odds|parlay)" || \
+             git diff origin/main...HEAD | grep -i "gambling\|betting\|odds"; then
+            echo "betting=true" >> $GITHUB_OUTPUT
+            echo "🚨 BETTING/GAMBLING content detected"
+          else
+            echo "betting=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check for cannabis content  
+          if echo "$CHANGED_FILES" | grep -E "(cannabis|cbd|weed|marijuana)" || \
+             git diff origin/main...HEAD | grep -i "cannabis\|cbd\|weed"; then
+            echo "cannabis=true" >> $GITHUB_OUTPUT
+            echo "🚨 CANNABIS content detected"
+          else
+            echo "cannabis=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check for credit/financial content
+          if echo "$CHANGED_FILES" | grep -E "(credit|housing|loan|mortgage|finance)" || \
+             git diff origin/main...HEAD | grep -i "credit\|loan\|mortgage"; then
+            echo "credit=true" >> $GITHUB_OUTPUT
+            echo "🚨 CREDIT/FINANCIAL content detected"
+          else
+            echo "credit=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check for secrets/keys
+          if echo "$CHANGED_FILES" | grep -E "(secret|key|\.env|token)" || \
+             git diff origin/main...HEAD | grep -i "api.*key\|token\|secret"; then
+            echo "secrets=true" >> $GITHUB_OUTPUT
+            echo "🚨 SECRETS/KEYS content detected"
+          else
+            echo "secrets=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Determine if owner approval is required
+          if [[ "$betting" == "true" || "$cannabis" == "true" || "$credit" == "true" || "$secrets" == "true" ]]; then
+            echo "approval=true" >> $GITHUB_OUTPUT
+            echo "⚠️ OWNER APPROVAL REQUIRED"
+          else
+            echo "approval=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ===================================
+  # ENHANCED SECRET SCANNING
+  # ===================================
+  
+  deep-secret-scan:
+    name: "🔍 Deep Secret Scanning"
+    runs-on: ubuntu-latest
+    needs: detect-sensitive
+    if: needs.detect-sensitive.outputs.sensitive-secrets == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Advanced TruffleHog Scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified --json --include-detectors="all"
+          
+      - name: Custom EQ12 Secret Patterns
+        run: |
+          echo "🔍 Scanning for EQ12-specific sensitive patterns..."
+          
+          # Check for API key patterns
+          if git diff origin/main...HEAD | grep -E "['\"]([A-Za-z0-9]{20,})['\"]" | grep -v "test\|example"; then
+            echo "❌ Potential API keys detected in diff"
+            exit 1
+          fi
+          
+          # Check for betting API keys
+          if git diff origin/main...HEAD | grep -i "odds.*api\|sports.*api\|betting.*key"; then
+            echo "❌ Betting API references detected - ensure externalized"
+            exit 1
+          fi
+          
+          # Check for financial API keys  
+          if git diff origin/main...HEAD | grep -i "credit.*api\|loan.*api\|bank.*api"; then
+            echo "❌ Financial API references detected - ensure externalized"
+            exit 1
+          fi
+          
+          # Check for cannabis compliance keys
+          if git diff origin/main...HEAD | grep -i "cannabis.*api\|cbd.*api\|metrc"; then
+            echo "❌ Cannabis API references detected - ensure externalized"
+            exit 1
+          fi
+          
+          echo "✅ No sensitive API patterns detected in changes"
+
+  # ===================================
+  # REGULATORY COMPLIANCE CHECK
+  # ===================================
+  
+  regulatory-compliance:
+    name: "📋 Regulatory Compliance"
+    runs-on: ubuntu-latest
+    needs: detect-sensitive
+    if: needs.detect-sensitive.outputs.requires-approval == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Betting Compliance Check
+        if: needs.detect-sensitive.outputs.sensitive-betting == 'true'
+        run: |
+          echo "🏈 Checking Betting/Gambling Compliance..."
+          
+          # Check for responsible gambling patterns
+          if git diff origin/main...HEAD | grep -i "personal.*use\|educational.*purpose"; then
+            echo "✅ Responsible use indicators found"
+          else
+            echo "⚠️ Add responsible gambling disclaimers"
+          fi
+          
+          # Check for API rate limiting in betting code
+          if git diff origin/main...HEAD | grep -E "sleep\(|delay|rate.*limit" | head -1; then
+            echo "✅ Rate limiting detected in betting code"
+          else
+            echo "❌ Add rate limiting to prevent API bans"
+            exit 1
+          fi
+          
+          echo "📋 Betting compliance check completed"
+          
+      - name: Cannabis Compliance Check  
+        if: needs.detect-sensitive.outputs.sensitive-cannabis == 'true'
+        run: |
+          echo "🌿 Checking Cannabis/CBD Compliance..."
+          
+          # Check for state compliance indicators
+          if git diff origin/main...HEAD | grep -i "state.*legal\|compliance\|regulation"; then
+            echo "✅ Legal compliance indicators found"
+          else
+            echo "⚠️ Add state/federal compliance documentation"
+          fi
+          
+          # Check for age verification patterns
+          if git diff origin/main...HEAD | grep -i "age.*verify\|21.*over\|adult"; then
+            echo "✅ Age verification patterns detected"
+          else
+            echo "⚠️ Consider age verification requirements"
+          fi
+          
+          echo "📋 Cannabis compliance check completed"
+          
+      - name: Financial Compliance Check
+        if: needs.detect-sensitive.outputs.sensitive-credit == 'true'
+        run: |
+          echo "🏠 Checking Credit/Financial Compliance..."
+          
+          # Check for PII protection
+          if git diff origin/main...HEAD | grep -i "encrypt\|hash\|secure"; then
+            echo "✅ Data protection patterns found"
+          else
+            echo "❌ Add encryption/protection for financial data"
+            exit 1
+          fi
+          
+          # Check for FCRA compliance indicators
+          if git diff origin/main...HEAD | grep -i "fcra\|fair.*credit\|personal.*use"; then
+            echo "✅ Fair Credit Reporting Act compliance indicators"
+          else
+            echo "⚠️ Add FCRA compliance documentation"
+          fi
+          
+          echo "📋 Financial compliance check completed"
+
+  # ===================================
+  # BUSINESS RISK ASSESSMENT  
+  # ===================================
+  
+  risk-assessment:
+    name: "⚠️ Business Risk Assessment"
+    runs-on: ubuntu-latest
+    needs: [detect-sensitive, regulatory-compliance]
+    if: needs.detect-sensitive.outputs.requires-approval == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Revenue Impact Analysis
+        run: |
+          echo "💰 Analyzing potential revenue impact..."
+          
+          # Check for changes to core revenue modules
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          
+          if echo "$CHANGED_FILES" | grep -E "(odds|parlay|swagbucks|affiliate|travel)"; then
+            echo "🚨 HIGH IMPACT: Core revenue modules affected"
+            echo "📊 Requires thorough testing before deployment"
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -E "(scheduler|xml|automation)"; then
+            echo "⚠️ MEDIUM IMPACT: Automation workflows affected"
+            echo "🔄 Verify scheduled task functionality"
+          fi
+          
+          echo "✅ Revenue impact analysis completed"
+          
+      - name: API Ban Risk Assessment
+        run: |
+          echo "🚫 Assessing API ban risk..."
+          
+          # Check for aggressive scraping patterns
+          if git diff origin/main...HEAD | grep -E "for.*in.*range\([0-9]+\)" | grep -v "sleep\|delay"; then
+            echo "❌ HIGH RISK: Potential aggressive loops without delays"
+            exit 1
+          fi
+          
+          # Check for proper error handling
+          if git diff origin/main...HEAD | grep -E "requests\.|urllib\." | head -1; then
+            if git diff origin/main...HEAD | grep -E "except|try:|raise_for_status"; then
+              echo "✅ HTTP error handling detected"
+            else
+              echo "❌ MEDIUM RISK: Add error handling for HTTP requests"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ API ban risk assessment completed"
+          
+      - name: Cross-Stack Impact Assessment
+        run: |
+          echo "🔗 Analyzing cross-stack impact..."
+          
+          # Check for shared dependency changes
+          if git diff origin/main...HEAD | grep -E "import|from.*import" | head -5; then
+            echo "ℹ️ Import changes detected - verify cross-module compatibility"
+          fi
+          
+          # Check for database schema changes  
+          if git diff origin/main...HEAD | grep -E "CREATE TABLE|ALTER TABLE|DROP"; then
+            echo "🗃️ Database schema changes detected - verify migration safety"
+          fi
+          
+          echo "✅ Cross-stack impact assessment completed"
+
+  # ===================================
+  # MANDATORY APPROVAL GATE
+  # ===================================
+  
+  approval-gate:
+    name: "🔐 Mandatory Approval Gate"
+    runs-on: ubuntu-latest
+    needs: [detect-sensitive, deep-secret-scan, regulatory-compliance, risk-assessment]
+    if: needs.detect-sensitive.outputs.requires-approval == 'true'
+    steps:
+      - name: Approval Required Notice
+        run: |
+          echo "🚨 SENSITIVE MODULE CHANGES DETECTED"
+          echo "=================================="
+          echo ""
+          echo "This PR modifies sensitive EQ12 GODSTACK modules that require"
+          echo "explicit owner approval before merging:"
+          echo ""
+          
+          if [[ "${{ needs.detect-sensitive.outputs.sensitive-betting }}" == "true" ]]; then
+            echo "🏈 BETTING/GAMBLING content - High regulatory risk"
+          fi
+          
+          if [[ "${{ needs.detect-sensitive.outputs.sensitive-cannabis }}" == "true" ]]; then
+            echo "🌿 CANNABIS/CBD content - Legal compliance required"
+          fi
+          
+          if [[ "${{ needs.detect-sensitive.outputs.sensitive-credit }}" == "true" ]]; then
+            echo "🏠 CREDIT/FINANCIAL content - Data protection required"
+          fi
+          
+          if [[ "${{ needs.detect-sensitive.outputs.sensitive-secrets }}" == "true" ]]; then
+            echo "🔐 SECRETS/KEYS content - Security review required"
+          fi
+          
+          echo ""
+          echo "REQUIRED ACTIONS:"
+          echo "1. ✅ Use sensitive_module.md PR template"
+          echo "2. ✅ Complete all compliance checklists"
+          echo "3. ✅ Get @Vibehigheric approval"
+          echo "4. ✅ Verify risk mitigation plans"
+          echo "5. ✅ Document rollback procedures"
+          echo ""
+          echo "⚠️ This PR CANNOT be merged without explicit owner approval"
+          
+      - name: Block Auto-Merge
+        run: |
+          echo "🛑 Auto-merge blocked for sensitive module changes"
+          echo "Manual review and approval required"
+          exit 1
+
+  # ===================================
+  # COMPLIANCE SUMMARY
+  # ===================================
+  
+  compliance-summary:
+    name: "📋 Compliance Summary"
+    runs-on: ubuntu-latest
+    needs: [detect-sensitive, deep-secret-scan, regulatory-compliance, risk-assessment]
+    if: always()
+    steps:
+      - name: Generate Compliance Report
+        run: |
+          echo "📋 EQ12 Sensitive Module Compliance Report"
+          echo "========================================"
+          echo ""
+          echo "**PR Number:** ${{ github.event.number }}"
+          echo "**Branch:** ${{ github.head_ref }}"
+          echo "**Author:** ${{ github.event.pull_request.user.login }}"
+          echo "**Date:** $(date -u)"
+          echo ""
+          echo "**Sensitive Modules Detected:**"
+          echo "- Betting/Gambling: ${{ needs.detect-sensitive.outputs.sensitive-betting }}"
+          echo "- Cannabis/CBD: ${{ needs.detect-sensitive.outputs.sensitive-cannabis }}" 
+          echo "- Credit/Financial: ${{ needs.detect-sensitive.outputs.sensitive-credit }}"
+          echo "- Secrets/Keys: ${{ needs.detect-sensitive.outputs.sensitive-secrets }}"
+          echo ""
+          echo "**Owner Approval Required:** ${{ needs.detect-sensitive.outputs.requires-approval }}"
+          echo ""
+          
+          if [[ "${{ needs.deep-secret-scan.result }}" == "success" ]]; then
+            echo "**Secret Scanning:** ✅ PASSED"
+          else
+            echo "**Secret Scanning:** ❌ FAILED"
+          fi
+          
+          if [[ "${{ needs.regulatory-compliance.result }}" == "success" ]]; then
+            echo "**Regulatory Compliance:** ✅ PASSED" 
+          else
+            echo "**Regulatory Compliance:** ❌ FAILED"
+          fi
+          
+          if [[ "${{ needs.risk-assessment.result }}" == "success" ]]; then
+            echo "**Risk Assessment:** ✅ PASSED"
+          else
+            echo "**Risk Assessment:** ❌ FAILED"
+          fi
+          
+          echo ""
+          echo "**Next Steps:**"
+          if [[ "${{ needs.detect-sensitive.outputs.requires-approval }}" == "true" ]]; then
+            echo "1. 🔴 OWNER APPROVAL REQUIRED (@Vibehigheric)"
+            echo "2. 📋 Complete sensitive module PR template"
+            echo "3. ✅ Address any compliance failures"
+            echo "4. 🔐 Verify security requirements met"
+          else
+            echo "1. ✅ No sensitive modules affected"
+            echo "2. 🚀 Standard review process applies"
+          fi

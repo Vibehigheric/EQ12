@@ -1,0 +1,79 @@
+# EQ12 CUSTOM COPIOLot ENGINE
+# Internal Copilot OS Layer for EQ12 Content Empire
+# Buffalo NY 14215 - ASCII-SAFE HARDENED MODE
+# Date: November 16, 2025
+
+enable_eq12_commands=true
+enable_ascii_only=true
+enable_strict_blocks=true
+disable_unicode_output=true
+eq12_safe_print=true
+eq12_no_magic_indent=true
+eq12_auto_repair=true
+pylance_protect=true
+
+# EQ12 Custom Commands
+eq12_commands:
+  - run-odds
+  - run-parlay
+  - system-repair
+  - ascii-scan
+  - pylance-restart
+  - fix-utf8
+  - revenue-track
+  - crypto-suite
+  - betting-analysis
+  - workspace-heal
+  - unicode-purge
+  - safe-launch
+  - immunity-check
+  - content-empire-mode
+
+# ASCII Enforcement Rules
+ascii_enforcement:
+  - no_emoji_output
+  - no_smart_quotes
+  - no_unicode_symbols
+  - no_non_ascii_chars
+  - force_ascii_banners
+  - strip_control_chars
+  - prevent_bom_injection
+
+# Pylance Safety Configuration
+pylance_safety:
+  - prevent_epipe_errors
+  - disable_dot_continue
+  - force_complete_blocks
+  - no_incremental_parsing
+  - channel_protection
+  - lsp_stability_mode
+
+# EQ12 Workspace Protection
+workspace_protection:
+  - auto_ascii_conversion
+  - unicode_detection_alerts
+  - corruption_prevention
+  - safe_file_encoding
+  - protected_script_execution
+
+# Revenue Tracking Safety
+revenue_safety:
+  - ascii_only_logs
+  - safe_number_formatting
+  - protected_calculations
+  - corruption_immune_storage
+
+# Content Empire Integration
+content_empire:
+  - hardened_automation
+  - ascii_safe_banners
+  - protected_workflows
+  - immunity_active_mode
+
+# Error Prevention
+error_prevention:
+  - prevent_write_epipe
+  - stop_channel_corruption
+  - block_unicode_injection
+  - safe_copilot_chat
+  - protected_inline_suggestions

@@ -1,0 +1,35 @@
+{
+  "networks": {
+    "ethereum": {
+      "rpc_url": "https://mainnet.infura.io/v3/YOUR_INFURA_KEY",
+      "chain_id": 1,
+      "enabled": false
+    },
+    "polygon": {
+      "rpc_url": "https://polygon-rpc.com",
+      "chain_id": 137,
+      "enabled": true
+    },
+    "bsc": {
+      "rpc_url": "https://bsc-dataseed.binance.org",
+      "chain_id": 56,
+      "enabled": true
+    }
+  },
+  "payment_settings": {
+    "default_expiry_minutes": 30,
+    "confirmation_blocks": 12,
+    "gas_limit": 21000,
+    "max_gas_price": 100
+  },
+  "security": {
+    "signature_expiry_minutes": 5,
+    "max_verification_attempts": 3,
+    "rate_limit_per_hour": 100
+  },
+  "features": {
+    "auto_price_updates": true,
+    "balance_caching": true,
+    "transaction_monitoring": true
+  }
+}

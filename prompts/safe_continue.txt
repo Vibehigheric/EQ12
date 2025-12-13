@@ -1,0 +1,135 @@
+========================================================================
+EQ12 SAFE CONTINUE MODE - ANTI-CORRUPTION CONVERSATION RULES
+========================================================================
+Buffalo NY 14215 Content Empire - ASCII-SAFE COMMUNICATION PROTOCOL
+Date: November 16, 2025
+
+CRITICAL RULES FOR SAFE CONVERSATION CONTINUATION:
+
+1. NEVER USE .continue OPERATOR
+   - Replace with: "continue response"
+   - Prevents LSP pipe corruption
+   - Avoids Pylance EPIPE errors
+
+2. NEVER RETURN UNICODE OR EMOJI
+   - ASCII characters only (32-126)
+   - No smart quotes: " " → " "
+   - No em dashes: — → --
+   - No fancy bullets: • → -
+
+3. NEVER RETURN INCOMPLETE JSON
+   - Always close all braces: { }
+   - Always close all brackets: [ ]
+   - Always close all quotes: " "
+   - Validate JSON before sending
+
+4. NEVER OPEN CODE BLOCKS WITHOUT CLOSING
+   - Always match opening ``` with closing ```
+   - Include language identifier: ```python
+   - Never send partial code blocks
+
+5. ALWAYS RETURN ASCII ONLY
+   - Force ASCII encoding: text.encode('ascii', 'replace')
+   - Strip control characters
+   - Remove zero-width spaces
+   - Eliminate BOM markers
+
+6. IF CONTINUING CODE, RE-PRINT CONTEXT
+   - Include last 10 valid lines before continuing
+   - Show complete function/class context
+   - Never reference line numbers from truncated output
+
+7. IF CONTINUING LOGS, RE-PRINT FULL SECTIONS
+   - Include complete log entry headers
+   - Show full timestamp information
+   - Never reference partial log entries
+
+8. ENFORCE STRICT BLOCK COMPLETION
+   - Python: proper indentation and closing
+   - PowerShell: matching braces and parentheses
+   - JSON: valid structure and syntax
+   - Markdown: proper header and list formatting
+
+9. SAFE CONVERSATION PATTERNS
+   - Use "continue response" instead of .continue
+   - Use "show more" instead of incremental display
+   - Use "complete the code" instead of "add to existing"
+   - Use "regenerate fully" instead of "patch existing"
+
+10. ERROR PREVENTION KEYWORDS
+    - BANNED: .continue, emoji, Unicode symbols
+    - REQUIRED: ASCII, complete, full regeneration
+    - PREFERRED: explicit, clear, self-contained
+
+EXAMPLE SAFE CONTINUATIONS:
+
+UNSAFE:
+"```python
+def function():
+    # ... (continuing from line 50)
+```"
+
+SAFE:
+"```python
+def safe_function():
+    """Complete function with full context"""
+    # Re-implementing complete function
+    result = process_data()
+    return result
+```"
+
+CONVERSATION REPAIR COMMANDS:
+
+If corruption occurs, use these recovery commands:
+- "regenerate complete response in ASCII only"
+- "restart conversation with safe mode"
+- "rewrite previous response without Unicode"
+- "provide full code block not incremental"
+
+ASCII-SAFE REPLACEMENT CHARACTERS:
+
+Unicode → ASCII
+" " → " " (smart quotes to straight quotes)
+— → -- (em dash to double dash)
+• → - (bullet to dash)
+… → ... (ellipsis to three dots)
+' ' → ' (smart single quotes)
+← → <- (left arrow)
+→ → -> (right arrow)
+™ → (TM) (trademark)
+© → (C) (copyright)
+® → (R) (registered)
+
+PYLANCE PROTECTION RULES:
+
+1. Never send responses that could corrupt the LSP pipe
+2. Always validate JSON structures before transmission
+3. Ensure all code blocks are syntactically complete
+4. Strip any characters outside ASCII range 32-126
+5. Prevent partial file updates that break parsing
+6. Force complete regeneration over incremental patches
+
+IMPLEMENTATION CHECKLIST:
+
+Before sending any response:
+[ ] Contains only ASCII characters (32-126)
+[ ] All JSON structures are complete and valid
+[ ] All code blocks have opening and closing markers
+[ ] No .continue operator usage
+[ ] No Unicode or emoji characters
+[ ] Complete context provided for code
+[ ] Full sections provided for logs
+[ ] No truncated references or line numbers
+
+========================================================================
+EMERGENCY RECOVERY PROTOCOL:
+========================================================================
+
+If Pylance crashes or EPIPE errors occur:
+1. Stop current conversation
+2. Run: powershell -File C:\EQ12\fix_copilot.ps1
+3. Restart VS Code completely
+4. Resume with ASCII-safe mode enabled
+5. Use only safe continuation patterns
+
+Buffalo NY 14215 Content Empire - CONVERSATION IMMUNITY ACTIVE

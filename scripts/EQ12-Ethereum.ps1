@@ -1,0 +1,153 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Ethereum Godmode Launcher
+# Quick access to Ethereum blockchain capabilities
+# Created: November 7, 2025
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Status", "Deploy", "Trade", "Monitor", "Report", "Test", "Help")]
+    [string]$Action = "Help",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$WorkspacePath = "C:\EQ12"
+)
+
+function Show-EthereumStatus {
+    Write-Host "="*80 -ForegroundColor Cyan
+    Write-Host "EQ12 ETHEREUM GODMODE STATUS" -ForegroundColor Cyan
+    Write-Host "="*80 -ForegroundColor Cyan
+    
+    # Check if orchestrator exists
+    $orchestratorPath = Join-Path $WorkspacePath "scripts\eq12_ethereum_godmode_orchestrator.py"
+    if (Test-Path $orchestratorPath) {
+        Write-Host "Ethereum Orchestrator: READY" -ForegroundColor Green
+    } else {
+        Write-Host "Ethereum Orchestrator: NOT FOUND" -ForegroundColor Red
+        return
+    }
+    
+    # Check database
+    $dbPath = Join-Path $WorkspacePath "data\eq12_ethereum_intelligence.db"
+    if (Test-Path $dbPath) {
+        Write-Host "Intelligence Database: ACTIVE" -ForegroundColor Green
+    } else {
+        Write-Host "Intelligence Database: NOT INITIALIZED" -ForegroundColor Yellow
+    }
+    
+    # Check config
+    $configPath = Join-Path $WorkspacePath "configs\ethereum_godmode_config.json"
+    if (Test-Path $configPath) {
+        Write-Host "Configuration: LOADED" -ForegroundColor Green
+    } else {
+        Write-Host "Configuration: MISSING" -ForegroundColor Red
+    }
+    
+    # Check recent reports
+    $recentReports = Get-ChildItem -Path $WorkspacePath -Name "eq12_ethereum_godmode_intelligence_report_*.md" -ErrorAction SilentlyContinue | Select-Object -First 3
+    if ($recentReports) {
+        Write-Host "`nRecent Intelligence Reports:" -ForegroundColor Cyan
+        foreach ($report in $recentReports) {
+            Write-Host "  - $report" -ForegroundColor White
+        }
+    }
+    
+    Write-Host "`nEthereum Godmode Status: ACTIVATED" -ForegroundColor Green
+    Write-Host "="*80 -ForegroundColor Cyan
+}
+
+function Start-EthereumDeploy {
+    Write-Host "Launching Ethereum Godmode Deployment..." -ForegroundColor Cyan
+    $deployScript = Join-Path $WorkspacePath "scripts\Deploy-EthereumGodmode.ps1"
+    
+    if (Test-Path $deployScript) {
+        & $deployScript -Action All -GenerateReport -VerboseOutput
+    } else {
+        Write-Host "Deployment script not found at: $deployScript" -ForegroundColor Red
+    }
+}
+
+function Start-EthereumTrading {
+    Write-Host "Executing Ethereum Trading Operations..." -ForegroundColor Cyan
+    $orchestratorPath = Join-Path $WorkspacePath "scripts\eq12_ethereum_godmode_orchestrator.py"
+    
+    if (Test-Path $orchestratorPath) {
+        python $orchestratorPath
+    } else {
+        Write-Host "Ethereum orchestrator not found at: $orchestratorPath" -ForegroundColor Red
+    }
+}
+
+function Start-EthereumMonitor {
+    Write-Host "Starting Ethereum Monitoring Dashboard..." -ForegroundColor Cyan
+    
+    # Check for recent reports
+    $latestReport = Get-ChildItem -Path $WorkspacePath -Name "eq12_ethereum_godmode_intelligence_report_*.md" -ErrorAction SilentlyContinue | 
+                   Sort-Object Name -Descending | Select-Object -First 1
+    
+    if ($latestReport) {
+        $reportPath = Join-Path $WorkspacePath $latestReport
+        Write-Host "Opening latest intelligence report: $latestReport" -ForegroundColor Green
+        
+        # Try to open with default markdown viewer
+        try {
+            Start-Process $reportPath
+        } catch {
+            # If that fails, display content in terminal
+            Write-Host "`nReport Content:" -ForegroundColor Cyan
+            Get-Content $reportPath | Select-Object -First 50
+            Write-Host "`n... (showing first 50 lines)" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "No intelligence reports found. Run "Trade" action first." -ForegroundColor Yellow
+    }
+}
+
+function Show-EthereumHelp {
+    Write-Host "="*80 -ForegroundColor Cyan
+    Write-Host "EQ12 ETHEREUM GODMODE LAUNCHER - HELP" -ForegroundColor Cyan
+    Write-Host "="*80 -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "USAGE:" -ForegroundColor Green
+    Write-Host "  .\EQ12-Ethereum.ps1 -Action <ACTION>" -ForegroundColor White
+    Write-Host ""
+    Write-Host "ACTIONS:" -ForegroundColor Green
+    Write-Host "  Status   - Check Ethereum system status and health" -ForegroundColor White
+    Write-Host "  Deploy   - Run complete Ethereum deployment process" -ForegroundColor White
+    Write-Host "  Trade    - Execute trading operations and arbitrage scanning" -ForegroundColor White
+    Write-Host "  Monitor  - View latest intelligence reports and analytics" -ForegroundColor White
+    Write-Host "  Test     - Run system tests and validations" -ForegroundColor White
+    Write-Host "  Help     - Show this help information" -ForegroundColor White
+    Write-Host ""
+    Write-Host "EXAMPLES:" -ForegroundColor Green
+    Write-Host "  .\EQ12-Ethereum.ps1 -Action Status" -ForegroundColor Cyan
+    Write-Host "  .\EQ12-Ethereum.ps1 -Action Deploy" -ForegroundColor Cyan
+    Write-Host "  .\EQ12-Ethereum.ps1 -Action Trade" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "ETHEREUM CAPABILITIES:" -ForegroundColor Green
+    Write-Host "  - Multi-chain connectivity (Ethereum, Arbitrum, Polygon, Optimism, Base)" -ForegroundColor White
+    Write-Host "  - 8 DeFi protocol integrations (Uniswap, SushiSwap, Aave, etc.)" -ForegroundColor White
+    Write-Host "  - Real-time arbitrage opportunity detection" -ForegroundColor White
+    Write-Host "  - Automated yield farming strategies" -ForegroundColor White
+    Write-Host "  - Cross-stack business integration" -ForegroundColor White
+    Write-Host "  - Comprehensive intelligence reporting" -ForegroundColor White
+    Write-Host ""
+    Write-Host "="*80 -ForegroundColor Cyan
+}
+
+# Main execution
+switch ($Action) {
+    "Status" { Show-EthereumStatus }
+    "Deploy" { Start-EthereumDeploy }
+    "Trade" { Start-EthereumTrading }
+    "Monitor" { Start-EthereumMonitor }
+    "Test" { 
+        Write-Host "Running Ethereum system tests..." -ForegroundColor Cyan
+        Start-EthereumDeploy  # Use deploy script in test mode
+    }
+    "Report" { Start-EthereumMonitor }  # Alias for Monitor
+    "Help" { Show-EthereumHelp }
+    default { Show-EthereumHelp }
+}

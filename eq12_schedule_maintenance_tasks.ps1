@@ -1,0 +1,24 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#  EQ12 Maintenance Pack Task Scheduler Configuration
+# ================================================
+
+# Task Name: EQ12 Daily Maintenance
+# Description: Autonomous maintenance for $1.9M/month business empire
+# Schedule: Daily at 6:00 AM
+# Action: Complete system health check, repair, and optimization
+
+Register-ScheduledTask -TaskName "EQ12 Daily Maintenance" -Trigger $(New-ScheduledTaskTrigger -Daily -At "06:00AM") -Action $(New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File C:\EQ12\eq12_autonomous_maintenance_pack.ps1 -Action All -AutoSchedule -GenerateReport -VerboseOutput" -WorkingDirectory "C:\EQ12") -Settings $(New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit $(New-TimeSpan -Hours 1)) -Principal $(New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest) -Description "EQ12 Autonomous Maintenance Pack - Daily system health and optimization for $1.9M/month business empire. Protects revenue systems including Business Intelligence ($657K-$735K/month), Quantum Deployment ($494K/month), and Microsoft Partner expansion ($920K/month)."
+
+# Emergency Maintenance Task (On-Demand)
+Register-ScheduledTask -TaskName "EQ12 Emergency Maintenance" -Trigger $(New-ScheduledTaskTrigger -AtStartup) -Action $(New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File C:\EQ12\eq12_autonomous_maintenance_pack.ps1 -Action Emergency -VerboseOutput" -WorkingDirectory "C:\EQ12") -Settings $(New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit $(New-TimeSpan -Minutes 30) -Disable) -Principal $(New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest) -Description "EQ12 Emergency Maintenance - Immediate system repair and recovery for critical business system failures."
+
+# Health Check Task (Every 4 Hours)
+Register-ScheduledTask -TaskName "EQ12 Health Monitor" -Trigger $(New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval $(New-TimeSpan -Hours 4) -RepetitionDuration $(New-TimeSpan -Days 365)) -Action $(New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -File C:\EQ12\eq12_autonomous_maintenance_pack.ps1 -Action Health -VerboseOutput" -WorkingDirectory "C:\EQ12") -Settings $(New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -ExecutionTimeLimit $(New-TimeSpan -Minutes 15)) -Principal $(New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest) -Description "EQ12 Health Monitor - Continuous health monitoring every 4 hours to ensure optimal performance of all revenue systems."
+
+Write-Host " EQ12 Autonomous Maintenance Pack - Scheduled Tasks Configured" -ForegroundColor Green
+Write-Host " Daily Maintenance: 6:00 AM" -ForegroundColor Cyan
+Write-Host " Health Monitoring: Every 4 hours" -ForegroundColor Cyan  
+Write-Host " Emergency Repair: On-demand (disabled by default)" -ForegroundColor Yellow
+Write-Host " Business Value Protected: $1.9M/month" -ForegroundColor Green

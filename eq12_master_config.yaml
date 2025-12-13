@@ -1,0 +1,108 @@
+# EQ12 MASTER CONFIGURATION
+# The Single Source of Truth for the Quantum Automation Empire
+# Generated: 2025-12-06
+
+cluster:
+  name: "EQ12-Quantum-Cluster"
+  master_node: "EQ12-Main"
+  nodes:
+    - hostname: "EQ12-Main"
+      role: "master"
+      ip: "192.168.1.100" # Example, adjust as needed
+      os: "Windows 11"
+    - hostname: "ThinkCentre-10T8"
+      role: "worker"
+      ip: "192.168.1.101" # Example
+      os: "Windows/Linux Hybrid"
+    - hostname: "EQ12-Pi-01"
+      role: "edge"
+      ip: "192.168.1.80"
+      os: "Raspberry Pi OS (Debian)"
+      hardware: ["Coral TPU"]
+
+networking:
+  subnet: "192.168.1.0/24"
+  gateway: "192.168.1.1"
+  dns: ["1.1.1.1", "8.8.8.8"]
+  vpn_required: true
+
+ml_stack:
+  models:
+    - name: "Moneyline Predictor"
+      type: "classification"
+      status: "active"
+    - name: "Spread Predictor"
+      type: "regression"
+      status: "active"
+    - name: "Coral Object Detection"
+      type: "vision"
+      hardware: "tpu"
+      status: "active"
+  pipelines:
+    - "self_healing_retrain"
+    - "drift_monitor"
+
+automation:
+  daily_loops:
+    - time: "00:00"
+      task: "ML Drift Check"
+    - time: "03:00"
+      task: "Self-Healing Retrain"
+    - time: "05:00"
+      task: "Sports Data Ingestion"
+    - time: "10:00"
+      task: "Parlay Generation"
+    - time: "12:00"
+      task: "Game Day Scans"
+
+vbnet_core:
+  solution_path: "EQ12.sln"
+  projects:
+    - name: "EQ12.Core"
+      path: "vbnet_projects/EQ12.Core"
+      description: "Core business logic and shared types"
+    - name: "EQ12.Security"
+      path: "vbnet_projects/EQ12.Security"
+      description: "Security scanning and secret management"
+    - name: "EQ12.TelegramBot"
+      path: "vbnet_projects/EQ12.TelegramBot"
+      description: "Notification and command bot"
+    - name: "EQ12.StackAgent"
+      path: "vbnet_projects/EQ12.StackAgent"
+      description: "Agentic workflow orchestrator"
+    - name: "EQ12.CI"
+      path: "vbnet_projects/EQ12.CI"
+      description: "Continuous Integration runner"
+    - name: "EQ12.Diagnostics"
+      path: "vbnet_projects/EQ12.Diagnostics"
+      description: "System health and self-diagnosis"
+    - name: "EQ12.CommandCenter"
+      path: "vbnet_projects/EQ12.CommandCenter"
+      description: "Main UI/CLI entry point"
+
+security:
+  scanners:
+    - "gitleaks"
+    - "flake8"
+    - "bandit"
+  policies:
+    - "no_hardcoded_secrets"
+    - "enforce_https"
+    - "rotate_ssh_keys_monthly"
+
+business:
+  funnels:
+    - "CBD Pet Funnel"
+    - "Cannabis Tourism"
+    - "Travel Bot"
+  monetization:
+    - "AliDropship"
+    - "Digital Products"
+
+travel_ai:
+  services:
+    - "Nominatim"
+    - "OpenRouteService"
+  targets:
+    - "BUF Airport"
+    - "Cannabis Friendly Lodging"

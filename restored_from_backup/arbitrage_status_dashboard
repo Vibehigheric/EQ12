@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+"""
+EQ12 ARBITRAGE STATUS DASHBOARD
+Real-time status monitoring for the master arbitrage system
+October 18, 2025
+"""
+
+import glob
+import json
+import os
+from datetime import datetime, timedelta
+
+import psutil
+
+
+class ArbitrageStatusDashboard:
+    """Monitor and display arbitrage system status"""
+
+    def __init__(self):
+        self.logs_dir = "c:\\EQ12\\logs"
+
+        print("📊 EQ12 ARBITRAGE STATUS DASHBOARD")
+        print("=" * 45)
+        print("🔍 Real-time system monitoring")
+        print("📱 Telegram alert tracking")
+        print("⚡ Master system verification")
+        print()
+
+    def check_master_system_status(self):
+        """Check if master arbitrage system is running"""
+
+        print("🎯 MASTER SYSTEM STATUS")
+        print("=" * 25)
+
+        # Check for lock file
+        lock_file = os.path.join(self.logs_dir, "arbitrage_master.lock")
+        master_running = False
+        master_pid = None
+
+        if os.path.exists(lock_file):
+            try:
+                with open(lock_file, "r") as f:
+                    master_pid = int(f.read().strip())
+
+                if psutil.pid_exists(master_pid):
+                    master_running = True
+                    print(f"🟢 Master system RUNNING (PID: {master_pid})")
+                else:
+                    print(f"🔴 Master system STOPPED (stale lock file)")
+            except Exception as e:
+                print(f"⚠️ Lock file error: {e}")
+        else:
+            print("🔴 Master system NOT RUNNING (no lock file)")
+
+        return master_running, master_pid
+
+    def check_duplicate_processes(self):
+        """Check for any duplicate arbitrage processes"""
+
+        print("\n🔍 DUPLICATE PROCESS CHECK")
+        print("=" * 30)
+
+        arbitrage_processes = []
+
+        for proc in psutil.process_iter(["pid", "name", "cmdline", "create_time"]):
+            try:
+                if proc.info["name"] == "python.exe":
+                    cmdline = " ".join(proc.info["cmdline"] or [])
+
+                    if any(
+                        keyword in cmdline.lower()
+                        for keyword in ["arbitrage", "master_arbitrage_system"]
+                    ):
+                        arbitrage_processes.append(
+                            {
+                                "pid": proc.info["pid"],
+                                "cmdline": cmdline,
+                                "start_time": datetime.fromtimestamp(proc.info["create_time"]),
+                            }
+                        )
+
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+
+        if len(arbitrage_processes) == 1:
+            print("✅ Single master process confirmed")
+            proc = arbitrage_processes[0]
+            print(f"   📊 PID: {proc['pid']}")
+            print(f"   ⏰ Started: {proc['start_time'].strftime('%H:%M:%S')}")
+        elif len(arbitrage_processes) > 1:
+            print(f"⚠️ {len(arbitrage_processes)} arbitrage processes detected:")
+            for proc in arbitrage_processes:
+                print(
+                    f"   🔴 PID {proc['pid']} - Started {proc['start_time'].strftime('%H:%M:%S')}"
+                )
+        else:
+            print("❌ No arbitrage processes found")
+
+        return arbitrage_processes
+
+    def analyze_telegram_alerts(self):
+        """Analyze recent Telegram alert activity"""
+
+        print("\n📱 TELEGRAM ALERT ANALYSIS")
+        print("=" * 30)
+
+        # Find recent alert files
+        alert_files = glob.glob(os.path.join(self.logs_dir, "*arbitrage*alert*.json"))
+        alert_files.extend(
+            glob.glob(os.path.join(self.logs_dir, "master_arbitrage_session_*.json"))
+        )
+
+        total_alerts = 0
+        total_profit = 0.0
+        recent_alerts = []
+
+        for file_path in alert_files:
+            try:
+                with open(file_path, "r") as f:
+                    data = json.load(f)
+
+                file_alerts = data.get("total_alerts_sent", 0)
+                file_profit = data.get("total_profit_potential", 0.0)
+
+                if isinstance(file_profit, (int, float)):
+                    total_alerts += file_alerts
+                    total_profit += file_profit
+
+                # Get file timestamp
+                file_stat = os.stat(file_path)
+                file_time = datetime.fromtimestamp(file_stat.st_mtime)
+
+                if datetime.now() - file_time < timedelta(hours=24):
+                    recent_alerts.append(
+                        {
+                            "file": os.path.basename(file_path),
+                            "alerts": file_alerts,
+                            "profit": file_profit,
+                            "time": file_time.strftime("%H:%M:%S"),
+                        }
+                    )
+
+            except Exception as e:
+                print(f"⚠️ Error reading {file_path}: {e}")
+
+        print(f"📊 Total alerts sent today: {total_alerts}")
+        print(f"💰 Total profit potential: ${total_profit:.2f}")
+
+        if recent_alerts:
+            print(f"📅 Recent activity ({len(recent_alerts)} files):")
+            for alert in sorted(recent_alerts, key=lambda x: x["time"], reverse=True)[:5]:
+                print(
+                    f"   📁 {alert['file']} - \
+                        {alert['alerts']} alerts (${alert['profit']:.2f}) at {alert['time']}"
+                )
+        else:
+            print("❌ No recent alert activity found")
+
+        return total_alerts, total_profit
+
+    def check_system_resources(self):
+        """Check system resource usage"""
+
+        print("\n💻 SYSTEM RESOURCES")
+        print("=" * 20)
+
+        # CPU usage
+        cpu_percent = psutil.cpu_percent(interval=1)
+        print(f"🖥️ CPU Usage: {cpu_percent:.1f}%")
+
+        # Memory usage
+        memory = psutil.virtual_memory()
+        print(f"🧠 Memory Usage: {memory.percent:.1f}% ({memory.used // (1024**2)} MB used)")
+
+        # Disk usage
+        disk = psutil.disk_usage("C:\\")
+        print(f"💾 Disk Usage: {disk.percent:.1f}% ({disk.free // (1024**3)} GB free)")
+
+        return {"cpu": cpu_percent, "memory": memory.percent, "disk": disk.percent}
+
+    def generate_comprehensive_status(self):
+        """Generate comprehensive status report"""
+
+        # Check master system
+        master_running, master_pid = self.check_master_system_status()
+
+        # Check for duplicates
+        processes = self.check_duplicate_processes()
+
+        # Analyze alerts
+        total_alerts, total_profit = self.analyze_telegram_alerts()
+
+        # Check resources
+        resources = self.check_system_resources()
+
+        print("\n" + "=" * 60)
+        print("📊 COMPREHENSIVE ARBITRAGE STATUS REPORT")
+        print("=" * 60)
+
+        # System Status
+        system_status = (
+            "🟢 OPERATIONAL" if master_running and len(processes) == 1 else "🔴 ISSUES DETECTED"
+        )
+        print(f"🎯 System Status: {system_status}")
+
+        if master_running:
+            print(f"✅ Master system running (PID: {master_pid})")
+        else:
+            print("❌ Master system not running")
+
+        if len(processes) == 1:
+            print("✅ Single instance confirmed")
+        elif len(processes) > 1:
+            print(f"⚠️ Multiple instances detected ({len(processes)})")
+        else:
+            print("❌ No arbitrage processes found")
+
+        # Alert Summary
+        print(f"\n📱 Telegram Alerts: {total_alerts} sent today")
+        print(f"💰 Profit Potential: ${total_profit:.2f}")
+
+        if total_alerts > 0:
+            avg_profit = total_profit / total_alerts if total_alerts > 0 else 0
+            print(f"📈 Average per alert: ${avg_profit:.2f}")
+
+        # Performance
+        print(f"\n💻 System Performance:")
+        print(f"   🖥️ CPU: {resources['cpu']:.1f}%")
+        print(f"   🧠 Memory: {resources['memory']:.1f}%")
+        print(f"   💾 Disk: {resources['disk']:.1f}%")
+
+        # Recommendations
+        print(f"\n🎯 RECOMMENDATIONS:")
+
+        if not master_running:
+            print("   🚀 Start master arbitrage system")
+        elif len(processes) > 1:
+            print("   🔄 Terminate duplicate processes")
+        else:
+            print("   ✅ System operating optimally")
+
+        if total_alerts == 0:
+            print("   📊 Monitor for arbitrage opportunities")
+        else:
+            print("   💰 Continue monitoring profitable opportunities")
+
+        if resources["cpu"] > 80:
+            print("   ⚡ High CPU usage detected")
+        if resources["memory"] > 85:
+            print("   🧠 High memory usage detected")
+
+        print("\n" + "=" * 60)
+
+        return {
+            "master_running": master_running,
+            "process_count": len(processes),
+            "total_alerts": total_alerts,
+            "total_profit": total_profit,
+            "resources": resources,
+        }
+
+
+def main():
+    """Generate arbitrage status dashboard"""
+
+    dashboard = ArbitrageStatusDashboard()
+    status = dashboard.generate_comprehensive_status()
+
+    print("\n🎯 ARBITRAGE DASHBOARD COMPLETE")
+    print("📊 Use this information to optimize system performance")
+    print("💰 Monitor for continuous profitable opportunities")
+
+    return status
+
+
+if __name__ == "__main__":
+    main()

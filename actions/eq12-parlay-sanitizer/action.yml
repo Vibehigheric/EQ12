@@ -1,0 +1,44 @@
+name: EQ12 Parlay Sanitizer
+description: Advanced parlay validation and risk assessment with EQ12 intelligence
+author: EQ12
+branding:
+  icon: shield-check
+  color: blue
+
+inputs:
+  parlay-data:
+    description: "Parlay configuration in JSON format"
+    required: true
+  risk-threshold:
+    description: "Maximum acceptable risk level (1-10)"
+    required: false
+    default: "7"
+  analysis-level:
+    description: "Analysis depth: basic, standard, premium"
+    required: false
+    default: "standard"
+  eq12-api-key:
+    description: "EQ12 API key for premium features"
+    required: false
+  correlation-check:
+    description: "Enable correlation analysis"
+    required: false
+    default: "true"
+  bankroll-percentage:
+    description: "Maximum percentage of bankroll to risk"
+    required: false
+    default: "2"
+
+outputs:
+  sanitized-parlay:
+    description: "Validated and optimized parlay configuration"
+  risk-assessment:
+    description: "Comprehensive risk analysis report"
+  recommendations:
+    description: "EQ12 optimization recommendations"
+  expected-value:
+    description: "Expected value calculation"
+
+runs:
+  using: "node16"
+  main: "dist/index.js"

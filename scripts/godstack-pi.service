@@ -1,0 +1,14 @@
+[Unit]
+Description=GodStack Pi Node Boot Pipeline
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/eq12/pi_boot.sh
+User=root
+Group=root
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,28 @@
+name: EQ12 Secrets Check
+description: Validate required EQ12 secrets exist
+inputs:
+  required:
+    description: Comma-separated secret names
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        IFS=',' read -ra REQ <<< "${{ inputs.required }}"
+        missing=()
+        for name in "${REQ[@]}"; do
+          n="$(echo "$name" | xargs)"
+          if [ -z "${!n}" ]; then
+            echo "::warning::Missing secret: $n"
+            missing+=("$n")
+          fi
+        done
+        if [ ${#missing[@]} -gt 0 ]; then
+          echo "::error::Required secrets missing: ${missing[*]}"
+          exit 1
+        fi
+      env:
+        ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

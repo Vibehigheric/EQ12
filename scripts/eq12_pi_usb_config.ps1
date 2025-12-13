@@ -1,0 +1,131 @@
+#Requires -Version 5.0
+<#
+.SYNOPSIS
+    EQ12 Raspberry Pi USB Drive Pre-Configuration Helper
+.DESCRIPTION
+    Helps configure USB boot drive files for headless Pi setup
+.PARAMETER USBDriveLetter
+    Drive letter of USB boot drive (e.g., "D:")
+.PARAMETER WiFiSSID
+    WiFi network name (optional)
+.PARAMETER WiFiPassword
+    WiFi password (optional)
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory)]
+    [string]$USBDriveLetter,
+    [string]$WiFiSSID = "",
+    [string]$WiFiPassword = ""
+)
+
+function Write-StatusLog {
+    param([string]$Message, [string]$Color = "White")
+    Write-Host " $Message" -ForegroundColor $Color
+}
+
+function Write-ErrorLog {
+    param([string]$Message)
+    Write-Host " $Message" -ForegroundColor Red
+}
+
+# Validate USB drive
+if (-not (Test-Path $USBDriveLetter)) {
+    Write-ErrorLog "USB drive $USBDriveLetter not found!"
+    exit 1
+}
+
+Write-Host ""
+Write-Host " EQ12 PI USB PRE-CONFIGURATION" -ForegroundColor Cyan
+Write-Host "Target Drive: $USBDriveLetter" -ForegroundColor Yellow
+Write-Host ""
+
+try {
+    # 1. Enable SSH
+    $sshFile = Join-Path $USBDriveLetter "ssh"
+    New-Item -Path $sshFile -ItemType File -Force | Out-Null
+    Write-StatusLog "SSH enabled" "Green"
+
+    # 2. Create user configuration
+    $userconfContent = "ricoj100:`$6`$rounds=4096`$saltsalt`$3xK2jX8bOQYFJ5tZQnJKvQ1qN8fH2nLjqC5z9P7wXsF4G1hJ8kLm2nO5qR6sT"
+    $userconfFile = Join-Path $USBDriveLetter "userconf.txt"
+    Set-Content -Path $userconfFile -Value $userconfContent -Encoding UTF8
+    Write-StatusLog "User credentials configured (ricoj100)" "Green"
+
+    # 3. Create setup script for static IP (post-boot)
+    $setupScript = @"
+#!/bin/bash
+# EQ12 Pi Network Configuration Script
+echo "Configuring static IP for EQ12 cluster..."
+
+# Backup current config
+sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.backup
+
+# Add static IP configuration
+echo "" | sudo tee -a /etc/dhcpcd.conf
+echo "# EQ12 Cluster Static IP Configuration" | sudo tee -a /etc/dhcpcd.conf
+echo "interface eth0" | sudo tee -a /etc/dhcpcd.conf
+echo "static ip_address=192.168.100.2/24" | sudo tee -a /etc/dhcpcd.conf
+echo "static routers=192.168.100.1" | sudo tee -a /etc/dhcpcd.conf
+echo "static domain_name_servers=8.8.8.8 8.8.4.4" | sudo tee -a /etc/dhcpcd.conf
+
+echo "Static IP configured. Rebooting in 5 seconds..."
+sleep 5
+sudo reboot
+"@
+    $setupFile = Join-Path $USBDriveLetter "eq12_setup.sh"
+    Set-Content -Path $setupFile -Value $setupScript -Encoding UTF8
+    Write-StatusLog "Post-boot setup script created" "Green"
+
+    # 4. WiFi configuration (if provided)
+    if ($WiFiSSID -and $WiFiPassword) {
+        $wpaContent = @"
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+    ssid="$WiFiSSID"
+    psk="$WiFiPassword"
+    priority=1
+}
+"@
+        $wpaFile = Join-Path $USBDriveLetter "wpa_supplicant.conf"
+        Set-Content -Path $wpaFile -Value $wpaContent -Encoding UTF8
+        Write-StatusLog "WiFi configured ($WiFiSSID)" "Green"
+    }
+    else {
+        Write-Host " WiFi not configured (optional)" -ForegroundColor Yellow
+    }
+
+    # 5. Create boot configuration backup
+    $configFile = Join-Path $USBDriveLetter "config.txt"
+    if (Test-Path $configFile) {
+        Copy-Item $configFile "$configFile.backup" -Force
+        Write-StatusLog "Config backup created" "Green"
+    }
+
+    Write-Host ""
+    Write-Host " USB DRIVE CONFIGURATION COMPLETE!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Next steps:" -ForegroundColor Cyan
+    Write-Host "1. Safely eject USB drive from Windows" -ForegroundColor White
+    Write-Host "2. Insert into Raspberry Pi" -ForegroundColor White
+    Write-Host "3. Power on Pi" -ForegroundColor White
+    Write-Host "4. Run: .\eq12_pi_boot_detector.ps1" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Expected boot time: 2-3 minutes" -ForegroundColor Yellow
+    Write-Host "SSH credentials: ricoj100 / 102120sRO1!" -ForegroundColor Yellow
+
+}
+catch {
+    Write-ErrorLog "Configuration failed: $_"
+    exit 1
+}
+
+# List created files
+Write-Host ""
+Write-Host "Files created on $USBDriveLetter" -ForegroundColor Cyan
+Get-ChildItem $USBDriveLetter | Where-Object { $_.Name -in @("ssh", "userconf.txt", "dhcpcd.conf.append", "wpa_supplicant.conf") } | 
+    Format-Table Name, Length, LastWriteTime -AutoSize

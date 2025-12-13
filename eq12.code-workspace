@@ -1,0 +1,43 @@
+{
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "scripts"
+        },
+        {
+            "path": "tests"
+        },
+        {
+            "path": "configs"
+        },
+        {
+            "path": "logs"
+        },
+        {
+            "path": "dashboard"
+        },
+        {
+            "path": "data"
+        },
+        {
+            "path": "schemas"
+        }
+    ],
+    "settings": {
+        "python.envFile": "${workspaceFolder}/.env",
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe"
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "charliermarsh.ruff",
+            "github.copilot",
+            "github.copilot-chat",
+            "redhat.vscode-xml",
+            "humao.rest-client"
+        ]
+    }
+}

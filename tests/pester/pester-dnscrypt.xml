@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="2" errors="0" failures="1" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2025-09-21" time="00:53:15">
+  <environment clr-version="4.0.30319.42000" user-domain="DESKTOP-2T2F2PJ" cwd="C:\Users\Ricoj100" platform="Microsoft Windows 11 Pro|C:\WINDOWS|\Device\Harddisk0\Partition4" machine-name="DESKTOP-2T2F2PJ" nunit-version="2.5.8.0" os-version="10.0.26100" user="Ricoj100" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Failure" success="False" time="1.115" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="C:\EQ12\tests\pester\Test-EQ12DNSCrypt.Tests.ps1" executed="True" result="Failure" success="False" time="1.115" asserts="0" description="C:\EQ12\tests\pester\Test-EQ12DNSCrypt.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="EQ12 DNSCrypt" executed="True" result="Failure" success="False" time="0.4118" asserts="0" description="EQ12 DNSCrypt">
+            <results>
+              <test-case description="Get-EQ12DNSCryptStatus returns a status object" name="EQ12 DNSCrypt.Get-EQ12DNSCryptStatus returns a status object" time="0.3157" asserts="0" success="False" result="Failure" executed="True">
+                <failure>
+                  <message>ParameterBindingException: Parameter set cannot be resolved using the specified named parameters.</message>
+                  <stack-trace>at &lt;ScriptBlock&gt;, C:\EQ12\tests\pester\Test-EQ12DNSCrypt.Tests.ps1:6</stack-trace>
+                </failure>
+              </test-case>
+              <test-case description="Restart-EQ12DNSCrypt is safe when service missing" name="EQ12 DNSCrypt.Restart-EQ12DNSCrypt is safe when service missing" time="0.0323" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>

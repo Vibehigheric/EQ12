@@ -1,0 +1,26 @@
+
+# Consultation Booking Confirmation
+
+Thank you for scheduling a consultation with EQ12!
+
+**Consultation Details:**
+- Date: [DATE]
+- Time: [TIME] 
+- Duration: [DURATION]
+- Type: [CONSULTATION_TYPE]
+
+**What to Expect:**
+- Coral TPU technology demonstration
+- AI acceleration capabilities review
+- Custom solution discussion
+- Next steps planning
+
+**Preparation:**
+- Brief overview of your current AI initiatives
+- Key challenges and objectives
+- Budget and timeline considerations
+
+We look forward to discussing how our hardware-accelerated AI solutions can transform your business!
+
+EQ12 Consulting Team
+Powered by Coral TPU

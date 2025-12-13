@@ -1,0 +1,17 @@
+{
+  "python_bridge": {
+    "enabled": true,
+    "script_path": "C:/EQ12/eq12_enhanced_openai_sdk.py",
+    "api_endpoint": "http://localhost:8000/ai-analysis"
+  },
+  "nodejs_bridge": {
+    "enabled": true,
+    "script_path": "C:/EQ12/eq12_node_betting_suite.js",
+    "api_endpoint": "http://localhost:3000/real-time-odds"
+  },
+  "api_keys": {
+    "odds_api": "${ODDS_API_KEY}",
+    "openai_api": "${OPENAI_API_KEY}",
+    "telegram_bot": "${TELEGRAM_BOT_TOKEN}"
+  }
+}

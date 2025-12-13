@@ -1,0 +1,208 @@
+# EQ12 Budget Policy Configuration
+# Ensures system stays under $120/month (~$4/day) with intelligent model routing
+# Integrates with model allow/deny policy for predictable costs
+
+daily_cap_usd: 4.00
+monthly_cap_usd: 120.00
+warn_at_usd: 3.60  # 90% of daily
+critical_at_usd: 3.80  # 95% of daily
+
+# Model policy integration
+model_policy:
+  enforce_allowlist: true
+  default_routing:
+    chat: gpt-4o-mini
+    embedding: text-embedding-3-small
+    moderation: omni-moderation-latest
+    fallback: gpt-4o
+  
+  cost_tiers:
+    cheap: 
+      models: [gpt-4o-mini, text-embedding-3-small, omni-moderation-latest]
+      daily_allocation_usd: 2.80  # 70% of budget
+    
+    standard:
+      models: [gpt-4o, whisper-1, tts-1, gpt-image-1]
+      daily_allocation_usd: 1.00  # 25% of budget
+    
+    expensive:
+      models: [o1, o1-mini, o1-pro, o3, o3-mini, text-embedding-3-large]
+      daily_allocation_usd: 0.20  # 5% of budget
+      require_approval: true
+    
+    burst:
+      models: [gpt-4o-realtime-preview, tts-1-hd, o4-mini-deep-research]
+      daily_allocation_usd: 0.00  # Disabled by default
+      temporary_only: true
+  
+  blocked_fallback:
+    action: route_to_allowed  # route_to_allowed | reject | warn_and_allow
+    log_violations: true
+
+# Budget allocation by function
+buckets:
+  prod:
+    cap_usd: 2.80  # 70% for production analysis
+    models:
+      gpt-4o-mini: 
+        tokens_day: 60000
+        rpm: 300
+        tpm: 140000
+        cost_per_1k_input: 0.00015
+        cost_per_1k_output: 0.0006
+      gpt-4o:      
+        tokens_day: 6000
+        rpm: 60
+        tpm: 21000
+        cost_per_1k_input: 0.0025
+        cost_per_1k_output: 0.01
+  
+  ops:
+    cap_usd: 0.80  # 20% for live ops/alerts/dashboards
+    models:
+      gpt-4o-mini: 
+        tokens_day: 15000
+        rpm: 100
+        tpm: 40000
+        cost_per_1k_input: 0.00015
+        cost_per_1k_output: 0.0006
+  
+  dev:
+    cap_usd: 0.40  # 10% for development/testing
+    models:
+      gpt-3.5-turbo: 
+        tokens_day: 10000
+        rpm: 200
+        tpm: 60000
+        cost_per_1k_input: 0.0015
+        cost_per_1k_output: 0.002
+      gpt-4o-mini:
+        tokens_day: 5000
+        rpm: 50
+        tpm: 20000
+        cost_per_1k_input: 0.00015
+        cost_per_1k_output: 0.0006
+
+# Feature-specific routing rules
+routing:
+  parlay_final:
+    prefer: gpt-4o
+    fallback: gpt-4o-mini
+    require_budget: prod
+    max_calls_day: 1
+    max_tokens_input: 1500
+    max_tokens_output: 800
+    priority: high
+  
+  parlay_drafts:
+    prefer: gpt-4o-mini
+    require_budget: prod
+    max_calls_day: 10
+    max_tokens_input: 1200
+    max_tokens_output: 600
+    priority: medium
+  
+  odds_summarization:
+    prefer: gpt-4o-mini
+    require_budget: prod
+    max_calls_day: 20
+    max_tokens_input: 800
+    max_tokens_output: 400
+    priority: medium
+  
+  live_update:
+    prefer: gpt-4o-mini
+    require_budget: ops
+    min_interval_sec: 300  # 5 minutes minimum
+    max_calls_per_game: 12
+    max_tokens_input: 600
+    max_tokens_output: 300
+    priority: low
+  
+  props_shortlist:
+    prefer: gpt-4o-mini
+    require_budget: prod
+    max_calls_day: 4
+    max_tokens_input: 1000
+    max_tokens_output: 500
+    priority: medium
+  
+  performance_recap:
+    prefer: gpt-4o-mini
+    require_budget: ops
+    max_calls_day: 1
+    max_tokens_input: 800
+    max_tokens_output: 400
+    priority: low
+  
+  dev_test:
+    prefer: gpt-3.5-turbo
+    fallback: gpt-4o-mini
+    require_budget: dev
+    max_calls_day: 50
+    max_tokens_input: 500
+    max_tokens_output: 300
+    priority: low
+  
+  webhook_test:
+    prefer: gpt-4o-mini
+    require_budget: dev
+    max_calls_day: 10
+    max_tokens_input: 100
+    max_tokens_output: 50
+    priority: low
+
+# Emergency degradation rules
+degradation:
+  at_90_percent:
+    - switch_to_mini: true
+    - reduce_frequency: 0.5
+    - skip_non_critical: true
+  
+  at_95_percent:
+    - block_new_requests: true
+    - allow_only: ["parlay_final"]
+    - force_model: gpt-4o-mini
+  
+  at_100_percent:
+    - block_all: true
+    - emergency_mode: true
+
+# Rate limiting safety margins (70% of official limits)
+rate_limits:
+  safety_margin: 0.7
+  burst_protection: true
+  queue_size: 100
+  
+# Scheduling rules
+scheduling:
+  hourly:
+    - "00:05": odds_summarization
+    - "00:07": value_screen_no_ai  # Pure math, no AI
+    - "00:10": parlay_drafts
+    - "00:00": parlay_final  # Top of hour only if under budget
+  
+  per_game:
+    live_update:
+      frequency: 300  # 5 minutes
+      max_per_game: 12
+      skip_unchanged: true
+  
+  daily:
+    morning: props_shortlist
+    evening: performance_recap
+
+# Prompt optimization rules
+prompts:
+  system_template: "Return strict JSON. Max 6 bullets. No prose."
+  max_examples: 1
+  batch_games: true
+  use_summaries: true
+  cache_duration: 3600  # 1 hour
+  
+# Monitoring and alerts
+monitoring:
+  budget_check_interval: 300  # 5 minutes
+  alert_thresholds: [0.5, 0.7, 0.9, 0.95]
+  log_all_requests: true
+  export_daily_stats: true

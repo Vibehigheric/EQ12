@@ -1,0 +1,40 @@
+# === EQ12 Master PowerShell Profile ===
+Write-Output "`n=== EQ12 Master Profile Loaded ==="
+Write-Output "Shortcuts: run-odds | run-parlay | netcheck | backup-ai | tg-alert | top-proc | eq12-update | eq12-launcher"
+
+function eq12-launcher { & "C:\EQ12\scripts\eq12_master_launcher.ps1" }
+function eq12-update   { & "C:\EQ12\scripts\eq12_update.ps1" }
+function run-odds      { python "C:\EQ12\scripts\odds_parser.py" }
+function run-parlay    { python "C:\EQ12\scripts\parlay_builder.py" }
+
+function netcheck {
+    if (-not (Test-Path "C:\EQ12\logs")) { New-Item -ItemType Directory -Path "C:\EQ12\logs" | Out-Null }
+    Test-Connection oddsapi.com -Count 4 | Out-File "C:\EQ12\logs\netcheck.txt" -Append
+    Write-Output "Netcheck logged → C:\EQ12\logs\netcheck.txt"
+}
+
+function backup-ai {
+    if (-not (Test-Path "C:\EQ12\logs")) { New-Item -ItemType Directory -Path "C:\EQ12\logs" | Out-Null }
+    robocopy "C:\AI_Projects" "D:\Backups\AI_Projects" /MIR /LOG:"C:\EQ12\logs\backup.log"
+    Write-Output "Backup complete → C:\EQ12\logs\backup.log"
+}
+
+function tg-alert {
+    param([string]$msg)
+    $TokenPath  = "C:\EQ12\keys\tg_token.txt"
+    $ChatIDPath = "C:\EQ12\keys\tg_chatid.txt"
+    if ((Test-Path $TokenPath) -and (Test-Path $ChatIDPath)) {
+        $Token  = (Get-Content $TokenPath).Trim()
+        $ChatID = (Get-Content $ChatIDPath).Trim()
+        $url = "https://api.telegram.org/bot{0}/sendMessage?chat_id={1}`&text={2}" -f $Token,$ChatID,[uri]::EscapeDataString($msg)
+        Invoke-RestMethod -Uri $url
+    } else {
+        Write-Output "Telegram keys not set (C:\EQ12\keys)."
+    }
+}
+
+function top-proc {
+    Get-Process | Sort-Object CPU -Descending | Select-Object -First 15
+}
+
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True

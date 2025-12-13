@@ -1,0 +1,234 @@
+#!/usr/bin/env powershell
+<#
+.SYNOPSIS
+EQ12 GitHub Vigilant Mode and Commit Verification Setup
+
+.DESCRIPTION
+Implements GitHub's commit signature verification best practices for the EQ12 betting automation stack.
+Sets up proper commit signing workflow aligned with GitHub Pro features and vigilant mode.
+
+.NOTES
+Based on GitHub's official documentation for commit signature verification.
+Optimized for GitHub Pro and Codespaces workflow.
+#>
+
+[CmdletBinding()]
+param(
+    [switch]$EnableGPG,
+    [switch]$SetupSSH,
+    [switch]$GitHubOnly,
+    [switch]$ShowStatus
+)
+
+Write-Host "🔐 EQ12 GITHUB COMMIT VERIFICATION SETUP" -ForegroundColor Green
+Write-Host "Implementing GitHub's vigilant mode and signature verification..." -ForegroundColor Cyan
+
+# Current Git configuration
+Write-Host "`n📊 Current Git Configuration:" -ForegroundColor Yellow
+$currentName = git config --global user.name
+$currentEmail = git config --global user.email  
+$currentSigningKey = git config --global user.signingkey
+$commitSigning = git config --global commit.gpgsign
+$gpgProgram = git config --global gpg.program
+
+Write-Host "  Name: $currentName" -ForegroundColor White
+Write-Host "  Email: $currentEmail" -ForegroundColor White
+Write-Host "  Signing Key: $currentSigningKey" -ForegroundColor White
+Write-Host "  Commit Signing: $commitSigning" -ForegroundColor White
+Write-Host "  GPG Program: $gpgProgram" -ForegroundColor White
+
+# Email verification status
+Write-Host "`n📧 Email Verification Requirements:" -ForegroundColor Yellow
+Write-Host "  Current Email: $currentEmail" -ForegroundColor White
+Write-Host "  Status: Must be verified on GitHub for vigilant mode" -ForegroundColor Gray
+Write-Host "  Action: Add to GitHub → Settings → Emails if not verified" -ForegroundColor Gray
+
+# GitHub's verification options
+Write-Host "`n🛡️ GitHub Commit Verification Options:" -ForegroundColor Yellow
+Write-Host "  [1] GitHub Web Signing (Recommended for GitHub Pro)" -ForegroundColor Green
+Write-Host "      ✅ Automatic signing for web commits" -ForegroundColor Gray
+Write-Host "      ✅ No local GPG setup required" -ForegroundColor Gray  
+Write-Host "      ✅ Perfect for Codespaces workflow" -ForegroundColor Gray
+Write-Host "" 
+Write-Host "  [2] Local GPG Signing" -ForegroundColor Yellow
+Write-Host "      🔧 Requires GPG key generation" -ForegroundColor Gray
+Write-Host "      🔧 Manual setup and management" -ForegroundColor Gray
+Write-Host "      ⚠️  Complex for cloud development" -ForegroundColor Gray
+Write-Host ""
+Write-Host "  [3] SSH Commit Signing (Modern approach)" -ForegroundColor Cyan
+Write-Host "      🚀 Uses existing SSH keys" -ForegroundColor Gray
+Write-Host "      🚀 Simpler than GPG" -ForegroundColor Gray
+Write-Host "      🚀 Good for GitHub Pro workflow" -ForegroundColor Gray
+
+# Current recommendation based on setup
+Write-Host "`n💡 EQ12 Recommendation:" -ForegroundColor Yellow
+Write-Host "  Based on your GitHub Pro + Codespaces setup:" -ForegroundColor Gray
+Write-Host "  ✅ Use GitHub Web Signing for automatic verification" -ForegroundColor Green
+Write-Host "  ✅ Enable Vigilant Mode on GitHub for all commits" -ForegroundColor Green
+Write-Host "  ✅ Local commits can remain unsigned (marked as such)" -ForegroundColor Green
+Write-Host "  ✅ Focus on code quality automation instead" -ForegroundColor Green
+
+# Vigilant mode setup instructions
+Write-Host "`n⚡ Vigilant Mode Setup (Recommended):" -ForegroundColor Yellow
+Write-Host "  1. Go to: GitHub.com → Settings → SSH and GPG keys" -ForegroundColor White
+Write-Host "  2. Scroll to 'Vigilant mode' section" -ForegroundColor White
+Write-Host "  3. Check 'Flag unsigned commits as unverified'" -ForegroundColor White
+Write-Host "  4. Save changes" -ForegroundColor White
+
+# Benefits explanation
+Write-Host "`n🎯 Benefits for EQ12 Betting Automation:" -ForegroundColor Yellow
+Write-Host "  ✅ Clear verification status on all commits" -ForegroundColor Green
+Write-Host "  ✅ Enhanced security for betting algorithm changes" -ForegroundColor Green
+Write-Host "  ✅ Professional appearance for code reviews" -ForegroundColor Green
+Write-Host "  ✅ Compliance with enterprise security standards" -ForegroundColor Green
+
+# Configuration options
+Write-Host "`n🔧 Configuration Options:" -ForegroundColor Yellow
+Write-Host "  [1] Setup for GitHub Web Signing (Recommended)" -ForegroundColor White
+Write-Host "  [2] Generate GPG key for local signing" -ForegroundColor White
+Write-Host "  [3] Setup SSH commit signing" -ForegroundColor White
+Write-Host "  [4] Show current verification status" -ForegroundColor White
+Write-Host "  [5] Keep current configuration" -ForegroundColor White
+
+if (-not $ShowStatus) {
+    $choice = Read-Host "`nSelect option (1-5)"
+}
+else {
+    $choice = "4"
+}
+
+switch ($choice) {
+    "1" {
+        Write-Host "`n🌐 Configuring for GitHub Web Signing..." -ForegroundColor Yellow
+        
+        # Ensure email is properly configured
+        if ($currentEmail -and $currentEmail -ne "") {
+            Write-Host "  ✅ Git email configured: $currentEmail" -ForegroundColor Green
+            Write-Host "  📋 Next steps:" -ForegroundColor Cyan
+            Write-Host "    1. Verify this email is added to your GitHub account" -ForegroundColor Gray
+            Write-Host "    2. Enable vigilant mode on GitHub" -ForegroundColor Gray
+            Write-Host "    3. Use GitHub web interface for critical commits" -ForegroundColor Gray
+            Write-Host "    4. Local commits will show as 'Unverified' (expected)" -ForegroundColor Gray
+        }
+        else {
+            Write-Host "  ❌ No email configured" -ForegroundColor Red
+            $email = Read-Host "  Enter your GitHub email address"
+            git config --global user.email $email
+            Write-Host "  ✅ Email configured: $email" -ForegroundColor Green
+        }
+        
+        # Disable local GPG signing for GitHub Pro workflow
+        git config --global commit.gpgsign false
+        git config --global --unset user.signingkey 2>$null
+        
+        Write-Host "  ✅ Configured for GitHub Pro workflow" -ForegroundColor Green
+        Write-Host "  ℹ️  Local commits will be unsigned (use GitHub web for signed commits)" -ForegroundColor Blue
+    }
+    
+    "2" {
+        Write-Host "`n🔑 Setting up GPG signing..." -ForegroundColor Yellow
+        Write-Host "  This requires GPG key generation and GitHub configuration" -ForegroundColor Gray
+        
+        # Check if GPG is available
+        $gpgAvailable = Get-Command gpg -ErrorAction SilentlyContinue
+        if ($gpgAvailable) {
+            Write-Host "  ✅ GPG available: $($gpgAvailable.Source)" -ForegroundColor Green
+            Write-Host "  📋 Manual steps required:" -ForegroundColor Cyan
+            Write-Host "    1. Generate GPG key: gpg --full-generate-key" -ForegroundColor Gray
+            Write-Host "    2. Export public key: gpg --armor --export [key-id]" -ForegroundColor Gray  
+            Write-Host "    3. Add key to GitHub: Settings → SSH and GPG keys" -ForegroundColor Gray
+            Write-Host "    4. Configure Git: git config --global user.signingkey [key-id]" -ForegroundColor Gray
+            Write-Host "    5. Enable signing: git config --global commit.gpgsign true" -ForegroundColor Gray
+        }
+        else {
+            Write-Host "  ❌ GPG not available - install GPG for Windows first" -ForegroundColor Red
+        }
+    }
+    
+    "3" {
+        Write-Host "`n🔐 Setting up SSH commit signing..." -ForegroundColor Yellow
+        Write-Host "  Modern alternative to GPG signing" -ForegroundColor Gray
+        
+        # Check for SSH keys
+        $sshDir = "$env:USERPROFILE\.ssh"
+        if (Test-Path $sshDir) {
+            $sshKeys = Get-ChildItem "$sshDir\*.pub" -ErrorAction SilentlyContinue
+            if ($sshKeys) {
+                Write-Host "  ✅ SSH keys found:" -ForegroundColor Green
+                foreach ($key in $sshKeys) {
+                    Write-Host "    - $($key.Name)" -ForegroundColor Gray
+                }
+                Write-Host "  📋 SSH signing setup:" -ForegroundColor Cyan
+                Write-Host "    1. Add SSH key to GitHub with 'Signing Key' capability" -ForegroundColor Gray
+                Write-Host "    2. Configure Git: git config --global gpg.format ssh" -ForegroundColor Gray
+                Write-Host "    3. Set signing key: git config --global user.signingkey ~/.ssh/id_rsa.pub" -ForegroundColor Gray
+                Write-Host "    4. Enable signing: git config --global commit.gpgsign true" -ForegroundColor Gray
+            }
+            else {
+                Write-Host "  ❌ No SSH keys found - generate SSH key first" -ForegroundColor Red
+                Write-Host "    Run: ssh-keygen -t rsa -b 4096 -C '$currentEmail'" -ForegroundColor Gray
+            }
+        }
+        else {
+            Write-Host "  ❌ SSH directory not found - generate SSH key first" -ForegroundColor Red
+        }
+    }
+    
+    "4" {
+        Write-Host "`n📊 Current Verification Status:" -ForegroundColor Yellow
+        
+        # Git configuration summary
+        Write-Host "  Git Configuration:" -ForegroundColor Cyan
+        Write-Host "    Name: $currentName" -ForegroundColor White
+        Write-Host "    Email: $currentEmail" -ForegroundColor White
+        Write-Host "    Signing: $commitSigning" -ForegroundColor White
+        Write-Host "    Key: $currentSigningKey" -ForegroundColor White
+        
+        # Verification status prediction
+        Write-Host "`n  Commit Verification Prediction:" -ForegroundColor Cyan
+        if ($commitSigning -eq "true" -and $currentSigningKey) {
+            Write-Host "    Status: Local commits will attempt signing" -ForegroundColor Yellow
+            Write-Host "    Result: May show Verified or Unverified depending on key setup" -ForegroundColor Yellow
+        }
+        else {
+            Write-Host "    Status: Local commits will be unsigned" -ForegroundColor Blue
+            Write-Host "    Result: Will show Unverified if vigilant mode enabled" -ForegroundColor Blue
+        }
+        
+        Write-Host "`n  GitHub Web Commits:" -ForegroundColor Cyan
+        Write-Host "    Status: Automatically signed by GitHub" -ForegroundColor Green
+        Write-Host "    Result: Always show Verified" -ForegroundColor Green
+        
+        # Recommendations
+        Write-Host "`n  Recommendations for EQ12:" -ForegroundColor Cyan
+        Write-Host "    ✅ Enable vigilant mode on GitHub" -ForegroundColor Green
+        Write-Host "    ✅ Use GitHub web interface for critical commits" -ForegroundColor Green
+        Write-Host "    ✅ Focus on automated code quality instead" -ForegroundColor Green
+        Write-Host "    ✅ Leverage GitHub Pro CI/CD pipeline" -ForegroundColor Green
+    }
+    
+    "5" {
+        Write-Host "`n✅ Keeping current configuration" -ForegroundColor Green
+        Write-Host "  No changes made to Git or GPG settings" -ForegroundColor Gray
+    }
+    
+    default {
+        Write-Host "`n✅ No changes made" -ForegroundColor Green
+    }
+}
+
+# Final recommendations
+Write-Host "`n🎯 EQ12 Commit Verification Strategy:" -ForegroundColor Yellow
+Write-Host "  For GitHub Pro + Betting Automation workflow:" -ForegroundColor Gray
+Write-Host "  ✅ Enable GitHub Vigilant Mode for transparency" -ForegroundColor Green
+Write-Host "  ✅ Use GitHub web commits for verified signatures" -ForegroundColor Green  
+Write-Host "  ✅ Local development focuses on code quality" -ForegroundColor Green
+Write-Host "  ✅ CI/CD pipeline ensures all commits are validated" -ForegroundColor Green
+
+Write-Host "`n📋 Immediate Actions:" -ForegroundColor Yellow
+Write-Host "  1. Go to GitHub.com → Settings → SSH and GPG keys" -ForegroundColor White
+Write-Host "  2. Enable Flag unsigned commits as unverified" -ForegroundColor White
+Write-Host "  3. Verify email $currentEmail is added to your account" -ForegroundColor White
+Write-Host "  4. Test with a web commit to see Verified badge" -ForegroundColor White
+
+Write-Host "`nEQ12 commit verification setup complete!" -ForegroundColor Green

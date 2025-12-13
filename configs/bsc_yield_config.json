@@ -1,0 +1,76 @@
+{
+    "network_config": {
+        "bsc_mainnet": {
+            "rpc_url": "https://bsc-dataseed.binance.org/",
+            "chain_id": 56,
+            "gas_price_gwei": 5,
+            "max_gas_limit": 500000
+        },
+        "backup_rpcs": [
+            "https://bsc-dataseed1.defibit.io/",
+            "https://bsc-dataseed1.ninicoin.io/",
+            "https://bsc.rpc.blxrbdn.com/"
+        ]
+    },
+    "protocols": {
+        "pancakeswap": {
+            "router": "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+            "factory": "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73",
+            "farms_api": "https://pancakeswap.finance/api/farms",
+            "min_tvl": 1000000,
+            "max_allocation": 40
+        },
+        "venus": {
+            "comptroller": "0xfD36E2c2a6789Db23113685031d7F16329158384",
+            "api_url": "https://api.venus.io/api/governance/venus",
+            "min_utilization": 0.1,
+            "max_utilization": 0.85,
+            "max_allocation": 30
+        },
+        "biswap": {
+            "router": "0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8",
+            "farms_api": "https://biswap.org/api/farms",
+            "max_allocation": 25
+        }
+    },
+    "risk_management": {
+        "max_single_protocol": 40,
+        "max_total_defi": 80,
+        "min_profit_threshold": 5.0,
+        "max_gas_cost_percentage": 10,
+        "rebalance_threshold": 5
+    },
+    "yield_preferences": {
+        "min_apy": 0.10,
+        "max_risk_score": 0.75,
+        "preferred_tokens": ["BNB", "BUSD", "USDT", "ETH", "BTCB"],
+        "avoid_tokens": ["SAFEMOON", "DOGE", "SHIB"],
+        "auto_compound": true,
+        "harvest_threshold": 100
+    },
+    "arbitrage_config": {
+        "min_profit_usd": 5,
+        "max_slippage": 0.02,
+        "dexes": ["pancakeswap", "biswap", "apeswap"],
+        "scan_interval": 30,
+        "execution_delay": 2
+    },
+    "revenue_targets": {
+        "daily_minimum": 50,
+        "weekly_target": 500,
+        "monthly_goal": 2000,
+        "capital_tiers": {
+            "tier_1": 10000,
+            "tier_2": 50000,
+            "tier_3": 100000,
+            "tier_4": 500000
+        }
+    },
+    "notification_settings": {
+        "telegram_enabled": true,
+        "high_profit_threshold": 100,
+        "emergency_loss_threshold": -500,
+        "daily_summary": true,
+        "opportunity_alerts": true
+    }
+}

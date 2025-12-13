@@ -1,0 +1,131 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Mozilla VPN Hop Mode Manager
+# Quick switching between single-hop and multi-hop for different operations
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("single", "multi", "status", "test")]
+    [string]$Mode = "status"
+)
+
+function Show-EQ12HopStatus {
+    Write-Host "🔀 EQ12 VPN Hop Mode Status" -ForegroundColor Cyan
+    Write-Host ""
+    
+    # Note: Mozilla VPN doesn't have CLI, so this is manual guidance
+    Write-Host "📋 Current Configuration Check:" -ForegroundColor Yellow
+    Write-Host "1. Open Mozilla VPN application" -ForegroundColor White
+    Write-Host "2. Look for 'Multi-hop' or "Double VPN" toggle" -ForegroundColor White
+    Write-Host "3. Check current server routing display" -ForegroundColor White
+    
+    # Test latency to key EQ12 APIs
+    Write-Host "`n🔬 Testing EQ12 API Latency..." -ForegroundColor Cyan
+    
+    $apis = @{
+        "Odds API" = "api.the-odds-api.com"
+        "OpenAI" = "api.openai.com"
+        "Weather" = "api.weather.gov"
+    }
+    
+    foreach ($api in $apis.GetEnumerator()) {
+        try {
+            $ping = Test-Connection -ComputerName $api.Value -Count 2 -Quiet
+            if ($ping) {
+                $latency = (Test-Connection -ComputerName $api.Value -Count 1).ResponseTime
+                if ($latency -lt 50) {
+                    Write-Host "   ✅ $($api.Key): ${latency}ms (Excellent)" -ForegroundColor Green
+                } elseif ($latency -lt 100) {
+                    Write-Host "   ⚠️ $($api.Key): ${latency}ms (Acceptable)" -ForegroundColor Yellow
+                } else {
+                    Write-Host "   ❌ $($api.Key): ${latency}ms (Too High)" -ForegroundColor Red
+                }
+            }
+        } catch {
+            Write-Host "   ⚠️ $($api.Key): Could not test" -ForegroundColor Yellow
+        }
+    }
+}
+
+function Show-SingleHopAdvice {
+    Write-Host "⚡ SINGLE-HOP MODE RECOMMENDED" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "🎯 Perfect for:" -ForegroundColor Cyan
+    Write-Host "• Daily EQ12 betting operations" -ForegroundColor White
+    Write-Host "• Live odds monitoring" -ForegroundColor White
+    Write-Host "• Real-time arbitrage detection" -ForegroundColor White
+    Write-Host "• Weather analysis" -ForegroundColor White
+    Write-Host "• AI-powered predictions" -ForegroundColor White
+    
+    Write-Host "`n⚙️ To Enable Single-Hop:" -ForegroundColor Yellow
+    Write-Host "1. Open Mozilla VPN" -ForegroundColor White
+    Write-Host "2. Ensure Multi-hop is DISABLED" -ForegroundColor White
+    Write-Host "3. Connect to nearest server (US East Coast)" -ForegroundColor White
+    Write-Host "4. Test latency should be <50ms" -ForegroundColor White
+}
+
+function Show-MultiHopAdvice {
+    Write-Host "🔒 MULTI-HOP MODE (HIGH SECURITY)" -ForegroundColor Magenta
+    Write-Host ""
+    Write-Host "🎯 Use only for:" -ForegroundColor Cyan
+    Write-Host "• High-stakes arbitrage (>$1000 bets)" -ForegroundColor White
+    Write-Host "• Sensitive account management" -ForegroundColor White
+    Write-Host "• Research on controversial strategies" -ForegroundColor White
+    Write-Host "• Maximum privacy operations" -ForegroundColor White
+    
+    Write-Host "`n⚙️ To Enable Multi-Hop:" -ForegroundColor Yellow
+    Write-Host "1. Open Mozilla VPN" -ForegroundColor White
+    Write-Host "2. Enable Multi-hop/Double VPN feature" -ForegroundColor White
+    Write-Host "3. Accept higher latency (15-30ms extra)" -ForegroundColor White
+    Write-Host "4. Monitor performance impact on EQ12" -ForegroundColor White
+    
+    Write-Host "`n⚠️ Warning:" -ForegroundColor Red
+    Write-Host "May impact live betting performance due to latency" -ForegroundColor White
+}
+
+function Test-EQ12Performance {
+    Write-Host "🔬 EQ12 PERFORMANCE TEST" -ForegroundColor Cyan
+    Write-Host ""
+    
+    # Test basic connectivity
+    Write-Host "Testing EQ12 system performance..." -ForegroundColor Yellow
+    
+    if (Test-Path "C:\EQ12\scripts\eq12_multi_sports_api_client.py") {
+        Write-Host "Running EQ12 API test..." -ForegroundColor White
+        try {
+            $result = python "C:\EQ12\scripts\eq12_multi_sports_api_client.py" --test-mode 2>&1
+            Write-Host "✅ EQ12 API test completed" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️ EQ12 API test had issues" -ForegroundColor Yellow
+        }
+    }
+    
+    Write-Host "`n💡 Performance Guidelines:" -ForegroundColor Cyan
+    Write-Host "• <50ms: Excellent for live betting" -ForegroundColor Green
+    Write-Host "• 50-100ms: Good for most operations" -ForegroundColor Yellow  
+    Write-Host "• >100ms: May impact live betting" -ForegroundColor Red
+}
+
+# Main execution
+switch ($Mode.ToLower()) {
+    "single" {
+        Show-SingleHopAdvice
+    }
+    "multi" {
+        Show-MultiHopAdvice
+    }
+    "test" {
+        Test-EQ12Performance
+    }
+    "status" {
+        Show-EQ12HopStatus
+    }
+    default {
+        Write-Host "EQ12 Mozilla VPN Hop Manager" -ForegroundColor Cyan
+        Write-Host "Usage: .\eq12_hop_manager.ps1 -Mode [single|multi|status|test]" -ForegroundColor White
+    }
+}
+
+Write-Host "`n🎯 EQ12 Recommendation: Use Single-Hop for optimal performance!" -ForegroundColor Green

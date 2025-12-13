@@ -1,0 +1,404 @@
+﻿# EQ12 Telegram & Token Management Wrapper
+# Simplified PowerShell interface for managing the complete communication and crypto system
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [ValidateSet("Start", "Stop", "Status", "RegisterChat", "TestAlert", "ConnectWallet", "CheckAccess", "Analytics", "Help")]
+    [string]$Action,
+    
+    [string]$ChatId = "",
+    [string]$ChatType = "admin",
+    [string]$Username = "",
+    [string]$WalletAddress = "",
+    [string]$Signature = "",
+    [string]$Resource = "ai_analysis",
+    [string]$AlertMessage = "",
+    [string]$Workspace = "C:\EQ12",
+    [switch]$VerboseOutput
+)
+
+# Set error action
+$ErrorActionPreference = "Stop"
+
+# Workspace validation
+if (!(Test-Path $Workspace)) {
+    Write-Error "Workspace path $Workspace does not exist"
+    exit 1
+}
+
+# Python executable path
+$PythonExe = "python"
+$ScriptsPath = Join-Path $Workspace "scripts"
+
+# Log function
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogMessage = "[$Timestamp] [$Level] $Message"
+    Write-Host $LogMessage
+    
+    $LogFile = Join-Path $Workspace "logs\telegram_wrapper.log"
+    $LogDir = Split-Path $LogFile -Parent
+    if (!(Test-Path $LogDir)) {
+        New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+    }
+    Add-Content -Path $LogFile -Value $LogMessage
+}
+
+# Process management functions
+function Start-TelegramServices {
+    Write-Log "Starting EQ12 Telegram services..."
+    
+    # Check if TELEGRAM_BOT_TOKEN is set
+    if (-not ${env}TELEGRAM_BOT_TOKEN) {
+        Write-Warning "TELEGRAM_BOT_TOKEN environment variable not set"
+        Write-Host "Please set your Telegram bot token:"
+        Write-Host "`${env}TELEGRAM_BOT_TOKEN = 'your_bot_token_here'"
+        return $false
+    }
+    
+    # Check if TELEGRAM_CHAT_ID is set
+    if (-not ${env}TELEGRAM_CHAT_ID) {
+        Write-Warning "TELEGRAM_CHAT_ID environment variable not set"
+        Write-Host "Please set your Telegram chat ID:"
+        Write-Host "`${env}TELEGRAM_CHAT_ID = 'your_chat_id_here'"
+        return $false
+    }
+    
+    try {
+        # Start Telegram Commander
+        Write-Log "Starting Telegram Commander..."
+        $CommanderScript = Join-Path $ScriptsPath "eq12_telegram_commander.py"
+        $CommanderJob = Start-Job -ScriptBlock {
+            param($Python, $Script, $Workspace)
+            & $Python $Script --workspace $Workspace
+        } -ArgumentList $PythonExe, $CommanderScript, $Workspace
+        
+        Write-Log "Telegram Commander started (Job ID: $($CommanderJob.Id))"
+        
+        # Start Message Router
+        Write-Log "Starting Message Router..."
+        $RouterScript = Join-Path $ScriptsPath "eq12_telegram_router.py"
+        $RouterJob = Start-Job -ScriptBlock {
+            param($Python, $Script, $Workspace)
+            & $Python $Script --workspace $Workspace
+        } -ArgumentList $PythonExe, $RouterScript, $Workspace
+        
+        Write-Log "Message Router started (Job ID: $($RouterJob.Id))"
+        
+        # Start Token Gateway (if Web3 available)
+        Write-Log "Starting Token Gateway..."
+        $GatewayScript = Join-Path $ScriptsPath "eq12_token_gateway.py"
+        $GatewayJob = Start-Job -ScriptBlock {
+            param($Python, $Script, $Workspace)
+            & $Python $Script --workspace $Workspace
+        } -ArgumentList $PythonExe, $GatewayScript, $Workspace
+        
+        Write-Log "Token Gateway started (Job ID: $($GatewayJob.Id))"
+        
+        # Save job IDs for later management
+        $JobInfo = @{
+            Commander = $CommanderJob.Id
+            Router = $RouterJob.Id
+            Gateway = $GatewayJob.Id
+            StartTime = Get-Date
+        }
+        
+        $JobFile = Join-Path $Workspace "data\telegram_services.json"
+        $JobDir = Split-Path $JobFile -Parent
+        if (!(Test-Path $JobDir)) {
+            New-Item -ItemType Directory -Path $JobDir -Force | Out-Null
+        }
+        $JobInfo | ConvertTo-Json | Set-Content $JobFile
+        
+        Write-Host "SUCCESS EQ12 Telegram services started successfully!" -ForegroundColor Green
+        Write-Host "Commander Job ID: $($CommanderJob.Id)" -ForegroundColor Cyan
+        Write-Host "Router Job ID: $($RouterJob.Id)" -ForegroundColor Cyan
+        Write-Host "Gateway Job ID: $($GatewayJob.Id)" -ForegroundColor Cyan
+        
+        return $true
+        
+    } catch {
+        Write-Log "Failed to start services: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Stop-TelegramServices {
+    Write-Log "Stopping EQ12 Telegram services..."
+    
+    try {
+        $JobFile = Join-Path $Workspace "data\telegram_services.json"
+        
+        if (Test-Path $JobFile) {
+            $JobInfo = Get-Content $JobFile | ConvertFrom-Json
+            
+            # Stop each job
+            foreach ($JobId in @($JobInfo.Commander, $JobInfo.Router, $JobInfo.Gateway)) {
+                if ($JobId) {
+                    $Job = Get-Job -Id $JobId -ErrorAction SilentlyContinue
+                    if ($Job) {
+                        Stop-Job -Id $JobId -ErrorAction SilentlyContinue
+                        Remove-Job -Id $JobId -ErrorAction SilentlyContinue
+                        Write-Log "Stopped job $JobId"
+                    }
+                }
+            }
+            
+            # Remove job file
+            Remove-Item $JobFile -ErrorAction SilentlyContinue
+        }
+        
+        # Also stop any python processes running telegram scripts
+        Get-Process python -ErrorAction SilentlyContinue | 
+            Where-Object { $_.CommandLine -match "telegram" } | 
+            Stop-Process -Force -ErrorAction SilentlyContinue
+        
+        Write-Host "SUCCESS EQ12 Telegram services stopped" -ForegroundColor Green
+        return $true
+        
+    } catch {
+        Write-Log "Failed to stop services: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Get-TelegramStatus {
+    Write-Log "Checking EQ12 Telegram services status..."
+    
+    # Check running jobs
+    $JobFile = Join-Path $Workspace "data\telegram_services.json"
+    $RunningJobs = 0
+    
+    if (Test-Path $JobFile) {
+        try {
+            $JobInfo = Get-Content $JobFile | ConvertFrom-Json
+            
+            Write-Host "`n🔧 Service Status:" -ForegroundColor Cyan
+            
+            foreach ($Service in @("Commander", "Router", "Gateway")) {
+                $JobId = $JobInfo.$Service
+                if ($JobId) {
+                    $Job = Get-Job -Id $JobId -ErrorAction SilentlyContinue
+                    if ($Job -and $Job.State -eq "Running") {
+                        Write-Host "OK $Service (Job $JobId): RUNNING" -ForegroundColor Green
+                        $RunningJobs++
+                    } else {
+                        Write-Host "X $Service (Job $JobId): STOPPED" -ForegroundColor Red
+                    }
+                } else {
+                    Write-Host "X $Service" ": NOT STARTED" -ForegroundColor Red
+                }
+            }
+            
+            if ($JobInfo.StartTime) {
+                $Uptime = (Get-Date) - [DateTime]$JobInfo.StartTime
+                Write-Host "`n⏱️ Uptime: $($Uptime.Hours)h $($Uptime.Minutes)m $($Uptime.Seconds)s" -ForegroundColor Yellow
+            }
+        } catch {
+            Write-Host "❌ Failed to read job status: $($_.Exception.Message)" -ForegroundColor Red
+        }
+        } else {
+        Write-Host "X No services currently running" -ForegroundColor Red
+    }    # Check environment variables
+    Write-Host "`n🔑 Environment Check:" -ForegroundColor Cyan
+    
+    if (${env}TELEGRAM_BOT_TOKEN) {
+        $TokenPreview = ${env}TELEGRAM_BOT_TOKEN.Substring(0, [Math]::Min(15, ${env}TELEGRAM_BOT_TOKEN.Length)) + "..."
+        Write-Host "OK TELEGRAM_BOT_TOKEN: $TokenPreview" -ForegroundColor Green
+    } else {
+        Write-Host "X TELEGRAM_BOT_TOKEN" ": NOT SET" -ForegroundColor Red
+    }
+    
+    if (${env}TELEGRAM_CHAT_ID) {
+        Write-Host "OK TELEGRAM_CHAT_ID: ${env}TELEGRAM_CHAT_ID" -ForegroundColor Green
+    } else {
+        Write-Host "X TELEGRAM_CHAT_ID" ": NOT SET" -ForegroundColor Red
+    }
+    
+    # Check database files
+    Write-Host "`n💾 Database Status:" -ForegroundColor Cyan
+    
+    $Databases = @(
+        "telegram_activity.db",
+        "telegram_router.db", 
+        "token_gateway.db"
+    )
+    
+    foreach ($DB in $Databases) {
+        $DBPath = Join-Path $Workspace "data\$DB"
+        if (Test-Path $DBPath) {
+            $Size = [Math]::Round((Get-Item $DBPath).Length / 1KB, 2)
+            Write-Host "OK $DB ($Size KB)" -ForegroundColor Green
+        } else {
+            Write-Host "X $DB" ": NOT FOUND" -ForegroundColor Red
+        }
+    }
+    
+    Write-Host "`n📊 Summary: $RunningJobs/3 services running" -ForegroundColor Yellow
+}
+
+# Main action handler
+switch ($Action) {
+    "Start" {
+        $success = Start-TelegramServices
+        if (-not $success) { exit 1 }
+    }
+    
+    "Stop" {
+        $success = Stop-TelegramServices
+        if (-not $success) { exit 1 }
+    }
+    
+    "Status" {
+        Get-TelegramStatus
+    }
+    
+    "RegisterChat" {
+        if (-not $ChatId) {
+            Write-Error "ChatId parameter required for RegisterChat action"
+            exit 1
+        }
+        
+        Write-Log "Registering chat $ChatId as $ChatType ($Username)"
+        $RouterScript = Join-Path $ScriptsPath "eq12_telegram_router.py"
+        
+        try {
+            & $PythonExe $RouterScript --register-chat $ChatId $ChatType $Username --workspace $Workspace
+            Write-Host "✅ Chat registered successfully" -ForegroundColor Green
+        } catch {
+            Write-Error "Failed to register chat: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    
+    "TestAlert" {
+        if (-not $AlertMessage) {
+            $AlertMessage = "EQ12 Telegram system test - $(Get-Date)"
+        }
+        
+        Write-Log "Sending test alert: $AlertMessage"
+        $RouterScript = Join-Path $ScriptsPath "eq12_telegram_router.py"
+        
+        try {
+            & $PythonExe $RouterScript --test-alert $AlertMessage --workspace $Workspace
+            Write-Host "✅ Test alert sent" -ForegroundColor Green
+        } catch {
+            Write-Error "Failed to send test alert: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    
+    "ConnectWallet" {
+        if (-not $WalletAddress -or -not $Signature) {
+            Write-Error "WalletAddress and Signature parameters required for ConnectWallet action"
+            exit 1
+        }
+        
+        Write-Log "Connecting wallet $WalletAddress"
+        $GatewayScript = Join-Path $ScriptsPath "eq12_token_gateway.py"
+        
+        try {
+            & $PythonExe $GatewayScript --connect-wallet $WalletAddress $Signature --workspace $Workspace
+            Write-Host "✅ Wallet connected successfully" -ForegroundColor Green
+        } catch {
+            Write-Error "Failed to connect wallet: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    
+    "CheckAccess" {
+        if (-not $WalletAddress) {
+            Write-Error "WalletAddress parameter required for CheckAccess action"
+            exit 1
+        }
+        
+        Write-Log "Checking access for wallet $WalletAddress to resource $Resource"
+        $GatewayScript = Join-Path $ScriptsPath "eq12_token_gateway.py"
+        
+        try {
+            & $PythonExe $GatewayScript --check-access $WalletAddress $Resource --workspace $Workspace
+        } catch {
+            Write-Error "Failed to check access: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    
+    "Analytics" {
+        Write-Log "Retrieving analytics data"
+        $RouterScript = Join-Path $ScriptsPath "eq12_telegram_router.py"
+        
+        try {
+            Write-Host "`n📊 Telegram Router Analytics:" -ForegroundColor Cyan
+            & $PythonExe $RouterScript --analytics --workspace $Workspace
+            Write-Host ""
+        } catch {
+            Write-Error "Failed to get analytics: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    
+    "Help" {
+        Write-Host @"
+
+EQ12 Telegram & Token Management Wrapper
+
+USAGE:
+    .\eq12_telegram_wrapper.ps1 -Action <Action> [parameters]
+
+ACTIONS:
+
+SERVICE MANAGEMENT:
+    Start              Start all Telegram services
+    Stop               Stop all Telegram services  
+    Status             Show service status and health
+
+CHAT MANAGEMENT:
+    RegisterChat       Register a new chat
+        -ChatId        Telegram chat ID (required)
+        -ChatType      Chat type: admin, vip, subscriber, channel, group
+        -Username      Optional username
+    
+    TestAlert          Send test alert message
+        -AlertMessage  Custom alert message (optional)
+
+CRYPTO INTEGRATION:
+    ConnectWallet      Connect a crypto wallet
+        -WalletAddress Wallet address (required)
+        -Signature     Wallet signature (required)
+    
+    CheckAccess        Check wallet access to resource
+        -WalletAddress Wallet address (required)
+        -Resource      Resource name (default: ai_analysis)
+
+MONITORING:
+    Analytics          Show message and delivery analytics
+    Help               Show this help message
+
+EXAMPLES:
+
+# Start all services
+.\eq12_telegram_wrapper.ps1 -Action Start
+
+# Register your chat as admin
+.\eq12_telegram_wrapper.ps1 -Action RegisterChat -ChatId 123456789 -ChatType admin -Username "YourName"
+
+# Send test alert
+.\eq12_telegram_wrapper.ps1 -Action TestAlert -AlertMessage "System online!"
+
+# Check service status
+.\eq12_telegram_wrapper.ps1 -Action Status
+
+# Check wallet access
+.\eq12_telegram_wrapper.ps1 -Action CheckAccess -WalletAddress 0x123... -Resource ai_analysis
+
+ENVIRONMENT VARIABLES REQUIRED:
+    TELEGRAM_BOT_TOKEN  - Your Telegram bot token from @BotFather
+    TELEGRAM_CHAT_ID    - Your Telegram chat ID
+
+"@ -ForegroundColor White
+    }
+}
+
+Write-Log "Action $Action completed"

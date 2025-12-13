@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Real-Time System Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 15px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-healthy { background-color: #4CAF50; }
+        .status-warning { background-color: #FF9800; }
+        .status-error { background-color: #F44336; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .widget {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .widget h2 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            color: #ffffff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .system-status {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+        }
+
+        .betting-activities {
+            grid-column: 2 / 3;
+            grid-row: 2 / 4;
+        }
+
+        .performance-metrics {
+            grid-column: 3 / 4;
+            grid-row: 2 / 3;
+        }
+
+        .recent-actions {
+            grid-column: 1 / 2;
+            grid-row: 3 / 4;
+        }
+
+        .alerts-panel {
+            grid-column: 3 / 4;
+            grid-row: 3 / 4;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .status-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .betting-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .betting-item.warning {
+            border-left-color: #FF9800;
+        }
+
+        .betting-item.error {
+            border-left-color: #F44336;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+        }
+
+        .scrollable-content {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.danger {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: rgba(244, 67, 54, 0.5);
+        }
+
+        .action-btn.success {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert-item {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            animation: alertPulse 3s infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .connection-online {
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+        }
+
+        .connection-offline {
+            background: rgba(244, 67, 54, 0.8);
+            color: white;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+
+            .betting-activities {
+                grid-column: 1 / -1;
+                grid-row: 3 / 4;
+            }
+
+            .performance-metrics {
+                grid-column: 2 / 3;
+                grid-row: 2 / 3;
+            }
+
+            .alerts-panel {
+                grid-column: 1 / -1;
+                grid-row: 4 / 5;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .widget {
+                padding: 15px;
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 EQ12 GODSTACK Dashboard</h1>
+            <p>Real-Time System Monitoring & Betting Activities</p>
+            <div class="action-buttons">
+                <button class="action-btn success" onclick="refreshSystem()">
+                    <span id="refreshIcon">🔄</span> Refresh System
+                </button>
+                <button class="action-btn" onclick="toggleAutoRefresh()">
+                    <span id="autoRefreshIcon">⏱️</span> <span id="autoRefreshText">Auto-Refresh: ON</span>
+                </button>
+                <button class="action-btn danger" onclick="coldRestart()">
+                    🔥 Cold Restart
+                </button>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="widget system-status">
+            <h2>🖥️ System Status</h2>
+            <div class="scrollable-content" id="systemStatusContent">
+                <div class="status-item">
+                    <span><span class="status-indicator status-healthy"></span>Database Connection</span>
+                    <span id="dbStatus">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <span><span class="status-indicator status-healthy"></span>Python Services</span>
+                    <span id="pythonStatus">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <span><span class="status-indicator status-healthy"></span>PowerShell Scripts</span>
+                    <span id="powershellStatus">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <span><span class="status-indicator status-healthy"></span>API Connections</span>
+                    <span id="apiStatus">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <span><span class="status-indicator status-warning"></span>X-Factor Pipeline</span>
+                    <span id="xfactorStatus">Loading...</span>
+                </div>
+                <div class="status-item">
+                    <span><span class="status-indicator status-healthy"></span>Auto Trader</span>
+                    <span id="traderStatus">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Betting Activities -->
+        <div class="widget betting-activities">
+            <h2>🏈 Live Betting Activities</h2>
+            <div class="scrollable-content" id="bettingContent">
+                <div class="betting-item">
+                    <strong>🔥 HIGH VALUE ALERT</strong><br>
+                    <span>Chiefs vs Bills - Over 52.5 Points</span><br>
+                    <small class="timestamp">Edge: +15.2% | Confidence: 87% | 2 minutes ago</small>
+                </div>
+                <div class="betting-item warning">
+                    <strong>⚠️ MODERATE EDGE</strong><br>
+                    <span>Cowboys vs Eagles - Cowboys +3.5</span><br>
+                    <small class="timestamp">Edge: +8.1% | Confidence: 72% | 5 minutes ago</small>
+                </div>
+                <div class="betting-item">
+                    <strong>✅ PLACED BET</strong><br>
+                    <span>Lions vs Packers - Under 45.5 Points</span><br>
+                    <small class="timestamp">$500 @ -110 | Edge: +12.3% | 8 minutes ago</small>
+                </div>
+                <div class="betting-item">
+                    <strong>📊 ANALYSIS UPDATE</strong><br>
+                    <span>49ers vs Rams - Line Movement Detected</span><br>
+                    <small class="timestamp">Moved from -7.5 to -6.5 | 12 minutes ago</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="widget performance-metrics">
+            <h2>📈 Performance Metrics</h2>
+            <div>
+                <div class="metric-value" id="totalProfitValue">+$2,847</div>
+                <div class="metric-label">Total Profit (30 Days)</div>
+            </div>
+            <div>
+                <div class="metric-value" id="winRateValue">68.4%</div>
+                <div class="metric-label">Win Rate</div>
+            </div>
+            <div>
+                <div class="metric-value" id="edgeValue">+11.2%</div>
+                <div class="metric-label">Average Edge</div>
+            </div>
+            <div>
+                <div class="metric-value" id="activeBetsValue">7</div>
+                <div class="metric-label">Active Bets</div>
+            </div>
+        </div>
+
+        <!-- Recent Actions -->
+        <div class="widget recent-actions">
+            <h2>🔄 Recent Actions</h2>
+            <div class="scrollable-content" id="recentActionsContent">
+                <div class="status-item">
+                    <span>🔍 Odds scan completed</span>
+                    <span class="timestamp">2 min ago</span>
+                </div>
+                <div class="status-item">
+                    <span>🤖 AI analysis updated</span>
+                    <span class="timestamp">3 min ago</span>
+                </div>
+                <div class="status-item">
+                    <span>💰 Bet placement executed</span>
+                    <span class="timestamp">5 min ago</span>
+                </div>
+                <div class="status-item">
+                    <span>📊 Database sync completed</span>
+                    <span class="timestamp">7 min ago</span>
+                </div>
+                <div class="status-item">
+                    <span>🔧 System health check</span>
+                    <span class="timestamp">10 min ago</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Panel -->
+        <div class="widget alerts-panel">
+            <h2>🚨 System Alerts</h2>
+            <div class="scrollable-content" id="alertsContent">
+                <div class="alert-item">
+                    <strong>⚡ High Activity Alert</strong><br>
+                    <small>15 new betting edges detected in last 5 minutes</small>
+                </div>
+                <div class="alert-item">
+                    <strong>🔋 System Performance</strong><br>
+                    <small>CPU usage elevated (78%) - monitor for optimization</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connection Status Indicator -->
+    <div class="connection-status connection-online" id="connectionStatus">
+        🟢 LIVE
+    </div>
+
+    <script>
+        // Dashboard JavaScript Logic
+        let autoRefreshEnabled = true;
+        let refreshInterval = null;
+        let websocket = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            startAutoRefresh();
+            // connectWebSocket(); // Uncomment when WebSocket backend is ready
+        });
+
+        function initializeDashboard() {
+            console.log('🚀 EQ12 Dashboard initialized');
+            updateTimestamps();
+            loadSystemStatus();
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshEnabled && !refreshInterval) {
+                refreshInterval = setInterval(() => {
+                    refreshSystem();
+                    updateTimestamps();
+                }, 30000); // Refresh every 30 seconds
+            }
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            const textElement = document.getElementById('autoRefreshText');
+            
+            if (autoRefreshEnabled) {
+                textElement.textContent = 'Auto-Refresh: ON';
+                startAutoRefresh();
+            } else {
+                textElement.textContent = 'Auto-Refresh: OFF';
+                stopAutoRefresh();
+            }
+        }
+
+        function refreshSystem() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.innerHTML = '<span class="loading-spinner"></span>';
+            
+            // Simulate API calls - replace with actual endpoints
+            setTimeout(() => {
+                loadSystemStatus();
+                updateBettingActivities();
+                updatePerformanceMetrics();
+                updateRecentActions();
+                refreshIcon.innerHTML = '🔄';
+                
+                // Show refresh notification
+                showNotification('System refreshed successfully', 'success');
+            }, 2000);
+        }
+
+        function loadSystemStatus() {
+            // Simulate loading system status
+            const statuses = ['✅ Online', '⚡ Active', '🔄 Running', '🎯 Optimal'];
+            
+            document.getElementById('dbStatus').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+            document.getElementById('pythonStatus').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+            document.getElementById('powershellStatus').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+            document.getElementById('apiStatus').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+            document.getElementById('xfactorStatus').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+            document.getElementById('traderStatus').textContent = statuses[Math.floor(Math.random() * statuses.length)];
+        }
+
+        function updateBettingActivities() {
+            // This would fetch real betting data from the backend
+            console.log('📊 Updating betting activities...');
+        }
+
+        function updatePerformanceMetrics() {
+            // Simulate metric updates
+            const profit = 2847 + Math.floor(Math.random() * 100 - 50);
+            const winRate = (68.4 + (Math.random() * 2 - 1)).toFixed(1);
+            const edge = (11.2 + (Math.random() * 1 - 0.5)).toFixed(1);
+            const activeBets = 7 + Math.floor(Math.random() * 3 - 1);
+            
+            document.getElementById('totalProfitValue').textContent = `+$${profit.toLocaleString()}`;
+            document.getElementById('winRateValue').textContent = `${winRate}%`;
+            document.getElementById('edgeValue').textContent = `+${edge}%`;
+            document.getElementById('activeBetsValue').textContent = activeBets;
+        }
+
+        function updateRecentActions() {
+            const actions = [
+                '🔍 Odds scan completed',
+                '🤖 AI analysis updated',
+                '💰 Bet placement executed',
+                '📊 Database sync completed',
+                '🔧 System health check'
+            ];
+            
+            // Randomly add new action
+            if (Math.random() > 0.7) {
+                const newAction = actions[Math.floor(Math.random() * actions.length)];
+                addRecentAction(newAction);
+            }
+        }
+
+        function addRecentAction(actionText) {
+            const container = document.getElementById('recentActionsContent');
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'status-item';
+            actionDiv.innerHTML = `
+                <span>${actionText}</span>
+                <span class="timestamp">Just now</span>
+            `;
+            
+            // Add to top
+            container.insertBefore(actionDiv, container.firstChild);
+            
+            // Keep only last 10 items
+            while (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        function updateTimestamps() {
+            const timestamps = document.querySelectorAll('.timestamp');
+            timestamps.forEach(ts => {
+                const text = ts.textContent;
+                if (text.includes('minute')) {
+                    const minutes = parseInt(text.match(/\d+/)[0]) + 1;
+                    ts.textContent = text.replace(/\d+/, minutes);
+                }
+            });
+        }
+
+        function coldRestart() {
+            if (confirm('🔥 Are you sure you want to perform a cold restart? This will stop all services and restart the entire system.')) {
+                showNotification('Cold restart initiated...', 'warning');
+                
+                // Call the cold restart endpoint
+                fetch('/api/cold-restart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        showNotification('Cold restart completed successfully', 'success');
+                        setTimeout(refreshSystem, 3000);
+                    } else {
+                        showNotification('Cold restart failed - check logs', 'error');
+                    }
+                }).catch(error => {
+                    console.error('Cold restart error:', error);
+                    // Simulate restart for demo
+                    setTimeout(() => {
+                        showNotification('Cold restart completed (simulated)', 'success');
+                        refreshSystem();
+                    }, 5000);
+                });
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            
+            const colors = {
+                success: '#4CAF50',
+                error: '#F44336',
+                warning: '#FF9800',
+                info: '#2196F3'
+            };
+            
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 4000);
+        }
+
+        function connectWebSocket() {
+            // WebSocket connection for real-time updates
+            try {
+                websocket = new WebSocket('ws://localhost:8765/dashboard');
+                
+                websocket.onopen = function(event) {
+                    console.log('🔗 WebSocket connected');
+                    document.getElementById('connectionStatus').className = 'connection-status connection-online';
+                    document.getElementById('connectionStatus').textContent = '🟢 LIVE';
+                };
+                
+                websocket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                };
+                
+                websocket.onclose = function(event) {
+                    console.log('🔌 WebSocket disconnected');
+                    document.getElementById('connectionStatus').className = 'connection-status connection-offline';
+                    document.getElementById('connectionStatus').textContent = '🔴 OFFLINE';
+                    
+                    // Attempt to reconnect after 5 seconds
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                };
+                
+            } catch (error) {
+                console.error('WebSocket connection failed:', error);
+            }
+        }
+
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'betting_edge':
+                    addBettingActivity(data);
+                    break;
+                case 'system_alert':
+                    addSystemAlert(data);
+                    break;
+                case 'status_update':
+                    updateSystemStatus(data);
+                    break;
+                default:
+                    console.log('Unknown message type:', data.type);
+            }
+        }
+
+        function addBettingActivity(data) {
+            const container = document.getElementById('bettingContent');
+            const activityDiv = document.createElement('div');
+            activityDiv.className = `betting-item ${data.priority || ''}`;
+            activityDiv.innerHTML = `
+                <strong>${data.title}</strong><br>
+                <span>${data.description}</span><br>
+                <small class="timestamp">${data.details} | Just now</small>
+            `;
+            
+            container.insertBefore(activityDiv, container.firstChild);
+            
+            // Keep only last 20 items
+            while (container.children.length > 20) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        function addSystemAlert(data) {
+            const container = document.getElementById('alertsContent');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert-item';
+            alertDiv.innerHTML = `
+                <strong>${data.title}</strong><br>
+                <small>${data.message}</small>
+            `;
+            
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Keep only last 10 alerts
+            while (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey) {
+                switch (event.key) {
+                    case 'r':
+                        event.preventDefault();
+                        refreshSystem();
+                        break;
+                    case 't':
+                        event.preventDefault();
+                        toggleAutoRefresh();
+                        break;
+                }
+            }
+        });
+
+        // Update page title with activity indicator
+        setInterval(() => {
+            if (autoRefreshEnabled) {
+                document.title = '🔴 EQ12 GODSTACK Dashboard - LIVE';
+            } else {
+                document.title = '⚫ EQ12 GODSTACK Dashboard - PAUSED';
+            }
+        }, 1000);
+
+    </script>
+</body>
+</html>

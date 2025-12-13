@@ -1,0 +1,108 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "EQ12 Odds Extract Schema - Production",
+    "description": "Normalized odds format for DraftKings/FanDuel/BetMGM extraction",
+    "type": "object",
+    "required": [
+        "rows",
+        "extracted_at_utc",
+        "books_found"
+    ],
+    "properties": {
+        "rows": {
+            "type": "array",
+            "description": "Normalized odds rows",
+            "items": {
+                "type": "object",
+                "required": [
+                    "game_id",
+                    "book",
+                    "market",
+                    "selection",
+                    "american_odds",
+                    "last_update_utc"
+                ],
+                "properties": {
+                    "game_id": {
+                        "type": "string",
+                        "pattern": "^nfl_[0-9]{8}_[a-z]+_[a-z]+$",
+                        "description": "Format: nfl_YYYYMMDD_away_home"
+                    },
+                    "book": {
+                        "type": "string",
+                        "enum": [
+                            "draftkings",
+                            "fanduel",
+                            "betmgm"
+                        ],
+                        "description": "Only allowed sportsbooks"
+                    },
+                    "market": {
+                        "type": "string",
+                        "enum": [
+                            "moneyline",
+                            "spread",
+                            "total"
+                        ],
+                        "description": "Market type"
+                    },
+                    "selection": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Team name or over/under"
+                    },
+                    "point": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "description": "Spread or total line (null for moneyline)"
+                    },
+                    "american_odds": {
+                        "type": "integer",
+                        "minimum": -999,
+                        "maximum": 999,
+                        "description": "American odds format"
+                    },
+                    "last_update_utc": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "UTC timestamp RFC3339 format"
+                    },
+                    "hook_flag": {
+                        "type": "boolean",
+                        "description": "True if line includes .5 hook"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "extracted_at_utc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When extraction was performed"
+        },
+        "books_found": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "draftkings",
+                    "fanduel",
+                    "betmgm"
+                ]
+            },
+            "description": "Which books had data available"
+        },
+        "stale_warning": {
+            "type": "boolean",
+            "description": "True if any data is >15 minutes old"
+        },
+        "total_rows": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of odds rows extracted"
+        }
+    },
+    "additionalProperties": false
+}

@@ -1,0 +1,196 @@
+[CmdletBinding()]
+param(
+    [string]$ScriptDirectory = "C:\EQ12\scripts",
+    [switch]$AutoFix,
+    [switch]$BackupFiles,
+    [string]$LogPath = "C:\EQ12\logs"
+)
+
+# EQ12 PowerShell Script Validator v2.0 - CORRUPTION-PROOF EDITION
+# Automatically detects and repairs PowerShell syntax corruption
+# Author: EQ12 AI Development Team - Buffalo NY 14215
+
+function Write-LogMessage {
+    param(
+        [string]$Message,
+        [string]$Type = "INFO"
+    )
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Type] $Message"
+    Write-Host $logEntry
+    Add-Content -Path "$LogPath\script_validation.log" -Value $logEntry -Encoding UTF8
+}
+
+function Repair-PowerShellFile {
+    param(
+        [string]$FilePath
+    )
+    
+    Write-LogMessage "Analyzing file: $FilePath" "INFO"
+    
+    try {
+        # Read file content with UTF-8 encoding
+        $Content = Get-Content $FilePath -Raw -Encoding UTF8
+        $OriginalContent = $Content
+        $Fixes = 0
+        
+        # Fix 1: Remove Unicode corruption (common culprits)
+        $CleanContent = $Content -replace '[^\x00-\x7F]', '' `
+                                 -replace '["""]', '"' `
+                                 -replace '[''']', "'" `
+                                 -replace '…', '...' `
+                                 -replace '–', '-' `
+                                 -replace '—', '--'
+        
+        if ($CleanContent -ne $Content) {
+            $Content = $CleanContent
+            $Fixes++
+            Write-LogMessage "  FIX 1: Removed Unicode corruption" "SUCCESS"
+        }
+        
+        # Fix 2: Balance braces
+        $OpenBraces = ($Content.ToCharArray() | Where-Object { $_ -eq '{' }).Count
+        $CloseBraces = ($Content.ToCharArray() | Where-Object { $_ -eq '}' }).Count
+        
+        if ($OpenBraces -gt $CloseBraces) {
+            $MissingBraces = $OpenBraces - $CloseBraces
+            $Content = $Content + ("`n}" * $MissingBraces)
+            $Fixes++
+            Write-LogMessage "  FIX 2: Added $MissingBraces missing closing braces" "SUCCESS"
+        }
+        
+        # Fix 3: Fix param() block structure
+        if ($Content -match 'param\s*\(' -and $Content -notmatch 'param\s*\([^)]*\)\s*\n') {
+            # Find all param blocks and fix them
+            $ParamMatches = [regex]::Matches($Content, 'param\s*\([^)]*\)')
+            foreach ($Match in $ParamMatches) {
+                $ParamBlock = $Match.Value
+                $OpenParens = ($ParamBlock.ToCharArray() | Where-Object { $_ -eq '(' }).Count
+                $CloseParens = ($ParamBlock.ToCharArray() | Where-Object { $_ -eq ')' }).Count
+                if ($OpenParens -gt $CloseParens) {
+                    $MissingParens = $OpenParens - $CloseParens
+                    $FixedParamBlock = $ParamBlock + (')" ' * $MissingParens)
+                    $Content = $Content -replace [regex]::Escape($ParamBlock), $FixedParamBlock
+                    $Fixes++
+                    Write-LogMessage "  FIX 3: Fixed param block structure" "SUCCESS"
+                }
+            }
+        }
+        
+        # Fix 4: Ensure proper function endings
+        $FunctionPattern = 'function\s+[\w-]+\s*\{[^}]*$'
+        if ($Content -match $FunctionPattern) {
+            $Content = $Content + "`n}"
+            $Fixes++
+            Write-LogMessage "  FIX 4: Added missing function closure" "SUCCESS"
+        }
+        
+        # Test the syntax
+        $TestResult = Test-PowerShellSyntax $Content
+        
+        if ($TestResult.IsValid) {
+            Write-LogMessage "  SYNTAX: Valid PowerShell syntax" "SUCCESS"
+        } else {
+            Write-LogMessage "  SYNTAX ERROR: $($TestResult.Error)" "ERROR"
+        }
+        
+        # Save fixed content if AutoFix is enabled
+        if ($AutoFix -and $Fixes -gt 0) {
+            if ($BackupFiles) {
+                $BackupPath = $FilePath + ".backup_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+                Copy-Item $FilePath $BackupPath
+                Write-LogMessage "  BACKUP: Created backup at $BackupPath" "INFO"
+            }
+            
+            Set-Content $FilePath -Value $Content -Encoding UTF8
+            Write-LogMessage "  REPAIRED: Applied $Fixes fixes to $FilePath" "SUCCESS"
+        }
+        
+        return @{
+            FilePath = $FilePath
+            FixesApplied = $Fixes
+            IsValid = $TestResult.IsValid
+            Error = $TestResult.Error
+        }
+        
+    } catch {
+        Write-LogMessage "  ERROR: Failed to process file - $_" "ERROR"
+        return @{
+            FilePath = $FilePath
+            FixesApplied = 0
+            IsValid = $false
+            Error = $_.Exception.Message
+        }
+    }
+}
+
+function Test-PowerShellSyntax {
+    param([string]$Content)
+    
+    try {
+        # Create temporary file for syntax testing
+        $TempFile = [System.IO.Path]::GetTempFileName() + ".ps1"
+        Set-Content $TempFile -Value $Content -Encoding UTF8
+        
+        # Test syntax using PowerShell parser
+        $Errors = $null
+        $Tokens = $null
+        [System.Management.Automation.Language.Parser]::ParseFile($TempFile, [ref]$Tokens, [ref]$Errors)
+        
+        Remove-Item $TempFile -Force
+        
+        if ($Errors.Count -eq 0) {
+            return @{ IsValid = $true; Error = $null }
+        } else {
+            return @{ IsValid = $false; Error = $Errors[0].Message }
+        }
+        
+    } catch {
+        return @{ IsValid = $false; Error = $_.Exception.Message }
+    }
+}
+
+# Main execution
+Write-LogMessage "EQ12 PowerShell Script Validator v2.0 - Starting validation" "INFO"
+Write-LogMessage "Target Directory: $ScriptDirectory" "INFO"
+Write-LogMessage "Auto-Fix: $AutoFix" "INFO"
+
+# Ensure log directory exists
+if (-not (Test-Path $LogPath)) {
+    New-Item -Path $LogPath -ItemType Directory -Force | Out-Null
+}
+
+# Find all PowerShell files
+$PowerShellFiles = Get-ChildItem -Path $ScriptDirectory -Filter "*.ps1" -Recurse
+
+Write-LogMessage "Found $($PowerShellFiles.Count) PowerShell files to validate" "INFO"
+
+$Results = @()
+$TotalFixed = 0
+
+foreach ($File in $PowerShellFiles) {
+    $Result = Repair-PowerShellFile -FilePath $File.FullName
+    $Results += $Result
+    $TotalFixed += $Result.FixesApplied
+}
+
+# Summary
+Write-LogMessage "=== VALIDATION COMPLETE ===" "INFO"
+Write-LogMessage "Files processed: $($Results.Count)" "INFO"
+Write-LogMessage "Total fixes applied: $TotalFixed" "INFO"
+Write-LogMessage "Valid files: $(($Results | Where-Object { $_.IsValid }).Count)" "SUCCESS"
+Write-LogMessage "Invalid files: $(($Results | Where-Object { -not $_.IsValid }).Count)" "ERROR"
+
+# Display invalid files
+$InvalidFiles = $Results | Where-Object { -not $_.IsValid }
+if ($InvalidFiles.Count -gt 0) {
+    Write-LogMessage "Files with syntax errors:" "ERROR"
+    foreach ($Invalid in $InvalidFiles) {
+        Write-LogMessage "  - $($Invalid.FilePath): $($Invalid.Error)" "ERROR"
+    }
+}
+
+Write-LogMessage "Log saved to: $LogPath\script_validation.log" "INFO"
+
+# Return results for further processing
+return $Results

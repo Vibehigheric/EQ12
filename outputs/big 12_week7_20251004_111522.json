@@ -1,0 +1,183 @@
+{
+  "generated_at": "2025-10-04T11:15:22.695008",
+  "system": "EQ12 NCAA Week 7 Conference Builder",
+  "conference": "Big 12",
+  "week": 7,
+  "parlays": [
+    {
+      "parlay_id": "Big 12_HIGH-PAYOUT_Week7_20251004_111522",
+      "conference": "Big 12",
+      "parlay_type": "high-payout",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "32aab37746e32d72605120ee63924aea",
+          "sport": "NCAA-FB",
+          "conference": "Big 12",
+          "matchup": "Oklahoma State Cowboys @ Arizona Wildcats",
+          "home_team": "Arizona Wildcats",
+          "away_team": "Oklahoma State Cowboys",
+          "pick_type": "H2H",
+          "bet": "Oklahoma State Cowboys ML",
+          "odds": 880.0,
+          "confidence": 0.545,
+          "kelly_percentage": 0.09865909090909093,
+          "sentiment": 0.65,
+          "weather": "Windy",
+          "edge_percentage": 44.29591836734694,
+          "clv_variance": 0.036755692914484106,
+          "start_time": "2025-10-04T19:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "MyBookie.ag",
+            "market": "h2h",
+            "outcome_name": "Oklahoma State Cowboys"
+          }
+        },
+        {
+          "game_id": "cb7d85df1a2186ede6f66305485ddc22",
+          "sport": "NCAA-FB",
+          "conference": "Big 12",
+          "matchup": "Mississippi State Bulldogs @ Texas A&M Aggies",
+          "home_team": "Texas A&M Aggies",
+          "away_team": "Mississippi State Bulldogs",
+          "pick_type": "H2H",
+          "bet": "Mississippi State Bulldogs ML",
+          "odds": 550.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08890909090909092,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 37.61538461538462,
+          "clv_variance": 0.01977373411967832,
+          "start_time": "2025-10-04T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "DraftKings",
+            "market": "h2h",
+            "outcome_name": "Mississippi State Bulldogs"
+          }
+        },
+        {
+          "game_id": "c1614464ceef18bdc3108d0fb3899343",
+          "sport": "NCAA-FB",
+          "conference": "Big 12",
+          "matchup": "Colorado Buffaloes @ TCU Horned Frogs",
+          "home_team": "TCU Horned Frogs",
+          "away_team": "Colorado Buffaloes",
+          "pick_type": "H2H",
+          "bet": "Colorado Buffaloes ML",
+          "odds": 425.0,
+          "confidence": 0.545,
+          "kelly_percentage": 0.08758823529411766,
+          "sentiment": 0.65,
+          "weather": "Light Rain",
+          "edge_percentage": 35.452380952380956,
+          "clv_variance": 0.074907680807869,
+          "start_time": "2025-10-04T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "BetUS",
+            "market": "h2h",
+            "outcome_name": "Colorado Buffaloes"
+          }
+        },
+        {
+          "game_id": "16d1658b495dc746aed5d921ffbae9a9",
+          "sport": "NCAA-FB",
+          "conference": "Big 12",
+          "matchup": "Texas Tech Red Raiders @ Houston Cougars",
+          "home_team": "Houston Cougars",
+          "away_team": "Texas Tech Red Raiders",
+          "pick_type": "H2H",
+          "bet": "Houston Cougars ML",
+          "odds": 410.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08307317073170734,
+          "sentiment": 0.6,
+          "weather": "Windy",
+          "edge_percentage": 33.3921568627451,
+          "clv_variance": 0.046363578652360876,
+          "start_time": "2025-10-04T23:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "DraftKings",
+            "market": "h2h",
+            "outcome_name": "Houston Cougars"
+          }
+        },
+        {
+          "game_id": "a62fc08c67b4e292879a17791a727e4a",
+          "sport": "NCAA-FB",
+          "conference": "Big 12",
+          "matchup": "Texas State Bobcats @ Arkansas State Red Wolves",
+          "home_team": "Arkansas State Red Wolves",
+          "away_team": "Texas State Bobcats",
+          "pick_type": "H2H",
+          "bet": "Arkansas State Red Wolves ML",
+          "odds": 400.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08250000000000002,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 33.0,
+          "clv_variance": 0.07268937193575271,
+          "start_time": "2025-10-04T20:00:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "BetRivers",
+            "market": "h2h",
+            "outcome_name": "Arkansas State Red Wolves"
+          }
+        },
+        {
+          "game_id": "fbde7d91385363d991f47b06e939428c",
+          "sport": "NCAA-FB",
+          "conference": "Big 12",
+          "matchup": "Texas Longhorns @ Florida Gators",
+          "home_team": "Florida Gators",
+          "away_team": "Texas Longhorns",
+          "pick_type": "H2H",
+          "bet": "Florida Gators ML",
+          "odds": 185.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.055189189189189206,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 17.91228070175439,
+          "clv_variance": 0.02022095529209624,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetMGM",
+            "market": "h2h",
+            "outcome_name": "Florida Gators"
+          }
+        }
+      ],
+      "combined_odds": 2430333.6875,
+      "win_probability": 0.02343670119025001,
+      "expected_roi": 56861.348096654976,
+      "clv_vs_open": 0.04511850228704021,
+      "recommended_stake": 12.854214700700439,
+      "total_edge": 201.668121499612,
+      "risk_score": 0.8999999999999999,
+      "top25_count": 0,
+      "steam_count": 2,
+      "created_at": "2025-10-04T11:15:22.683003"
+    }
+  ],
+  "summary": {
+    "total_parlays": 1,
+    "total_legs": 6,
+    "top25_games": 0,
+    "steam_moves": 2,
+    "total_stake": 12.854214700700439
+  }
+}

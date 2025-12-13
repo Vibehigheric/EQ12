@@ -1,0 +1,618 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 WireGuard Installation & Configuration Script
+# Automated setup for WireGuard VPN integration with EQ12 betting system
+# Supports multiple installation methods and complete configuration
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("Windows", "Winget", "Chocolatey", "Manual")]
+    [string]$InstallMethod = "Winget",
+
+    [Parameter(Mandatory = $false)]
+    [string]$ConfigName = "eq12-betting",
+
+    [Parameter(Mandatory = $false)]
+    [string]$WireGuardConfigDir = "C:\EQ12\wireguard",
+
+    [Parameter(Mandatory = $false)]
+    [switch]$GenerateKeys,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$CreateSampleConfig,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$InstallOnly,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$ValidateInstallation,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$Force
+)
+
+# Import required modules
+Import-Module -Name "Microsoft.PowerShell.Management" -Force
+Import-Module -Name "Microsoft.PowerShell.Security" -Force
+
+# Global variables
+$script:LogFile = "C:\EQ12\logs\wireguard_install.log"
+$script:WireGuardExe = "${env:ProgramFiles}\WireGuard\wireguard.exe"
+$script:WgExe = "${env:ProgramFiles}\WireGuard\wg.exe"
+
+function Write-InstallLog {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Message,
+
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("INFO", "WARN", "ERROR", "SUCCESS")]
+        [string]$Level = "INFO"
+    )
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+    $logEntry = "[$timestamp] [$Level] EQ12_WIREGUARD_INSTALL: $Message"
+
+    # Write to console with color coding
+    switch ($Level) {
+        "INFO" { Write-Host $logEntry -ForegroundColor Cyan }
+        "WARN" { Write-Host $logEntry -ForegroundColor Yellow }
+        "ERROR" { Write-Host $logEntry -ForegroundColor Red }
+        "SUCCESS" { Write-Host $logEntry -ForegroundColor Green }
+    }
+
+    # Write to log file
+    try {
+        $logDir = Split-Path -Parent $script:LogFile
+        if (-not (Test-Path $logDir)) {
+            New-Item -Path $logDir -ItemType Directory -Force | Out-Null
+        }
+        $logEntry | Out-File -FilePath $script:LogFile -Append -Encoding UTF8
+    } catch {
+        Write-Warning "Failed to write to log file: $_"
+    }
+}
+
+function Test-AdminPrivileges {
+    Write-InstallLog "Checking administrator privileges..."
+
+    $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+
+    if (-not $isAdmin) {
+        Write-InstallLog "Administrator privileges required for WireGuard installation" -Level "ERROR"
+        Write-InstallLog "Please run this script as Administrator" -Level "ERROR"
+        return $false
+    }
+
+    Write-InstallLog "Administrator privileges confirmed" -Level "SUCCESS"
+    return $true
+}
+
+function Test-WireGuardInstallation {
+    Write-InstallLog "Checking existing WireGuard installation..."
+
+    # Check if WireGuard executable exists
+    if (Test-Path $script:WireGuardExe) {
+        try {
+            $version = & $script:WireGuardExe /version 2>&1
+            Write-InstallLog "WireGuard found: $version" -Level "SUCCESS"
+            return $true
+        } catch {
+            Write-InstallLog "WireGuard executable found but not functional" -Level "WARN"
+        }
+    }
+
+    # Check if WireGuard service exists
+    $wgService = Get-Service -Name "WireGuardManager" -ErrorAction SilentlyContinue
+    if ($wgService) {
+        Write-InstallLog "WireGuard service found: $($wgService.Status)" -Level "INFO"
+        return $true
+    }
+
+    Write-InstallLog "WireGuard not found on system" -Level "WARN"
+    return $false
+}
+
+function Install-WireGuardWinget {
+    Write-InstallLog "Installing WireGuard using Winget..."
+
+    try {
+        # Check if winget is available
+        $wingetPath = Get-Command winget -ErrorAction SilentlyContinue
+        if (-not $wingetPath) {
+            throw "Winget not found. Please install Windows Package Manager."
+        }
+
+        Write-InstallLog "Using Winget to install WireGuard..."
+        $result = Start-Process -FilePath "winget" -ArgumentList "install", "--id=WireGuard.WireGuard", "--silent", "--accept-package-agreements" -Wait -PassThru
+
+        if ($result.ExitCode -eq 0) {
+            Write-InstallLog "WireGuard installed successfully via Winget" -Level "SUCCESS"
+            return $true
+        } else {
+            throw "Winget installation failed with exit code: $($result.ExitCode)"
+        }
+    } catch {
+        Write-InstallLog "Winget installation failed: $_" -Level "ERROR"
+        return $false
+    }
+}
+
+function Install-WireGuardChocolatey {
+    Write-InstallLog "Installing WireGuard using Chocolatey..."
+
+    try {
+        # Check if Chocolatey is available
+        $chocoPath = Get-Command choco -ErrorAction SilentlyContinue
+        if (-not $chocoPath) {
+            throw "Chocolatey not found. Please install Chocolatey first."
+        }
+
+        Write-InstallLog "Using Chocolatey to install WireGuard..."
+        $result = Start-Process -FilePath "choco" -ArgumentList "install", "wireguard", "-y" -Wait -PassThru
+
+        if ($result.ExitCode -eq 0) {
+            Write-InstallLog "WireGuard installed successfully via Chocolatey" -Level "SUCCESS"
+            return $true
+        } else {
+            throw "Chocolatey installation failed with exit code: $($result.ExitCode)"
+        }
+    } catch {
+        Write-InstallLog "Chocolatey installation failed: $_" -Level "ERROR"
+        return $false
+    }
+}
+
+function Install-WireGuardManual {
+    Write-InstallLog "Installing WireGuard manually from official installer..."
+
+    try {
+        $installerUrl = "https://download.wireguard.com/windows-client/wireguard-installer.exe"
+        $installerPath = "$env:TEMP\wireguard-installer.exe"
+
+        Write-InstallLog "Downloading WireGuard installer from: $installerUrl"
+
+        # Download installer
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($installerUrl, $installerPath)
+
+        if (-not (Test-Path $installerPath)) {
+            throw "Failed to download WireGuard installer"
+        }
+
+        Write-InstallLog "Running WireGuard installer..."
+        $result = Start-Process -FilePath $installerPath -ArgumentList "/S" -Wait -PassThru
+
+        if ($result.ExitCode -eq 0) {
+            Write-InstallLog "WireGuard installed successfully" -Level "SUCCESS"
+
+            # Clean up installer
+            Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
+            return $true
+        } else {
+            throw "Manual installation failed with exit code: $($result.ExitCode)"
+        }
+    } catch {
+        Write-InstallLog "Manual installation failed: $_" -Level "ERROR"
+        return $false
+    }
+}
+
+function Install-WireGuard {
+    Write-InstallLog "Starting WireGuard installation process..."
+
+    # Check if already installed (unless Force is specified)
+    if (-not $Force -and (Test-WireGuardInstallation)) {
+        Write-InstallLog "WireGuard already installed. Use -Force to reinstall." -Level "WARN"
+        return $true
+    }
+
+    # Try installation methods in order of preference
+    $installSuccess = $false
+
+    switch ($InstallMethod) {
+        "Winget" {
+            $installSuccess = Install-WireGuardWinget
+            if (-not $installSuccess) {
+                Write-InstallLog "Winget failed, trying Chocolatey as fallback..."
+                $installSuccess = Install-WireGuardChocolatey
+            }
+            if (-not $installSuccess) {
+                Write-InstallLog "Chocolatey failed, trying manual installation..."
+                $installSuccess = Install-WireGuardManual
+            }
+        }
+        "Chocolatey" {
+            $installSuccess = Install-WireGuardChocolatey
+            if (-not $installSuccess) {
+                Write-InstallLog "Chocolatey failed, trying manual installation..."
+                $installSuccess = Install-WireGuardManual
+            }
+        }
+        "Manual" {
+            $installSuccess = Install-WireGuardManual
+        }
+        "Windows" {
+            Write-InstallLog "Please install WireGuard manually from Microsoft Store or official website" -Level "INFO"
+            Write-InstallLog "Official installer: https://download.wireguard.com/windows-client/wireguard-installer.exe" -Level "INFO"
+            return $false
+        }
+    }
+
+    if ($installSuccess) {
+        # Wait a moment for installation to complete
+        Start-Sleep -Seconds 3
+
+        # Verify installation
+        if (Test-WireGuardInstallation) {
+            Write-InstallLog "WireGuard installation verified successfully" -Level "SUCCESS"
+            return $true
+        } else {
+            Write-InstallLog "Installation completed but verification failed" -Level "ERROR"
+            return $false
+        }
+    } else {
+        Write-InstallLog "All installation methods failed" -Level "ERROR"
+        return $false
+    }
+}
+
+function New-WireGuardKeys {
+    Write-InstallLog "Generating WireGuard key pair..."
+
+    try {
+        # Ensure wg command is available
+        if (-not (Test-Path $script:WgExe)) {
+            throw "WireGuard tools not found. Please ensure WireGuard is properly installed."
+        }
+
+        # Generate private key
+        $privateKey = & $script:WgExe genkey
+        if (-not $privateKey) {
+            throw "Failed to generate private key"
+        }
+
+        # Generate public key from private key
+        $publicKey = $privateKey | & $script:WgExe pubkey
+        if (-not $publicKey) {
+            throw "Failed to generate public key"
+        }
+
+        Write-InstallLog "Key pair generated successfully" -Level "SUCCESS"
+        Write-InstallLog "Private Key: $privateKey" -Level "INFO"
+        Write-InstallLog "Public Key: $publicKey" -Level "INFO"
+
+        # Save keys to files
+        $keyDir = Join-Path $WireGuardConfigDir "keys"
+        if (-not (Test-Path $keyDir)) {
+            New-Item -Path $keyDir -ItemType Directory -Force | Out-Null
+        }
+
+        $privateKeyFile = Join-Path $keyDir "$ConfigName.private"
+        $publicKeyFile = Join-Path $keyDir "$ConfigName.public"
+
+        $privateKey | Out-File -FilePath $privateKeyFile -Encoding ASCII -NoNewline
+        $publicKey | Out-File -FilePath $publicKeyFile -Encoding ASCII -NoNewline
+
+        # Set secure permissions on private key
+        $acl = Get-Acl $privateKeyFile
+        $acl.SetAccessRuleProtection($true, $false)
+        $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($env:USERNAME, "FullControl", "Allow")
+        $acl.SetAccessRule($accessRule)
+        Set-Acl -Path $privateKeyFile -AclObject $acl
+
+        Write-InstallLog "Keys saved to: $keyDir" -Level "SUCCESS"
+
+        return @{
+            PrivateKey     = $privateKey
+            PublicKey      = $publicKey
+            PrivateKeyFile = $privateKeyFile
+            PublicKeyFile  = $publicKeyFile
+        }
+    } catch {
+        Write-InstallLog "Key generation failed: $_" -Level "ERROR"
+        return $null
+    }
+}
+
+function New-WireGuardSampleConfig {
+    Write-InstallLog "Creating sample WireGuard configuration..."
+
+    try {
+        # Ensure config directory exists
+        if (-not (Test-Path $WireGuardConfigDir)) {
+            New-Item -Path $WireGuardConfigDir -ItemType Directory -Force | Out-Null
+        }
+
+        # Generate keys if requested
+        $keys = $null
+        if ($GenerateKeys) {
+            $keys = New-WireGuardKeys
+            if (-not $keys) {
+                throw "Failed to generate keys for sample configuration"
+            }
+        }
+
+        # Create sample configuration
+        $configFile = Join-Path $WireGuardConfigDir "$ConfigName.conf"
+
+        $sampleConfig = @"
+# EQ12 Betting VPN Configuration
+# Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
+# Configuration Name: $ConfigName
+
+[Interface]
+# Private key for this peer
+$(if ($keys) { "PrivateKey = $($keys.PrivateKey)" } else { "PrivateKey = YOUR_PRIVATE_KEY_HERE" })
+
+# IP address assigned to this interface
+Address = 10.0.0.2/24
+
+# DNS servers to use when connected
+DNS = 1.1.1.1, 1.0.0.1
+
+# Optional: Listen port (if acting as server)
+# ListenPort = 51820
+
+# Optional: Pre/Post connection scripts
+# PreUp = powershell -Command "Write-Host 'EQ12 VPN Connecting...'"
+# PostUp = powershell -Command "Write-Host 'EQ12 VPN Connected'"
+# PreDown = powershell -Command "Write-Host 'EQ12 VPN Disconnecting...'"
+# PostDown = powershell -Command "Write-Host 'EQ12 VPN Disconnected'"
+
+[Peer]
+# Public key of the VPN server
+PublicKey = SERVER_PUBLIC_KEY_HERE
+
+# Endpoint (server address and port)
+Endpoint = vpn.yourprovider.com:51820
+
+# Allowed IPs (0.0.0.0/0 for full tunnel, or specific ranges)
+AllowedIPs = 0.0.0.0/0
+
+# Keep connection alive through NAT/firewall (optional)
+PersistentKeepalive = 25
+
+# Example configuration for EQ12 specific routing:
+# To route only betting-related traffic through VPN:
+# AllowedIPs = 192.168.1.0/24, 10.0.0.0/8
+#
+# To exclude local network but route everything else:
+# AllowedIPs = 0.0.0.0/0
+#
+# For maximum security (recommended for EQ12):
+# AllowedIPs = 0.0.0.0/0
+"@
+
+        $sampleConfig | Out-File -FilePath $configFile -Encoding UTF8
+        Write-InstallLog "Sample configuration created: $configFile" -Level "SUCCESS"
+
+        # Create setup instructions
+        $instructionsFile = Join-Path $WireGuardConfigDir "SETUP_INSTRUCTIONS.txt"
+        $instructions = @"
+EQ12 WireGuard VPN Setup Instructions
+=====================================
+
+1. CONFIGURE YOUR VPN PROVIDER:
+   - Get your VPN provider's WireGuard configuration
+   - Replace 'YOUR_PRIVATE_KEY_HERE' with your private key
+   - Replace 'SERVER_PUBLIC_KEY_HERE' with your server's public key
+   - Replace 'vpn.yourprovider.com:51820' with your server endpoint
+
+2. GENERATED KEYS (if applicable):
+$(if ($keys) {
+"   - Private Key: $($keys.PrivateKey)
+   - Public Key: $($keys.PublicKey)
+   - Key Files: $($keys.PrivateKeyFile), $($keys.PublicKeyFile)"
+} else {
+"   - Use -GenerateKeys parameter to create new keys
+   - Or get keys from your VPN provider"
+})
+
+3. TEST THE CONNECTION:
+   PowerShell Commands:
+   ```
+   # Install tunnel
+   & `"${env:ProgramFiles}\WireGuard\wireguard.exe`" /installtunnelservice `"$configFile`"
+
+   # Check status
+   Get-Service -Name `"WireGuardTunnel`$$ConfigName`"
+
+   # Test IP
+   Invoke-RestMethod -Uri `"https://ifconfig.me/ip`"
+   ```
+
+4. INTEGRATE WITH EQ12:
+   - Update EQ12 VPN Guard script to use config: $ConfigName
+   - Run: .\eq12_vpn_guard.ps1 -VpnConfig `"$ConfigName`"
+
+5. SECURITY RECOMMENDATIONS:
+   - Use 'AllowedIPs = 0.0.0.0/0' for maximum security
+   - Enable 'PersistentKeepalive = 25' for stable connections
+   - Use DNS = 1.1.1.1, 1.0.0.1 to prevent DNS leaks
+   - Test for IP/DNS leaks: https://ipleak.net/
+
+Configuration File: $configFile
+Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
+"@
+
+        $instructions | Out-File -FilePath $instructionsFile -Encoding UTF8
+        Write-InstallLog "Setup instructions created: $instructionsFile" -Level "SUCCESS"
+
+        return @{
+            ConfigFile       = $configFile
+            InstructionsFile = $instructionsFile
+            Keys             = $keys
+        }
+    } catch {
+        Write-InstallLog "Failed to create sample configuration: $_" -Level "ERROR"
+        return $null
+    }
+}
+
+function Test-WireGuardConfiguration {
+    param([string]$ConfigPath)
+
+    Write-InstallLog "Validating WireGuard configuration: $ConfigPath"
+
+    try {
+        if (-not (Test-Path $ConfigPath)) {
+            throw "Configuration file not found: $ConfigPath"
+        }
+
+        # Read configuration content
+        $configContent = Get-Content -Path $ConfigPath -Raw
+
+        # Basic validation checks
+        $checks = @{
+            "Interface section" = $configContent -match '\[Interface\]'
+            "Peer section"      = $configContent -match '\[Peer\]'
+            "Private key"       = $configContent -match 'PrivateKey\s*='
+            "Public key"        = $configContent -match 'PublicKey\s*='
+            "Endpoint"          = $configContent -match 'Endpoint\s*='
+            "AllowedIPs"        = $configContent -match 'AllowedIPs\s*='
+        }
+
+        $failedChecks = @()
+        foreach ($check in $checks.GetEnumerator()) {
+            if (-not $check.Value) {
+                $failedChecks += $check.Key
+            }
+        }
+
+        if ($failedChecks.Count -gt 0) {
+            Write-InstallLog "Configuration validation failed. Missing: $($failedChecks -join ', ')" -Level "ERROR"
+            return $false
+        }
+
+        # Try to validate with wg tool if available
+        if (Test-Path $script:WgExe) {
+            try {
+                $tempConfig = [System.IO.Path]::GetTempFileName()
+                Copy-Item -Path $ConfigPath -Destination $tempConfig -Force
+
+                $validation = & $script:WgExe showconf $tempConfig 2>&1
+                Remove-Item -Path $tempConfig -Force -ErrorAction SilentlyContinue
+
+                if ($LASTEXITCODE -eq 0) {
+                    Write-InstallLog "Configuration syntax validated successfully" -Level "SUCCESS"
+                } else {
+                    Write-InstallLog "Configuration syntax validation failed: $validation" -Level "WARN"
+                }
+            } catch {
+                Write-InstallLog "Could not validate with wg tool: $_" -Level "WARN"
+            }
+        }
+
+        Write-InstallLog "Configuration validation completed successfully" -Level "SUCCESS"
+        return $true
+    } catch {
+        Write-InstallLog "Configuration validation failed: $_" -Level "ERROR"
+        return $false
+    }
+}
+
+function Show-WireGuardInfo {
+    Write-InstallLog "WireGuard Installation Summary" -Level "SUCCESS"
+    Write-Host "=" * 80 -ForegroundColor Cyan
+
+    # Installation status
+    if (Test-WireGuardInstallation) {
+        Write-Host "✅ WireGuard Status: INSTALLED" -ForegroundColor Green
+
+        try {
+            $version = & $script:WireGuardExe /version 2>&1
+            Write-Host "   Version: $version" -ForegroundColor Gray
+        } catch {
+            Write-Host "   Version: Unable to determine" -ForegroundColor Gray
+        }
+
+        Write-Host "   Executable: $script:WireGuardExe" -ForegroundColor Gray
+        Write-Host "   Tools: $script:WgExe" -ForegroundColor Gray
+    } else {
+        Write-Host "❌ WireGuard Status: NOT INSTALLED" -ForegroundColor Red
+    }
+
+    # Configuration status
+    Write-Host "`n📁 Configuration Directory: $WireGuardConfigDir" -ForegroundColor Cyan
+    if (Test-Path $WireGuardConfigDir) {
+        $configs = Get-ChildItem -Path $WireGuardConfigDir -Filter "*.conf" -ErrorAction SilentlyContinue
+        Write-Host "   Configurations found: $($configs.Count)" -ForegroundColor Gray
+        foreach ($config in $configs) {
+            Write-Host "   - $($config.Name)" -ForegroundColor Gray
+        }
+    } else {
+        Write-Host "   Status: Directory not created yet" -ForegroundColor Yellow
+    }
+
+    # Next steps
+    Write-Host "`n🚀 Next Steps for EQ12 Integration:" -ForegroundColor Cyan
+    Write-Host "   1. Create VPN configuration: .\wireguard_install.ps1 -CreateSampleConfig -GenerateKeys" -ForegroundColor Gray
+    Write-Host "   2. Configure your VPN provider settings" -ForegroundColor Gray
+    Write-Host "   3. Test connection: .\eq12_vpn_guard.ps1 -VpnConfig '$ConfigName"" -ForegroundColor Gray
+    Write-Host "   4. Setup automated startup: .\setup_vpn_task.ps1" -ForegroundColor Gray
+
+    Write-Host "`n📚 Useful Commands:" -ForegroundColor Cyan
+    Write-Host "   wg show                    - Show active connections" -ForegroundColor Gray
+    Write-Host "   wg-quick up config-name    - Start VPN connection" -ForegroundColor Gray
+    Write-Host "   wg-quick down config-name  - Stop VPN connection" -ForegroundColor Gray
+
+    Write-Host "=" * 80 -ForegroundColor Cyan
+}
+
+# Main execution function
+function Main {
+    Write-InstallLog "EQ12 WireGuard Installation & Configuration Script" -Level "SUCCESS"
+    Write-Host "=" * 80
+
+    # Check prerequisites
+    if (-not (Test-AdminPrivileges)) {
+        exit 1
+    }
+
+    try {
+        # Install WireGuard if needed
+        if (-not $InstallOnly -or -not (Test-WireGuardInstallation)) {
+            if (-not (Install-WireGuard)) {
+                Write-InstallLog "WireGuard installation failed - aborting" -Level "ERROR"
+                exit 1
+            }
+        }
+
+        # Create sample configuration if requested
+        if ($CreateSampleConfig) {
+            $configResult = New-WireGuardSampleConfig
+            if ($configResult) {
+                Write-InstallLog "Sample configuration created successfully" -Level "SUCCESS"
+
+                # Validate the created configuration
+                if (Test-WireGuardConfiguration -ConfigPath $configResult.ConfigFile) {
+                    Write-InstallLog "Configuration validation passed" -Level "SUCCESS"
+                }
+            }
+        }
+
+        # Validate existing installation
+        if ($ValidateInstallation) {
+            $configPath = Join-Path $WireGuardConfigDir "$ConfigName.conf"
+            if (Test-Path $configPath) {
+                Test-WireGuardConfiguration -ConfigPath $configPath
+            } else {
+                Write-InstallLog "No configuration found to validate: $configPath" -Level "WARN"
+            }
+        }
+
+        # Show summary
+        Show-WireGuardInfo
+
+        Write-InstallLog "EQ12 WireGuard setup completed successfully!" -Level "SUCCESS"
+    } catch {
+        Write-InstallLog "Critical error during setup: $_" -Level "ERROR"
+        exit 1
+    }
+}
+
+# Execute main function
+Main

@@ -1,0 +1,80 @@
+{
+  "name": "eq12-root",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "commitlint": "commitlint --edit $1",
+    "lint:commits": "commitlint --from=HEAD~1 --to=HEAD --verbose",
+    "changelog": "git-cliff --config cliff.toml > CHANGELOG.md",
+    "changelog:latest": "git-cliff --config cliff.toml --latest --strip header",
+    "release:prepare": "npm run changelog && git add CHANGELOG.md",
+    "odds:demo": "node --no-deprecation eq12_node_odds_client.js",
+    "odds:nfl": "node --no-deprecation -e \"import('./eq12_node_odds_client.js').then(m => new m.default().getNFLAnalysis())\"",
+    "odds:arbitrage": "node --no-deprecation -e \"import('./eq12_node_odds_client.js').then(m => new m.default().findArbitrageOpportunities())\"",
+    "odds:sports": "node --no-deprecation -e \"import('./eq12_node_odds_client.js').then(m => new m.default().getSports())\"",
+    "odds:props": "node --no-deprecation -e \"import('./eq12_node_odds_client.js').then(m => new m.default().getPlayerProps())\"",
+    "test": "node --test",
+    "test:watch": "node --test --watch",
+    "build": "npm run build:all",
+    "build:all": "npm run build:core && npm run build:extensions",
+    "build:core": "node build-core.js",
+    "build:extensions": "npm run --workspaces build",
+    "dev": "npm run dev:core",
+    "dev:core": "nodemon --exec 'node --no-deprecation' server/index.js",
+    "start": "node --no-deprecation server/index.js",
+    "clean": "rimraf dist/ node_modules/.cache/",
+    "update:deps": "npm update && npm audit fix",
+    "security:check": "npm audit && npm run security:snyk",
+    "security:snyk": "snyk test || echo 'Snyk not installed'",
+    "format": "prettier --write .",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint ."
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.3",
+    "winston": "^3.18.3",
+    "dayjs": "^1.11.13",
+    "lodash-es": "^4.17.21",
+    "helmet": "^8.0.0",
+    "cors": "^2.8.5",
+    "compression": "^1.7.4",
+    "rate-limiter-flexible": "^5.0.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@types/node": "^24.7.1",
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.3",
+    "husky": "^9.1.7",
+    "nodemon": "^3.1.7",
+    "rimraf": "^6.0.1",
+    "snyk": "^1.1294.0",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "workspaces": [
+    "server",
+    "eq12-firefox-ext",
+    "extensions/*"
+  ],
+  "volta": {
+    "node": "20.11.1",
+    "npm": "10.8.0"
+  }
+}

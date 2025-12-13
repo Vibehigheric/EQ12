@@ -1,0 +1,292 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+     EQ12 NFL Live Parlay Intelligence PowerShell Wrapper
+    Enhanced injury monitoring and player prop intelligence
+
+.DESCRIPTION
+    PowerShell wrapper for the enhanced NFL live parlay intelligence system.
+    Provides injury monitoring, player prop analysis, and bulletproof protections.
+
+.PARAMETER Action
+    Action to perform: Intelligence, QuickCheck, FullReport
+
+.PARAMETER Legs
+    Number of parlay legs (default: 10)
+
+.PARAMETER VerboseOutput
+    Enable verbose output
+
+.PARAMETER GenerateReport
+    Generate comprehensive HTML report
+
+.EXAMPLE
+    .\eq12_nfl_intelligence_wrapper.ps1 -Action Intelligence
+    
+.EXAMPLE
+    .\eq12_nfl_intelligence_wrapper.ps1 -Action FullReport -Legs 12 -VerboseOutput
+
+.NOTES
+    Created: November 6, 2025
+    Author: EQ12 System Operations Team
+    Purpose: Enhanced NFL parlay with injury intelligence
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet("Intelligence", "QuickCheck", "FullReport")]
+    [string]$Action = "Intelligence",
+    
+    [ValidateRange(5, 15)]
+    [int]$Legs = 10,
+    
+    [switch]$VerboseOutput,
+    
+    [switch]$GenerateReport
+)
+
+# Enhanced error handling and logging
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+# Workspace paths
+$WorkspaceRoot = "C:\EQ12"
+$ScriptsPath = Join-Path $WorkspaceRoot "scripts"
+$DataPath = Join-Path $WorkspaceRoot "data" 
+$LogsPath = Join-Path $WorkspaceRoot "logs"
+$DashboardPath = Join-Path $WorkspaceRoot "dashboard"
+
+# Ensure directories exist
+@($DataPath, $LogsPath, $DashboardPath) | ForEach-Object {
+    if (-not (Test-Path $_)) {
+        New-Item -Path $_ -ItemType Directory -Force | Out-Null
+    }
+}
+
+# Logging setup
+$LogFile = Join-Path $LogsPath "nfl_intelligence_wrapper_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+function Write-LogMessage {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "$Timestamp - $Level - $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry
+}
+
+function Invoke-NFLIntelligenceSystem {
+    param([int]$TargetLegs)
+    
+    Write-LogMessage " Starting NFL Live Parlay Intelligence System"
+    Write-LogMessage " Target Legs: $TargetLegs"
+    
+    $PythonScript = Join-Path $ScriptsPath "eq12_nfl_live_intelligence.py"
+    
+    if (-not (Test-Path $PythonScript)) {
+        throw " NFL Intelligence script not found: $PythonScript"
+    }
+    
+    # Execute Python script
+    try {
+        $Result = & python $PythonScript
+        if ($LASTEXITCODE -ne 0) {
+            throw "Python script execution failed with exit code: $LASTEXITCODE"
+        }
+        
+        Write-LogMessage " NFL Intelligence system executed successfully"
+        return $Result
+    }
+    catch {
+        Write-LogMessage " Failed to execute NFL Intelligence: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
+function Get-InjuryIntelligenceReport {
+    Write-LogMessage " Generating injury intelligence report"
+    
+    # Find latest parlay data file
+    $LatestParlay = Get-ChildItem -Path $DataPath -Filter "nfl_enhanced_parlay_*.json" | 
+                   Sort-Object LastWriteTime -Descending | 
+                   Select-Object -First 1
+    
+    if (-not $LatestParlay) {
+        Write-LogMessage " No parlay data found for injury report" "WARN"
+        return $null
+    }
+    
+    $ParlayData = Get-Content $LatestParlay.FullName | ConvertFrom-Json
+    
+    $Report = @{
+        Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        ParlayFile = $LatestParlay.Name
+        InjuryIntelligence = $ParlayData.injury_intelligence
+        GamesCovered = $ParlayData.games_covered
+        PlayerPropsIncluded = $ParlayData.player_props_included
+        TotalOdds = $ParlayData.odds.total_decimal_odds
+        PotentialPayout = $ParlayData.odds.potential_payout
+    }
+    
+    Write-LogMessage " Injury intelligence report generated"
+    return $Report
+}
+
+function New-NFLIntelligenceReport {
+    param($InjuryReport)
+    
+    Write-LogMessage " Generating comprehensive HTML report"
+    
+    $ReportFile = Join-Path $DashboardPath "nfl_intelligence_report_$(Get-Date -Format 'yyyyMMdd_HHmmss').html"
+    
+    $HtmlContent = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> EQ12 NFL Intelligence Report</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid #4CAF50; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #2c3e50; margin: 0; font-size: 2.5em; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0; }
+        .stat-card { background: #f8f9fa; border-left: 5px solid #4CAF50; padding: 20px; border-radius: 10px; }
+        .stat-card h3 { margin: 0 0 10px 0; color: #2c3e50; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #4CAF50; }
+        .injury-section { background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 10px; padding: 20px; margin: 20px 0; }
+        .blocked-players { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .questionable-players { background: #d1ecf1; border: 1px solid #bee5eb; }
+        .timestamp { text-align: center; color: #6c757d; margin-top: 30px; font-style: italic; }
+        .success-badge { background: #d4edda; color: #155724; padding: 10px 20px; border-radius: 5px; display: inline-block; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> EQ12 NFL Intelligence Report</h1>
+            <p>Enhanced Live Parlay with Injury Monitoring</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3> Total Odds</h3>
+                <div class="stat-value">$($InjuryReport.TotalOdds)x</div>
+            </div>
+            <div class="stat-card">
+                <h3> Potential Payout</h3>
+                <div class="stat-value">`$$($InjuryReport.PotentialPayout)</div>
+            </div>
+            <div class="stat-card">
+                <h3> Games Covered</h3>
+                <div class="stat-value">$($InjuryReport.GamesCovered)</div>
+            </div>
+            <div class="stat-card">
+                <h3> Player Props</h3>
+                <div class="stat-value">$($InjuryReport.PlayerPropsIncluded)</div>
+            </div>
+        </div>
+        
+        <div class="injury-section">
+            <h2> Injury Intelligence Summary</h2>
+            <div class="stats-grid">
+                <div class="stat-card blocked-players">
+                    <h3> Blocked Players</h3>
+                    <div class="stat-value">$($InjuryReport.InjuryIntelligence.blocked_players.Count)</div>
+                </div>
+                <div class="stat-card questionable-players">
+                    <h3> Questionable Players</h3>
+                    <div class="stat-value">$($InjuryReport.InjuryIntelligence.questionable_players.Count)</div>
+                </div>
+                <div class="stat-card">
+                    <h3> Total Monitored</h3>
+                    <div class="stat-value">$($InjuryReport.InjuryIntelligence.total_monitored)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="success-badge">
+             NFL Intelligence System: Fully Operational with Injury Monitoring
+        </div>
+        
+        <div class="timestamp">
+            Generated: $($InjuryReport.Timestamp) | File: $($InjuryReport.ParlayFile)
+        </div>
+    </div>
+</body>
+</html>
+"@
+    
+    Set-Content -Path $ReportFile -Value $HtmlContent -Encoding UTF8
+    Write-LogMessage " HTML report saved: $ReportFile"
+    
+    return $ReportFile
+}
+
+# Main execution
+try {
+    Write-Host " EQ12 NFL LIVE PARLAY INTELLIGENCE WRAPPER" -ForegroundColor Green
+    Write-Host "Enhanced injury monitoring and player props" -ForegroundColor Cyan
+    Write-Host "=" * 70 -ForegroundColor Yellow
+    
+    Write-LogMessage " Starting NFL Intelligence Wrapper"
+    Write-LogMessage " Action: $Action | Legs: $Legs | Verbose: $VerboseOutput | Report: $GenerateReport"
+    
+    switch ($Action) {
+        "Intelligence" {
+            Write-Host " Running NFL Live Parlay Intelligence..." -ForegroundColor Green
+            $Result = Invoke-NFLIntelligenceSystem -TargetLegs $Legs
+            Write-Host $Result
+        }
+        
+        "QuickCheck" {
+            Write-Host " Quick NFL Intelligence Check..." -ForegroundColor Yellow
+            $Result = Invoke-NFLIntelligenceSystem -TargetLegs $Legs
+            $InjuryReport = Get-InjuryIntelligenceReport
+            
+            if ($InjuryReport) {
+                Write-Host "`n Quick Intelligence Summary:" -ForegroundColor Cyan
+                Write-Host " Total Odds: $($InjuryReport.TotalOdds)x" -ForegroundColor Green
+                Write-Host " Potential Payout: `$$($InjuryReport.PotentialPayout)" -ForegroundColor Green
+                Write-Host " Blocked Players: $($InjuryReport.InjuryIntelligence.blocked_players.Count)" -ForegroundColor Red
+                Write-Host " Questionable Players: $($InjuryReport.InjuryIntelligence.questionable_players.Count)" -ForegroundColor Yellow
+                Write-Host " Total Monitored: $($InjuryReport.InjuryIntelligence.total_monitored)" -ForegroundColor Blue
+            }
+        }
+        
+        "FullReport" {
+            Write-Host " Generating Full NFL Intelligence Report..." -ForegroundColor Magenta
+            $Result = Invoke-NFLIntelligenceSystem -TargetLegs $Legs
+            $InjuryReport = Get-InjuryIntelligenceReport
+            
+            if ($InjuryReport -and $GenerateReport) {
+                $ReportFile = New-NFLIntelligenceReport -InjuryReport $InjuryReport
+                Write-Host "`n Full HTML report generated: $ReportFile" -ForegroundColor Green
+                
+                # Open report in default browser
+                if (Test-Path $ReportFile) {
+                    Start-Process $ReportFile
+                    Write-Host " Report opened in default browser" -ForegroundColor Cyan
+                }
+            }
+        }
+    }
+    
+    Write-Host "`n" + "=" * 70 -ForegroundColor Yellow
+    Write-Host " NFL INTELLIGENCE: System operational!" -ForegroundColor Green
+    Write-Host " INJURY MONITORING: Active protection!" -ForegroundColor Green  
+    Write-Host " LIVE PARLAY: Enhanced intelligence applied!" -ForegroundColor Green
+    Write-Host "=" * 70 -ForegroundColor Yellow
+    
+    Write-LogMessage " NFL Intelligence Wrapper completed successfully"
+    
+} catch {
+    Write-Host " NFL Intelligence Wrapper failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-LogMessage " Error: $($_.Exception.Message)" "ERROR"
+    exit 1
+}
+
+Write-Host "`n NFL Intelligence Wrapper execution completed!" -ForegroundColor Green

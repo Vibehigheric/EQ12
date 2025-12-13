@@ -1,0 +1,55 @@
+# EQ12 Core Dependencies - Cleaned and Organized
+# Base utilities
+requests>=2.31.0
+python-dotenv>=1.0.0
+pathlib2>=2.3.7
+argparse
+
+# Data processing
+pandas>=2.1.0
+numpy>=1.24.0
+json5>=0.9.0
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.11.0
+pytest-asyncio>=0.21.0
+
+# Web scraping and automation
+beautifulsoup4>=4.12.0
+playwright>=1.37.0
+playwright-stealth>=1.0.6
+undetected-chromedriver>=3.5.0
+fake-useragent>=1.4.0
+
+# AI and ML
+transformers>=4.33.0
+sentence-transformers>=2.2.2
+langchain>=0.0.300
+openai>=1.0.0
+
+# Data storage and caching
+redis>=4.6.0
+weaviate-client>=3.24.0
+
+# Graphics and visualization  
+pillow>=10.0.0
+matplotlib>=3.7.0
+
+# Web frameworks
+flask>=2.3.0
+aiohttp>=3.8.0
+
+# Telegram bot
+python-telegram-bot>=20.5
+
+# Optional Intel optimizations (install when available)
+# intel-openmp
+# oneapi-numpy  
+# oneapi-pandas
+# openvino
+
+# Development tools (optional)
+# black>=23.7.0
+# flake8>=6.0.0
+# mypy>=1.5.0

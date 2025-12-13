@@ -1,0 +1,235 @@
+{
+    "name": "php-dx-professional-pack",
+    "displayName": "PHP DX Professional Pack",
+    "description": "Complete PHP Developer Experience with Intelephense, type safety, and professional tooling",
+    "version": "1.0.0",
+    "publisher": "eq12",
+    "engines": {
+        "vscode": "^1.74.0"
+    },
+    "categories": [
+        "Extension Packs",
+        "Programming Languages",
+        "Linters",
+        "Formatters"
+    ],
+    "keywords": [
+        "php",
+        "intelephense", 
+        "type safety",
+        "developer experience",
+        "productivity",
+        "professional",
+        "betting",
+        "sports api"
+    ],
+    "extensionPack": [
+        "bmewburn.vscode-intelephense-client",
+        "xdebug.php-debug",
+        "devsense.phptools-vscode",
+        "recca0120.vscode-phpunit",
+        "sanderronde.phpstan-vscode",
+        "getpsalm.psalm-vscode-plugin",
+        "kokororin.vscode-phpfmt",
+        "junstyle.php-cs-fixer",
+        "felixfbecker.php-intellisense"
+    ],
+    "icon": "images/icon.png",
+    "galleryBanner": {
+        "color": "#1e1e1e",
+        "theme": "dark"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/eq12/vscode-php-dx-pack.git"
+    },
+    "homepage": "https://eq12.dev/php-dx-pack",
+    "bugs": {
+        "url": "https://github.com/eq12/vscode-php-dx-pack/issues"
+    },
+    "sponsor": {
+        "url": "https://github.com/sponsors/eq12"
+    },
+    "activationEvents": [
+        "onLanguage:php"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "phpDxPack.setupProject",
+                "title": "PHP DX: Setup Professional Project",
+                "category": "PHP DX"
+            },
+            {
+                "command": "phpDxPack.generateHelper",
+                "title": "PHP DX: Generate Intelephense Helper",
+                "category": "PHP DX"
+            },
+            {
+                "command": "phpDxPack.analyzeCoverage", 
+                "title": "PHP DX: Analyze Type Coverage",
+                "category": "PHP DX"
+            },
+            {
+                "command": "phpDxPack.installSportsTypes",
+                "title": "PHP DX: Install Sports API Types",
+                "category": "PHP DX"
+            },
+            {
+                "command": "phpDxPack.openDashboard",
+                "title": "PHP DX: Open Professional Dashboard",
+                "category": "PHP DX"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "phpDxPack.setupProject",
+                    "when": "explorerResourceIsFolder",
+                    "group": "phpdx@1"
+                }
+            ],
+            "editor/context": [
+                {
+                    "command": "phpDxPack.generateHelper",
+                    "when": "resourceExtname == .php",
+                    "group": "phpdx@1"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "phpDxPack.setupProject",
+                    "when": "workspaceFolderCount > 0"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "PHP DX Professional",
+            "properties": {
+                "phpDx.typeRefiner.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable automatic type refinement suggestions"
+                },
+                "phpDx.typeRefiner.apiKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "TypeRefiner API key for advanced features"
+                },
+                "phpDx.helperGenerator.autoUpdate": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically update helper files when dependencies change"
+                },
+                "phpDx.sportsApi.defaultKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Default sports API key for type libraries"
+                },
+                "phpDx.qualityGate.enabled": {
+                    "type": "boolean", 
+                    "default": true,
+                    "description": "Enable type quality gate checks"
+                },
+                "phpDx.qualityGate.threshold": {
+                    "type": "number",
+                    "default": 80,
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Minimum type coverage threshold percentage"
+                },
+                "phpDx.professional.showTips": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show professional development tips and suggestions"
+                }
+            }
+        },
+        "views": {
+            "explorer": [
+                {
+                    "id": "phpDxDashboard",
+                    "name": "PHP DX Professional",
+                    "when": "workspaceFolderCount > 0"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "phpDxProfessional",
+                    "title": "PHP DX Professional", 
+                    "icon": "$(symbol-class)"
+                }
+            ]
+        },
+        "taskDefinitions": [
+            {
+                "type": "phpdx",
+                "required": ["task"],
+                "properties": {
+                    "task": {
+                        "type": "string",
+                        "description": "PHP DX task type"
+                    },
+                    "args": {
+                        "type": "array",
+                        "description": "Task arguments"
+                    }
+                }
+            }
+        ],
+        "problemMatchers": [
+            {
+                "name": "phpdx-type-coverage",
+                "owner": "phpdx",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        ],
+        "snippets": [
+            {
+                "language": "php",
+                "path": "./snippets/php-professional.json"
+            }
+        ],
+        "jsonValidation": [
+            {
+                "fileMatch": "composer.json",
+                "url": "./schemas/composer-phpdx.json"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js",
+        "package": "vsce package",
+        "publish": "vsce publish"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.74.0",
+        "@types/node": "16.x", 
+        "@typescript-eslint/eslint-plugin": "^5.45.0",
+        "@typescript-eslint/parser": "^5.45.0",
+        "eslint": "^8.28.0",
+        "typescript": "^4.9.4",
+        "@vscode/test-electron": "^2.2.0",
+        "@vscode/vsce": "^2.15.0"
+    },
+    "dependencies": {
+        "axios": "^1.6.0",
+        "semver": "^7.5.4"
+    }
+}

@@ -1,0 +1,47 @@
+{
+    "component_info": {
+        "name": "health_monitor",
+        "type": "monitor",
+        "script_path": "C:\\EQ12\\scripts\\health_monitor.py",
+        "dependencies": [],
+        "version": "1.0.0"
+    },
+    "runtime_settings": {
+        "enabled": true,
+        "auto_start": true,
+        "restart_on_failure": true,
+        "max_memory_mb": 512,
+        "execution_timeout": 300,
+        "priority": "normal"
+    },
+    "monitoring": {
+        "health_check_enabled": true,
+        "performance_monitoring": true,
+        "error_tracking": true,
+        "metrics_collection": true
+    },
+    "logging": {
+        "log_level": "INFO",
+        "log_file": "C:/EQ12/logs/health_monitor.log",
+        "log_rotation": true,
+        "max_log_size_mb": 100,
+        "backup_count": 5
+    },
+    "security": {
+        "require_authentication": true,
+        "encrypt_data": true,
+        "audit_operations": true,
+        "access_level": "standard"
+    },
+    "monitoring_settings": {
+        "check_interval": 60,
+        "alert_threshold": 3,
+        "auto_healing": true,
+        "restart_failed_services": true
+    },
+    "metrics": {
+        "collect_system_metrics": true,
+        "collect_application_metrics": true,
+        "store_historical_data": true
+    }
+}

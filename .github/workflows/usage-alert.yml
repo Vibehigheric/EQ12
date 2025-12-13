@@ -1,0 +1,107 @@
+name: Monthly Usage Alert
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: "15 13 * * *" # daily at 13:15 UTC
+
+permissions:
+    contents: read
+    issues: write
+
+jobs:
+    usage:
+        runs-on: ubuntu-latest
+        env:
+            OWNER: ${{ github.repository_owner }}
+            REPO: ${{ github.repository }}
+            MINUTES_THRESHOLD: ${{ vars.MINUTES_THRESHOLD || '70' }}
+            SPEND_THRESHOLD: ${{ vars.SPEND_THRESHOLD || '25' }}
+            ORG_BILLING: ${{ vars.ORG_BILLING || '0' }}
+        steps:
+            - name: Prepare tools
+              run: |
+                  sudo apt-get update -y
+                  sudo apt-get install -y jq
+
+            - name: Try to fetch Actions billing (org)
+              id: org_actions
+              if: env.ORG_BILLING == '1'
+              shell: bash
+              run: |
+                  set -e
+                  resp=$(curl -sSf -H "Authorization: Bearer $GITHUB_TOKEN" \
+                    -H "Accept: application/vnd.github+json" \
+                    https://api.github.com/orgs/${OWNER}/settings/billing/actions || true)
+                  echo "response=$resp" >> $GITHUB_OUTPUT
+
+            - name: Parse org Actions billing
+              id: parse_org
+              if: env.ORG_BILLING == '1' && steps.org_actions.outputs.response != ''
+              shell: bash
+              run: |
+                  resp='${{ steps.org_actions.outputs.response }}'
+                  used=$(echo "$resp" | jq -r '.total_minutes_used // 0')
+                  included=$(echo "$resp" | jq -r '.included_minutes // 0')
+                  paid=$(echo "$resp" | jq -r '.minutes_used_paid // 0')
+                  pct=0
+                  if [ "$included" != "0" ]; then pct=$(( 100 * used / included )); fi
+                  echo "used=$used" >> $GITHUB_OUTPUT
+                  echo "included=$included" >> $GITHUB_OUTPUT
+                  echo "paid=$paid" >> $GITHUB_OUTPUT
+                  echo "pct=$pct" >> $GITHUB_OUTPUT
+
+            - name: Compose summary
+              id: summary
+              shell: bash
+              run: |
+                  ALERT="0"
+                  MSG="GitHub Usage Summary for ${OWNER}\n\n"
+                  if [ "${{ env.ORG_BILLING }}" = "1" ] && [ -n "${{ steps.parse_org.outputs.used }}" ]; then
+                    MSG+="Actions minutes used: ${{ steps.parse_org.outputs.used }} / ${{ steps.parse_org.outputs.included }} (paid: ${{ steps.parse_org.outputs.paid }})\n"
+                    MSG+="Usage % of included: ${{ steps.parse_org.outputs.pct }}%\n"
+                    if [ "${{ steps.parse_org.outputs.pct }}" -ge "${{ env.MINUTES_THRESHOLD }}" ]; then ALERT="1"; fi
+                  else
+                    MSG+="Billing API not available (personal account or insufficient scope).\n"
+                    MSG+="Manual check recommended: Settings → Billing & plans.\n"
+                  fi
+                  MSG+="Budget guard status: ACTIONS_BUDGET_LOCK=${{ secrets.ACTIONS_BUDGET_LOCK || '0' }}\n"
+                  printf "%b" "$MSG" > usage_summary.txt
+                  echo "alert=$ALERT" >> $GITHUB_OUTPUT
+
+            - name: Open or update usage alert issue
+              if: steps.summary.outputs.alert == '1'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const body = fs.readFileSync('usage_summary.txt', 'utf8');
+                      const title = 'Monthly Usage Alert: Threshold Exceeded';
+                      const { data: issues } = await github.rest.issues.listForRepo({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        state: 'open',
+                        labels: 'usage-alert'
+                      });
+                      if (issues.length > 0) {
+                        await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: issues[0].number,
+                          body
+                        });
+                      } else {
+                        await github.rest.issues.create({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          title,
+                          body,
+                          labels: ['usage-alert']
+                        });
+                      }
+
+            - name: Always upload summary artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: usage-summary
+                  path: usage_summary.txt

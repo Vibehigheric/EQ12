@@ -1,0 +1,140 @@
+name: "🚨 Governance Violation Report"
+description: "Report a violation of EQ12 GODSTACK governance rules, compliance requirements, or security policies."
+title: "[GOVERNANCE] "
+labels: ["governance", "violation", "urgent"]
+assignees:
+  - Vibehigheric
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚨 Governance Violation Alert
+        
+        Thank you for reporting a governance violation. This helps maintain the integrity of EQ12 GODSTACK's compliance and security standards.
+        
+        **⚠️ For sensitive business stacks (Betting/Cannabis/Credit), immediate escalation will occur.**
+
+  - type: dropdown
+    id: violation_type
+    attributes:
+      label: "Violation Type"
+      description: "What type of governance violation occurred?"
+      options:
+        - "Secret/Credential Exposure"
+        - "PR Template Not Used"
+        - "CODEOWNERS Bypass Attempt"
+        - "Sensitive Stack Unauthorized Change"
+        - "Security Gate Failure"
+        - "Compliance Policy Violation"
+        - "Workflow Security Issue"
+        - "Authentication/Access Control"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: business_stack
+    attributes:
+      label: "Business Stack Affected"
+      description: "Which business stack is involved? (Sensitive stacks trigger immediate escalation)"
+      options:
+        - "🎰 Betting Stack (URGENT)"
+        - "🌿 Cannabis Stack (URGENT)" 
+        - "💳 Credit Stack (URGENT)"
+        - "🏪 General E-commerce"
+        - "🤖 AI/Automation"
+        - "📊 Analytics/Scraping"
+        - "🔧 Infrastructure/DevOps"
+        - "📱 Mobile Applications"
+        - "Not Stack-Specific"
+    validations:
+      required: true
+
+  - type: textarea
+    id: violation_description
+    attributes:
+      label: "Violation Description"
+      description: "Provide detailed information about the governance violation"
+      placeholder: |
+        Describe:
+        - What governance rule was violated?
+        - When did this occur?
+        - What was the impact or potential risk?
+        - Which files/PRs/commits are involved?
+      value: |
+        **Violation Details:**
+        
+        **When:** 
+        **Where:** 
+        **Impact:** 
+        **Risk Level:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Evidence & References"
+      description: "Provide links, screenshots, or other evidence"
+      placeholder: |
+        - PR Link: 
+        - Commit Hash: 
+        - Workflow Run: 
+        - Screenshots: 
+        - Related Issues: 
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity Assessment"
+      description: "How severe is this violation?"
+      options:
+        - "🔴 Critical - Immediate security/compliance risk"
+        - "🟡 High - Governance rule bypassed, needs quick fix"
+        - "🟢 Medium - Process violation, should be addressed"
+        - "🔵 Low - Minor issue, documentation needed"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested_fix
+    attributes:
+      label: "Suggested Resolution"
+      description: "How should this violation be addressed?"
+      placeholder: |
+        Suggested actions:
+        - Immediate steps to mitigate risk
+        - Process improvements needed
+        - Policy updates required
+        - Training/communication needs
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: immediate_actions
+    attributes:
+      label: "Immediate Actions Taken"
+      description: "What immediate actions have you already taken?"
+      options:
+        - label: "Blocked related PRs from merging"
+        - label: "Notified team leads/stakeholders"
+        - label: "Created incident documentation"
+        - label: "Escalated to compliance team"
+        - label: "Revoked compromised access/credentials"
+        - label: "No immediate actions taken yet"
+
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+      label: "Acknowledgments"
+      description: "Please confirm understanding"
+      options:
+        - label: "I understand this report will trigger governance review process"
+          required: true
+        - label: "I confirm the information provided is accurate to my knowledge"
+          required: true
+        - label: "I understand sensitive stack violations may trigger immediate escalation"
+          required: true

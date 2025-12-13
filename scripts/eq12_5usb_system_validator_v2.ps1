@@ -1,0 +1,465 @@
+# ================================
+# EQ12 SAFE MODE  NO MORE BREAKS
+# ================================
+Set-StrictMode -Version Latest
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
+$OutputEncoding = [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8
+[System.Console]::InputEncoding = [System.Text.Encoding]::UTF8
+[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Prevent accidental truncation or malformed scripts
+$ErrorActionPreference = "Stop"
+
+#region EQ12_5USB_SYSTEM_VALIDATOR_V2_HARDENED
+# EQ12 + Raspberry Pi 5-USB System Validation Script - HARDENED VERSION
+# Complete testing and validation of modular USB system
+# Buffalo NY 14215 Content Empire Validation
+# VERSION: 2.0 - CORRUPTION-PROOF EDITION
+
+[CmdletBinding()]
+param(
+    [string]$USBBuildPath = "C:\EQ12\usb_builds",
+    [switch]$FullTest,
+    [switch]$QuickValidation,
+    [switch]$AutoRepair
+)
+
+function Write-EQ12Header {
+    [CmdletBinding()]
+    param()
+
+    Write-Host ""
+    Write-Host " EQ12 + RASPBERRY PI 5-USB SYSTEM VALIDATION v2.0" -ForegroundColor Cyan
+    Write-Host " Buffalo NY 14215 Content Empire System Test" -ForegroundColor Yellow
+    Write-Host " CORRUPTION-PROOF HARDENED EDITION" -ForegroundColor Green
+    Write-Host ("=" * 60)
+}
+
+function Test-USBBuildDirectory {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    Write-Host " Testing USB build directory..." -ForegroundColor Green
+
+    if (-not (Test-Path $Path)) {
+        Write-Host " USB build path not found: $Path" -ForegroundColor Red
+
+        if ($AutoRepair) {
+            Write-Host " Auto-repair: Creating USB build directory..." -ForegroundColor Yellow
+            try {
+                New-Item -Path $Path -ItemType Directory -Force | Out-Null
+                Write-Host " USB build directory created: $Path" -ForegroundColor Green
+                return $true
+            }
+            catch {
+                Write-Host " Failed to create directory: $($_.Exception.Message)" -ForegroundColor Red
+                return $false
+            }
+        }
+        else {
+            return $false
+        }
+    }
+
+    Write-Host " USB build directory found: $Path" -ForegroundColor Green
+    return $true
+}
+
+function Get-USBSystemDefinitions {
+    [CmdletBinding()]
+    param()
+
+    return @(
+        @{
+            Name = "USB1_EQ12_RECOVERY"
+            DisplayName = " USB #1 - EQ12 Recovery System"
+            KeyFiles = @("EQ12_RECOVERY_BOOTSTRAP.ps1", "PYTHON_ENV\setup_python.ps1")
+            Purpose = "System recovery and reinstallation"
+            Critical = $true
+        },
+        @{
+            Name = "USB2_CORAL_TPU_CACHE"
+            DisplayName = " USB #2 - Coral TPU Model Cache"
+            KeyFiles = @("coral_model_loader.sh", "download_models.py")
+            Purpose = "AI model acceleration"
+            Critical = $true
+        },
+        @{
+            Name = "USB3_BUFFALO_14215_INTEL"
+            DisplayName = " USB #3 - Buffalo Intelligence"
+            KeyFiles = @("buffalo_14215_intel_scraper.py")
+            Purpose = "Local market intelligence"
+            Critical = $false
+        },
+        @{
+            Name = "USB4_REVENUE_CONTENT_VAULT"
+            DisplayName = " USB #4 - Revenue Vault"
+            KeyFiles = @("content_empire_vault_manager.py")
+            Purpose = "Content Empire protection"
+            Critical = $false
+        },
+        @{
+            Name = "USB5_ENTERPRISE_AUTH_KEY"
+            DisplayName = " USB #5 - Enterprise Auth"
+            KeyFiles = @("eq12_enterprise_auth_system.py", "AUTH_KEY")
+            Purpose = "Hardware authentication"
+            Critical = $true
+        }
+    )
+}
+
+function Test-USBSystem {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [hashtable]$USBSystem,
+
+        [Parameter(Mandatory)]
+        [string]$BasePath
+    )
+
+    Write-Host ""
+    Write-Host $USBSystem.DisplayName -ForegroundColor White
+    Write-Host "Purpose: $($USBSystem.Purpose)" -ForegroundColor Gray
+
+    $USBPath = Join-Path $BasePath $USBSystem.Name
+    $USBResult = [PSCustomObject]@{
+        Name = $USBSystem.Name
+        DisplayName = $USBSystem.DisplayName
+        Path = $USBPath
+        Exists = $false
+        KeyFilesFound = 0
+        TotalKeyFiles = $USBSystem.KeyFiles.Count
+        Status = "FAIL"
+        Critical = $USBSystem.Critical
+        MissingFiles = @()
+    }
+
+    if (Test-Path $USBPath) {
+        $USBResult.Exists = $true
+        Write-Host "   Directory:  FOUND" -ForegroundColor Green
+
+        foreach ($KeyFile in $USBSystem.KeyFiles) {
+            $FilePath = Join-Path $USBPath $KeyFile
+            if (Test-Path $FilePath) {
+                $USBResult.KeyFilesFound++
+                Write-Host "   $KeyFile:  FOUND" -ForegroundColor Green
+            } else {
+                $USBResult.MissingFiles += $KeyFile
+                Write-Host "   $KeyFile:  MISSING" -ForegroundColor Red
+            }
+        }
+
+        if ($USBResult.KeyFilesFound -eq $USBResult.TotalKeyFiles) {
+            $USBResult.Status = "PASS"
+            Write-Host "   Status:  COMPLETE" -ForegroundColor Green
+        } else {
+            $USBResult.Status = "PARTIAL"
+            Write-Host "   Status:  PARTIAL ($($USBResult.KeyFilesFound)/$($USBResult.TotalKeyFiles))" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "   Directory:  NOT FOUND" -ForegroundColor Red
+        Write-Host "   Status:  MISSING" -ForegroundColor Red
+    }
+
+    return $USBResult
+}
+
+function Test-MasterDeploymentScript {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$BasePath
+    )
+
+    Write-Host ""
+    Write-Host " TESTING MASTER DEPLOYMENT SCRIPT..." -ForegroundColor Cyan
+
+    $MasterScript = Join-Path $BasePath "DEPLOY_ALL_USB_SYSTEMS.ps1"
+
+    if (Test-Path $MasterScript) {
+        Write-Host " Master deployment script found" -ForegroundColor Green
+        $MasterSize = (Get-Item $MasterScript).Length
+        Write-Host " Script size: $MasterSize bytes" -ForegroundColor Gray
+        return $true
+    } else {
+        Write-Host " Master deployment script missing" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Test-SystemConfiguration {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$BasePath
+    )
+
+    Write-Host ""
+    Write-Host " TESTING SYSTEM CONFIGURATION..." -ForegroundColor Cyan
+
+    $ConfigFile = Join-Path $BasePath "EQ12_5USB_SYSTEM_CONFIG.json"
+
+    if (Test-Path $ConfigFile) {
+        Write-Host " System configuration file found" -ForegroundColor Green
+
+        try {
+            $ConfigContent = Get-Content $ConfigFile -Raw -Encoding UTF8
+            $Config = $ConfigContent | ConvertFrom-Json
+
+            Write-Host " Total USB systems: $($Config.usb_systems.Count)" -ForegroundColor Gray
+            Write-Host " Total storage: $($Config.total_storage)" -ForegroundColor Gray
+            Write-Host " Location: $($Config.location)" -ForegroundColor Gray
+
+            return $Config
+        }
+        catch {
+            Write-Host " Configuration file found but invalid JSON: $($_.Exception.Message)" -ForegroundColor Yellow
+            return $null
+        }
+    } else {
+        Write-Host " System configuration file missing" -ForegroundColor Red
+        return $null
+    }
+}
+
+function Get-SystemSize {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [array]$USBSystems,
+
+        [Parameter(Mandatory)]
+        [string]$BasePath
+    )
+
+    Write-Host ""
+    Write-Host " CALCULATING SYSTEM SIZE..." -ForegroundColor Cyan
+
+    $TotalSize = 0
+
+    foreach ($USB in $USBSystems) {
+        $USBPath = Join-Path $BasePath $USB.Name
+
+        if (Test-Path $USBPath) {
+            try {
+                $USBSize = (Get-ChildItem $USBPath -Recurse -File -ErrorAction SilentlyContinue |
+                           Measure-Object -Property Length -Sum).Sum
+
+                if ($null -eq $USBSize) { $USBSize = 0 }
+
+                $USBSizeMB = [Math]::Round($USBSize / 1MB, 2)
+                Write-Host " $($USB.Name): $USBSizeMB MB" -ForegroundColor Gray
+                $TotalSize += $USBSize
+            }
+            catch {
+                Write-Host " Could not calculate size for $($USB.Name): $($_.Exception.Message)" -ForegroundColor Yellow
+            }
+        }
+    }
+
+    $TotalSizeMB = [Math]::Round($TotalSize / 1MB, 2)
+    $TotalSizeGB = [Math]::Round($TotalSize / 1GB, 2)
+
+    Write-Host " Total system size: $TotalSizeMB MB ($TotalSizeGB GB)" -ForegroundColor White
+
+    return @{
+        TotalBytes = $TotalSize
+        TotalMB = $TotalSizeMB
+        TotalGB = $TotalSizeGB
+    }
+}
+
+function Show-DeploymentRecommendations {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [int]$PassedSystems,
+
+        [Parameter(Mandatory)]
+        [int]$TotalSystems
+    )
+
+    Write-Host ""
+    Write-Host " DEPLOYMENT RECOMMENDATIONS:" -ForegroundColor Cyan
+
+    if ($PassedSystems -eq $TotalSystems) {
+        Write-Host " All USB systems are ready for deployment!" -ForegroundColor Green
+        Write-Host " Next steps:" -ForegroundColor White
+        Write-Host "   1. Purchase 5 x 32GB USB 3.0+ drives" -ForegroundColor Gray
+        Write-Host "   2. Copy each USB folder to physical drives" -ForegroundColor Gray
+        Write-Host "   3. Label drives with system names" -ForegroundColor Gray
+        Write-Host "   4. Install USB #1 into EQ12 permanently" -ForegroundColor Gray
+        Write-Host "   5. Install USB #2 into Raspberry Pi permanently" -ForegroundColor Gray
+        Write-Host "   6. Test hot-swap workflow with USB #3, #4, #5" -ForegroundColor Gray
+    } elseif ($PassedSystems -ge ($TotalSystems * 0.6)) {
+        Write-Host " Most USB systems ready, but some issues found" -ForegroundColor Yellow
+        Write-Host " Consider regenerating failed/partial systems" -ForegroundColor Yellow
+    } else {
+        Write-Host " Multiple USB systems have issues" -ForegroundColor Red
+        Write-Host " Recommend running USB system generator again" -ForegroundColor Red
+    }
+
+    # Buffalo NY specific recommendations
+    Write-Host ""
+    Write-Host " BUFFALO NY 14215 RECOMMENDATIONS:" -ForegroundColor Yellow
+    Write-Host " USB Drive sources:" -ForegroundColor White
+    Write-Host "    Best Buy (Sheridan Drive) - 15 min drive" -ForegroundColor Gray
+    Write-Host "    Micro Center (Henrietta, NY) - 1.5 hour drive" -ForegroundColor Gray
+    Write-Host "    Amazon - 2-day Prime shipping" -ForegroundColor Gray
+    Write-Host " Winter considerations:" -ForegroundColor White
+    Write-Host "    Store USB drives indoors (lake effect snow)" -ForegroundColor Gray
+    Write-Host "    Use waterproof USB drive cases" -ForegroundColor Gray
+    Write-Host "    Keep backup of each drive at separate location" -ForegroundColor Gray
+}
+
+function Export-ValidationReport {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [array]$ValidationResults,
+
+        [Parameter(Mandatory)]
+        [hashtable]$SizeInfo,
+
+        [Parameter(Mandatory)]
+        [int]$PassedSystems,
+
+        [Parameter(Mandatory)]
+        [int]$PartialSystems,
+
+        [Parameter(Mandatory)]
+        [int]$FailedSystems
+    )
+
+    $ValidationReport = [PSCustomObject]@{
+        timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ss.fffK")
+        location = "Buffalo NY 14215"
+        system = "EQ12_5USB_VALIDATION_v2.0"
+        total_systems = $ValidationResults.Count
+        passed_systems = $PassedSystems
+        partial_systems = $PartialSystems
+        failed_systems = $FailedSystems
+        total_size_mb = $SizeInfo.TotalMB
+        total_size_gb = $SizeInfo.TotalGB
+        validation_results = $ValidationResults
+        deployment_ready = ($PassedSystems -eq $ValidationResults.Count)
+    }
+
+    try {
+        $ReportPath = Join-Path "C:\EQ12\logs" "usb_validation_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+
+        # Ensure logs directory exists
+        if (-not (Test-Path "C:\EQ12\logs")) {
+            New-Item -Path "C:\EQ12\logs" -ItemType Directory -Force | Out-Null
+        }
+
+        $ValidationReport | ConvertTo-Json -Depth 10 |
+            Out-File -FilePath $ReportPath -Encoding UTF8 -Force
+
+        Write-Host " Validation report saved to: $ReportPath" -ForegroundColor Gray
+        return $ReportPath
+    }
+    catch {
+        Write-Host " Could not save validation report: $($_.Exception.Message)" -ForegroundColor Yellow
+        return $null
+    }
+}
+
+function Show-FinalStatus {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [int]$PassedSystems,
+
+        [Parameter(Mandatory)]
+        [int]$TotalSystems
+    )
+
+    Write-Host ""
+    Write-Host " EQ12 5-USB SYSTEM STATUS:" -ForegroundColor Cyan
+
+    if ($PassedSystems -eq $TotalSystems) {
+        Write-Host " READY FOR DEPLOYMENT" -ForegroundColor Green
+        Write-Host " Buffalo NY 14215 Content Empire: OPERATIONAL" -ForegroundColor Green
+    } elseif ($PassedSystems -ge ($TotalSystems * 0.6)) {
+        Write-Host " MOSTLY READY (MINOR ISSUES)" -ForegroundColor Yellow
+        Write-Host " Buffalo NY 14215 Content Empire: NEEDS ATTENTION" -ForegroundColor Yellow
+    } else {
+        Write-Host " NEEDS RECONSTRUCTION" -ForegroundColor Red
+        Write-Host " Buffalo NY 14215 Content Empire: REBUILD REQUIRED" -ForegroundColor Red
+    }
+}
+
+# Main execution logic
+try {
+    Write-EQ12Header
+
+    # Test USB build directory
+    if (-not (Test-USBBuildDirectory -Path $USBBuildPath)) {
+        exit 1
+    }
+
+    # Get USB system definitions
+    $USBSystems = Get-USBSystemDefinitions
+
+    Write-Host ""
+    Write-Host " VALIDATING USB SYSTEM COMPONENTS..." -ForegroundColor Cyan
+
+    # Validate each USB system
+    $ValidationResults = @()
+    foreach ($USB in $USBSystems) {
+        $USBResult = Test-USBSystem -USBSystem $USB -BasePath $USBBuildPath
+        $ValidationResults += $USBResult
+    }
+
+    # Calculate summary statistics
+    $PassedSystems = ($ValidationResults | Where-Object { $_.Status -eq "PASS" }).Count
+    $PartialSystems = ($ValidationResults | Where-Object { $_.Status -eq "PARTIAL" }).Count
+    $FailedSystems = ($ValidationResults | Where-Object { $_.Status -eq "FAIL" }).Count
+
+    Write-Host ""
+    Write-Host " VALIDATION SUMMARY:" -ForegroundColor Cyan
+    Write-Host " Passed: $PassedSystems/$($USBSystems.Count) USB systems" -ForegroundColor Green
+    Write-Host " Partial: $PartialSystems/$($USBSystems.Count) USB systems" -ForegroundColor Yellow
+    Write-Host " Failed: $FailedSystems/$($USBSystems.Count) USB systems" -ForegroundColor Red
+
+    # Test additional components
+    $MasterScriptOK = Test-MasterDeploymentScript -BasePath $USBBuildPath
+    $SystemConfig = Test-SystemConfiguration -BasePath $USBBuildPath
+    $SizeInfo = Get-SystemSize -USBSystems $USBSystems -BasePath $USBBuildPath
+
+    # Show recommendations
+    Show-DeploymentRecommendations -PassedSystems $PassedSystems -TotalSystems $USBSystems.Count
+
+    # Export validation report
+    $ReportPath = Export-ValidationReport -ValidationResults $ValidationResults -SizeInfo $SizeInfo -PassedSystems $PassedSystems -PartialSystems $PartialSystems -FailedSystems $FailedSystems
+
+    # Show final status
+    Show-FinalStatus -PassedSystems $PassedSystems -TotalSystems $USBSystems.Count
+
+    Write-Host ""
+    Write-Host " Validation complete. Check results above for next steps." -ForegroundColor Cyan
+
+    # Set appropriate exit code
+    if ($FailedSystems -eq 0) {
+        exit 0  # Success
+    } elseif ($PassedSystems -ge ($USBSystems.Count * 0.6)) {
+        exit 2  # Partial success
+    } else {
+        exit 1  # Major issues
+    }
+}
+catch {
+    Write-Host ""
+    Write-Host " CRITICAL ERROR IN USB VALIDATION:" -ForegroundColor Red
+    Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Stack: $($_.ScriptStackTrace)" -ForegroundColor Gray
+    exit 1
+}
+
+#endregion EQ12_5USB_SYSTEM_VALIDATOR_V2_HARDENED
+

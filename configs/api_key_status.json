@@ -1,0 +1,94 @@
+{
+  "last_updated": "2025-11-08T00:47:12.531560+00:00",
+  "api_test_results": {
+    "odds_api": {
+      "provider": "APIProvider.ODDS_API",
+      "key_name": "ODDS_API_KEY",
+      "status": "APIStatus.WORKING",
+      "response_code": 200,
+      "response_time": 0.2673635482788086,
+      "error_message": null,
+      "last_tested": "2025-11-08 00:47:06.927659+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    },
+    "openweather": {
+      "provider": "APIProvider.OPENWEATHER",
+      "key_name": "OPENWEATHER_API_KEY",
+      "status": "APIStatus.WORKING",
+      "response_code": 200,
+      "response_time": 0.1560955047607422,
+      "error_message": null,
+      "last_tested": "2025-11-08 00:47:07.598787+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    },
+    "sportsdata": {
+      "provider": "APIProvider.SPORTSDATA",
+      "key_name": "SPORTSDATA_API_KEY",
+      "status": "APIStatus.INVALID_KEY",
+      "response_code": 401,
+      "response_time": 0.2563748359680176,
+      "error_message": "Invalid API key or authentication failed",
+      "last_tested": "2025-11-08 00:47:08.362911+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    },
+    "espn": {
+      "provider": "APIProvider.ESPN",
+      "key_name": "ESPN_API_KEY",
+      "status": "APIStatus.WORKING",
+      "response_code": 200,
+      "response_time": 0.3084084987640381,
+      "error_message": null,
+      "last_tested": "2025-11-08 00:47:09.227690+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    },
+    "openai": {
+      "provider": "APIProvider.OPENAI",
+      "key_name": "OPENAI_API_KEY",
+      "status": "APIStatus.WORKING",
+      "response_code": 200,
+      "response_time": 0.6151514053344727,
+      "error_message": null,
+      "last_tested": "2025-11-08 00:47:10.346514+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    },
+    "telegram": {
+      "provider": "APIProvider.TELEGRAM",
+      "key_name": "TELEGRAM_BOT_TOKEN",
+      "status": "APIStatus.WORKING",
+      "response_code": 200,
+      "response_time": 0.44076991081237793,
+      "error_message": null,
+      "last_tested": "2025-11-08 00:47:11.298826+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    },
+    "twitter": {
+      "provider": "APIProvider.TWITTER",
+      "key_name": "TWITTER_API_KEY",
+      "status": "APIStatus.INVALID_KEY",
+      "response_code": 401,
+      "response_time": 0.20679283142089844,
+      "error_message": "Invalid API key or authentication failed",
+      "last_tested": "2025-11-08 00:47:12.016629+00:00",
+      "rate_limit_remaining": null,
+      "daily_usage": 0
+    }
+  },
+  "working_apis": [
+    "odds_api",
+    "openweather",
+    "espn",
+    "openai",
+    "telegram"
+  ],
+  "failed_apis": [],
+  "setup_required": [
+    "sportsdata",
+    "twitter"
+  ]
+}

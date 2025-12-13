@@ -1,0 +1,145 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 USB Drive Setup Expert Tool
+    Buffalo NY 14215 Content Empire - USB Optimization
+
+.DESCRIPTION
+    Professional USB drive configuration and bootable creation tool
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet("AnalyzeAll", "CreateBootable", "FormatOptimal", "SecurityScan")]
+    [string]$Action = "AnalyzeAll"
+)
+
+function Get-USBDriveDetails {
+    Write-Host "💾 USB DRIVE ANALYSIS" -ForegroundColor Cyan
+    Write-Host "===========================================" -ForegroundColor Cyan
+
+    # Get USB drives
+    $usbDrives = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DriveType -eq 2}
+
+    foreach ($drive in $usbDrives) {
+        $sizeGB = [math]::Round($drive.Size/1GB, 2)
+        $freeGB = [math]::Round($drive.FreeSpace/1GB, 2)
+        $usedGB = $sizeGB - $freeGB
+
+        Write-Host ""
+        Write-Host "Drive: $($drive.DeviceID)" -ForegroundColor Yellow
+        Write-Host "Label: $($drive.VolumeName)" -ForegroundColor White
+        Write-Host "Size: $sizeGB GB" -ForegroundColor Green
+        Write-Host "Free: $freeGB GB" -ForegroundColor Green
+        Write-Host "Used: $usedGB GB" -ForegroundColor Red
+        Write-Host "File System: $($drive.FileSystem)" -ForegroundColor Cyan
+
+        # Bootable check
+        $bootable = Test-Path "$($drive.DeviceID)\boot"
+        Write-Host "Bootable: $(if($bootable){'Yes ✓'}else{'No ✗'})" -ForegroundColor $(if($bootable){'Green'}else{'Red'})
+    }
+}
+
+function Show-BootableRecommendations {
+    Write-Host ""
+    Write-Host "🚀 BOOTABLE DRIVE RECOMMENDATIONS" -ForegroundColor Yellow
+    Write-Host "===========================================" -ForegroundColor Yellow
+
+    Write-Host ""
+    Write-Host "Option 1: Windows 11 Bootable (D: Drive)" -ForegroundColor Cyan
+    Write-Host "- Download Windows 11 ISO from Microsoft"
+    Write-Host "- Use Rufus to create bootable drive"
+    Write-Host "- Format: NTFS, GPT partition scheme"
+    Write-Host "- Purpose: Emergency Windows installation/recovery"
+
+    Write-Host ""
+    Write-Host "Option 2: Multi-Boot Linux (E: Drive)" -ForegroundColor Cyan
+    Write-Host "- Install Ventoy bootloader"
+    Write-Host "- Copy multiple ISO files to drive"
+    Write-Host "- Boot from any ISO without reformatting"
+    Write-Host "- Recommended ISOs: Ubuntu, Kali Linux, SystemRescue"
+
+    Write-Host ""
+    Write-Host "Option 3: Ultimate Rescue Drive" -ForegroundColor Cyan
+    Write-Host "- Combine both drives with YUMI"
+    Write-Host "- Windows PE + Linux distributions"
+    Write-Host "- Antivirus rescue disks"
+    Write-Host "- Hardware diagnostic tools"
+}
+
+function Show-SecurityOptimization {
+    Write-Host ""
+    Write-Host "🔒 SECURITY OPTIMIZATION" -ForegroundColor Red
+    Write-Host "===========================================" -ForegroundColor Red
+
+    Write-Host ""
+    Write-Host "BitLocker Encryption Setup:"
+    Write-Host "- Format one drive as NTFS"
+    Write-Host "- Enable BitLocker encryption"
+    Write-Host "- Store recovery key safely"
+    Write-Host "- Use for sensitive data only"
+
+    Write-Host ""
+    Write-Host "VeraCrypt Alternative:"
+    Write-Host "- Cross-platform encryption"
+    Write-Host "- Hidden volumes support"
+    Write-Host "- Stronger than BitLocker"
+    Write-Host "- Works on any OS"
+}
+
+function Show-OptimalFormats {
+    Write-Host ""
+    Write-Host "💡 OPTIMAL FILE SYSTEM FORMATS" -ForegroundColor Green
+    Write-Host "===========================================" -ForegroundColor Green
+
+    Write-Host ""
+    Write-Host "FAT32: Current format on both drives"
+    Write-Host "✓ Maximum compatibility (all OS)"
+    Write-Host "✗ 4GB file size limit"
+    Write-Host "✗ 32GB partition limit (Windows)"
+    Write-Host "Use for: General file transfer, legacy systems"
+
+    Write-Host ""
+    Write-Host "NTFS: Windows native"
+    Write-Host "✓ Large files supported"
+    Write-Host "✓ Security permissions"
+    Write-Host "✓ BitLocker encryption"
+    Write-Host "✗ Limited Mac/Linux support"
+    Write-Host "Use for: Windows bootable, backup drives"
+
+    Write-Host ""
+    Write-Host "exFAT: Cross-platform modern"
+    Write-Host "✓ Large files supported"
+    Write-Host "✓ Works on Windows/Mac/Linux"
+    Write-Host "✓ No file size limits"
+    Write-Host "✗ No security features"
+    Write-Host "Use for: Media files, cross-platform storage"
+}
+
+# Main execution
+switch ($Action) {
+    "AnalyzeAll" {
+        Get-USBDriveDetails
+        Show-BootableRecommendations
+        Show-SecurityOptimization
+        Show-OptimalFormats
+    }
+    "CreateBootable" {
+        Show-BootableRecommendations
+    }
+    "FormatOptimal" {
+        Show-OptimalFormats
+    }
+    "SecurityScan" {
+        Show-SecurityOptimization
+    }
+}
+
+Write-Host ""
+Write-Host "🎯 NEXT STEPS:" -ForegroundColor Yellow
+Write-Host "1. Choose primary purpose for each drive"
+Write-Host "2. Download required tools (Rufus, Ventoy)"
+Write-Host "3. Create bootable drives as needed"
+Write-Host "4. Set up encryption for sensitive data"
+Write-Host "5. Label drives clearly for easy identification"
+Write-Host ""

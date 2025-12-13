@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "mode": { 
+      "type": "string", 
+      "enum": ["live", "offline"],
+      "description": "Indicates if response is from live AI or offline fallback"
+    },
+    "task": { 
+      "type": "string",
+      "description": "The type of task being performed"
+    },
+    "result": { 
+      "type": "object",
+      "description": "Main result data structure"
+    },
+    "warnings": { 
+      "type": "array", 
+      "items": { "type": "string" },
+      "description": "Any warnings or caveats about the result"
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" },
+        "tokens_est": { "type": "integer" },
+        "ts": { "type": "number" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "execution_time_ms": { "type": "number" }
+      },
+      "required": ["ts"],
+      "additionalProperties": true
+    }
+  },
+  "required": ["mode", "task", "result", "meta"],
+  "additionalProperties": true
+}

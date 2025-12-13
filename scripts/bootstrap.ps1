@@ -1,0 +1,93 @@
+param(
+    [switch]$Force
+)
+
+$ErrorActionPreference = "Stop"
+$RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path | Split-Path -Parent
+Set-Location $RepoRoot
+
+Write-Host "🚀 EQ12 Bootstrap Starting..." -ForegroundColor Green
+Write-Host "Repository: $RepoRoot" -ForegroundColor Cyan
+
+# 1) Create venv if missing
+if (-not (Test-Path ".venv") -or $Force) {
+    Write-Host "📦 Creating Python virtual environment..." -ForegroundColor Yellow
+    python -m venv .venv
+}
+
+# 2) Activate venv
+$venv = Join-Path $RepoRoot ".venv\Scripts\Activate.ps1"
+if (Test-Path $venv) {
+    Write-Host "🔌 Activating virtual environment..." -ForegroundColor Yellow
+    . $venv
+} else {
+    Write-Host "❌ Virtual environment activation script not found" -ForegroundColor Red
+    exit 1
+}
+
+# 3) Ensure uv is available
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+    Write-Host "⚡ Installing uv (fast package manager)..." -ForegroundColor Yellow
+    pip install --upgrade pip
+    pip install uv
+}
+
+# 4) Sync env from pyproject or requirements
+if (Test-Path "pyproject.toml") {
+    Write-Host "📋 Syncing dependencies with uv..." -ForegroundColor Yellow
+    uv sync
+} elseif (Test-Path "requirements.txt") {
+    Write-Host "📋 Installing requirements with uv..." -ForegroundColor Yellow
+    uv pip install -r requirements.txt
+}
+
+# 5) Install development tools
+Write-Host "🔧 Installing development tools..." -ForegroundColor Yellow
+uv pip install ruff black mypy pre-commit
+
+# 6) Pre-commit hooks
+if (Test-Path ".pre-commit-config.yaml") {
+    Write-Host "🪝 Installing pre-commit hooks..." -ForegroundColor Yellow
+    pre-commit install
+}
+
+# 7) Verify key environment variables
+Write-Host "🔑 Checking environment variables..." -ForegroundColor Yellow
+$requiredVars = @("ODDS_API_KEY", "OPENAI_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID")
+$missingVars = @()
+
+foreach ($var in $requiredVars) {
+    if (-not (Get-Item "env:$var" -ErrorAction SilentlyContinue)) {
+        $missingVars += $var
+    }
+}
+
+if ($missingVars.Count -gt 0) {
+    Write-Host "⚠️ Missing environment variables:" -ForegroundColor Red
+    foreach ($var in $missingVars) {
+        Write-Host "   - $var" -ForegroundColor Red
+    }
+    Write-Host "💡 Please set these in your .env file or system environment" -ForegroundColor Yellow
+}
+
+# 8) Create logs directory
+$logsDir = Join-Path $RepoRoot "logs"
+if (-not (Test-Path $logsDir)) {
+    Write-Host "📁 Creating logs directory..." -ForegroundColor Yellow
+    New-Item -ItemType Directory -Path $logsDir -Force | Out-Null
+}
+
+# 9) Verify Python tools work
+Write-Host "🧪 Verifying installation..." -ForegroundColor Yellow
+try {
+    python --version
+    uv --version
+    ruff --version
+    Write-Host "✅ All tools installed successfully!" -ForegroundColor Green
+} catch {
+    Write-Host "❌ Tool verification failed: $_" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "EQ12 Bootstrap Complete!" -ForegroundColor Green
+Write-Host "Ready for expert sports betting automation" -ForegroundColor Cyan

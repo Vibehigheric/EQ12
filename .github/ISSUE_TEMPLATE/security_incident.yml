@@ -1,0 +1,214 @@
+name: "🔒 Security Incident Report"
+description: "Report security vulnerabilities, credential exposures, or security policy violations."
+title: "[SECURITY] "
+labels: ["security", "incident", "urgent"]
+assignees:
+  - Vibehigheric
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔒 Security Incident Report
+        
+        **⚠️ IMPORTANT: For critical security issues, also contact compliance@eq12-godstack.local immediately.**
+        
+        This form is for reporting security incidents, vulnerabilities, or policy violations within EQ12 GODSTACK.
+
+  - type: dropdown
+    id: incident_type
+    attributes:
+      label: "Security Incident Type"
+      description: "What type of security incident are you reporting?"
+      options:
+        - "🔑 Credential/Secret Exposure"
+        - "🚨 Code Vulnerability (High/Critical)"
+        - "🔓 Unauthorized Access Attempt"
+        - "📦 Dependency Vulnerability"
+        - "🔐 Authentication/Authorization Issue"
+        - "🕵️ Data Exposure/Privacy Breach"
+        - "🤖 Workflow/Action Security Issue"
+        - "🌐 External Integration Compromise"
+        - "📱 Third-party Service Issue"
+        - "Other Security Concern"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity_level
+    attributes:
+      label: "Severity Level"
+      description: "How severe is this security incident?"
+      options:
+        - "🔴 Critical - Immediate threat, active compromise"
+        - "🟠 High - Serious vulnerability, needs urgent fix"
+        - "🟡 Medium - Security concern, should be addressed"
+        - "🟢 Low - Minor issue, best practice improvement"
+    validations:
+      required: true
+
+  - type: textarea
+    id: incident_description
+    attributes:
+      label: "Incident Description"
+      description: "Provide detailed information about the security incident"
+      placeholder: |
+        Describe the security incident:
+        - What was discovered?
+        - How was it discovered?
+        - When did it occur/was it discovered?
+        - What systems/data are affected?
+        - Is this actively being exploited?
+      value: |
+        **Incident Details:**
+        
+        **Discovery Method:** 
+        **Affected Systems:** 
+        **Timeline:** 
+        **Current Status:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact_assessment
+    attributes:
+      label: "Impact Assessment"
+      description: "What is the potential or actual impact?"
+      placeholder: |
+        Impact analysis:
+        - What data/systems are at risk?
+        - Business impact assessment
+        - Compliance implications
+        - Customer/user impact
+        - Financial implications
+      value: |
+        **Impact Assessment:**
+        
+        **Data at Risk:** 
+        **Business Impact:** 
+        **Compliance Risk:** 
+        **User Impact:** 
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: affected_stacks
+    attributes:
+      label: "Affected Business Stacks"
+      description: "Which business stacks are impacted? (Critical for compliance)"
+      options:
+        - label: "🎰 Betting Stack (Gambling regulations)"
+        - label: "🌿 Cannabis Stack (METRC/State compliance)"
+        - label: "💳 Credit Stack (PCI DSS/Financial regs)"
+        - label: "🏪 E-commerce Stack"
+        - label: "🤖 AI/Automation Stack"
+        - label: "📊 Analytics/Scraping Stack"
+        - label: "🔧 Infrastructure/DevOps"
+        - label: "📱 Mobile Applications"
+        - label: "None specifically - general infrastructure"
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: "Evidence & Technical Details"
+      description: "Provide technical evidence, logs, or proof of concept"
+      placeholder: |
+        Technical evidence:
+        - Log entries
+        - Screenshots (remove sensitive data)
+        - Commit hashes
+        - Vulnerability scan results
+        - Proof of concept (safe)
+        - Network traces
+      render: shell
+
+  - type: textarea
+    id: immediate_actions
+    attributes:
+      label: "Immediate Actions Taken"
+      description: "What immediate containment/mitigation actions have been taken?"
+      placeholder: |
+        Containment actions:
+        - Credentials revoked/rotated
+        - Access blocked/restricted
+        - Systems isolated
+        - Patches applied
+        - Monitoring increased
+        - Stakeholders notified
+      value: |
+        **Actions Taken:**
+        
+        **Containment:** 
+        **Mitigation:** 
+        **Notifications:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: recommended_remediation
+    attributes:
+      label: "Recommended Remediation"
+      description: "What steps should be taken to fully resolve this incident?"
+      placeholder: |
+        Remediation plan:
+        - Short-term fixes
+        - Long-term improvements
+        - Process changes needed
+        - Additional monitoring
+        - Training requirements
+
+  - type: checkboxes
+    id: regulatory_impact
+    attributes:
+      label: "Regulatory/Compliance Considerations"
+      description: "Are there regulatory reporting requirements?"
+      options:
+        - label: "May require gambling commission notification"
+        - label: "May require state cannabis authority notification"
+        - label: "May require PCI DSS incident reporting"
+        - label: "May require data breach notification laws compliance"
+        - label: "May require customer notification"
+        - label: "No regulatory reporting required"
+        - label: "Unknown - needs legal review"
+
+  - type: dropdown
+    id: disclosure_timeline
+    attributes:
+      label: "Public Disclosure Timeline"
+      description: "When should this be publicly disclosed (if at all)?"
+      options:
+        - "No public disclosure needed"
+        - "After fix is deployed and verified"
+        - "After 90-day responsible disclosure period"
+        - "Immediate disclosure required by law"
+        - "Needs legal/compliance review"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confidentiality
+    attributes:
+      label: "Confidentiality & Handling"
+      description: "Special handling requirements"
+      options:
+        - label: "This incident involves sensitive business stack data"
+        - label: "This incident may have legal implications"
+        - label: "This incident involves customer/user data"
+        - label: "This incident involves financial/payment data"
+        - label: "This incident involves proprietary algorithms/IP"
+        - label: "Standard handling is appropriate"
+
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+      label: "Security Acknowledgments"
+      description: "Please confirm understanding of security protocols"
+      options:
+        - label: "I understand this incident will trigger security response procedures"
+          required: true
+        - label: "I confirm I have not shared sensitive details publicly or inappropriately"
+          required: true
+        - label: "I understand sensitive stack incidents may require immediate regulatory notification"
+          required: true
+        - label: "I will cooperate with incident response team investigation"
+          required: true

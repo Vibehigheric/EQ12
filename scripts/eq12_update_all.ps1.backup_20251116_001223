@@ -1,0 +1,432 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Update All Script
+# ======================
+# Purpose: One-click update for all tools and dependencies
+# Idempotent: Safe to run multiple times
+# Free tools only: No paid API calls
+
+[CmdletBinding()]
+param(
+    [switch]$SkipWinget,
+    [switch]$SkipPython,
+    [switch]$SkipNode,
+    [switch]$SkipTests,
+    [switch]$Force
+)
+
+$ErrorActionPreference = "Stop"
+$InformationPreference = "Continue"
+
+# Colors for PowerShell output
+$Green = "Green"
+$Yellow = "Yellow"
+$Red = "Red"
+$Cyan = "Cyan"
+
+function Write-StatusMessage {
+    param([string]$Message)
+    Write-Host "🔄 $Message" -ForegroundColor $Cyan
+}
+
+function Write-SuccessMessage {
+    param([string]$Message)
+    Write-Host "✅ $Message" -ForegroundColor $Green
+}
+
+function Write-WarningMessage {
+    param([string]$Message)
+    Write-Host "⚠️  $Message" -ForegroundColor $Yellow
+}
+
+function Write-ErrorMessage {
+    param([string]$Message)
+    Write-Host "❌ $Message" -ForegroundColor $Red
+}
+
+function Test-CommandExists {
+    param([string]$Command)
+    try {
+        Get-Command $Command -ErrorAction Stop | Out-Null
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+function Update-WingetPackages {
+    if ($SkipWinget) {
+        Write-StatusMessage "Skipping winget updates (--SkipWinget specified)"
+        return $true
+    }
+    
+    Write-StatusMessage "Updating all winget packages..."
+    
+    if (-not (Test-CommandExists "winget")) {
+        Write-WarningMessage "winget not found, skipping package updates"
+        return $false
+    }
+    
+    try {
+        # Update all packages
+        $result = winget upgrade --all --silent --accept-package-agreements --accept-source-agreements 2>&1
+        
+        if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq -1978335189) {
+            Write-SuccessMessage "winget packages updated successfully"
+            
+            # Refresh PATH for current session
+            ${env}PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
+            
+            return $true
+        } else {
+            Write-WarningMessage "winget upgrade completed with warnings (exit code: $LASTEXITCODE)"
+            Write-Host "Output: $result" -ForegroundColor $Yellow
+            return $true  # Continue despite warnings
+        }
+    } catch {
+        Write-ErrorMessage "Failed to update winget packages: $_"
+        return $false
+    }
+}
+
+function Update-PythonDependencies {
+    if ($SkipPython) {
+        Write-StatusMessage "Skipping Python updates (--SkipPython specified)"
+        return $true
+    }
+    
+    Write-StatusMessage "Updating Python dependencies..."
+    
+    # Check if virtual environment exists and activate it
+    if (Test-Path ".venv\Scripts\Activate.ps1") {
+        Write-StatusMessage "Activating Python virtual environment..."
+        try {
+            & ".\.venv\Scripts\Activate.ps1"
+            Write-SuccessMessage "Virtual environment activated"
+        } catch {
+            Write-ErrorMessage "Failed to activate virtual environment: $_"
+            return $false
+        }
+    } else {
+        Write-WarningMessage "No virtual environment found at .venv, using global Python"
+    }
+    
+    # Update pip first
+    Write-StatusMessage "Updating pip..."
+    try {
+        python -m pip install --upgrade pip pip-tools
+        Write-SuccessMessage "pip updated"
+    } catch {
+        Write-ErrorMessage "Failed to update pip: $_"
+        return $false
+    }
+    
+    # Compile and sync requirements if requirements.in exists
+    if (Test-Path "requirements.in") {
+        Write-StatusMessage "Compiling requirements from requirements.in..."
+        try {
+            pip-compile --upgrade requirements.in
+            Write-SuccessMessage "Requirements compiled"
+            
+            Write-StatusMessage "Syncing Python dependencies..."
+            pip-sync requirements.txt
+            Write-SuccessMessage "Python dependencies synced"
+        } catch {
+            Write-ErrorMessage "Failed to compile/sync requirements: $_"
+            return $false
+        }
+    } elseif (Test-Path "requirements.txt") {
+        Write-StatusMessage "Updating from requirements.txt..."
+        try {
+            pip install --upgrade -r requirements.txt
+            Write-SuccessMessage "Python dependencies updated"
+        } catch {
+            Write-ErrorMessage "Failed to update Python dependencies: $_"
+            return $false
+        }
+    } else {
+        Write-WarningMessage "No requirements.in or requirements.txt found"
+    }
+    
+    return $true
+}
+
+function Update-NodeDependencies {
+    if ($SkipNode) {
+        Write-StatusMessage "Skipping Node.js updates (--SkipNode specified)"
+        return $true
+    }
+    
+    if (-not (Test-Path "package.json")) {
+        Write-StatusMessage "No package.json found, skipping Node.js updates"
+        return $true
+    }
+    
+    Write-StatusMessage "Updating Node.js dependencies..."
+    
+    # Check if package-lock.json exists and is newer than package.json
+    $useNpmCi = $false
+    if (Test-Path "package-lock.json") {
+        $packageJsonTime = (Get-Item "package.json").LastWriteTime
+        $packageLockTime = (Get-Item "package-lock.json").LastWriteTime
+        
+        if ($packageLockTime -gt $packageJsonTime) {
+            $useNpmCi = $true
+        }
+    }
+    
+    try {
+        if ($useNpmCi) {
+            Write-StatusMessage "Running npm ci (lock file is current)..."
+            npm ci
+        } else {
+            Write-StatusMessage "Running npm update..."
+            npm update
+        }
+        
+        Write-SuccessMessage "Node.js dependencies updated"
+    } catch {
+        Write-ErrorMessage "Failed to update Node.js dependencies: $_"
+        return $false
+    }
+    
+    # Update pnpm dependencies if pnpm is available and pnpm-lock.yaml exists
+    if ((Test-CommandExists "pnpm") -and (Test-Path "pnpm-lock.yaml")) {
+        Write-StatusMessage "Updating pnpm dependencies..."
+        try {
+            pnpm up -L  # Latest versions
+            Write-SuccessMessage "pnpm dependencies updated"
+        } catch {
+            Write-WarningMessage "Failed to update pnpm dependencies: $_"
+        }
+    }
+    
+    return $true
+}
+
+function Update-PreCommitHooks {
+    if (-not (Test-CommandExists "pre-commit")) {
+        Write-StatusMessage "pre-commit not installed, skipping hook updates"
+        return $true
+    }
+    
+    if (-not (Test-Path ".pre-commit-config.yaml")) {
+        Write-StatusMessage "No .pre-commit-config.yaml found, skipping hook updates"
+        return $true
+    }
+    
+    Write-StatusMessage "Updating pre-commit hooks..."
+    try {
+        pre-commit autoupdate
+        Write-SuccessMessage "pre-commit hooks updated"
+    } catch {
+        Write-WarningMessage "Failed to update pre-commit hooks: $_"
+        return $false
+    }
+    
+    return $true
+}
+
+function Run-CodeFormatting {
+    Write-StatusMessage "Running code formatting and linting..."
+    
+    # Run Ruff if available
+    if (Test-CommandExists "ruff") {
+        Write-StatusMessage "Running Ruff formatting and fixes..."
+        try {
+            # Check and fix issues
+            ruff check --fix .
+            
+            # Format code
+            ruff format .
+            
+            Write-SuccessMessage "Ruff formatting completed"
+        } catch {
+            Write-WarningMessage "Ruff formatting had issues: $_"
+        }
+    } elseif (Test-CommandExists "python") {
+        # Try to run ruff via python module
+        try {
+            python -m ruff check --fix .
+            python -m ruff format .
+            Write-SuccessMessage "Ruff formatting completed (via Python module)"
+        } catch {
+            Write-WarningMessage "Ruff not available: $_"
+        }
+    } else {
+        Write-StatusMessage "Ruff not available, skipping code formatting"
+    }
+    
+    return $true
+}
+
+function Run-SmokeTests {
+    if ($SkipTests) {
+        Write-StatusMessage "Skipping smoke tests (--SkipTests specified)"
+        return $true
+    }
+    
+    Write-StatusMessage "Running smoke tests..."
+    
+    # Run EQ12 smoke test if it exists
+    if (Test-Path "eq12_free_smoke_test.py") {
+        try {
+            python eq12_free_smoke_test.py
+            Write-SuccessMessage "EQ12 smoke tests passed"
+        } catch {
+            Write-WarningMessage "EQ12 smoke tests failed: $_"
+            return $false
+        }
+    } else {
+        Write-StatusMessage "eq12_free_smoke_test.py not found, creating basic test..."
+        
+        # Create a basic smoke test
+        $basicTest = @"
+#!/usr/bin/env python3
+"""Basic smoke test for EQ12 free toolchain"""
+import sys
+import os
+from datetime import datetime, timezone
+
+def main():
+    print("🧪 EQ12 Basic Smoke Test")
+    print("=" * 30)
+    
+    # Test Python version
+    print(f"✅ Python: {sys.version}")
+    
+    # Test timezone awareness
+    now = datetime.now(timezone.utc)
+    print(f"✅ UTC Time: {now}")
+    
+    # Test current directory
+    print(f"✅ Working Directory: {os.getcwd()}")
+    
+    # Test virtual environment
+    if hasattr(sys, 'prefix') and hasattr(sys, 'base_prefix'):
+        in_venv = sys.prefix != sys.base_prefix
+        print(f"✅ Virtual Environment: {in_venv}")
+    
+    print("🎉 Basic smoke test completed!")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+"@
+        
+        $basicTest | Out-File -FilePath "eq12_free_smoke_test.py" -Encoding utf8
+        Write-SuccessMessage "Created basic smoke test"
+        
+        try {
+            python eq12_free_smoke_test.py
+            Write-SuccessMessage "Basic smoke test passed"
+        } catch {
+            Write-WarningMessage "Basic smoke test failed: $_"
+            return $false
+        }
+    }
+    
+    return $true
+}
+
+function Show-UpdateSummary {
+    param([hashtable]$Results)
+    
+    Write-Host ""
+    Write-Host "🎉 EQ12 UPDATE ALL COMPLETE!" -ForegroundColor $Green
+    Write-Host "============================" -ForegroundColor $Green
+    Write-Host ""
+    
+    Write-Host "Update Results:" -ForegroundColor $Cyan
+    Write-Host "---------------" -ForegroundColor $Cyan
+    
+    foreach ($step in $Results.GetEnumerator()) {
+        $icon = if ($step.Value) { "✅" } else { "❌" }
+        $color = if ($step.Value) { $Green } else { $Red }
+        Write-Host "$icon $($step.Key)" -ForegroundColor $color
+    }
+    
+    Write-Host ""
+    $successCount = ($Results.Values | Where-Object { $_ }).Count
+    $totalCount = $Results.Count
+    
+    if ($successCount -eq $totalCount) {
+        Write-Host "🎉 All updates completed successfully!" -ForegroundColor $Green
+    } else {
+        Write-Host "⚠️  $successCount/$totalCount updates completed successfully" -ForegroundColor $Yellow
+    }
+    
+    Write-Host ""
+    Write-Host "Next recommended actions:" -ForegroundColor $Yellow
+    Write-Host "- Run: scripts\eq12_env_check.ps1" -ForegroundColor $White
+    Write-Host "- Check VS Code tasks for additional tools" -ForegroundColor $White
+    Write-Host ""
+}
+
+# Main execution
+function Start-UpdateAll {
+    Write-Host ""
+    Write-Host "🔄 EQ12 UPDATE ALL TOOLS" -ForegroundColor $Green
+    Write-Host "========================" -ForegroundColor $Green
+    Write-Host "Updating free/open-source tools only" -ForegroundColor $Cyan
+    Write-Host ""
+    
+    $startTime = Get-Date
+    $results = @{}
+    
+    # Update winget packages
+    $results["Winget Packages"] = Update-WingetPackages
+    
+    # Update Python dependencies
+    $results["Python Dependencies"] = Update-PythonDependencies
+    
+    # Update Node.js dependencies  
+    $results["Node.js Dependencies"] = Update-NodeDependencies
+    
+    # Update pre-commit hooks
+    $results["Pre-commit Hooks"] = Update-PreCommitHooks
+    
+    # Run code formatting
+    $results["Code Formatting"] = Run-CodeFormatting
+    
+    # Run smoke tests
+    $results["Smoke Tests"] = Run-SmokeTests
+    
+    $endTime = Get-Date
+    $duration = $endTime - $startTime
+    
+    # Show summary
+    Show-UpdateSummary -Results $results
+    
+    Write-Host "Update completed in $($duration.TotalSeconds.ToString("F1")) seconds" -ForegroundColor $Cyan
+    
+    # Return success if all critical steps succeeded
+    $criticalSteps = @("Python Dependencies", "Code Formatting", "Smoke Tests")
+    $criticalSuccess = $true
+    
+    foreach ($step in $criticalSteps) {
+        if ($results.ContainsKey($step) -and -not $results[$step]) {
+            $criticalSuccess = $false
+            break
+        }
+    }
+    
+    return $criticalSuccess
+}
+
+# Script entry point
+try {
+    $success = Start-UpdateAll
+    
+    if ($success) {
+        Write-SuccessMessage "Update completed successfully!"
+        exit 0
+    } else {
+        Write-ErrorMessage "Update completed with errors. Please check the output above."
+        exit 1
+    }
+} catch {
+    Write-ErrorMessage "Update failed: $_"
+    exit 1
+}

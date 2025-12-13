@@ -1,0 +1,174 @@
+{
+  "destination": "C:\\EQ12\\vendor\\sf",
+  "tools": [
+    {
+      "name": "XAMPP",
+      "project": "xampp",
+      "file_hint": "xampp-windows-x64-*.exe",
+      "category": "web-stack",
+      "why": "Apache/PHP/MySQL stack for EQ12 dashboards & APIs",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "HeidiSQL",
+      "project": "heidisql",
+      "file_hint": "HeidiSQL_*_Setup.exe|HeidiSQL_*_Portable.zip",
+      "category": "db",
+      "why": "MariaDB/MySQL GUI for schema + prod ops",
+      "silent_args": "/SILENT",
+      "install": "installer-or-portable"
+    },
+    {
+      "name": "WinSCP",
+      "project": "winscp",
+      "file_hint": "WinSCP-*-Setup.exe",
+      "category": "devops",
+      "why": "SFTP/FTP deploys and log pulls",
+      "silent_args": "/VERYSILENT /NORESTART",
+      "install": "installer"
+    },
+    {
+      "name": "WinMerge",
+      "project": "winmerge",
+      "file_hint": "WinMerge-*-Setup.exe",
+      "category": "dev",
+      "why": "Config/data diff & merge",
+      "silent_args": "/SILENT",
+      "install": "installer"
+    },
+    {
+      "name": "NSIS",
+      "project": "nsis",
+      "file_hint": "nsis-*.exe",
+      "category": "build",
+      "why": "Package internal Windows tools/agents",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "Gpg4win",
+      "project": "gpg4win",
+      "file_hint": "gpg4win-*.exe",
+      "category": "security",
+      "why": "Sign builds, encrypt secrets",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "KeePass",
+      "project": "keepass",
+      "file_hint": "KeePass-*-Setup.exe|KeePass-*-Portable.zip",
+      "category": "security",
+      "why": "Local secrets vault for API keys",
+      "silent_args": "/SILENT",
+      "install": "installer-or-portable"
+    },
+    {
+      "name": "OpenVPN",
+      "project": "openvpn",
+      "file_hint": "OpenVPN-*.exe",
+      "category": "networking",
+      "why": "Secure tunnels to infra",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "LogExpert",
+      "project": "logexpert",
+      "file_hint": "LogExpert-*.exe",
+      "category": "monitoring",
+      "why": "Tail EQ12 logs with regex filters",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "AWStats",
+      "project": "awstats",
+      "file_hint": "awstats-*.zip|awstats-*.exe",
+      "category": "analytics",
+      "why": "Apache log analytics for dashboard/API routes",
+      "install": "portable-or-installer"
+    },
+    {
+      "name": "PortableApps Platform",
+      "project": "portableapps",
+      "file_hint": "PortableAppsPlatform*.exe",
+      "category": "ops",
+      "why": "One launcher for many portable tools",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "PSPad",
+      "project": "pspad",
+      "file_hint": "pspad*.exe",
+      "category": "editor",
+      "why": "Light editor on jump boxes",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "TightVNC",
+      "project": "vnc-tight",
+      "file_hint": "tightvnc-*.exe",
+      "category": "ops",
+      "why": "VNC access to test nodes",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "DB Browser for SQLite",
+      "project": "sqlitebrowser",
+      "file_hint": "DB.Browser.for.SQLite-*.win64.exe|sqlitebrowser-*.zip",
+      "category": "db",
+      "why": "Inspect EQ12 cache/telemetry DBs",
+      "silent_args": "/S",
+      "install": "installer-or-portable"
+    },
+    {
+      "name": "XML Copy Editor",
+      "project": "xml-copy-editor",
+      "file_hint": "XmlCopyEditor-*.exe",
+      "category": "dev",
+      "why": "Validate XML feeds/schemas locally",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "GnuWin32 (wget/coreutils)",
+      "project": "gnuwin32",
+      "file_hint": "wget-*.exe|coreutils-*.exe",
+      "category": "cli",
+      "why": "Scriptable downloads and UNIX-like tools",
+      "silent_args": "/S",
+      "install": "installer"
+    },
+    {
+      "name": "ConEmu",
+      "project": "conemu",
+      "file_hint": "ConEmuSetup-*.exe",
+      "category": "cli",
+      "why": "Better console for long-running jobs",
+      "silent_args": "/SILENT",
+      "install": "installer"
+    },
+    {
+      "name": "PeaZip",
+      "project": "peazip",
+      "file_hint": "peazip-*.WIN64.exe|peazip_portable-*.ZIP",
+      "category": "utils",
+      "why": "Archive/unarchive portable",
+      "silent_args": "/SILENT",
+      "install": "installer-or-portable"
+    },
+    {
+      "name": "Webalizer",
+      "project": "webalizer",
+      "file_hint": "webalizer-*.zip|webalizer-*.exe",
+      "category": "analytics",
+      "why": "Quick Apache log summaries",
+      "install": "portable-or-installer"
+    }
+  ]
+}

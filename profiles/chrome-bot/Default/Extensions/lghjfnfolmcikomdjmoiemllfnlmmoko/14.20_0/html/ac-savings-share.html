@@ -1,0 +1,31 @@
+<link rel="stylesheet" type="text/css" href="chrome-extension://{{ extension_id }}/css/ac-savings-share.css">
+<link rel="stylesheet" type="text/css" href="chrome-extension://{{ extension_id }}/fonts/material-icons/material-icons.css">
+
+<div id="ac-savings-share">
+  <div id="ac-header">
+    <div id="ac-ih-icon"><img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg" /></div>
+    <div id="ac-close-icon"><i class="material-icons pb-close">close</i></div>
+  </div>
+  <div id="ac-content">
+    <div id="ac-savings-image"><img src="chrome-extension://{{ extension_id }}/images/savings@2x.png"></div>
+    <div id="ac-title">CNET Shopping just saved you:</div>
+    <div id="ac-savings-container">
+      <div id="ac-savings">__MSG_currency__20.49</div>
+    </div>
+  </div>
+  <div id="ac-footer">
+    <div>Don't hog all the savings!</div>
+    <div>Share CNET Shopping with a friend.</div>
+    <div id="ac-share">
+      <div class="img-container">
+        <img src="chrome-extension://{{ extension_id }}/images/twitter-logo.svg">
+      </div>
+      <div class="img-container">
+        <img src="chrome-extension://{{ extension_id }}/images/facebook-logo.svg">
+      </div>
+      <div class="img-container">
+        <img src="chrome-extension://{{ extension_id }}/images/email@2x.png">
+      </div>
+    </div>
+  </div>
+</div>

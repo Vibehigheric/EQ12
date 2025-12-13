@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <!-- Map the broken NUnit GitHub URL to our local schema -->
+    <system systemId="https://raw.githubusercontent.com/nunit/nunit/master/src/NUnitFramework/nunit.xsd" uri="schemas/nunit.xsd"/>
+    <!-- Also map the main branch variant in case it gets redirected -->
+    <system systemId="https://raw.githubusercontent.com/nunit/nunit/main/src/NUnitFramework/nunit.xsd" uri="schemas/nunit.xsd"/>
+    <!-- Map common NUnit schema variants -->
+    <uri name="https://raw.githubusercontent.com/nunit/nunit/master/src/NUnitFramework/nunit.xsd" uri="schemas/nunit.xsd"/>
+    <uri name="https://raw.githubusercontent.com/nunit/nunit/main/src/NUnitFramework/nunit.xsd" uri="schemas/nunit.xsd"/>
+</catalog>

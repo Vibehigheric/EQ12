@@ -1,0 +1,197 @@
+﻿=== EQ12 WORKSPACE DIAGNOSTIC ===
+Generated: 09/27/2025 16:31:06
+
+1. DIRECTORY STRUCTURE
+======================
+FOLDER: .copilot
+FOLDER: .devcontainer
+FOLDER: .github
+FOLDER: .venv
+FOLDER: .vscode
+FOLDER: archive_duplicates
+FOLDER: bing_intelligence
+FOLDER: buffalo_stack
+FOLDER: configs
+FOLDER: dashboard
+FOLDER: data
+FOLDER: docs
+FOLDER: drive
+FOLDER: edgegod-parlay
+FOLDER: EdgeGodParlays
+FOLDER: EdgeGodUnified
+FOLDER: envs
+FOLDER: EQ12
+FOLDER: EQ12.ChatGPT.InlineRefactor
+FOLDER: EQ12_Automation
+FOLDER: eq12_godstack2
+FOLDER: eq12_godstack_final
+FOLDER: eq12_meta_search
+FOLDER: governance
+FOLDER: grafana
+FOLDER: graphics
+FOLDER: keys
+FOLDER: logs
+FOLDER: macros
+FOLDER: modules
+FOLDER: notebooks
+FOLDER: omni_scraper
+FOLDER: openai-python-project
+FOLDER: outputs
+FOLDER: profiles
+FOLDER: prometheus
+FOLDER: reports
+FOLDER: scaffold
+FOLDER: scraper_starter
+FOLDER: scripts
+FOLDER: tasks
+FOLDER: TestConsole
+FOLDER: tests
+FOLDER: wireguard
+FOLDER: __pycache__
+
+2. PYTHON FILES
+===============
+PYTHON: alert_pipe.py
+PYTHON: autosuggest_intelligence.py
+PYTHON: autosuggest_merge.py
+PYTHON: check_secrets.py
+PYTHON: chrome_governance_automation.py
+PYTHON: cleanup_pyc.py
+PYTHON: clients.py
+PYTHON: dashboard.py
+PYTHON: db.py
+PYTHON: enrichment.py
+PYTHON: eq12_automation_bridge.py
+PYTHON: eq12_billing_system.py
+PYTHON: eq12_cleanup.py
+PYTHON: eq12_config.py
+PYTHON: eq12_enterprise_api.py
+PYTHON: eq12_enterprise_api_v2.py
+PYTHON: eq12_governance_assistant.py
+PYTHON: eq12_intelligent_router.py
+PYTHON: eq12_master_ecosystem.py
+PYTHON: eq12_openai_demo.py
+PYTHON: eq12_openai_governance.py
+PYTHON: eq12_openai_optimizer.py
+PYTHON: eq12_openai_streaming.py
+PYTHON: eq12_plugin_marketplace.py
+PYTHON: eq12_premium_features.py
+PYTHON: eq12_restore.py
+PYTHON: eq12_streaming_assistant.py
+PYTHON: eq12_stream_processor.py
+PYTHON: eq12_unified_search.py
+PYTHON: fix_devcontainer_issues.py
+
+3. POWERSHELL FILES
+==================
+PS1: Build-Install-EQ12ChatGPT.ps1
+PS1: chrome_daily_task_simple.ps1
+PS1: chrome_test_simple.ps1
+PS1: eq12-build-dashboard.ps1
+PS1: eq12-elite-run.ps1
+PS1: eq12_daily_test.ps1
+PS1: eq12_deploy_godstack.ps1
+PS1: eq12_deploy_godstack_clean.ps1
+PS1: eq12_diagnose.ps1
+PS1: eq12_diagnose_fixed.ps1
+PS1: eq12_launcher.ps1
+PS1: eq12_master_launcher.ps1
+PS1: eq12_ngrok_manager.ps1
+PS1: EQ12_Profile.ps1
+PS1: eq12_recycle.ps1
+PS1: eq12_simple_diagnose.ps1
+PS1: eq12_simple_start.ps1
+PS1: eq12_status_check.ps1
+PS1: eq12_status_check_clean.ps1
+PS1: eq12_update.ps1
+
+4. CONFIGURATION FILES
+======================
+CONFIG: humanlayer.json
+CONFIG: docker-compose.preview.yml
+CONFIG: docker-compose.yml
+CONFIG: archive_manifest.txt
+CONFIG: COPILOT_MASTER_PROMPT.append.txt
+CONFIG: COPILOT_MASTER_PROMPT.merged.txt
+CONFIG: COPILOT_MASTER_PROMPT.txt
+CONFIG: eq12_cleanup_report.appended.txt
+CONFIG: eq12_cleanup_report.txt
+CONFIG: eq12_cleanup_report.v2.txt
+CONFIG: eq12_inventory.txt
+CONFIG: keys_manifest.txt
+CONFIG: queries.txt
+CONFIG: queries_news.txt
+CONFIG: requirements-enterprise.txt
+CONFIG: requirements-orchestrator.txt
+CONFIG: requirements.txt
+CONFIG: requirements_clean.txt
+CONFIG: .copilot-instructions.md
+CONFIG: AGENTS.md
+CONFIG: COMPLIANCE.md
+CONFIG: CONSISTENCY_REPORT.md
+CONFIG: CONTRIBUTING.md
+CONFIG: COPILOT_DEVCONTAINER_PROMPT.md
+CONFIG: COPILOT_MASTER_PATCH.md
+CONFIG: COPILOT_MASTER_PROMPT.md
+CONFIG: COPILOT_PROMPT.md
+CONFIG: COPILOT_PROMPTS.md
+CONFIG: COPILOT_PROMPT_GPG.md
+CONFIG: COPILOT_REVIEW.md
+CONFIG: DASHBOARD.md
+CONFIG: DEPLOYMENT.md
+CONFIG: DEPLOYMENT_GUIDE.md
+
+5. PYTHON SYNTAX CHECK
+======================
+OK: alert_pipe.py
+OK: autosuggest_intelligence.py
+OK: autosuggest_merge.py
+OK: check_secrets.py
+OK: chrome_governance_automation.py
+OK: cleanup_pyc.py
+OK: clients.py
+OK: dashboard.py
+OK: db.py
+OK: enrichment.py
+
+6. REQUIREMENTS FILES
+====================
+FOUND: requirements.txt
+REQ: # EQ12 Core Dependencies - Cleaned and Organized
+REQ: # Base utilities
+REQ: requests>=2.31.0
+REQ: python-dotenv>=1.0.0
+REQ: argparse
+FOUND: requirements-enterprise.txt
+
+7. ENVIRONMENT VARIABLES
+=======================
+MISSING: OPENAI_API_KEY
+MISSING: DATABASE_URL
+MISSING: SECRET_KEY
+
+8. SECURITY SCAN
+===============
+
+9. IMPORT ISSUES
+===============
+IMPORTS in alert_pipe.py:
+  import os
+  from typing import List, Dict, Optional
+IMPORTS in autosuggest_intelligence.py:
+  import os
+  import sys
+  import json
+IMPORTS in autosuggest_merge.py:
+  import argparse, sys, json, urllib.parse, requests
+  from typing import List, Dict
+  from clients import BingClient
+IMPORTS in check_secrets.py:
+  import os
+  import sys
+IMPORTS in chrome_governance_automation.py:
+  import os
+  import sys
+  import json
+
+=== DIAGNOSTIC COMPLETE ===

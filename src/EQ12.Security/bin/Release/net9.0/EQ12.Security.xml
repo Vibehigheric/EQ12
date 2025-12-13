@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EQ12.Security
+</name>
+</assembly>
+<members>
+<member name="T:EQ12.Security.EQ12.Security.CredentialManager">
+ <summary>Encryption and credential management</summary>
+</member>
+<member name="M:EQ12.Security.EQ12.Security.CredentialManager.EncryptCredential(System.String)">
+ <summary>Encrypt a sensitive string using DPAPI</summary>
+</member>
+<member name="M:EQ12.Security.EQ12.Security.CredentialManager.DecryptCredential(System.String)">
+ <summary>Decrypt a credential from storage</summary>
+</member>
+<member name="M:EQ12.Security.EQ12.Security.CredentialManager.GetApiKey(System.String)">
+ <summary>Read API key from environment or secure storage</summary>
+</member>
+</members>
+</doc>

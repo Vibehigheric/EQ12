@@ -1,0 +1,229 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 D Drive Bootable Execution
+    Buffalo NY 14215 Content Empire - Immediate Windows 11 Setup
+
+.DESCRIPTION
+    Direct execution of Windows 11 bootable creation on D: drive
+#>
+
+$ErrorActionPreference = "Stop"
+
+function Start-WindowsBootableExecution {
+    Clear-Host
+    Write-Host "EQ12 D: DRIVE BOOTABLE EXECUTION" -ForegroundColor Green
+    Write-Host "================================" -ForegroundColor Green
+    Write-Host "Buffalo NY 14215 Content Empire" -ForegroundColor Gray
+    Write-Host "Windows 11 2025 Update Bootable Creation" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Verify D: drive
+    $dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq "D:"}
+    if (-not $dDrive) {
+        Write-Host "ERROR: D: drive not found" -ForegroundColor Red
+        Write-Host "Please connect your USB drive and try again" -ForegroundColor Yellow
+        return
+    }
+
+    $sizeGB = [math]::Round($dDrive.Size/1GB, 2)
+    Write-Host "D: Drive Status: $sizeGB GB USB Ready" -ForegroundColor Green
+
+    # Setup download location
+    $downloadPath = "$env:USERPROFILE\Downloads\Windows11_Tools"
+    New-Item -Path $downloadPath -ItemType Directory -Force | Out-Null
+
+    Write-Host ""
+    Write-Host "EXECUTION PLAN:" -ForegroundColor Yellow
+    Write-Host "1. Open Microsoft Media Creation Tool download"
+    Write-Host "2. Guide through download process"
+    Write-Host "3. Launch tool for D: drive bootable creation"
+    Write-Host "4. Verify bootable setup completion"
+
+    Write-Host ""
+    Write-Host "Opening Microsoft download page..." -ForegroundColor Cyan
+
+    # Open Microsoft Media Creation Tool page
+    Start-Process "https://go.microsoft.com/fwlink/?linkid=2156295"
+
+    Write-Host ""
+    Write-Host "DOWNLOAD INSTRUCTIONS:" -ForegroundColor Yellow
+    Write-Host "1. Click 'Download Media Creation Tool Now'"
+    Write-Host "2. Save as: MediaCreationTool11.exe"
+    Write-Host "3. Save location: $downloadPath"
+    Write-Host "4. File size: ~20MB (quick download)"
+
+    # Open download folder
+    Start-Process $downloadPath
+
+    Write-Host ""
+    Write-Host "Waiting for download completion..." -ForegroundColor Cyan
+    Write-Host "Press ENTER when MediaCreationTool11.exe is downloaded" -ForegroundColor Yellow
+    Read-Host
+
+    # Check for downloaded file
+    $mediaToolPath = Join-Path $downloadPath "MediaCreationTool11.exe"
+    $altPaths = @(
+        (Join-Path $downloadPath "MediaCreationTool.exe"),
+        (Get-ChildItem $downloadPath -Filter "*MediaCreation*.exe" | Select-Object -First 1 -ExpandProperty FullName)
+    )
+
+    $toolFound = $false
+    foreach ($path in @($mediaToolPath) + $altPaths) {
+        if ($path -and (Test-Path $path)) {
+            $mediaToolPath = $path
+            $toolFound = $true
+            break
+        }
+    }
+
+    if (-not $toolFound) {
+        Write-Host "ERROR: Media Creation Tool not found" -ForegroundColor Red
+        Write-Host "Please download MediaCreationTool11.exe and save to:" -ForegroundColor Yellow
+        Write-Host "$downloadPath" -ForegroundColor White
+        return
+    }
+
+    $fileSize = [math]::Round((Get-Item $mediaToolPath).Length/1MB, 2)
+    Write-Host "Found Media Creation Tool: $fileSize MB" -ForegroundColor Green
+
+    Write-Host ""
+    Write-Host "LAUNCHING MEDIA CREATION TOOL..." -ForegroundColor Green
+    Write-Host ""
+
+    # Show instructions before launch
+    Write-Host "FOLLOW THESE STEPS IN THE TOOL:" -ForegroundColor Yellow
+    Write-Host "===============================" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Step 1: License Agreement" -ForegroundColor Cyan
+    Write-Host "  > Click 'Accept'" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Step 2: What do you want to do?" -ForegroundColor Cyan
+    Write-Host "  > Select: 'Create installation media'" -ForegroundColor Green
+    Write-Host "  > Click 'Next'" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Step 3: Select language and edition" -ForegroundColor Cyan
+    Write-Host "  > Language: English" -ForegroundColor White
+    Write-Host "  > Edition: Windows 11" -ForegroundColor White
+    Write-Host "  > Architecture: 64-bit" -ForegroundColor White
+    Write-Host "  > Click 'Next'" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Step 4: Choose media type" -ForegroundColor Cyan
+    Write-Host "  > Select: 'USB flash drive'" -ForegroundColor Green
+    Write-Host "  > Click 'Next'" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Step 5: Select USB drive" -ForegroundColor Cyan
+    Write-Host "  > Choose: D: drive (your USB)" -ForegroundColor Green
+    Write-Host "  > VERIFY correct drive selected" -ForegroundColor Red
+    Write-Host "  > Click 'Next'" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Step 6: Creation process" -ForegroundColor Cyan
+    Write-Host "  > Tool downloads Windows 11 (~5GB)" -ForegroundColor White
+    Write-Host "  > Creates bootable USB automatically" -ForegroundColor White
+    Write-Host "  > Takes 30-60 minutes total" -ForegroundColor White
+    Write-Host "  > DO NOT remove USB during process" -ForegroundColor Red
+
+    Write-Host ""
+    Write-Host "CRITICAL WARNINGS:" -ForegroundColor Red
+    Write-Host "- ALL data on D: drive will be ERASED" -ForegroundColor Red
+    Write-Host "- Keep USB connected throughout process" -ForegroundColor Red
+    Write-Host "- Stable internet required for download" -ForegroundColor Red
+
+    Write-Host ""
+    Write-Host "Ready to launch? Press ENTER to continue..." -ForegroundColor Yellow
+    Read-Host
+
+    # Launch with admin privileges
+    Write-Host "Starting Media Creation Tool with admin privileges..." -ForegroundColor Green
+    Start-Process $mediaToolPath -Verb RunAsAdministrator
+
+    Write-Host ""
+    Write-Host "Media Creation Tool launched!" -ForegroundColor Green
+    Write-Host "Follow the step-by-step instructions above" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Process will take 30-60 minutes depending on internet speed" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "When the tool shows 'Your USB flash drive is ready':" -ForegroundColor Yellow
+    Write-Host "Press ENTER to verify the bootable creation" -ForegroundColor Green
+    Read-Host
+
+    # Verify creation
+    Test-BootableCreation
+}
+
+function Test-BootableCreation {
+    Write-Host ""
+    Write-Host "VERIFYING BOOTABLE CREATION" -ForegroundColor Cyan
+    Write-Host "============================" -ForegroundColor Cyan
+
+    # Check D: drive
+    $dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq "D:"}
+
+    if (-not $dDrive) {
+        Write-Host "ERROR: D: drive not accessible" -ForegroundColor Red
+        return
+    }
+
+    $totalGB = [math]::Round($dDrive.Size/1GB, 2)
+    $usedGB = [math]::Round(($dDrive.Size - $dDrive.FreeSpace)/1GB, 2)
+    $freeGB = [math]::Round($dDrive.FreeSpace/1GB, 2)
+
+    Write-Host ""
+    Write-Host "D: DRIVE STATUS:" -ForegroundColor Yellow
+    Write-Host "  Total: $totalGB GB"
+    Write-Host "  Used: $usedGB GB"
+    Write-Host "  Free: $freeGB GB"
+    Write-Host "  Format: $($dDrive.FileSystem)"
+
+    # Check for Windows files
+    $essentialFiles = @(
+        "D:\setup.exe",
+        "D:\sources\boot.wim",
+        "D:\sources\install.wim"
+    )
+
+    $foundFiles = 0
+    Write-Host ""
+    Write-Host "WINDOWS 11 FILES CHECK:" -ForegroundColor Cyan
+
+    foreach ($file in $essentialFiles) {
+        if (Test-Path $file) {
+            Write-Host "Found: $file" -ForegroundColor Green
+            $foundFiles++
+        } else {
+            Write-Host "Missing: $file" -ForegroundColor Red
+        }
+    }
+
+    Write-Host ""
+    if ($foundFiles -eq $essentialFiles.Count) {
+        Write-Host "SUCCESS! D: DRIVE IS NOW BOOTABLE!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "WINDOWS 11 RESCUE DRIVE READY:" -ForegroundColor Yellow
+        Write-Host "- Emergency Windows installation"
+        Write-Host "- System recovery operations"
+        Write-Host "- Boot problem resolution"
+        Write-Host "- Clean Windows installs"
+
+        Write-Host ""
+        Write-Host "HOW TO USE:" -ForegroundColor Green
+        Write-Host "1. Insert into target computer"
+        Write-Host "2. Restart and press F12 (boot menu)"
+        Write-Host "3. Select USB drive"
+        Write-Host "4. Windows 11 setup starts"
+
+        Write-Host ""
+        Write-Host "D: DRIVE BOOTABLE EXECUTION COMPLETE!" -ForegroundColor Green
+
+    } else {
+        Write-Host "WARNING: Bootable creation incomplete" -ForegroundColor Yellow
+        Write-Host "Found $foundFiles of $($essentialFiles.Count) files"
+        Write-Host "Media Creation Tool may not have completed successfully"
+    }
+
+    Write-Host ""
+    Write-Host "EQ12 Bootable Creation Process Complete" -ForegroundColor Cyan
+}
+
+# Execute the process
+Start-WindowsBootableExecution

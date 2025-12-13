@@ -1,0 +1,65 @@
+{
+  "total_analyzed": 3,
+  "wins": 0,
+  "losses": 3,
+  "win_rate": 0.0,
+  "insights": {
+    "losing_patterns": {
+      "analysis": "\ud83e\udd16 gpt-4 Analysis: The request appears to be related to sports betting intelligence.",
+      "group_stats": {
+        "count": 3,
+        "conferences": [
+          "ACC"
+        ],
+        "avg_odds": 507036.29904440005,
+        "avg_legs": 5.0,
+        "steam_rate": 0.26666666666666666,
+        "top_picks": [
+          {
+            "parlay_id": "ACC_BALANCED_Week7_20251004_111230",
+            "conference": "ACC",
+            "odds": 4518.3099999999995,
+            "legs": 3,
+            "edge": 76.03995400915052
+          },
+          {
+            "parlay_id": "ACC_HIGH-PAYOUT_Week7_20251004_111230",
+            "conference": "ACC",
+            "odds": 1407579.6882000002,
+            "legs": 6,
+            "edge": 185.1424972933697
+          },
+          {
+            "parlay_id": "ACC_HIGH-PAYOUT_Week7_20251004_111511",
+            "conference": "ACC",
+            "odds": 109010.89893319998,
+            "legs": 6,
+            "edge": 121.22113790534505
+          }
+        ]
+      },
+      "timestamp": "2025-10-04T16:57:06.648122"
+    },
+    "overall_patterns": {
+      "analysis": "\ud83c\udfaf Strategic Response: The system should implement comprehensive monitoring and safety protocols.",
+      "historical_data": {
+        "total_parlays": 3,
+        "by_conference": {
+          "ACC": {
+            "total": 3,
+            "wins": 0,
+            "win_rate": 0.0
+          }
+        },
+        "by_type": {},
+        "performance_metrics": {
+          "avg_win_prob": 0.07394153071233332,
+          "avg_edge": 127.46786306928841,
+          "steam_correlation": 0,
+          "confidence_accuracy": 0
+        }
+      },
+      "timestamp": "2025-10-04T16:57:07.153016"
+    }
+  }
+}

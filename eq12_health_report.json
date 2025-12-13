@@ -1,0 +1,211 @@
+{
+  "timestamp": "2025-10-04T10:26:10.723057",
+  "checks": {
+    "Directory Structure": {
+      "status": "pass",
+      "message": "All required directories found",
+      "details": {
+        "scripts": {
+          "exists": true,
+          "has_init": true
+        },
+        "tests": {
+          "exists": true,
+          "has_init": true
+        },
+        "configs": {
+          "exists": true,
+          "has_init": true
+        },
+        "logs": {
+          "exists": true,
+          "has_init": true
+        },
+        "dashboard": {
+          "exists": true,
+          "has_init": true
+        },
+        "data": {
+          "exists": true,
+          "has_init": true
+        }
+      },
+      "timestamp": "2025-10-04T10:26:10.723368"
+    },
+    "Python Dependencies": {
+      "status": "fail",
+      "message": "Missing packages: python-dotenv, pytest-mock, pytest-asyncio, beautifulsoup4, playwright-stealth, undetected-chromedriver, fake-useragent, sentence-transformers, weaviate-client, pillow, python-telegram-bot, python-telegram-bot, discord.py, webdriver-manager, psycopg2-binary, nltk, textblob, reportlab, tesseract, prometheus-client, feedparser, python-dateutil, uvicorn[standard], SQLAlchemy, psycopg2-binary",
+      "details": {
+        "missing": [
+          "python-dotenv",
+          "pytest-mock",
+          "pytest-asyncio",
+          "beautifulsoup4",
+          "playwright-stealth",
+          "undetected-chromedriver",
+          "fake-useragent",
+          "sentence-transformers",
+          "weaviate-client",
+          "pillow",
+          "python-telegram-bot",
+          "python-telegram-bot",
+          "discord.py",
+          "webdriver-manager",
+          "psycopg2-binary",
+          "nltk",
+          "textblob",
+          "reportlab",
+          "tesseract",
+          "prometheus-client",
+          "feedparser",
+          "python-dateutil",
+          "uvicorn[standard]",
+          "SQLAlchemy",
+          "psycopg2-binary"
+        ],
+        "installed": [
+          "requests",
+          "pandas",
+          "numpy",
+          "pytest",
+          "playwright",
+          "transformers",
+          "langchain",
+          "openai",
+          "redis",
+          "matplotlib",
+          "flask",
+          "aiohttp",
+          "selenium",
+          "bs4",
+          "yaml",
+          "yfinance",
+          "psutil",
+          "qrcode",
+          "jinja2",
+          "aiofiles",
+          "netifaces",
+          "zeroconf",
+          "pystray",
+          "watchdog",
+          "pytest",
+          "scipy",
+          "httpx",
+          "pytz",
+          "fastapi",
+          "stripe",
+          "pydantic"
+        ]
+      },
+      "timestamp": "2025-10-04T10:26:10.723368"
+    },
+    "Configuration Files": {
+      "status": "pass",
+      "message": "All configuration files valid",
+      "details": {
+        "ai_enhanced_config.json": "valid",
+        "amazon_watchlist.json": "valid",
+        "bookmarks.json": "valid",
+        "cookbook_config.json": "valid",
+        "copilot_system_config.json": "valid",
+        "coupon_watchlist.json": "valid",
+        "EQ12SystemMonitor_integration.json": "valid",
+        "generated_projects_index.json": "valid",
+        "production_config.json": "valid",
+        "travel_watchlist.json": "valid",
+        "viboot_config.example.json": "valid",
+        "x_api_search_queries.json": "valid"
+      },
+      "timestamp": "2025-10-04T10:26:48.769510"
+    },
+    "Log Health": {
+      "status": "pass",
+      "message": "Log system healthy",
+      "details": {
+        "total_files": 92,
+        "total_size_mb": 7.17,
+        "large_files": [],
+        "recent_errors": 0
+      },
+      "timestamp": "2025-10-04T10:26:48.904530"
+    },
+    "PowerShell Scripts": {
+      "status": "warning",
+      "message": "3 scripts have issues",
+      "details": {
+        "checked": 253,
+        "errors": [
+          {
+            "script": "eq12_simple_start.ps1",
+            "error": "Command '['powershell', '-NoProfile', '-Command', 'Get-Command -Syntax (Get-Content \"C:\\\\EQ12\\\\eq12_simple_start.ps1\")']' returned non-zero exit status 1."
+          },
+          {
+            "script": "eq12_status_check_clean.ps1",
+            "error": "Command '['powershell', '-NoProfile', '-Command', 'Get-Command -Syntax (Get-Content \"C:\\\\EQ12\\\\eq12_status_check_clean.ps1\")']' returned non-zero exit status 1."
+          },
+          {
+            "script": "manage_chrome_task.ps1",
+            "error": "Command '['powershell', '-NoProfile', '-Command', 'Get-Command -Syntax (Get-Content \"C:\\\\EQ12\\\\manage_chrome_task.ps1\")']' returned non-zero exit status 1."
+          }
+        ]
+      },
+      "timestamp": "2025-10-04T10:26:48.906531"
+    },
+    "Git Repository": {
+      "status": "warning",
+      "message": "Not a Git repository",
+      "details": {},
+      "timestamp": "2025-10-04T10:26:50.974028"
+    },
+    "Environment Variables": {
+      "status": "warning",
+      "message": "Missing env vars: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, OPENAI_API_KEY",
+      "details": {
+        "missing": [
+          "TELEGRAM_BOT_TOKEN",
+          "TELEGRAM_CHAT_ID",
+          "OPENAI_API_KEY"
+        ],
+        "configured": [
+          "ODDS_API_KEY"
+        ]
+      },
+      "timestamp": "2025-10-04T10:26:50.974028"
+    },
+    "Services Status": {
+      "status": "info",
+      "message": "Services status checked",
+      "details": {
+        "note": "Service checks not implemented"
+      },
+      "timestamp": "2025-10-04T10:26:50.975028"
+    },
+    "Disk Space": {
+      "status": "pass",
+      "message": "Sufficient disk space available",
+      "details": {
+        "free_gb": 1606.59,
+        "total_gb": 1906.61,
+        "used_percent": 15.74
+      },
+      "timestamp": "2025-10-04T10:26:50.975028"
+    },
+    "Performance": {
+      "status": "pass",
+      "message": "Performance metrics collected",
+      "details": {
+        "cpu_percent": 23.6,
+        "memory_percent": 86.9,
+        "memory_available_gb": 4.15
+      },
+      "timestamp": "2025-10-04T10:26:50.975028"
+    }
+  },
+  "summary": {
+    "total_checks": 10,
+    "passed": 6,
+    "failed": 1,
+    "warnings": 3
+  },
+  "execution_time_seconds": 41.28
+}

@@ -1,0 +1,1 @@
+import{b as r}from"./chunk-3GYLW4KZ.js";function l(t){return t?.replaceAll(/\s\s+/g," ").trim()||""}var o=r(()=>{"use strict"});function n(t){if(!t)return null;try{let e=new Date(t);return isNaN(e.getUTCFullYear())?null:e.toISOString().split("T")[0]}catch{return null}}var a=r(()=>{});function u(t){return n(t)||t}var i=r(()=>{"use strict";a()});export{l as a,o as b,u as c,i as d};

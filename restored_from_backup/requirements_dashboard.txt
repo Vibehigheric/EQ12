@@ -1,0 +1,37 @@
+# EQ12 Unified Dashboard Requirements
+# Core FastAPI and web framework dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Database and data handling
+sqlite3  # Built into Python
+requests==2.31.0
+aiofiles==23.2.1
+
+# WebSocket support
+websockets==12.0
+
+# Async support
+asyncio  # Built into Python
+aiohttp==3.9.1
+
+# Data processing and analysis
+pandas==2.1.4
+numpy==1.25.2
+
+# Logging and monitoring
+structlog==23.2.0
+
+# Security and authentication (optional)
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Development and testing (optional)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Optional: Advanced features
+redis==5.0.1  # For caching if Redis server available
+celery==5.3.4  # For background tasks if needed

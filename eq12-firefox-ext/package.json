@@ -1,0 +1,42 @@
+{
+    "name": "eq12-betting-ext",
+    "version": "0.1.0",
+    "description": "EQ12 Betting Dashboard Companion Extension",
+    "scripts": {
+        "build:firefox": "npm run clean && cp -r src dist-firefox && cp manifest.firefox.json dist-firefox/manifest.json && cp -r icons dist-firefox/",
+        "build:chromium": "npm run clean && cp -r src dist-chromium && cp manifest.chromium.json dist-chromium/manifest.json && cp -r icons dist-chromium/",
+        "build:windows:firefox": "npm run clean:windows && xcopy src dist-firefox\\ /E /I && copy manifest.firefox.json dist-firefox\\manifest.json && xcopy icons dist-firefox\\icons\\ /E /I",
+        "build:windows:chromium": "npm run clean:windows && xcopy src dist-chromium\\ /E /I && copy manifest.chromium.json dist-chromium\\manifest.json && xcopy icons dist-chromium\\icons\\ /E /I",
+        "clean": "rm -rf dist-firefox dist-chromium",
+        "clean:windows": "if exist dist-firefox rmdir /s /q dist-firefox && if exist dist-chromium rmdir /s /q dist-chromium",
+        "package:firefox": "cd dist-firefox && zip -r ../eq12-firefox-ext.zip .",
+        "package:chromium": "cd dist-chromium && zip -r ../eq12-chromium-ext.zip .",
+        "package:windows": "powershell -Command \"Compress-Archive -Path dist-firefox\\* -DestinationPath eq12-firefox-ext.zip -Force; Compress-Archive -Path dist-chromium\\* -DestinationPath eq12-chromium-ext.zip -Force\"",
+        "dev": "npm run build:windows:firefox",
+        "test": "echo 'Extension ready for testing'",
+        "lint": "eslint src/**/*.js",
+        "build": "npm run build:windows:firefox",
+        "start": "web-ext run --source-dir=dist-firefox",
+        "package": "npm run package:windows"
+    },
+    "dependencies": {
+        "send": "1.2.0",
+        "webextension-polyfill": "^0.12.0"
+    },
+    "devDependencies": {
+        "@types/webextension-polyfill": "^0.10.7",
+        "eslint": "^8.57.0",
+        "web-ext": "^8.2.0"
+    },
+    "keywords": [
+        "betting",
+        "parlay",
+        "sportsbook",
+        "ev",
+        "firefox",
+        "chrome",
+        "extension"
+    ],
+    "author": "EQ12 Team",
+    "license": "MIT"
+}

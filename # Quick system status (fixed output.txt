@@ -1,0 +1,13 @@
+# Quick system status (fixed output)
+.\scripts\eq12_status.ps1
+
+# View complete command reference  
+Get-Content EQ12_Command_Sheet.txt
+
+# Launch interactive menu
+.\EQ12_Interactive_Launcher.ps1
+
+# Direct program access examples
+python eq12_streaming_assistant.py
+python scripts\eq12_cfb_optimizer.py
+python chrome_governance_automation.py

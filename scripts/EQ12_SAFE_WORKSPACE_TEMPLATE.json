@@ -1,0 +1,165 @@
+{
+  "$schema": "https://code.visualstudio.com/schemas/vscode/settings.schema.json",
+  "// ====================================================================": "EQ12 SAFE WORKSPACE TEMPLATE — VS Code Hardened Configuration",
+  "// Description": "Prevents VS Code failsafe mode by stabilizing Python, Pylance, Copilot, file watchers, and resource limits",
+  "// Usage": "Copy to .vscode/settings.json in your workspace root",
+  "// ====================================================================": "",
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// PYTHON STABILITY — Lock to workspace venv, prevent fallback mode": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.activateEnvInCurrentTerminal": true,
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// PYLANCE OPTIMIZATION — Enable indexing, prevent degraded mode": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "python.analysis.indexing": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.exclude": [
+    "**/__pycache__",
+    "**/.venv",
+    "**/node_modules",
+    "**/.git",
+    "**/dist",
+    "**/build"
+  ],
+  "python.analysis.ignore": [
+    "**/.venv/**",
+    "**/node_modules/**"
+  ],
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// FORMATTING — Disable format-on-paste (causes crashes), stable Black": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": false,
+  "editor.defaultFormatter": "ms-python.black-formatter",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// COPILOT — Enable all features, prevent authentication fallback": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": true,
+    "markdown": true,
+    "python": true,
+    "javascript": true,
+    "typescript": true,
+    "powershell": true
+  },
+  "github.copilot.chat.localeOverride": "en",
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// FILE WATCHER LIMITS — Critical for preventing VS Code crashes": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.vscode-server/**": true,
+    "**/logs/**": true,
+    "**/reports/**": true,
+    "**/*.pyc": true,
+    "**/.DS_Store": true
+  },
+  
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/*.pyc": true
+  },
+  
+  "search.exclude": {
+    "**/.git": true,
+    "**/.venv": true,
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/logs": true,
+    "**/reports": true,
+    "**/__pycache__": true
+  },
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// GIT — Prevent resource exhaustion from large repos": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "git.enabled": true,
+  "git.autorefresh": true,
+  "git.autofetch": false,
+  "git.detectSubmodules": false,
+  "git.ignoreLimitWarning": true,
+  "git.untrackedChanges": "hidden",
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// TERMINAL — Stable PowerShell integration": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell"
+    }
+  },
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// PERFORMANCE — Prevent resource exhaustion": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "update.mode": "none",
+  "telemetry.telemetryLevel": "off",
+  "window.restoreWindows": "none",
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 5000,
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// EDITOR — Stable defaults, prevent memory leaks": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "editor.minimap.enabled": false,
+  "editor.codeLens": true,
+  "editor.inlayHints.enabled": "on",
+  "editor.hover.enabled": true,
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+  "editor.suggestSelection": "first",
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// WORKSPACE TRUST — Prevent security prompts on every load": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.startupPrompt": "once",
+  "security.workspace.trust.banner": "never",
+  
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "// EQ12-SPECIFIC — Project conventions": "",
+  "// ──────────────────────────────────────────────────────────────────": "",
+  "files.eol": "\n",
+  "files.encoding": "utf8",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}

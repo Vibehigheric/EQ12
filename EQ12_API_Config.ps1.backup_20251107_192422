@@ -1,0 +1,178 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 API Key Configuration & Clarification Guide
+# Addresses different types of "Copilot" APIs and proper authentication methods
+
+[CmdletBinding()]
+param()
+
+Clear-Host
+Write-Host ""
+Write-Host "🔑 EQ12 API KEY CONFIGURATION GUIDE" -ForegroundColor Cyan
+Write-Host "=============================================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Ensure keys directory exists
+$keysDir = "C:\EQ12\keys"
+if (-not (Test-Path $keysDir)) {
+    New-Item -ItemType Directory -Path $keysDir -Force | Out-Null
+    Write-Host "✅ Created keys directory: $keysDir" -ForegroundColor Green
+}
+
+Write-Host "📋 COPILOT API CLARIFICATION:" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "There is NO single 'Copilot API Key" - different services use different auth:" -ForegroundColor White
+Write-Host ""
+
+Write-Host "1. 🐙 GitHub Copilot:" -ForegroundColor Green
+Write-Host "   • Authentication: GitHub account login (no API key)" -ForegroundColor White
+Write-Host "   • Access: VS Code extension with GitHub sign-in" -ForegroundColor White
+Write-Host "   • Enterprise: GitHub Copilot Metrics API uses GitHub tokens" -ForegroundColor White
+Write-Host ""
+
+Write-Host "2. 🏢 Microsoft 365 Copilot:" -ForegroundColor Green
+Write-Host "   • Authentication: Azure AD tokens (not simple API key)" -ForegroundColor White
+Write-Host "   • Access: Microsoft Graph API authentication flow" -ForegroundColor White
+Write-Host "   • Setup: Azure Portal app registration required" -ForegroundColor White
+Write-Host ""
+
+Write-Host "3. 🤖 OpenAI API (What we actually use):" -ForegroundColor Green
+Write-Host "   • This is what powers our 'Copilot-like" functionality" -ForegroundColor White
+Write-Host "   • Single API key for ChatGPT, GPT-4, and streaming" -ForegroundColor White
+Write-Host "   • Current status: " -NoNewline -ForegroundColor White
+
+# Check OpenAI API key status
+if (Test-Path "$keysDir\openai_api_key.txt") {
+    $keyLength = (Get-Content "$keysDir\openai_api_key.txt" -Raw).Trim().Length
+    Write-Host "CONFIGURED ✅ ($keyLength chars)" -ForegroundColor Green
+} else {
+    Write-Host "NOT CONFIGURED ❌" -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "=============================================================" -ForegroundColor Cyan
+Write-Host "📊 CURRENT API CONFIGURATION STATUS:" -ForegroundColor Yellow
+Write-Host ""
+
+# Check all API keys
+$apiStatus = @{
+    "OpenAI API Key" = Test-Path "$keysDir\openai_api_key.txt"
+    "ChatGPT API Key" = Test-Path "$keysDir\chatgpt_api_key.txt"
+}
+
+foreach ($api in $apiStatus.GetEnumerator()) {
+    $status = if ($api.Value) { "✅ CONFIGURED" } else { "❌ MISSING" }
+    $color = if ($api.Value) { "Green" } else { "Red" }
+    Write-Host "  $($api.Key): $status" -ForegroundColor $color
+}
+
+Write-Host ""
+Write-Host "💡 RECOMMENDATIONS:" -ForegroundColor Yellow
+Write-Host ""
+
+if (-not $apiStatus["OpenAI API Key"]) {
+    Write-Host "1. Configure OpenAI API Key for AI functionality:" -ForegroundColor White
+    Write-Host "   • Get key from: https://platform.openai.com/api-keys" -ForegroundColor Gray
+    Write-Host "   • Save to: C:\EQ12\keys\openai_api_key.txt" -ForegroundColor Gray
+    Write-Host ""
+}
+
+Write-Host "2. For GitHub Copilot in VS Code:" -ForegroundColor White
+Write-Host "   • Install GitHub Copilot extension" -ForegroundColor Gray
+Write-Host "   • Sign in with your GitHub account" -ForegroundColor Gray
+Write-Host "   • No additional API key needed" -ForegroundColor Gray
+Write-Host ""
+
+Write-Host "3. For Microsoft 365 Copilot integration:" -ForegroundColor White
+Write-Host "   • Requires Azure AD app registration" -ForegroundColor Gray
+Write-Host "   • Use Microsoft Graph authentication" -ForegroundColor Gray
+Write-Host "   • See: https://docs.microsoft.com/graph" -ForegroundColor Gray
+
+Write-Host ""
+Write-Host "🔧 ACTIONS:" -ForegroundColor Yellow
+Write-Host "  1. Configure OpenAI API Key (recommended)" -ForegroundColor White
+Write-Host "  2. View current environment variables" -ForegroundColor White
+Write-Host "  3. Test API connections" -ForegroundColor White
+Write-Host "  4. Return to main launcher" -ForegroundColor White
+Write-Host ""
+Write-Host "  0. Exit" -ForegroundColor Red
+Write-Host ""
+
+$choice = Read-Host "Select an option"
+
+switch ($choice) {
+    1 {
+        Write-Host ""
+        Write-Host "📝 OpenAI API Key Configuration:" -ForegroundColor Green
+        Write-Host ""
+        $apiKey = Read-Host "Enter your OpenAI API key (starts with sk-)" -MaskInput
+
+        if ($apiKey -and $apiKey.StartsWith("sk-")) {
+            $apiKey | Out-File -FilePath "$keysDir\openai_api_key.txt" -Encoding utf8 -NoNewline
+            $apiKey | Out-File -FilePath "$keysDir\chatgpt_api_key.txt" -Encoding utf8 -NoNewline
+
+            # Set environment variables
+            $env:OPENAI_API_KEY = $apiKey
+            $env:CHATGPT_API_KEY = $apiKey
+            [System.Environment]::SetEnvironmentVariable("OPENAI_API_KEY", $apiKey, "User")
+            [System.Environment]::SetEnvironmentVariable("CHATGPT_API_KEY", $apiKey, "User")
+
+            Write-Host ""
+            Write-Host "✅ OpenAI API key configured successfully!" -ForegroundColor Green
+            Write-Host "✅ Environment variables set" -ForegroundColor Green
+            Write-Host "✅ Files saved to keys directory" -ForegroundColor Green
+        } else {
+            Write-Host "❌ Invalid API key format. Must start with 'sk-"" -ForegroundColor Red
+        }
+    }
+    2 {
+        Write-Host ""
+        Write-Host "🔍 Current Environment Variables:" -ForegroundColor Green
+        Write-Host ""
+        $envVars = @("OPENAI_API_KEY", "CHATGPT_API_KEY", "GITHUB_TOKEN")
+        foreach ($var in $envVars) {
+            $value = [System.Environment]::GetEnvironmentVariable($var, "User")
+            if ($value) {
+                $masked = $value.Substring(0, [Math]::Min(10, $value.Length)) + "..."
+                Write-Host "  $var = $masked" -ForegroundColor Green
+            } else {
+                Write-Host "  $var = NOT SET" -ForegroundColor Red
+            }
+        }
+    }
+    3 {
+        Write-Host ""
+        Write-Host "🧪 Testing API Connections..." -ForegroundColor Green
+        Write-Host ""
+
+        if (Test-Path "$keysDir\openai_api_key.txt") {
+            try {
+                $apiKey = Get-Content "$keysDir\openai_api_key.txt" -Raw
+                $headers = @{ "Authorization" = "Bearer $apiKey" }
+                $response = Invoke-RestMethod -Uri "https://api.openai.com/v1/models" -Headers $headers -TimeoutSec 10
+                Write-Host "✅ OpenAI API: Connected ($($response.data.Count) models available)" -ForegroundColor Green
+            } catch {
+                Write-Host "❌ OpenAI API: Connection failed - $($_.Exception.Message)" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "⚠️  OpenAI API: No key configured" -ForegroundColor Yellow
+        }
+    }
+    4 {
+        Write-Host ""
+        Write-Host "🔄 Launching main menu..." -ForegroundColor Green
+        & ".\EQ12_Dynamic_Launcher.ps1"
+    }
+    0 {
+        Write-Host "👋 Exiting configuration..." -ForegroundColor Green
+        exit
+    }
+    default {
+        Write-Host "❌ Invalid choice" -ForegroundColor Red
+    }
+}
+
+Write-Host ""
+Write-Host "Press any key to continue..." -ForegroundColor Gray
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

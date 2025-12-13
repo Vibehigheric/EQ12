@@ -1,0 +1,15 @@
+name: Usage Info
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: "0 12 * * 1" # Weekly Mondays at 12:00 UTC
+jobs:
+    info:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Print runner and job info
+              run: |
+                  echo "Runner: $RUNNER_OS"
+                  echo "Job: $GITHUB_JOB"
+                  echo "Workflow: $GITHUB_WORKFLOW"
+                  echo "Repo: $GITHUB_REPOSITORY"

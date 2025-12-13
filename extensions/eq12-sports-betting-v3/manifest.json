@@ -1,0 +1,76 @@
+{
+    "manifest_version": 3,
+    "name": "EQ12 Sports Betting Assistant",
+    "version": "3.0.0",
+    "description": "Advanced sports betting analysis with auto-parlay detection and live odds comparison",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "alarms",
+        "notifications",
+        "webRequest"
+    ],
+    "host_permissions": [
+        "https://www.draftkings.com/*",
+        "https://www.fanduel.com/*",
+        "https://www.bet365.com/*",
+        "https://www.caesars.com/*",
+        "https://www.mgm.com/*",
+        "https://api.the-odds-api.com/*",
+        "https://localhost:3000/*",
+        "https://localhost:3001/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.draftkings.com/*",
+                "https://www.fanduel.com/*",
+                "https://www.bet365.com/*",
+                "https://www.caesars.com/*",
+                "https://www.mgm.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "content.css"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_title": "EQ12 Sports Betting Assistant",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "32": "icons/icon32.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+    "side_panel": {
+        "default_path": "sidepanel/sidepanel.html"
+    },
+    "options_page": "options/options.html",
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "injected.js",
+                "eq12-api.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "icons": {
+        "16": "icons/icon16.png",
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    }
+}

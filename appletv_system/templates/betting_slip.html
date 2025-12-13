@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EQ12 Betting Slip</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .betting-slip {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        .title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .parlay-info {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+        }
+        .bet-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border-left: 4px solid #00ff88;
+        }
+        .odds {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00ff88;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+        .qr-code {
+            float: right;
+            margin-top: -100px;
+        }
+        .live-indicator {
+            animation: pulse 2s infinite;
+            background: #ff4444;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+    <div class="betting-slip">
+        <div class="live-indicator">🔴 LIVE BETTING SLIP</div>
+        <div class="title">{{ title }}</div>
+        
+        <div class="parlay-info">
+            <strong>{{ bet_count }} Leg Parlay</strong><br>
+            Total Odds: <span class="odds">{{ total_odds }}x</span>
+        </div>
+        
+        {% for bet in bets %}
+        <div class="bet-item">
+            <strong>{{ bet.team }}</strong> {{ bet.type }}<br>
+            <span style="font-size: 20px;">{{ bet.selection }} ({{ bet.odds }})</span>
+        </div>
+        {% endfor %}
+        
+        <div class="parlay-info">
+            Risk: ${{ risk_amount }} | Win: ${{ potential_win }}
+        </div>
+        
+        {% if qr_code %}
+        <div class="qr-code">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" width="100">
+        </div>
+        {% endif %}
+        
+        <div class="footer">
+            Generated: {{ timestamp }}<br>
+            EQ12 Automation Stack 🎯
+        </div>
+    </div>
+</body>
+</html>
+        

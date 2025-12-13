@@ -1,0 +1,60 @@
+{
+   "action": {
+      "default_icon": {
+         "16": "icon/16-off.png",
+         "48": "icon/48.png"
+      },
+      "default_popup": "popup.html",
+      "default_title": "Helium 10"
+   },
+   "author": "Helium10 \u003Csupport@helium10.com>",
+   "background": {
+      "service_worker": "background-script.js",
+      "type": "module"
+   },
+   "content_scripts": [ {
+      "all_frames": false,
+      "css": [  ],
+      "js": [ "vendors.js", "helium-script.js" ],
+      "matches": [ "*://*.helium-dev.com/*", "*://*.helium10-dev.com/*", "*://*.helium10.com/*", "*://*.helium-staging.com/*" ],
+      "run_at": "document_end"
+   }, {
+      "all_frames": false,
+      "css": [  ],
+      "js": [ "vendors.js", "amazon-script.js" ],
+      "matches": [ "*://*.amazon.com/*", "*://*.amazon.ca/*", "*://*.amazon.com.mx/*", "*://*.amazon.de/*", "*://*.amazon.es/*", "*://*.amazon.it/*", "*://*.amazon.fr/*", "*://*.amazon.co.uk/*", "*://*.amazon.nl/*", "*://*.amazon.in/*", "*://*.amazon.com.au/*", "*://*.amazon.co.jp/*", "*://*.amazon.com.br/*", "*://*.amazon.ae/*", "*://*.amazon.sa/*" ],
+      "run_at": "document_end"
+   }, {
+      "all_frames": false,
+      "css": [  ],
+      "js": [ "vendors.js", "walmart-script.js" ],
+      "matches": [ "*://*.walmart.com/*" ],
+      "run_at": "document_end"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "default_locale": "en",
+   "description": "Unlock product research, keyword insights, profit & review analysis to boost your Amazon & Walmart sales! For sellers & influencers.",
+   "externally_connectable": {
+      "matches": [ "*://*.helium-dev.com/*", "*://*.helium10.com/*", "*://*.helium-staging.com/*" ]
+   },
+   "host_permissions": [ "*://*/*" ],
+   "icons": {
+      "128": "icon/128.png",
+      "16": "icon/16.png",
+      "32": "icon/32.png",
+      "48": "icon/48.png"
+   },
+   "incognito": "spanning",
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnelehx76t6pioKAV/ybv5K3RfDaUlnqJ06Own2GNYEiQYBfcwVg3IxaWgzcM0G9GCLkrB3WUh61R4ONSQrWqRETnGO409ih9gXlii5fZ+nciiuStqXFxpzfHyj7D126yZnaynx24nNt/ZOqzhOdrG7AIBZ3ysRDanV7TC3X16qXWmonMexhttoy/bZLI5X0zwQMxRR3yvwQCQoezI9F6U2hzr3UxQLSdcsyb2KB4JYEIxLMfTu2HI6yjW2gDiirxreaXH6gNdAozv7O0v3t3PEwXLKQ/J04LDwNvqFP7Wm80GQrMLrKiw2+iUMROv1xa1io4Jg+nc1rVeJXT7F/zpwIDAQAB",
+   "manifest_version": 3,
+   "name": "Helium 10 for Amazon Sellers, Influencers, and Walmart Sellers",
+   "optional_permissions": [  ],
+   "options_page": "options.html",
+   "permissions": [ "background", "activeTab", "tabs", "storage", "unlimitedStorage" ],
+   "short_name": "Helium 10",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "8.26.3",
+   "version_name": "8.26.3"
+}

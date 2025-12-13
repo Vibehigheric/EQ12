@@ -1,0 +1,9 @@
+{
+  "incident_id": "DEPLOYMENT_TEST_20251107_080906",
+  "collection_time": "2025-11-07T08:09:11.671658",
+  "evidence_path": "C:\\EQ12\\incident_response\\forensics",
+  "successful_tasks": 4,
+  "failed_tasks": 0,
+  "total_tasks": 4,
+  "collection_status": "COMPLETE"
+}

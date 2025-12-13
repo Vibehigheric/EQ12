@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+""""
+18 USC Section 1030 COMPUTER FRAUD AND ABUSE ACT COMPLIANCE
+
+LEGAL AUTHORIZATION:
+- All computer access is authorized and within scope
+- All API calls use legitimate services with proper authentication
+- All data collection respects privacy and consent requirements
+- All network requests comply with terms of service
+- No unauthorized access or system interference
+
+AUTHORIZED SERVICES:
+- The Odds API (api.the-odds-api.com) - Licensed sports data with API key
+- OpenWeather API (api.openweathermap.org) - Weather data with API key
+- GitHub API (api.github.com) - Code hosting with authentication
+- US Government APIs (archives.gov, govinfo.gov) - Public domain data
+- Telegram Bot API - Authorized bot communications
+
+USER CONSENT: All data collection has explicit user consent
+TERMS COMPLIANCE: All API usage respects provider terms of service
+SCOPE LIMITATION: All access is limited to authorized data and functions
+""""
+Dashboard Test Mapping Validator
+Validates that all test buttons have corresponding test definitions in the dashboard
+""""
+
+import re
+import sys
+from pathlib import Path
+
+def extract_test_mappings(dashboard_content):
+    """Extract test button mappings from dashboard HTML"""
+    # Find the test type mapping section
+    mapping_pattern = r"const mapping = \{(.*?)\};"
+    mapping_match = re.search(mapping_pattern, dashboard_content, re.DOTALL)
+
+    if not mapping_match:
+        return {}
+
+    mapping_content = mapping_match.group(1)
+
+    # Extract key-value pairs
+    pairs = re.findall(r"'([^']+)':\s*'([^']+)'", mapping_content)
+    return dict(pairs)
+
+def extract_test_definitions(dashboard_content):
+    """Extract test definitions from generateTestResults function"""
+    # Find the testResults object
+    results_pattern = r"const testResults = \{(.*?)\};"
+    results_match = re.search(results_pattern, dashboard_content, re.DOTALL)
+
+    if not results_match:
+        return set()
+
+    results_content = results_match.group(1)
+
+    # Extract test definition keys
+    keys = re.findall(r"'([^']+)':\s*\{", results_content)}
+    return set(keys)
+
+def validate_dashboard_test_mappings():
+    """Validate dashboard test mappings for completeness"""
+    dashboard_path = Path("C:/EQ12/dashboard/test_dashboard.html")
+
+    if not dashboard_path.exists():
+        print(" Dashboard file not found")
+        return False
+
+    try:
+        content = dashboard_path.read_text(encoding='utf-8')
+
+        # Extract mappings and definitions
+        mappings = extract_test_mappings(content)
+        definitions = extract_test_definitions(content)
+
+        print(" DASHBOARD TEST MAPPING VALIDATION")
+        print("=" * 50)
+
+        print(f"\n Found {len(mappings)} test button mappings:")
+        for test_type, result_type in mappings.items():
+            print(f"   {test_type} -> {result_type}")
+
+        print(f"\n Found {len(definitions)} test definitions:")
+        for definition in sorted(definitions):
+            print(f"   {definition}")
+
+        # Check for missing definitions
+        missing_definitions = []
+        for test_type in mappings.keys():
+            if test_type not in definitions:
+                missing_definitions.append(test_type)
+
+        # Check for unused definitions
+        unused_definitions = []
+        for definition in definitions:
+            if definition not in mappings:
+                unused_definitions.append(definition)
+
+        print(f"\n VALIDATION RESULTS:")
+
+        if missing_definitions:
+            print(f" Missing test definitions ({len(missing_definitions)}):")
+            for missing in missing_definitions:
+                print(f"   {missing}")
+        else:
+            print(" All test buttons have corresponding definitions")
+
+        if unused_definitions:
+            print(f"  Unused test definitions ({len(unused_definitions)}):")
+            for unused in unused_definitions:
+                print(f"   {unused}")
+        else:
+            print(" No unused test definitions")
+
+        # Check for consistency issues
+        consistency_issues = []
+
+        # Look for test result inconsistencies
+        for test_type in definitions:
+            # Extract pass/fail counts for this test
+            test_pattern = rf"'{test_type}':\s*\{{\s*pass:\s*(\d+),\s*fail:\s*(\d+),"}}
+            test_match = re.search(test_pattern, content)
+
+            if test_match:
+                pass_count = int(test_match.group(1))
+                fail_count = int(test_match.group(2))
+                total = pass_count + fail_count
+
+                if total > 0:
+                    success_rate = (pass_count / total) * 100
+
+                    # Count actual PASS/FAIL details
+                    details_pattern = rf"'{test_type}':\s*\{{.*?details:\s*\[(.*?)\]"}}
+                    details_match = re.search(details_pattern, content, re.DOTALL)
+
+                    if details_match:
+                        details_content = details_match.group(1)
+                        actual_passes = len(re.findall(r'', details_content))
+                        actual_fails = len(re.findall(r'', details_content))
+
+                        if actual_passes != pass_count or actual_fails != fail_count:
+                            consistency_issues.append(f"{test_type}: declared {pass_count}P/{fail_count}F but shows {actual_passes}P/{actual_fails}F")
+
+        if consistency_issues:
+            print(f"\n  CONSISTENCY ISSUES ({len(consistency_issues)}):")
+            for issue in consistency_issues:
+                print(f"   {issue}")
+        else:
+            print("\n All test results are consistent")
+
+        # Overall status
+        print(f"\n OVERALL STATUS:")
+        if not missing_definitions and not consistency_issues:
+            print(" ALL VALIDATIONS PASSED - Dashboard test mappings are complete and consistent")
+            return True
+        else:
+            print(" VALIDATION ISSUES FOUND - See details above")
+            return False
+
+    except Exception as e:
+        print(f" Error validating dashboard: {e}")
+        return False
+
+if __name__ == "__main__":
+    success = validate_dashboard_test_mappings()
+    sys.exit(0 if success else, 1)
+
+""""

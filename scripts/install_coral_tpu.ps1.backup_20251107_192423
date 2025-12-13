@@ -1,0 +1,83 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Coral TPU Installation Script
+# Run this script as Administrator to install Coral TPU support
+
+Write-Host "🚀 EQ12 Coral TPU Installation & Setup" -ForegroundColor Cyan
+Write-Host "=======================================" -ForegroundColor Cyan
+
+# Check if running as Administrator
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host "❌ This script requires Administrator privileges" -ForegroundColor Red
+    Write-Host "💡 Right-click and 'Run as Administrator"" -ForegroundColor Yellow
+    pause
+    exit 1
+}
+
+Write-Host "✅ Running with Administrator privileges" -ForegroundColor Green
+
+# Install Python packages
+Write-Host "📦 Installing Python packages..." -ForegroundColor Yellow
+$packages = @("pycoral", "tflite-runtime", "numpy", "schedule", "web3", "eth-account", "aiohttp")
+
+foreach ($package in $packages) {
+    Write-Host "📥 Installing $package..." -ForegroundColor Cyan
+    try {
+        python -m pip install $package
+        Write-Host "✅ $package installed successfully" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "⚠️ Failed to install $package" -ForegroundColor Red
+    }
+}
+
+# Check for Coral USB device
+Write-Host "🔍 Checking for Coral USB device..." -ForegroundColor Yellow
+$coralDevices = Get-PnpDevice | Where-Object {$_.FriendlyName -like "*Coral*" -or $_.FriendlyName -like "*Edge TPU*"}
+
+if ($coralDevices) {
+    Write-Host "✅ Coral device(s) detected:" -ForegroundColor Green
+    $coralDevices | ForEach-Object {
+        Write-Host "   📱 $($_.FriendlyName) - Status: $($_.Status)" -ForegroundColor White
+    }
+} else {
+    Write-Host "❌ No Coral devices detected" -ForegroundColor Red
+    Write-Host "💡 Troubleshooting:" -ForegroundColor Yellow
+    Write-Host "   1. Ensure Coral USB Accelerator is connected" -ForegroundColor White
+    Write-Host "   2. Try different USB port (USB 3.0 recommended)" -ForegroundColor White
+    Write-Host "   3. Install Coral drivers if needed" -ForegroundColor White
+    Write-Host "   4. Check Device Manager for unknown devices" -ForegroundColor White
+}
+
+# Test Python Coral import
+Write-Host "🧪 Testing Coral library import..." -ForegroundColor Yellow
+try {
+    python -c "from pycoral.utils.edgetpu import make_interpreter; print('✅ Coral libraries imported successfully')"
+    Write-Host "✅ Coral libraries working correctly" -ForegroundColor Green
+}
+catch {
+    Write-Host "⚠️ Coral library import failed" -ForegroundColor Red
+    Write-Host "💡 Libraries installed but may need Coral device connected" -ForegroundColor Yellow
+}
+
+# Create desktop shortcut for EQ12 Coral Manager
+Write-Host "🔗 Creating desktop shortcut..." -ForegroundColor Yellow
+$WshShell = New-Object -comObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$env:USERPROFILE\Desktop\EQ12 Coral Manager.lnk")
+$Shortcut.TargetPath = "python"
+$Shortcut.Arguments = '"C:\EQ12\scripts\eq12_coral_accelerator_manager.py"'
+$Shortcut.WorkingDirectory = "C:\EQ12\scripts"
+$Shortcut.IconLocation = "python.exe"
+$Shortcut.Description = "EQ12 Coral TPU Accelerator Manager"
+$Shortcut.Save()
+
+Write-Host "✅ Desktop shortcut created" -ForegroundColor Green
+
+Write-Host "=======================================" -ForegroundColor Cyan
+Write-Host "🎉 Coral TPU setup complete!" -ForegroundColor Green
+Write-Host "📱 Connect your Coral USB Accelerator if not already connected" -ForegroundColor Yellow
+Write-Host "🚀 Run 'python eq12_coral_accelerator_manager.py" to verify" -ForegroundColor Cyan
+Write-Host "=======================================" -ForegroundColor Cyan
+
+pause

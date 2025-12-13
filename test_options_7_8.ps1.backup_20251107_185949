@@ -1,0 +1,28 @@
+[CmdletBinding()]
+param()
+
+Write-Host "[TEST] Testing EQ12 Launcher Options 7 & 8" -ForegroundColor Green
+
+# Option 7: Program Discovery
+Write-Host "`n[OPTION 7] PROGRAM DISCOVERY:" -ForegroundColor Cyan
+$pyFiles = Get-ChildItem -Path "C:\EQ12" -Recurse -Filter "*.py" -ErrorAction SilentlyContinue | Select-Object -First 5
+$ps1Files = Get-ChildItem -Path "C:\EQ12" -Recurse -Filter "*.ps1" -ErrorAction SilentlyContinue | Select-Object -First 5
+
+Write-Host "Python Scripts (Sample):" -ForegroundColor Yellow
+$pyFiles | ForEach-Object { Write-Host "  - $($_.Name)" -ForegroundColor White }
+
+Write-Host "PowerShell Scripts (Sample):" -ForegroundColor Yellow
+$ps1Files | ForEach-Object { Write-Host "  - $($_.Name)" -ForegroundColor White }
+
+# Option 8: System Statistics
+Write-Host "`n[OPTION 8] SYSTEM STATISTICS:" -ForegroundColor Cyan
+$totalFiles = (Get-ChildItem -Path "C:\EQ12" -Recurse -File -ErrorAction SilentlyContinue).Count
+$totalDirs = (Get-ChildItem -Path "C:\EQ12" -Recurse -Directory -ErrorAction SilentlyContinue).Count
+$totalSize = (Get-ChildItem -Path "C:\EQ12" -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+
+Write-Host "Total Files: $totalFiles" -ForegroundColor White
+Write-Host "Total Directories: $totalDirs" -ForegroundColor White
+Write-Host "Total Size: $([math]::Round($totalSize / 1MB, 2)) MB" -ForegroundColor White
+Write-Host "Scan Time: $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Gray
+
+Write-Host "`n[TEST] Options 7 & 8 validation complete!" -ForegroundColor Green

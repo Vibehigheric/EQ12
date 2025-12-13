@@ -1,0 +1,191 @@
+/*!
+       *
+       * detectIncognito v1.3.5
+       *
+       * https://github.com/Joe12387/detectIncognito
+       *
+       * MIT License
+       *
+       * Copyright (c) 2021 - 2024 Joe Rutkowski <Joe@dreggle.com>
+       *
+       * Permission is hereby granted, free of charge, to any person obtaining a copy
+       * of this software and associated documentation files (the "Software"), to deal
+       * in the Software without restriction, including without limitation the rights
+       * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+       * copies of the Software, and to permit persons to whom the Software is
+       * furnished to do so, subject to the following conditions:
+       *
+       * The above copyright notice and this permission notice shall be included in all
+       * copies or substantial portions of the Software.
+       *
+       * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+       * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+       * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+       * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+       * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+       * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+       * SOFTWARE.
+       *
+       * Please keep this comment intact in order to properly abide by the MIT License.
+       *
+       **/
+
+/*!
+ * Rakuten Cash Back Button v5.71.0
+ * Copyrights 2025 Ebates Inc. dba Rakuten
+ */
+
+/*! ../MessagingSDK */
+
+/*! ./MessagingSDK */
+
+/*! ./Store */
+
+/*! ./createSDKInstanceWithInit */
+
+/*! ./getPublicPath */
+
+/*! ./native.js */
+
+/*! ./regex.js */
+
+/*! ./rng.js */
+
+/*! ./src */
+
+/*! ./src/federation */
+
+/*! ./stringify.js */
+
+/*! ./utils */
+
+/*! ./validate.js */
+
+/*! detectincognitojs */
+
+/*! idb-keyval */
+
+/*! js-cookie v3.0.5 | MIT */
+
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
+/*! throttle-debounce */
+
+/*! ua-parser-js */
+
+/*! uuid */
+
+/*!********************!*\
+      !*** ./modules.ts ***!
+      \********************/
+
+/*!**********************!*\
+      !*** ./src/Store.ts ***!
+      \**********************/
+
+/*!**********************!*\
+      !*** ./src/index.ts ***!
+      \**********************/
+
+/*!**********************!*\
+      !*** ./src/utils.ts ***!
+      \**********************/
+
+/*!*****************************!*\
+      !*** ./src/MessagingSDK.ts ***!
+      \*****************************/
+
+/*!*********************************!*\
+      !*** ./src/federation/index.ts ***!
+      \*********************************/
+
+/*!***************************************!*\
+      !*** ./src/federation/utils/index.ts ***!
+      \***************************************/
+
+/*!***********************************************!*\
+      !*** ./node_modules/idb-keyval/dist/index.js ***!
+      \***********************************************/
+
+/*!***********************************************!*\
+      !*** ./src/federation/utils/getPublicPath.ts ***!
+      \***********************************************/
+
+/*!**************************************************!*\
+      !*** ./node_modules/uuid/dist/esm-browser/v4.js ***!
+      \**************************************************/
+
+/*!***************************************************!*\
+      !*** ./node_modules/uuid/dist/esm-browser/rng.js ***!
+      \***************************************************/
+
+/*!****************************************************!*\
+      !*** ./node_modules/ua-parser-js/src/ua-parser.js ***!
+      \****************************************************/
+
+/*!*****************************************************!*\
+      !*** ./node_modules/throttle-debounce/esm/index.js ***!
+      \*****************************************************/
+
+/*!*****************************************************!*\
+      !*** ./node_modules/uuid/dist/esm-browser/regex.js ***!
+      \*****************************************************/
+
+/*!*****************************************************!*\
+      !*** ./src/federation/createSDKInstanceWithInit.ts ***!
+      \*****************************************************/
+
+/*!******************************************************!*\
+      !*** ./node_modules/uuid/dist/esm-browser/native.js ***!
+      \******************************************************/
+
+/*!********************************************************!*\
+      !*** ./node_modules/uuid/dist/esm-browser/validate.js ***!
+      \********************************************************/
+
+/*!*********************************************************!*\
+      !*** ./node_modules/uuid/dist/esm-browser/stringify.js ***!
+      \*********************************************************/
+
+/*!********************************************************************!*\
+      !*** ./node_modules/detectincognitojs/dist/detectIncognito.esm.js ***!
+      \********************************************************************/
+
+/**
+ * @license React
+ * react-dom.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * @license React
+ * react.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
+ * @license React
+ * scheduler.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */

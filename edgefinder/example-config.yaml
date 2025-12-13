@@ -1,0 +1,69 @@
+# EdgeFinder Configuration
+search:
+  max_results_per_source: 50
+  timeout_seconds: 30
+  retry_attempts: 3
+  default_keywords: ["api", "library", "tool"]
+  
+github:
+  base_url: "https://api.github.com"
+  rate_limit_buffer: 10  # requests to reserve
+  search_delay_ms: 100   # delay between API calls
+  
+huggingface:
+  base_url: "https://huggingface.co"
+  api_base_url: "https://huggingface.co/api"
+  models_endpoint: "/models"
+  spaces_endpoint: "/spaces"
+  
+analysis:
+  download_enabled: true
+  security_scan_enabled: true
+  max_file_size_mb: 100
+  max_repo_size_mb: 500
+  timeout_seconds: 300
+  
+scoring:
+  license_bonus: 20
+  stars_weight: 0.3
+  activity_weight: 0.2
+  keyword_weight: 0.2
+  language_bonus: 10
+  security_penalty: -50
+  max_score: 100
+
+licenses:
+  allowed:
+    - "MIT"
+    - "Apache-2.0"
+    - "BSD-3-Clause"
+    - "BSD-2-Clause"
+    - "ISC"
+    - "Unlicense"
+  blocked:
+    - "GPL-3.0"
+    - "GPL-2.0"
+    - "AGPL-3.0"
+    - "LGPL-3.0"
+    - "LGPL-2.1"
+    - "CC-BY-NC"
+    - "CC-BY-NC-SA"
+
+security:
+  bandit_enabled: true
+  safety_enabled: true
+  custom_rules_enabled: true
+  max_security_warnings: 5
+  
+patch_generation:
+  enabled: true
+  ast_based: true
+  sandbox_test: true
+  max_patch_size_lines: 1000
+  backup_original: true
+
+eq12_integration:
+  dashboard_base_url: "https://eq12.local/dashboards"
+  betting_keywords: ["odds", "parlay", "sportsbook", "betting", "wager"]
+  ai_keywords: ["llama", "transformer", "agent", "ml", "ai", "gpt"]
+  analytics_keywords: ["statistics", "analysis", "prediction", "model"]

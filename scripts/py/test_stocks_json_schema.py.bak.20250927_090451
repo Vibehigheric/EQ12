@@ -1,0 +1,19 @@
+import json
+import os
+
+import pytest
+
+
+def test_stocks_json_schema() -> None:
+    path = os.path.expandvars(r"C:/EQ12/logs/stocks_latest.json")
+    assert os.path.exists(path), f"File not found: {path}"
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    # Top-level keys
+    for key in ("type", "ts", "tickers", "results"):
+        assert key in data, f"Missing key: {key}"
+    assert isinstance(data["results"], list), "results must be a list"
+    required = {"ticker", "close", "ema20", "ema50", "rsi14", "mom5", "signal"}
+    for i, r in enumerate(data["results"]):
+        missing = required - r.keys()
+        assert not missing, f"Result {i} missing keys: {missing}"

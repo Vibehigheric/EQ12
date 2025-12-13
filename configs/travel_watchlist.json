@@ -1,0 +1,4 @@
+[
+  { "route": "NYC-LAX", "hotel_location": "Los Angeles", "max_price": 400, "hotel_min_discount": 20 },
+  { "route": "SFO-LHR", "hotel_location": "London", "max_price": 700, "hotel_min_discount": 15 }
+]

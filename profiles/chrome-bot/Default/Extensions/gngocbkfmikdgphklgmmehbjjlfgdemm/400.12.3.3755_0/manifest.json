@@ -1,0 +1,41 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "assets/icons/128.png",
+         "16": "assets/icons/16.png",
+         "32": "assets/icons/32.png",
+         "48": "assets/icons/48.png",
+         "64": "assets/icons/64.png"
+      },
+      "default_popup": "popup/index.html",
+      "default_title": "SwagButton"
+   },
+   "background": {
+      "service_worker": "worker/service-worker.js"
+   },
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "default_locale": "en",
+   "description": "__MSG_manifest_description__",
+   "host_permissions": [ "https://*/*", "http://*/*" ],
+   "icons": {
+      "128": "assets/icons/128.png",
+      "16": "assets/icons/16.png",
+      "32": "assets/icons/32.png",
+      "48": "assets/icons/48.png",
+      "64": "assets/icons/64.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC/jnUnaQ0EtFLazwaY0Ww2+AsPNt+bSG9mhPgUCX3f93nrelzT9b1bpbgP1y9vx8eijjDTTQOB/OMSk7BZHRcmErmTehAC9tDlvGnZtGMRGDI/hHWWLK7U5aVr9GMZqYHe9OS8r3Vm9ZZm4Ui8/FPN/MciOyaMLYuo0NrgVkyqCwIDAQAB",
+   "manifest_version": 3,
+   "name": "SwagButton",
+   "optional_permissions": [ "notifications" ],
+   "permissions": [ "tabs", "alarms", "storage", "cookies", "scripting", "webRequest", "webNavigation", "management", "unlimitedStorage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "400.12.3.3755",
+   "version_name": "11.12.3.3755",
+   "web_accessible_resources": [ {
+      "matches": [ "https://*/*", "http://*/*" ],
+      "resources": [ "assets/icons/*", "assets/images/*", "assets/fonts/*", "assets/redesign/*", "worker/injections/*" ]
+   } ]
+}

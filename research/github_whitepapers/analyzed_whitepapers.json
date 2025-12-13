@@ -1,0 +1,178 @@
+[
+  {
+    "title": "Agentic AI, Security, and DevOps: Meet GitHub",
+    "url": "https://github.com/resources/whitepapers/agentic-ai-security-and-devops",
+    "content_type": "Ebook",
+    "category": "AI & Automation",
+    "description": "Explore strategies on how to use GitHub tools to help your teams be more productive, efficient, and happy at work.",
+    "relevance_score": 10,
+    "key_insights": [
+      "AI agents are reshaping software development workflows",
+      "Agentic systems require new security and governance approaches",
+      "Team productivity increases with proper AI agent integration",
+      "Secret leaks are increasing with rapid development cycles",
+      "Automated secret detection is critical for modern CI/CD",
+      "Security must be integrated into developer workflows",
+      "DevOps transformation requires cultural and technical changes",
+      "Common pitfalls can be avoided with proper planning",
+      "Tool integration is key to successful DevOps adoption"
+    ],
+    "eq12_applications": [
+      "Optimize EQ12's CI/CD integration",
+      "Improve OpenAI migration bot intelligence",
+      "Enhance EQ12's streaming assistant capabilities",
+      "Advanced governance automation patterns",
+      "Improve governance security practices",
+      "Strengthen EQ12's secret redaction system",
+      "Enhance deployment practices",
+      "Enhance logging security features",
+      "Improve automation pipeline efficiency"
+    ]
+  },
+  {
+    "title": "How agentic AI is accelerating DevOps",
+    "url": "https://github.com/resources/whitepapers/how-agentic-ai-is-accelerating-devops",
+    "content_type": "Ebook",
+    "category": "AI & Automation",
+    "description": "Discover what AI agents can really do for your organization — and how they're already reshaping the way software gets built.",
+    "relevance_score": 10,
+    "key_insights": [
+      "AI agents are reshaping software development workflows",
+      "Agentic systems require new security and governance approaches",
+      "Team productivity increases with proper AI agent integration",
+      "DevOps transformation requires cultural and technical changes",
+      "Common pitfalls can be avoided with proper planning",
+      "Tool integration is key to successful DevOps adoption"
+    ],
+    "eq12_applications": [
+      "Optimize EQ12's CI/CD integration",
+      "Improve OpenAI migration bot intelligence",
+      "Enhance EQ12's streaming assistant capabilities",
+      "Advanced governance automation patterns",
+      "Enhance deployment practices",
+      "Improve automation pipeline efficiency"
+    ]
+  },
+  {
+    "title": "Detecting and Preventing Secret Leaks in Code",
+    "url": "https://github.com/resources/whitepapers/secret-scanning-a-key-to-your-cybersecurity-strategy",
+    "content_type": "Ebook",
+    "category": "Security & Governance",
+    "description": "In today's interconnected digital landscape, safeguarding access to systems and sensitive data is more critical—and more challenging—than ever.",
+    "relevance_score": 10,
+    "key_insights": [
+      "Secret leaks are increasing with rapid development cycles",
+      "Automated secret detection is critical for modern CI/CD",
+      "Security must be integrated into developer workflows"
+    ],
+    "eq12_applications": [
+      "Implement advanced redaction filters",
+      "Improve governance security practices",
+      "Strengthen EQ12's secret redaction system",
+      "Upgrade EQ12's secret detection patterns",
+      "Enhance logging security features",
+      "Add proactive secret leak prevention"
+    ]
+  },
+  {
+    "title": "GitHub recognized as a Leader in the Gartner® Magic Quadrant™ for AI Code Assistants",
+    "url": "https://github.com/resources/whitepapers/gartner-magic-quadrant-and-critical-capabilities-for-ai-code-assistants",
+    "content_type": "Whitepaper",
+    "category": "General",
+    "description": "Learn why Gartner positioned GitHub as a Leader for the second year in a row—highest and furthest in both Ability to Execute and Completeness of Vision.",
+    "relevance_score": 9,
+    "key_insights": [],
+    "eq12_applications": []
+  },
+  {
+    "title": "Training and onboarding developers on GitHub Copilot",
+    "url": "https://github.com/resources/whitepapers/training-and-onboarding-developers-on-github-copilot",
+    "content_type": "Whitepaper",
+    "category": "AI & Automation",
+    "description": "To fully realize Copilot's potential, entire teams, not just individual developers, must adopt new skills.",
+    "relevance_score": 9,
+    "key_insights": [
+      "AI tool adoption requires team-wide skill development",
+      "Individual adoption is insufficient for full AI potential",
+      "Structured onboarding improves AI tool effectiveness"
+    ],
+    "eq12_applications": [
+      "Integration with OpenAI migration system",
+      "Team adoption strategies",
+      "Onboarding processes for EQ12 systems",
+      "Best practices for AI-assisted development",
+      "Skill development frameworks",
+      "Training framework for EQ12 team adoption"
+    ]
+  },
+  {
+    "title": "Turn developer workflows into a security powerhouse with GitHub",
+    "url": "https://github.com/resources/whitepapers/forrester-industry-spotlight-github-advanced-security",
+    "content_type": "Whitepaper",
+    "category": "Security & Governance",
+    "description": "The Forrester Industry Spotlight on GitHub Advanced Security shows how enterprises achieve measurable gains in security efficiency, risk reduction, and developer productivity.",
+    "relevance_score": 9,
+    "key_insights": [
+      "Secret leaks are increasing with rapid development cycles",
+      "Automated secret detection is critical for modern CI/CD",
+      "Security must be integrated into developer workflows"
+    ],
+    "eq12_applications": [
+      "Strengthen EQ12's secret redaction system",
+      "Enhance logging security features",
+      "Improve governance security practices"
+    ]
+  },
+  {
+    "title": "The engineering leader's guide to AI",
+    "url": "https://github.com/resources/whitepapers/engineering-leaders-guide-to-ai",
+    "content_type": "Ebook",
+    "category": "Training & Adoption",
+    "description": "AI coding is here. Developers have embraced it and already use various tools for AI code generation to augment their coding capabilities.",
+    "relevance_score": 8,
+    "key_insights": [],
+    "eq12_applications": []
+  },
+  {
+    "title": "6 common pitfalls for DevOps teams and how to avoid them",
+    "url": "https://github.com/resources/whitepapers/6-devops-pitfalls",
+    "content_type": "Ebook",
+    "category": "DevOps & Integration",
+    "description": "DevOps is a transformative practice—and not only because it helps to build better software. It also aligns teams, removing siloed workstreams and promoting collaboration.",
+    "relevance_score": 8,
+    "key_insights": [
+      "DevOps transformation requires cultural and technical changes",
+      "Common pitfalls can be avoided with proper planning",
+      "Tool integration is key to successful DevOps adoption"
+    ],
+    "eq12_applications": [
+      "Enhance deployment practices",
+      "Optimize EQ12's CI/CD integration",
+      "Improve automation pipeline efficiency"
+    ]
+  },
+  {
+    "title": "Unlock 376% ROI with GitHub Enterprise Cloud",
+    "url": "https://github.com/resources/whitepapers/forrester",
+    "content_type": "Whitepaper",
+    "category": "Business Value",
+    "description": "Read the full Forrester TEI study and use the interactive ROI calculator to model results for your organization.",
+    "relevance_score": 7,
+    "key_insights": [],
+    "eq12_applications": [
+      "Cost-benefit analysis models",
+      "Business case development for EQ12 investments",
+      "Value measurement frameworks"
+    ]
+  },
+  {
+    "title": "GitHub case study: Enhancing customer support with AI",
+    "url": "https://github.com/resources/whitepapers/enhancing-customer-support-with-ai",
+    "content_type": "Ebook",
+    "category": "General",
+    "description": "GitHub Copilot empowers engineers to help their organizations achieve better business outcomes for their customers.",
+    "relevance_score": 6,
+    "key_insights": [],
+    "eq12_applications": []
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "deployment": {
+    "environment": "production",
+    "domain": "yourdomain.com",
+    "api_subdomain": "api",
+    "dashboard_subdomain": "dashboard",
+    "ssl_enabled": true,
+    "auto_scaling": false
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "eq12_enterprise",
+    "user": "eq12_api",
+    "backup_enabled": true,
+    "backup_schedule": "0 2 * * *"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "db": 0,
+    "cluster_enabled": false
+  },
+  "monitoring": {
+    "prometheus_enabled": true,
+    "grafana_enabled": true,
+    "sentry_enabled": true,
+    "log_level": "INFO"
+  },
+  "scaling": {
+    "api_instances": 2,
+    "worker_instances": 2,
+    "max_connections": 1000
+  },
+  "security": {
+    "rate_limiting": true,
+    "ddos_protection": true,
+    "api_key_rotation": true,
+    "audit_logging": true
+  }
+}

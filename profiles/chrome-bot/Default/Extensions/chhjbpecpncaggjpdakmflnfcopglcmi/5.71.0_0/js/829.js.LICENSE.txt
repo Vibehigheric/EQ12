@@ -1,0 +1,4 @@
+/*!
+ * Rakuten Cash Back Button v5.71.0
+ * Copyrights 2025 Ebates Inc. dba Rakuten
+ */

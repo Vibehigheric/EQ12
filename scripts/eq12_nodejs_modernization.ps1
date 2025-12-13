@@ -1,0 +1,209 @@
+# EQ12 Node.js Modernization Script
+[CmdletBinding()]
+param(
+    [Parameter()]
+    [ValidateSet("analyze", "update", "install", "format", "lint", "test", "all")]
+    [string]$Action = "all",
+    
+    [Parameter()]
+    [switch]$Force
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Write-EQ12Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "[$timestamp] [$Level] $Message"
+    
+    switch ($Level) {
+        "ERROR" { Write-Host $logMessage -ForegroundColor Red }
+        "WARNING" { Write-Host $logMessage -ForegroundColor Yellow }
+        "SUCCESS" { Write-Host $logMessage -ForegroundColor Green }
+        default { Write-Host $logMessage -ForegroundColor White }
+    }
+}
+
+function Test-NodeJSVersion {
+    try {
+        $nodeVersion = node --version
+        $majorVersion = [int]($nodeVersion -replace 'v(\d+)\..*', '$1')
+        
+        Write-EQ12Log "Current Node.js version: $nodeVersion"
+        
+        if ($majorVersion -lt 20) {
+            Write-EQ12Log "Node.js 20+ recommended for optimal performance" -Level "WARNING"
+            Write-EQ12Log "Consider upgrading: https://nodejs.org/en/download/" -Level "INFO"
+        } else {
+            Write-EQ12Log "Node.js version is current" -Level "SUCCESS"
+        }
+        
+        return $true
+    } catch {
+        Write-EQ12Log "Node.js not found or not accessible" -Level "ERROR"
+        return $false
+    }
+}
+
+function Update-EQ12Dependencies {
+    Write-EQ12Log "Updating EQ12 Node.js dependencies..."
+    
+    try {
+        Set-Location "C:\EQ12"
+        
+        # Run the Python modernizer
+        python scripts\eq12_nodejs_modernizer.py
+        
+        Write-EQ12Log "Dependencies updated successfully" -Level "SUCCESS"
+        return $true
+    } catch {
+        Write-EQ12Log "Failed to update dependencies: $($_.Exception.Message)" -Level "ERROR"
+        return $false
+    }
+}
+
+function Install-Dependencies {
+    Write-EQ12Log "Installing Node.js dependencies..."
+    
+    try {
+        Set-Location "C:\EQ12"
+        
+        if ($Force) {
+            Write-EQ12Log "Force cleaning node_modules..."
+            Remove-Item -Path "node_modules" -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "package-lock.json" -Force -ErrorAction SilentlyContinue
+        }
+        
+        npm install
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "Dependencies installed successfully" -Level "SUCCESS"
+            
+            # Run audit
+            npm audit --audit-level moderate
+            
+            return $true
+        } else {
+            Write-EQ12Log "Failed to install dependencies" -Level "ERROR"
+            return $false
+        }
+    } catch {
+        Write-EQ12Log "Exception during installation: $($_.Exception.Message)" -Level "ERROR"
+        return $false
+    }
+}
+
+function Format-Code {
+    Write-EQ12Log "Formatting code with Prettier..."
+    
+    try {
+        Set-Location "C:\EQ12"
+        npm run format
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "Code formatting completed" -Level "SUCCESS"
+        } else {
+            Write-EQ12Log "Code formatting had issues" -Level "WARNING"
+        }
+    } catch {
+        Write-EQ12Log "Failed to format code: $($_.Exception.Message)" -Level "ERROR"
+    }
+}
+
+function Invoke-Linting {
+    Write-EQ12Log "Running ESLint..."
+    
+    try {
+        Set-Location "C:\EQ12"
+        npm run lint
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "Linting completed successfully" -Level "SUCCESS"
+        } else {
+            Write-EQ12Log "Linting found issues" -Level "WARNING"
+        }
+    } catch {
+        Write-EQ12Log "Failed to run linting: $($_.Exception.Message)" -Level "ERROR"
+    }
+}
+
+function Test-EQ12System {
+    Write-EQ12Log "Running EQ12 system tests..."
+    
+    try {
+        Set-Location "C:\EQ12"
+        npm test
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "All tests passed" -Level "SUCCESS"
+        } else {
+            Write-EQ12Log "Some tests failed" -Level "WARNING"
+        }
+    } catch {
+        Write-EQ12Log "Failed to run tests: $($_.Exception.Message)" -Level "ERROR"
+    }
+}
+
+# Main execution
+Write-Host "🚀 EQ12 NODE.JS MODERNIZATION" -ForegroundColor Cyan
+Write-Host "=" * 60
+
+if (-not (Test-NodeJSVersion)) {
+    Write-EQ12Log "Please install Node.js 20+ before continuing" -Level "ERROR"
+    exit 1
+}
+
+switch ($Action.ToLower()) {
+    "analyze" {
+        Write-EQ12Log "Analyzing current setup..."
+        python "C:\EQ12\scripts\eq12_nodejs_modernizer.py" --analyze
+    }
+    
+    "update" {
+        Update-EQ12Dependencies
+    }
+    
+    "install" {
+        Install-Dependencies
+    }
+    
+    "format" {
+        Format-Code
+    }
+    
+    "lint" {
+        Invoke-Linting
+    }
+    
+    "test" {
+        Test-EQ12System
+    }
+    
+    "all" {
+        Write-EQ12Log "Running complete modernization process..."
+        
+        if (Update-EQ12Dependencies) {
+            if (Install-Dependencies) {
+                Format-Code
+                Invoke-Linting
+                Test-EQ12System
+                
+                Write-EQ12Log "EQ12 Node.js modernization completed!" -Level "SUCCESS"
+                Write-Host ""
+                Write-Host "✅ Next steps:" -ForegroundColor Green
+                Write-Host "   1. Review updated package.json"
+                Write-Host "   2. Test your applications: npm run dev"
+                Write-Host "   3. Check for any remaining deprecation warnings"
+                Write-Host "   4. Consider upgrading to Node.js 20+ LTS if not already"
+            }
+        }
+    }
+    
+    default {
+        Write-EQ12Log "Unknown action: $Action" -Level "ERROR"
+        Write-Host "Available actions: analyze, update, install, format, lint, test, all"
+    }
+}
+
+Write-Host ""
+Write-Host "✅ EQ12 Node.js Modernization Complete!" -ForegroundColor Green

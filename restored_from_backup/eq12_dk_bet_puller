@@ -1,0 +1,305 @@
+#!/usr/bin/env python3
+"""
+EQ12 DraftKings Bet History Auto-Puller
+Automatically retrieves bet slips and integrates with EQ12 financial analysis
+"""
+
+import json
+import logging
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+import requests
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("C:/EQ12/logs/eq12_dk_puller.log"), logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
+
+class EQ12DraftKingsPuller:
+    def __init__(self):
+        self.data_dir = Path("C:/EQ12/data")
+        self.data_dir.mkdir(exist_ok=True)
+
+        # API endpoints (these will be discovered via browser dev tools)
+        self.api_endpoints = {
+            "bets": "https://sportsbook.draftkings.com/api/players/v1/bets",
+            "settled": "https://sportsbook.draftkings.com/api/players/v1/settled-bets",
+            "account": "https://sportsbook.draftkings.com/api/players/v1/account",
+        }
+
+        # Get auth token from environment
+        self.auth_token = os.getenv("DK_AUTH_TOKEN")
+        self.session_cookie = os.getenv("DK_SESSION_COOKIE")
+
+        if not self.auth_token and not self.session_cookie:
+            logger.warning("[WARN] No DK_AUTH_TOKEN or DK_SESSION_COOKIE found in environment")
+            logger.info("[INFO] Run browser method first to capture tokens")
+
+    def setup_session(self) -> requests.Session:
+        """Setup authenticated session with DraftKings"""
+        session = requests.Session()
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+        }
+
+        if self.auth_token:
+            headers["Authorization"] = f"Bearer {self.auth_token}"
+
+        if self.session_cookie:
+            session.cookies.update({"session": self.session_cookie})
+
+        session.headers.update(headers)
+        return session
+
+    def test_connection(self) -> bool:
+        """Test connection to DraftKings API"""
+        logger.info("[TEST] Testing DraftKings API connection...")
+
+        session = self.setup_session()
+
+        try:
+            # Try account endpoint first (usually less restricted)
+            response = session.get(self.api_endpoints["account"], timeout=10)
+
+            if response.status_code == 200:
+                logger.info("[OK] DraftKings API connection successful")
+                return True
+            elif response.status_code == 401:
+                logger.error("[ERROR] Authentication failed - check tokens")
+                return False
+            elif response.status_code == 403:
+                logger.error("[ERROR] Access denied - possible bot detection")
+                return False
+            else:
+                logger.warning(f"[WARN] Unexpected status code: {response.status_code}")
+                return False
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[ERROR] Connection failed: {e}")
+            return False
+
+    def pull_bet_history(self, days_back: int = 30) -> dict[str, Any] | None:
+        """Pull bet history from DraftKings API"""
+        logger.info(f"[PULL] Retrieving bet history for last {days_back} days...")
+
+        session = self.setup_session()
+        all_bets = {"settled": [], "pending": [], "metadata": {}}
+
+        try:
+            # Pull settled bets
+            settled_response = session.get(self.api_endpoints["settled"], timeout=15)
+            if settled_response.status_code == 200:
+                settled_data = settled_response.json()
+                all_bets["settled"] = settled_data.get("bets", [])
+                logger.info(f"[OK] Retrieved {len(all_bets['settled'])} settled bets")
+
+            # Pull pending bets
+            bets_response = session.get(self.api_endpoints["bets"], timeout=15)
+            if bets_response.status_code == 200:
+                bets_data = bets_response.json()
+                all_bets["pending"] = bets_data.get("bets", [])
+                logger.info(f"[OK] Retrieved {len(all_bets['pending'])} pending bets")
+
+            # Add metadata
+            all_bets["metadata"] = {
+                "pulled_at": datetime.now().isoformat(),
+                "days_back": days_back,
+                "total_bets": len(all_bets["settled"]) + len(all_bets["pending"]),
+            }
+
+            return all_bets
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[ERROR] Failed to pull bet history: {e}")
+            return None
+
+    def save_bet_data(self, bet_data: dict[str, Any]) -> str:
+        """Save bet data to JSON and CSV formats"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Save raw JSON
+        json_file = self.data_dir / f"dk_bets_{timestamp}.json"
+        with open(json_file, "w", encoding="utf-8") as f:
+            json.dump(bet_data, f, indent=2, ensure_ascii=False)
+
+        # Convert to CSV for analysis
+        csv_file = self.data_dir / f"dk_bets_{timestamp}.csv"
+        self.convert_to_csv(bet_data, csv_file)
+
+        logger.info(f"[SAVE] Bet data saved to {json_file} and {csv_file}")
+        return str(json_file)
+
+    def convert_to_csv(self, bet_data: dict[str, Any], csv_file: Path):
+        """Convert bet data to CSV format for analysis"""
+        rows = []
+
+        # Process settled bets
+        for bet in bet_data.get("settled", []):
+            row = self.extract_bet_info(bet, "settled")
+            if row:
+                rows.append(row)
+
+        # Process pending bets
+        for bet in bet_data.get("pending", []):
+            row = self.extract_bet_info(bet, "pending")
+            if row:
+                rows.append(row)
+
+        if rows:
+            df = pd.DataFrame(rows)
+            df.to_csv(csv_file, index=False)
+            logger.info(f"[CSV] Converted {len(rows)} bets to CSV format")
+
+    def extract_bet_info(self, bet: dict[str, Any], status: str) -> dict[str, Any] | None:
+        """Extract key information from bet object"""
+        try:
+            return {
+                "bet_id": bet.get("betId", ""),
+                "status": status,
+                "sport": bet.get("sport", ""),
+                "bet_type": bet.get("betType", ""),
+                "stake": float(bet.get("stake", 0)),
+                "potential_win": float(bet.get("potentialWin", 0)),
+                "odds": bet.get("odds", ""),
+                "placed_at": bet.get("placedAt", ""),
+                "settled_at": bet.get("settledAt", ""),
+                "result": bet.get("result", ""),
+                "actual_win": float(bet.get("actualWin", 0)),
+                "description": bet.get("description", "")[:100],  # Truncate long descriptions
+            }
+        except (KeyError, ValueError, TypeError) as e:
+            logger.warning(f"[WARN] Failed to extract bet info: {e}")
+            return None
+
+    def generate_browser_capture_script(self) -> str:
+        """Generate JavaScript code to capture API tokens from browser"""
+        script = """
+// EQ12 DraftKings Token Capture Script
+// Run this in browser console while logged into DraftKings
+
+console.log("🔍 EQ12 DraftKings Token Capture Starting...");
+
+// Method 1: Intercept XHR requests
+let originalXHR = window.XMLHttpRequest;
+window.XMLHttpRequest = function() {
+    let xhr = new originalXHR();
+    let originalOpen = xhr.open;
+
+    xhr.open = function(method, url) {
+        if (url.includes('draftkings.com/api')) {
+            console.log("📡 API Call Found:", url);
+
+            let originalSend = xhr.send;
+            xhr.send = function(data) {
+                xhr.addEventListener('readystatechange', function() {
+                    if (xhr.readyState === 4) {
+                        console.log("🔑 Headers:", xhr.getAllResponseHeaders());
+                        if (xhr.getResponseHeader('authorization')) {
+                            console.log("🎯 Auth Token Found!");
+                        }
+                    }
+                });
+                return originalSend.call(this, data);
+            };
+        }
+        return originalOpen.apply(this, arguments);
+    };
+    return xhr;
+};
+
+// Method 2: Check localStorage and sessionStorage
+console.log("💾 LocalStorage tokens:");
+for (let key in localStorage) {
+    if (key.toLowerCase().includes('token') || key.toLowerCase().includes('auth')) {
+        console.log(`${key}: ${localStorage[key]}`);
+    }
+}
+
+console.log("🗂️ SessionStorage tokens:");
+for (let key in sessionStorage) {
+    if (key.toLowerCase().includes('token') || key.toLowerCase().includes('auth')) {
+        console.log(`${key}: ${sessionStorage[key]}`);
+    }
+}
+
+// Method 3: Check cookies
+console.log("🍪 Relevant cookies:");
+document.cookie.split(';').forEach(cookie => {
+    if (cookie.toLowerCase().includes('session') || cookie.toLowerCase().includes('auth')) {
+        console.log(cookie.trim());
+    }
+});
+
+console.log("✅ Token capture complete. Now go to My Bets page to trigger API calls.");
+"""
+
+        script_file = self.data_dir / "dk_token_capture.js"
+        with open(script_file, "w", encoding="utf-8") as f:
+            f.write(script)
+
+        logger.info(f"[SCRIPT] Browser capture script saved to {script_file}")
+        return str(script_file)
+
+    def run_full_pull(self) -> bool:
+        """Run complete bet pulling process"""
+        logger.info("[START] EQ12 DraftKings Bet Puller")
+
+        # Test connection first
+        if not self.test_connection():
+            logger.error("[FAIL] Connection test failed")
+
+            # Generate browser capture script for manual token extraction
+            script_file = self.generate_browser_capture_script()
+            logger.info("[INFO] Manual token capture required:")
+            logger.info(f"[INFO] 1. Open {script_file} in text editor")
+            logger.info("[INFO] 2. Copy the JavaScript code")
+            logger.info("[INFO] 3. Paste in DraftKings console (F12)")
+            logger.info("[INFO] 4. Set tokens with: setx DK_AUTH_TOKEN 'your-token'")
+            return False
+
+        # Pull bet history
+        bet_data = self.pull_bet_history()
+        if not bet_data:
+            logger.error("[FAIL] Failed to pull bet data")
+            return False
+
+        # Save data
+        saved_file = self.save_bet_data(bet_data)
+
+        # Generate summary
+        total_bets = bet_data["metadata"]["total_bets"]
+        logger.info(f"[SUCCESS] Pulled {total_bets} bets successfully")
+        logger.info(f"[INFO] Data saved to {saved_file}")
+
+        return True
+
+
+def main():
+    """Main entry point"""
+    puller = EQ12DraftKingsPuller()
+    success = puller.run_full_pull()
+
+    if success:
+        logger.info("[NEXT] Run eq12_finance_analyzer.py to analyze profitability")
+
+    sys.exit(0 if success else 1)
+
+
+if __name__ == "__main__":
+    main()

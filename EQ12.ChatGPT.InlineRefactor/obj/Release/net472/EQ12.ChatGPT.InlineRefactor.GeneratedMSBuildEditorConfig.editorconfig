@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = EQ12.ChatGPT.InlineRefactor
+build_property.ProjectDir = C:\EQ12_BROKEN_20251122_210342\EQ12.ChatGPT.InlineRefactor\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 

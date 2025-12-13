@@ -1,0 +1,367 @@
+import datetime as _dt
+
+import requests as _rq
+
+
+# ---------- Utilities ----------
+def _today_iso():
+    return _dt.date.today().isoformat()
+
+
+def _yymmdd():
+    return _dt.date.today().strftime("%Y%m%d")
+
+
+def concise_list(games, max_items=8):
+    if not games:
+        return "No games found."
+    s = []
+    for i, g in enumerate(games[:max_items], 1):
+        if isinstance(g, dict):
+            home = g.get("home")
+            away = g.get("away")
+        else:
+            home, away = g
+        s.append(f"{i}. {away} @ {home}")
+    return "\n".join(s)
+
+
+# ---------- MLB ----------
+def mlb_schedule_detailed():
+    """
+    Return list of dicts: {
+      'home','away','gamePk','probHome','probAway','homeId','awayId'
+    }
+    Uses MLB Stats API.
+    """
+    url = "https://statsapi.mlb.com/api/v1/schedule"
+    params = {"sportId": 1, "date": _today_iso(), "hydrate": "team,probablePitcher"}
+    out = []
+    try:
+        r = _rq.get(url, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        for date in data.get("dates", []):
+            for g in date.get("games", []):
+                home_t = g.get("teams", {}).get("home", {})
+                away_t = g.get("teams", {}).get("away", {})
+                home = (home_t.get("team") or {}).get("name")
+                away = (away_t.get("team") or {}).get("name")
+                homeId = (home_t.get("team") or {}).get("id")
+                awayId = (away_t.get("team") or {}).get("id")
+                probHome = (home_t.get("probablePitcher") or {}).get("fullName")
+                probAway = (away_t.get("probablePitcher") or {}).get("fullName")
+                gamePk = g.get("gamePk")
+                if home and away:
+                    out.append(
+                        {
+                            "home": home,
+                            "away": away,
+                            "homeId": homeId,
+                            "awayId": awayId,
+                            "probHome": probHome,
+                            "probAway": probAway,
+                            "gamePk": gamePk,
+                        }
+                    )
+    except Exception:
+        pass
+    return out
+
+
+def mlb_active_roster(team_id):
+    """Return list of {'name','position'} for the active MLB roster of a team."""
+    url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster?rosterType=active"
+    try:
+        r = _rq.get(url, timeout=10)
+        r.raise_for_status()
+        roster = []
+        for p in r.json().get("roster", []):
+            per = p.get("person", {})
+            pos = p.get("position", {})
+            roster.append({"name": per.get("fullName"), "position": pos.get("abbreviation")})
+        return roster
+    except Exception:
+        return []
+
+
+def build_mlb_context(max_games=10):
+    games = mlb_schedule_detailed()
+    if not games:
+        return "TODAY’S MLB: none.", [], {}
+
+    games = games[:max_games]
+    out = ["TODAY’S MLB GAMES:"]
+    roster_map = {}
+
+    for g in games:
+        home = g["home"]
+        away = g["away"]
+        probA = g.get("probAway") or "TBD"
+        probH = g.get("probHome") or "TBD"
+        out.append(f"- {away} @ {home}  (Prob P: {probA} / {probH})")
+        # weather/park line under each matchup
+        out.append("  " + format_weather_line(home))
+
+    out.append("\nACTIVE ROSTERS (short list, up to 12):")
+    for g in games:
+        for team_name, tid in [(g["away"], g["awayId"]), (g["home"], g["homeId"])]:
+            if tid and team_name not in roster_map:
+                roster = mlb_active_roster(tid)
+                names = [r.get("name") for r in roster if r.get("name")]
+                names = names[:12]
+                roster_map[team_name] = names
+                label = ", ".join(names) if names else "TBD"
+                out.append(f"• {team_name}: {label}")
+
+    return "\n".join(out), games, roster_map
+
+    games = games[:max_games]
+    out = ["TODAY’S MLB GAMES:"]
+    roster_map = {}
+
+    for g in games:
+        home = g["home"]
+        away = g["away"]
+        probA = g.get("probAway") or "TBD"
+        probH = g.get("probHome") or "TBD"
+        out.append(f"- {away} @ {home}  (Prob P: {probA} / {probH})")
+        # weather/park line under each matchup
+        out.append("  " + format_weather_line(home))
+
+    out.append("\nACTIVE ROSTERS (short list, up to 12):")
+    for g in games:
+        for team_name, tid in [(g["away"], g["awayId"]), (g["home"], g["homeId"])]:
+            if tid and team_name not in roster_map:
+                roster = mlb_active_roster(tid)
+                names = [r.get("name") for r in roster if r.get("name")]
+                names = names[:12]
+                roster_map[team_name] = names
+                label = ", ".join(names) if names else "TBD"
+                out.append(f"• {team_name}: {label}")
+
+    return "\n".join(out), games, roster_map
+    # limit games and get rosters for the ones in play
+    games = games[:max_games]
+    blocks = ["TODAYS MLB GAMES:"]
+    roster_map = {}
+    for g in games:
+        blocks.append(
+            f"- {g['away']} @ {g['home']}  "
+            f"(Probable P: {g.get('probAway') or 'TBD'} / {g.get('probHome') or 'TBD'})"
+        )
+    # attach short active rosters (names only) for each team
+    blocks.append("\nACTIVE ROSTERS (short list):")
+    for g in games:
+        for team_name, tid in [(g["away"], g["awayId"]), (g["home"], g["homeId"])]:
+            if tid and team_name not in roster_map:
+                roster = mlb_active_roster(tid)
+                names = [r["name"] for r in roster if r.get("name")]
+                # short list top 8 names
+                roster_map[team_name] = names[:8]
+                blocks.append(f" {team_name}: " + (", ".join(names[:8]) if names else "TBD"))
+    return "\n".join(blocks), games
+
+
+# ---------- WNBA ----------
+def wnba_schedule_detailed():
+    """
+    Return list of dicts: {'home','away'}
+    Uses ESPN WNBA scoreboard.
+    """
+    url = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
+    params = {"dates": _yymmdd()}
+    out = []
+    try:
+        r = _rq.get(url, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        for e in data.get("events", []):
+            comps = e.get("competitions", [])
+            if not comps:
+                continue
+            teams = comps[0].get("competitors", [])
+            if len(teams) == 2:
+                home = next(
+                    (t["team"]["displayName"] for t in teams if t.get("homeAway") == "home"),
+                    None,
+                )
+                away = next(
+                    (t["team"]["displayName"] for t in teams if t.get("homeAway") == "away"),
+                    None,
+                )
+                if home and away:
+                    out.append({"home": home, "away": away})
+    except Exception:
+        pass
+    return out
+
+
+def build_wnba_context(max_games=8):
+    games = wnba_schedule_detailed()
+    if not games:
+        return "TODAYS WNBA: none.", games
+    lines = ["TODAYS WNBA GAMES:", concise_list(games, max_games)]
+    return "\n".join(lines), games
+
+
+# ---------- Command Router ----------
+def context_for_command(cmd: str):
+    """
+    Return (sport, context_text) for a known command key.
+    """
+    cmd = (cmd or "").lower()
+    if cmd in {
+        "hr_tripod",
+        "ks_two_leg",
+        "parlay_mlb_safe",
+        "mixed_10_leg",
+        "odds_summary",
+    }:
+        ctx, games = build_mlb_context()
+        return ("mlb", ctx)
+    if cmd in {"wnba_points"}:
+        ctx, games = build_wnba_context()
+        return ("wnba", ctx)
+    if cmd in {"ufc_mov"}:
+        return (
+            "ufc",
+            "UFC: Use current official card only. If card is not today, say so briefly.",
+        )
+    if cmd in {"boxing_underdog"}:
+        return (
+            "boxing",
+            "BOXING: Only sanctioned, scheduled bouts; use recent comps and line drift.",
+        )
+    if cmd in {"affiliate_convert", "travel_deals"}:
+        return ("info", "General info utility.")
+    return ("general", "")
+
+
+# ====== MLB ballpark geocodes (short list; expand as you like) ======
+BALLPARKS = {
+    "New York Yankees": (40.8296, -73.9262),  # Yankee Stadium
+    "New York Mets": (40.7571, -73.8458),  # Citi Field
+    "Boston Red Sox": (42.3467, -71.0972),  # Fenway Park
+    "Chicago Cubs": (41.9484, -87.6553),  # Wrigley
+    "Chicago White Sox": (41.8300, -87.6339),  # Guaranteed Rate
+    "Los Angeles Dodgers": (34.0739, -118.2400),
+    "Los Angeles Angels": (33.8003, -117.8827),
+    "San Francisco Giants": (37.7786, -122.3893),
+    "Oakland Athletics": (37.7516, -122.2005),
+    "Houston Astros": (29.7571, -95.3555),
+    "Texas Rangers": (32.7473, -97.0842),
+    "Atlanta Braves": (33.8907, -84.4677),
+    "Philadelphia Phillies": (39.9057, -75.1665),
+    "St. Louis Cardinals": (38.6226, -90.1928),
+    "Toronto Blue Jays": (43.6414, -79.3893),
+    "Miami Marlins": (25.7781, -80.2197),
+    "Arizona Diamondbacks": (33.4457, -112.0667),
+    "San Diego Padres": (32.7076, -117.1566),
+    "Seattle Mariners": (47.5914, -122.3325),
+    "Colorado Rockies": (39.7561, -104.9942),
+    "Cleveland Guardians": (41.4962, -81.6852),
+}
+
+# Simple park factors (100 = neutral). Fill with your source later.
+PARK_FACTORS = {
+    "Fenway Park": {"HR": 96, "TB": 108},
+    "Wrigley Field": {"HR": 105, "TB": 103},
+    "Yankee Stadium": {"HR": 117, "TB": 104},
+    "Dodger Stadium": {"HR": 102, "TB": 100},
+    "Oracle Park": {"HR": 90, "TB": 95},
+    "Rogers Centre": {"HR": 103, "TB": 102},
+}
+
+
+def _compass(deg: float) -> str:
+    try:
+        dirs = [
+            "N",
+            "NNE",
+            "NE",
+            "ENE",
+            "E",
+            "ESE",
+            "SE",
+            "SSE",
+            "S",
+            "SSW",
+            "SW",
+            "WSW",
+            "W",
+            "WNW",
+            "NW",
+            "NNW",
+        ]
+        i = int((deg / 22.5) + 0.5) % 16
+        return dirs[i]
+    except Exception:
+        return "?"
+
+
+def get_current_weather_openmeteo(lat: float, lon: float) -> dict | None:
+    """
+    Free provider. Returns dict: {"temp_f": float, "wind_mph": float, "wind_dir": float}
+    """
+    try:
+        url = (
+            "https://api.open-meteo.com/v1/forecast"
+            f"?latitude={lat}&longitude={lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m"
+            "&temperature_unit=fahrenheit&wind_speed_unit=mph"
+        )
+        r = requests.get(url, timeout=6)
+        r.raise_for_status()
+        cur = r.json().get("current") or {}
+        return {
+            "temp_f": cur.get("temperature_2m"),
+            "wind_mph": cur.get("wind_speed_10m"),
+            "wind_dir": cur.get("wind_direction_10m"),
+        }
+    except Exception:
+        return None
+
+
+def _park_label(home_team: str) -> tuple[str, dict]:
+    """
+    Derive a park label from home team and look up park factors if known.
+    Very light heuristic; feel free to hard-map team->park.
+    """
+    mapping = {
+        "New York Yankees": "Yankee Stadium",
+        "New York Mets": "Citi Field",
+        "Boston Red Sox": "Fenway Park",
+        "Chicago Cubs": "Wrigley Field",
+        "San Francisco Giants": "Oracle Park",
+        "Toronto Blue Jays": "Rogers Centre",
+        "Los Angeles Dodgers": "Dodger Stadium",
+    }
+    park = mapping.get(home_team, home_team)  # fallback to name if unknown
+    return park, PARK_FACTORS.get(park, {})
+
+
+def format_weather_line(home_team: str) -> str:
+    """
+    Returns a compact line like:
+      WX: 78°F, Wind 12 mph W (HR boost if >= 8 mph). Park(HR/TB)=117/104
+    """
+    latlon = BALLPARKS.get(home_team)
+    park, pf = _park_label(home_team)
+    pf_hr = pf.get("HR", "—")
+    pf_tb = pf.get("TB", "—")
+
+    if not latlon:
+        return f"WX: (no geo)  Park: {park} (HR/TB={pf_hr}/{pf_tb})"
+
+    w = get_current_weather_openmeteo(latlon[0], latlon[1])
+    if not w:
+        return f"WX: (unavailable)  Park: {park} (HR/TB={pf_hr}/{pf_tb})"
+
+    temp = w.get("temp_f")
+    mph = w.get("wind_mph")
+    deg = w.get("wind_dir")
+    arrow = _compass(deg) if deg is not None else "?"
+    boost = " — HR boost" if (mph and mph >= 8) else ""
+    temp_s = f"{round(temp)}°F" if isinstance(temp, (int, float)) else "?"
+    mph_s = f"{round(mph)} mph" if isinstance(mph, (int, float)) else "?"
+    return f"WX: {temp_s}, Wind {mph_s} {arrow}{boost}.  Park({park}) HR/TB={pf_hr}/{pf_tb}"

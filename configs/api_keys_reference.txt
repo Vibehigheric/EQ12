@@ -1,0 +1,27 @@
+EQ12 API KEY QUICK REFERENCE
+==============================
+
+SPORTSDATA_API_KEY:
+  Website: https://sportsdata.io/
+  Priority: CRITICAL
+  Free Tier: 1000 requests/month
+  Purpose: Comprehensive sports statistics
+
+TWITTER_API_KEY:
+  Website: https://developer.twitter.com/
+  Priority: CRITICAL
+  Free Tier: Limited access
+  Purpose: Social intelligence monitoring
+
+OPENWEATHER_API_KEY:
+  Website: https://openweathermap.org/api
+  Priority: IMPORTANT
+  Free Tier: 1000 calls/day
+  Purpose: Weather data for sports analysis
+
+ESPN_API_KEY:
+  Website: https://site.api.espn.com/
+  Priority: OPTIONAL
+  Free Tier: Public endpoints
+  Purpose: Real-time sports data
+

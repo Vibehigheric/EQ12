@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>EQ12CoreLibrary</RootNamespace>
+    <TargetFramework>net6.0</TargetFramework>
+    <UseWindowsForms>false</UseWindowsForms>
+    <AssemblyTitle>EQ12CoreLibrary</AssemblyTitle>
+    <AssemblyDescription>EQ12 VB.NET Class Library</AssemblyDescription>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- EQ12 Minimal Auto-Execute Targets -->
+  
+  <Target Name="EQ12MinimalSetup" AfterTargets="AfterBuild">
+    <Message Text="âš¡ EQ12: Quick workspace setup..." Importance="high" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;Write-Host 'âœ… EQ12 build completed for: $(MSBuildProjectName)' -ForegroundColor Green&quot;" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;if (-not (Test-Path 'C:\EQ12\logs')) { New-Item -ItemType Directory -Path 'C:\EQ12\logs' -Force }&quot;" />
+  </Target>
+</Project>

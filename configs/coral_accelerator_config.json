@@ -1,0 +1,44 @@
+{
+  "coral_accelerator": {
+    "enabled": true,
+    "device_path": "auto",
+    "max_concurrent_tasks": 4,
+    "model_cache_size": 10,
+    "auto_optimize": true,
+    "performance_monitoring": true
+  },
+  "models": {
+    "classification": {
+      "default": "mobilenet_v2",
+      "alternatives": [
+        "efficientnet",
+        "resnet"
+      ]
+    },
+    "detection": {
+      "default": "efficientdet",
+      "alternatives": [
+        "yolo_edge",
+        "ssd_mobilenet"
+      ]
+    },
+    "segmentation": {
+      "default": "deeplabv3",
+      "alternatives": [
+        "unet_edge"
+      ]
+    }
+  },
+  "optimization": {
+    "batch_processing": true,
+    "result_caching": true,
+    "background_processing": true,
+    "automatic_model_selection": true
+  },
+  "integration": {
+    "eq12_scripts": true,
+    "web3_acceleration": true,
+    "freelance_automation": true,
+    "crypto_analysis": true
+  }
+}

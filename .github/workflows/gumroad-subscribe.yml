@@ -1,0 +1,28 @@
+name: Gumroad Subscribe
+
+on:
+  workflow_dispatch:
+
+jobs:
+  subscribe:
+    runs-on: ubuntu-latest
+    env:
+      GUMROAD_PING_URL: ${{ vars.GUMROAD_PING_URL }}
+      GUMROAD_ACCESS_TOKEN: ${{ secrets.GUMROAD_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate configuration
+        run: |
+          if [ -z "${GUMROAD_PING_URL}" ]; then echo "Missing vars.GUMROAD_PING_URL" && exit 1; fi
+          if [ -z "${GUMROAD_ACCESS_TOKEN}" ]; then echo "Missing secrets.GUMROAD_ACCESS_TOKEN" && exit 1; fi
+          case "$GUMROAD_PING_URL" in https://*) ;; *) echo "GUMROAD_PING_URL must be HTTPS" && exit 1 ;; esac
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run subscriptions
+        run: |
+          python scripts/gumroad_subscribe.py

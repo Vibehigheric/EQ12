@@ -1,0 +1,102 @@
+
+"""EQ12 Freelance Project Scaffold"""
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+from pathlib import Path
+from typing import Dict
+
+TEMPLATES: Dict[str, Dict[str, object]] = {
+    "web": {
+        "dirs": ["src", "static", "tests", "scripts"],
+        "files": {
+            "README.md": "# Web Project\\n\\nGenerated via EQ12 scaffold.\\n",
+            "requirements.txt": "fastapi\\nuvicorn",
+            "src/__init__.py": "",
+            "src/main.py": "from fastapi import FastAPI\\n\\napp = FastAPI()\\n\\n@app.get(\"/health\")\\ndef health():\\n    return {\"status\": \"ok\"}\\n",
+        },
+    },
+    "data": {
+        "dirs": ["notebooks", "data", "models", "scripts"],
+        "files": {
+            "README.md": "# Data Science Project\\n",
+            "environment.yml": "name: eq12-data\\ndependencies:\\n  - python=3.12\\n  - pandas\\n  - numpy\\n  - scikit-learn\\n",
+            "scripts/pipeline.py": "def main():\\n    print('Pipeline placeholder')\\n\\nif __name__ == '__main__':\\n    main()\\n",
+        },
+    },
+    "api": {
+        "dirs": ["app", "tests", "deploy"],
+        "files": {
+            "pyproject.toml": "[project]\\nname = \\"eq12-service\\"\\nversion = \\"0.1.0\\"\\ndependencies = [\\"flask\\"]\\n",
+            "app/__init__.py": "from flask import Flask\\n\\ndef create_app():\\n    app = Flask(__name__)\\n\\n    @app.route('/health')\\n    def health():\\n        return {\\"status\\": \\"ok\\"}\\n\\n    return app\\n",
+            "README.md": "# API Service\\n",
+        },
+    },
+}
+
+
+def scaffold_project(name: str, kind: str) -> Path:
+    base = Path(name).resolve()
+    if base.exists():
+        raise SystemExit(f"Directory {base} already exists.")
+    template = TEMPLATES[kind]
+    for directory in template["dirs"]:
+        (base / directory).mkdir(parents=True, exist_ok=True)
+    files = template["files"]
+    for relative, contents in files.items():
+        file_path = base / relative
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        file_path.write_text(contents, encoding="utf-8")
+    (base / ".gitignore").write_text("__pycache__/
+.env
+*.log
+", encoding="utf-8")
+    return base
+
+
+def install_dependencies(path: Path, kind: str) -> None:
+    commands = {
+        "web": ["python", "-m", "pip", "install", "fastapi", "uvicorn"],
+        "data": ["python", "-m", "pip", "install", "-r", "requirements.txt"],
+        "api": ["python", "-m", "pip", "install", "flask"],
+    }
+    cmd = commands.get(kind)
+    if not cmd:
+        return
+    try:
+        subprocess.run(cmd, cwd=path, check=False)
+    except FileNotFoundError:
+        pass
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="EQ12 freelance scaffold generator")
+    parser.add_argument("name", help="Project directory")
+    parser.add_argument("--type", default="web", choices=TEMPLATES.keys(), help="Template type")
+    parser.add_argument("--no-install", action="store_true", help="Skip dependency installation")
+    parser.add_argument("--json", action="store_true", help="Output summary as JSON")
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+    base = scaffold_project(args.name, args.type)
+    if not args.no_install:
+        install_dependencies(base, args.type)
+    summary = {
+        "path": str(base),
+        "type": args.type,
+        "files": sorted(str(p.relative_to(base)) for p in base.rglob("*"))
+    }
+    if args.json:
+        print(json.dumps(summary, indent=2))
+    else:
+        print(f"Created project at {base}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

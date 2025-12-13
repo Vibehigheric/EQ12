@@ -1,0 +1,5 @@
+Create a comprehensive travel automation system that:
+- Monitors flight prices and hotel availability
+- Tracks visa requirements and travel advisories
+- Generates optimized itineraries with local recommendations
+- Provides real-time weather and currency updates

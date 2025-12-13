@@ -1,0 +1,75 @@
+#Requires -Version 5.1
+[CmdletBinding()]
+param(
+    [string]$Workspace = "C:\EQ12",
+    [switch]$VerboseOutput,
+    [switch]$TestMode
+)
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "🚀 EQ12 DraftKings SGP Analyzer - Tonight's NBA Games" -ForegroundColor Green
+
+$logFile = Join-Path $Workspace "logs" "sgp_tonight_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+$pythonScript = Join-Path $Workspace "scripts" "eq12_coral_betting_ai.py"
+
+# Ensure logs directory exists
+$logsDir = Join-Path $Workspace "logs"
+if (-not (Test-Path $logsDir)) {
+    New-Item -Path $logsDir -ItemType Directory -Force | Out-Null
+}
+
+try {
+    Write-Host "📊 Launching Coral AI SGP Analysis..." -ForegroundColor Cyan
+    
+    $pythonArgs = @(
+        $pythonScript,
+        "--workspace", $Workspace,
+        "--sgp-tonight"
+    )
+    
+    if ($VerboseOutput) {
+        $pythonArgs += "--verbose"
+    }
+    
+    if ($TestMode) {
+        Write-Host "⚠️ TEST MODE: Would execute:" -ForegroundColor Yellow
+        Write-Host "python $($pythonArgs -join ' ')" -ForegroundColor Yellow
+        return
+    }
+    
+    # Execute the analysis
+    $process = Start-Process -FilePath "python" -ArgumentList $pythonArgs -NoNewWindow -Wait -PassThru -RedirectStandardOutput $logFile -RedirectStandardError "$logFile.errors"
+    
+    if ($process.ExitCode -eq 0) {
+        Write-Host "✅ SGP Analysis completed successfully!" -ForegroundColor Green
+        Write-Host "📄 Log saved to: $logFile" -ForegroundColor Gray
+        
+        # Show tail of output
+        if (Test-Path $logFile) {
+            Write-Host "`n📊 Analysis Summary:" -ForegroundColor Yellow
+            Get-Content $logFile | Select-Object -Last 10 | ForEach-Object {
+                Write-Host "   $_" -ForegroundColor White
+            }
+        }
+    }
+    else {
+        Write-Host "❌ SGP Analysis failed with exit code: $($process.ExitCode)" -ForegroundColor Red
+        
+        if (Test-Path "$logFile.errors") {
+            Write-Host "Error details:" -ForegroundColor Red
+            Get-Content "$logFile.errors" | ForEach-Object {
+                Write-Host "   $_" -ForegroundColor Red
+            }
+        }
+        
+        exit $process.ExitCode
+    }
+}
+catch {
+    Write-Host "💥 Fatal error during SGP analysis: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Stack trace: $($_.ScriptStackTrace)" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "`n🎯 SGP Analysis Complete! Check Telegram for betting recommendations." -ForegroundColor Green

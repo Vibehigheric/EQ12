@@ -1,0 +1,115 @@
+# Requires -Modules Pester
+# Requires -Version 5.0
+
+<#
+    .SYNOPSIS
+    Optimized script to execute the EQ12 sports betting test suite using Pester
+    with concurrent execution and detailed reporting.
+
+    This script leverages PowerShell Core (pwsh) for performance and Pester's
+    built-in concurrency feature for maximum speed.
+
+    .PARAMETER TargetScript
+    The path to the core script being tested. This replaces the -File argument.
+
+    .PARAMETER ConcurrencyLevel
+    The number of threads to use for parallel test execution.
+    Defaults to the number of logical processors.
+
+    .PARAMETER ExcludeIntegration
+    If set to $true, excludes all tests marked with the '-Tag "Integration"'
+    to ensure fast, stable execution of Unit Tests only.
+#>
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$TargetScript = "C:\EQ12\eq12_sports_betting_advanced.ps1",
+
+    [int]$ConcurrencyLevel = $([Environment]::ProcessorCount),
+
+    [string]$ReportPath = "C:\EQ12\TestReports\EQ12_TestReport_$(Get-Date -Format 'yyyyMMdd_HHmmss').xml",
+
+    [bool]$ExcludeIntegration = $true # Defaulting to true for faster, more stable dev runs
+)
+
+# --- Configuration for Speed and Thoroughness ---
+
+# 1. Environment Check (Speed)
+# It's highly recommended to use 'pwsh.exe' (PowerShell Core) over 'powershell.exe' (Desktop)
+# for significant performance improvements in modern script execution.
+if ($PSVersionTable.PSEdition -ne 'Core') {
+    Write-Warning "Running in Windows PowerShell (powershell.exe). For maximum speed, execute this script using PowerShell Core (pwsh.exe)."
+}
+
+# 2. Find Tests (Thoroughness)
+# Define the root folder where all Pester test files (*.Tests.ps1) are located.
+$TestPath = Split-Path -Path $TargetScript -Parent
+Write-Host "Searching for Pester tests in: $TestPath"
+
+# 3. Import Pester Module (Dependency Management)
+try {
+    Import-Module Pester -MinimumVersion 5.0 -ErrorAction Stop
+}
+catch {
+    Write-Error "Pester module (v5.0+) not found. Please install it using: Install-Module -Name Pester -Force"
+    exit 1
+}
+
+# 4. Define Reporting Format (Thoroughness)
+# Outputting in NUnit format is critical for CI/CD systems (Jenkins, Azure DevOps, GitHub Actions).
+$TestResultFormat = @{
+    Path   = $ReportPath
+    Format = 'NUnitXml'
+}
+Write-Host "Detailed report will be saved to: $($ReportPath)"
+
+# Configure Exclusion for Stability
+$ExclusionParams = @{}
+if ($ExcludeIntegration) {
+    $ExclusionParams['ExcludeTag'] = 'Integration'
+    Write-Host "Excluding tests tagged 'Integration' for stability and speed." -ForegroundColor Yellow
+}
+
+
+# 5. Execute Tests with Concurrency (Speed & Thoroughness)
+Write-Host "Starting Pester execution with Concurrency: $ConcurrencyLevel..."
+try {
+    # Create Pester configuration for modern Pester 5.x
+    $PesterConfig = [PesterConfiguration]::Default
+    $PesterConfig.Run.Path = $TestPath
+    $PesterConfig.Run.PassThru = $true
+    $PesterConfig.TestResult.Enabled = $true
+    $PesterConfig.TestResult.OutputFormat = $TestResultFormat.Format
+    $PesterConfig.TestResult.OutputPath = $TestResultFormat.Path
+
+    # Apply exclusion tags if specified
+    if ($ExcludeIntegration) {
+        $PesterConfig.Filter.ExcludeTag = 'Integration'
+    }
+
+    # Set concurrency for performance
+    if ($ConcurrencyLevel -gt 1) {
+        $PesterConfig.Run.Container = New-PesterContainer -Path $TestPath
+    }
+
+    $TestResults = Invoke-Pester -Configuration $PesterConfig
+
+    # 6. Output Summary
+    $TotalTests = $TestResults.TotalCount
+    $FailedTests = $TestResults.FailedCount
+    $TotalDuration = $TestResults.Duration.TotalSeconds
+
+    Write-Host ""
+    Write-Host "--- EQ12 TEST SUITE SUMMARY ---" -ForegroundColor Green
+    Write-Host "Total Tests Run: $($TotalTests)"
+    Write-Host "Failed Tests: $($FailedTests)" -ForegroundColor $(if ($FailedTests -gt 0) { 'Red' } else { 'Green' })
+    Write-Host "Total Duration: $($TotalDuration) seconds"
+    Write-Host "-------------------------------"
+
+    if ($FailedTests -gt 0) {
+        exit 1 # Non-zero exit code indicates failure in CI/CD
+    }
+}
+catch {
+    Write-Error "An error occurred during Invoke-Pester: $($_.Exception.Message)"
+    exit 1
+}

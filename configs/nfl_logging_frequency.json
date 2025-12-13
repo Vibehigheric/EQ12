@@ -1,0 +1,10 @@
+{
+  "current_interval": "every_2_hours",
+  "recommended_interval": "hourly",
+  "peak_hours_interval": "every_30_minutes",
+  "off_hours_interval": "every_2_hours",
+  "game_day_interval": "every_15_minutes",
+  "max_log_size_mb": 5,
+  "enable_compression": true,
+  "last_optimization": "2025-10-11T07:20:48.605614"
+}

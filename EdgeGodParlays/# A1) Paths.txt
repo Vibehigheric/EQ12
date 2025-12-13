@@ -1,0 +1,34 @@
+# A1) Paths
+$ROOT = "C:\EQ12\EdgeGodParlays"
+New-Item -ItemType Directory -Force -Path $ROOT | Out-Null
+
+# A2) Create .env with placeholders (edit after creation)
+@"
+# Core
+OPENAI_API_KEY=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
+TELEGRAM_BOT_TOKEN=7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc
+TELEGRAM_CHAT_ID=5475370304
+# Odds / data
+ODDS_API_KEY=8eb822610b7753d45f76dcac8230a7d1
+
+# Google / Sheets (optional integration)
+GOOGLE_SHEETS_SPREADSHEET_ID=d87fcf1452bc55c8a7907444d50474d857089730 
+
+# Put OAuth JSON at: C:\EQ12\EdgeGodParlays\creds.json
+
+# Ngrok (optional, for Telegram webhooks)
+
+NGROK_AUTHTOKEN=30ITsz6jMc0Ugg8RTQvBeGy05ag_7e8tLgn62naWMMtE1wmt
+"@ | Set-Content -Path "$ROOT\.env" -Encoding UTF8 -Force
+
+# A3) Tighten ACLs (only your user & Administrators)
+$acl = Get-Acl $ROOT
+$ruleUser = New-Object System.Security.AccessControl.FileSystemAccessRule("$env:USERNAME","FullControl","ContainerInherit,ObjectInherit","None","Allow")
+$ruleAdmins = New-Object System.Security.AccessControl.FileSystemAccessRule("Administrators","FullControl","ContainerInherit,ObjectInherit","None","Allow")
+$acl.SetAccessRuleProtection($true,$false)
+$acl.ResetAccessRule($ruleUser)
+$acl.AddAccessRule($ruleAdmins)
+Set-Acl -Path $ROOT -AclObject $acl
+
+# A4) (Sheets) Copy your OAuth creds JSON now:
+#   copy C:\path\to\downloaded\client_secret.json  C:\EQ12\EdgeGodParlays\creds.json

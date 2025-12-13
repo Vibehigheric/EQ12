@@ -1,0 +1,2 @@
+Cleanup run: 11/15/2025 21:26:05
+Parameters: Archive=False; Remove=False; Confirm=False; DryRun=True; Targets=.ven*,.pytest_cache,.ruff_cache,node_modules

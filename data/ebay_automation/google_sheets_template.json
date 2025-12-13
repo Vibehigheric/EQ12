@@ -1,0 +1,51 @@
+{
+  "sheet_name": "EQ12_eBay_Automation",
+  "headers": [
+    "SKU",
+    "Title",
+    "Category",
+    "Cost",
+    "Sale_Price",
+    "Weight_Oz",
+    "Length",
+    "Width",
+    "Height",
+    "Fits_Flat_Rate",
+    "Preferred_Box",
+    "Shipping_Charged",
+    "eBay_Fee_Percent",
+    "PayPal_Fee_Percent",
+    "Gross_Revenue",
+    "Total_Fees",
+    "Net_Profit",
+    "Profit_Margin",
+    "Recommended_Box",
+    "Shipping_Cost",
+    "Box_Cost",
+    "Last_Updated"
+  ],
+  "formulas": {
+    "Gross_Revenue": "=E2+L2",
+    "Total_Fees": "=E2*M2+N2*O2+0.30",
+    "Net_Profit": "=O2-P2-D2-T2-U2",
+    "Profit_Margin": "=Q2/O2*100"
+  },
+  "sample_data": [
+    {
+      "SKU": "TECH001",
+      "Title": "Vintage Camera Lens 50mm",
+      "Category": "Photography",
+      "Cost": 15.0,
+      "Sale_Price": 45.0,
+      "Weight_Oz": 12,
+      "Length": 4,
+      "Width": 4,
+      "Height": 3,
+      "Fits_Flat_Rate": "small_box",
+      "Preferred_Box": "small_box",
+      "Shipping_Charged": 10.2,
+      "eBay_Fee_Percent": 0.129,
+      "PayPal_Fee_Percent": 0.029
+    }
+  ]
+}

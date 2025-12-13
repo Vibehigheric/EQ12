@@ -1,0 +1,134 @@
+{
+  "x_api_github_queries": {
+    "description": "GitHub search queries specifically for X (Twitter) API repositories and samples",
+    "last_updated": "2025-10-03T20:30:00Z",
+    "search_categories": {
+      "official_repos": [
+        {
+          "query": "repo:TwitterDev/Twitter-API-v2-sample-code",
+          "description": "Official Twitter API v2 sample code in multiple languages",
+          "priority": "high",
+          "integration_target": "XClient.vb",
+          "expected_patterns": ["PostTweet", "SearchTweets", "OAuth", "RateLimits"]
+        },
+        {
+          "query": "repo:TwitterDev/search-tweets-python", 
+          "description": "Python client for Twitter search endpoints",
+          "priority": "high",
+          "integration_target": "XClient.vb SearchBettingIntelligence",
+          "expected_patterns": ["SearchRecent", "SearchAll", "Pagination", "Filters"]
+        },
+        {
+          "query": "repo:TwitterDev/twitter-api-typescript-sdk",
+          "description": "Official TypeScript SDK for Twitter API v2",
+          "priority": "medium",
+          "integration_target": "XClient.vb",
+          "expected_patterns": ["TweetAPI", "UserAPI", "StreamAPI", "Types"]
+        },
+        {
+          "query": "repo:TwitterDev/twitter-api-java-sdk",
+          "description": "Official Java SDK for Twitter API v2",
+          "priority": "medium", 
+          "integration_target": "XClient.vb",
+          "expected_patterns": ["TweetManager", "UserManager", "StreamingClient"]
+        },
+        {
+          "query": "repo:TwitterDev/xurl",
+          "description": "OAuth2.0-enabled curl for the X API",
+          "priority": "high",
+          "integration_target": "XClient.vb OAuth handling",
+          "expected_patterns": ["OAuth2", "BearerToken", "Authentication", "CURL"]
+        },
+        {
+          "query": "repo:TwitterDev/twauth-web",
+          "description": "Simple Flask app to get OAuth tokens",
+          "priority": "medium",
+          "integration_target": "OAuth token management",
+          "expected_patterns": ["OAuth1", "OAuth2", "TokenRefresh", "WebAuth"]
+        }
+      ],
+      "community_betting_repos": [
+        {
+          "query": "twitter api betting OR gambling OR sports OR odds in:readme language:python",
+          "description": "Community Twitter bots for sports betting intelligence",
+          "priority": "high",
+          "integration_target": "XClient.vb betting intelligence",
+          "expected_patterns": ["InjuryReports", "LineMovement", "SportsData", "BettingAlerts"]
+        },
+        {
+          "query": "twitter bot arbitrage OR kelly OR sportsbook in:readme language:javascript",
+          "description": "JavaScript Twitter bots for arbitrage detection",
+          "priority": "medium",
+          "integration_target": "ArbitrageBotEngine integration",
+          "expected_patterns": ["Arbitrage", "Sportsbooks", "OddsComparison", "Alerts"]
+        },
+        {
+          "query": "twitter stream sports OR injury OR trade in:readme",
+          "description": "Real-time sports data streaming from Twitter",
+          "priority": "high",
+          "integration_target": "LiveWatch integration",
+          "expected_patterns": ["RealTimeStream", "SportsUpdates", "InjuryTracking"]
+        }
+      ],
+      "sdk_implementations": [
+        {
+          "query": "twitter api v2 client OR sdk language:csharp",
+          "description": "C#/.NET Twitter API implementations",
+          "priority": "very_high",
+          "integration_target": "Direct XClient.vb enhancement",
+          "expected_patterns": ["HttpClient", "RestSharp", "OAuth", "RateLimit"]
+        },
+        {
+          "query": "twitter api wrapper OR library language:vbnet",
+          "description": "VB.NET Twitter API wrappers",
+          "priority": "very_high", 
+          "integration_target": "XClient.vb direct integration",
+          "expected_patterns": ["VB.NET", "TwitterAPI", "Wrapper", "Client"]
+        },
+        {
+          "query": "twitter streaming api real-time OR webhook language:python",
+          "description": "Real-time Twitter streaming implementations",
+          "priority": "high",
+          "integration_target": "Real-time monitoring system",
+          "expected_patterns": ["Streaming", "Webhooks", "RealTime", "EventDriven"]
+        }
+      ]
+    }
+  },
+  "integration_config": {
+    "max_repos_per_search": 25,
+    "clone_repos": true,
+    "extract_patterns": true,
+    "generate_vbnet_modules": true,
+    "update_integration_log": true,
+    "create_reports": true,
+    "monetization_hooks": {
+      "bitly_shorten": true,
+      "telegram_alerts": true,
+      "discord_notifications": true
+    }
+  },
+  "output_config": {
+    "generated_modules_path": "C:\\EQ12\\visual_studio_projects\\EQ12SportsBettingTerminal\\Modules\\Generated",
+    "reports_path": "C:\\EQ12\\Reports\\XApiIntegration",
+    "logs_path": "C:\\EQ12\\logs\\x_api_integration",
+    "samples_path": "C:\\EQ12\\samples\\x_api"
+  },
+  "slurm_github_format": {
+    "queries": [""],
+    "source_filter": ["slurm_github"],
+    "source_specific_search_parameters": {
+      "slurm_github": [
+        { "query": "repo:TwitterDev/Twitter-API-v2-sample-code" },
+        { "query": "repo:TwitterDev/search-tweets-python" },
+        { "query": "repo:TwitterDev/twitter-api-typescript-sdk" },
+        { "query": "repo:TwitterDev/twitter-api-java-sdk" },
+        { "query": "repo:TwitterDev/xurl" },
+        { "query": "repo:TwitterDev/twauth-web" },
+        { "query": "twitter api betting OR gambling OR sports OR odds in:readme language:python" },
+        { "query": "twitter api v2 client OR sdk language:csharp" },
+        { "query": "twitter streaming api real-time OR webhook" }
+      ]
+    }
+  }
+}

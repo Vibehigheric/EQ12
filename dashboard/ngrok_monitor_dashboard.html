@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Ngrok Tunnel Monitor Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #16a34a;
+            --warning-color: #d97706;
+            --error-color: #dc2626;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-online { background-color: var(--success-color); }
+        .status-warning { background-color: var(--warning-color); }
+        .status-offline { background-color: var(--error-color); }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .health-score {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .health-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .health-excellent { background: linear-gradient(135deg, var(--success-color), #22c55e); }
+        .health-good { background: linear-gradient(135deg, #22c55e, #84cc16); }
+        .health-warning { background: linear-gradient(135deg, var(--warning-color), #f59e0b); }
+        .health-critical { background: linear-gradient(135deg, var(--error-color), #ef4444); }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success { background: var(--success-color); }
+        .btn-success:hover { background: #15803d; }
+
+        .btn-warning { background: var(--warning-color); }
+        .btn-warning:hover { background: #b45309; }
+
+        .btn-danger { background: var(--error-color); }
+        .btn-danger:hover { background: #b91c1c; }
+
+        .logs-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 2px 0;
+            border-left: 3px solid transparent;
+            padding-left: 8px;
+            margin: 2px 0;
+        }
+
+        .log-info { border-left-color: #3b82f6; }
+        .log-success { border-left-color: var(--success-color); }
+        .log-warning { border-left-color: var(--warning-color); }
+        .log-error { border-left-color: var(--error-color); }
+
+        .refresh-indicator {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .grid { grid-template-columns: 1fr; }
+            .actions { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 EQ12 Ngrok Tunnel Monitor</h1>
+            <p>Real-time tunnel stability monitoring and management dashboard</p>
+        </div>
+
+        <div class="grid">
+            <!-- Tunnel Status Card -->
+            <div class="card">
+                <h3>
+                    <span class="status-indicator" id="tunnel-status-indicator"></span>
+                    Tunnel Status
+                </h3>
+                <div class="metric">
+                    <span class="metric-label">Public URL</span>
+                    <span class="metric-value" id="public-url">Loading...</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Local Port</span>
+                    <span class="metric-value" id="local-port">8080</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">API Status</span>
+                    <span class="metric-value" id="api-status">Checking...</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Process ID</span>
+                    <span class="metric-value" id="process-id">-</span>
+                </div>
+            </div>
+
+            <!-- Health Score Card -->
+            <div class="card">
+                <h3>System Health</h3>
+                <div class="health-score">
+                    <div class="health-circle" id="health-circle">
+                        <span id="health-percentage">--</span>
+                    </div>
+                    <div>
+                        <div class="metric-value" id="health-status">Initializing...</div>
+                        <div class="metric-label">Overall Health Score</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Uptime & Metrics Card -->
+            <div class="card">
+                <h3>📊 Performance Metrics</h3>
+                <div class="metric">
+                    <span class="metric-label">Tunnel Uptime</span>
+                    <span class="metric-value" id="tunnel-uptime">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Monitor Uptime</span>
+                    <span class="metric-value" id="monitor-uptime">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Error Count</span>
+                    <span class="metric-value" id="error-count">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Reconnections</span>
+                    <span class="metric-value" id="reconnect-count">0</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Last Check</span>
+                    <span class="metric-value" id="last-check">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Card -->
+        <div class="card">
+            <h3>🎛️ Monitor Controls</h3>
+            <div class="actions">
+                <button class="btn btn-success" onclick="startMonitor()">Start Monitor</button>
+                <button class="btn btn-warning" onclick="restartTunnel()">Restart Tunnel</button>
+                <button class="btn btn-danger" onclick="stopMonitor()">Stop Monitor</button>
+                <button class="btn" onclick="refreshStatus()">
+                    <span id="refresh-icon">🔄</span> Refresh
+                </button>
+                <button class="btn" onclick="showLogs()">📋 View Logs</button>
+            </div>
+        </div>
+
+        <!-- Logs Card -->
+        <div class="card" id="logs-card" style="display: none;">
+            <h3>📋 Recent Activity Logs</h3>
+            <div class="logs-container" id="logs-container">
+                <div class="log-entry log-info">[Loading logs...]</div>
+            </div>
+            <div class="actions" style="margin-top: 16px;">
+                <button class="btn" onclick="refreshLogs()">Refresh Logs</button>
+                <button class="btn" onclick="hideLogs()">Hide Logs</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>EQ12 GODSTACK Ngrok Tunnel Monitor Dashboard | Last updated: <span id="last-updated">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Dashboard state
+        let refreshInterval;
+        let monitorData = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshStatus();
+            startAutoRefresh();
+        });
+
+        function startAutoRefresh() {
+            // Refresh every 30 seconds
+            refreshInterval = setInterval(refreshStatus, 30000);
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        }
+
+        async function refreshStatus() {
+            const refreshIcon = document.getElementById('refresh-icon');
+            refreshIcon.classList.add('refresh-indicator');
+            
+            try {
+                // Simulate API call - in real implementation, this would call your monitoring API
+                await simulateStatusCheck();
+                updateUI();
+                document.getElementById('last-updated').textContent = new Date().toLocaleString();
+            } catch (error) {
+                console.error('Failed to refresh status:', error);
+            } finally {
+                refreshIcon.classList.remove('refresh-indicator');
+            }
+        }
+
+        async function simulateStatusCheck() {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Mock data - in real implementation, fetch from your monitoring service
+            monitorData = {
+                tunnelRunning: Math.random() > 0.1,
+                publicUrl: 'https://a4ba03bc220b.ngrok-free.app',
+                processId: 20016,
+                apiAccessible: Math.random() > 0.05,
+                healthScore: Math.floor(Math.random() * 30) + 70,
+                tunnelUptime: Math.floor(Math.random() * 86400) + 3600,
+                monitorUptime: Math.floor(Math.random() * 172800) + 7200,
+                errorCount: Math.floor(Math.random() * 5),
+                reconnectCount: Math.floor(Math.random() * 3),
+                lastCheck: new Date()
+            };
+        }
+
+        function updateUI() {
+            const statusIndicator = document.getElementById('tunnel-status-indicator');
+            const publicUrlEl = document.getElementById('public-url');
+            const processIdEl = document.getElementById('process-id');
+            const apiStatusEl = document.getElementById('api-status');
+            const healthCircle = document.getElementById('health-circle');
+            const healthPercentage = document.getElementById('health-percentage');
+            const healthStatus = document.getElementById('health-status');
+
+            // Update tunnel status
+            if (monitorData.tunnelRunning) {
+                statusIndicator.className = 'status-indicator status-online';
+                publicUrlEl.textContent = monitorData.publicUrl;
+                processIdEl.textContent = monitorData.processId;
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                publicUrlEl.textContent = 'Not running';
+                processIdEl.textContent = '-';
+            }
+
+            // Update API status
+            if (monitorData.apiAccessible) {
+                apiStatusEl.textContent = '✅ Accessible';
+                apiStatusEl.style.color = 'var(--success-color)';
+            } else {
+                apiStatusEl.textContent = '❌ Not accessible';
+                apiStatusEl.style.color = 'var(--error-color)';
+            }
+
+            // Update health score
+            const score = monitorData.healthScore;
+            healthPercentage.textContent = score + '%';
+            
+            if (score >= 90) {
+                healthCircle.className = 'health-circle health-excellent';
+                healthStatus.textContent = 'Excellent';
+            } else if (score >= 70) {
+                healthCircle.className = 'health-circle health-good';
+                healthStatus.textContent = 'Good';
+            } else if (score >= 50) {
+                healthCircle.className = 'health-circle health-warning';
+                healthStatus.textContent = 'Warning';
+            } else {
+                healthCircle.className = 'health-circle health-critical';
+                healthStatus.textContent = 'Critical';
+            }
+
+            // Update metrics
+            document.getElementById('tunnel-uptime').textContent = formatDuration(monitorData.tunnelUptime);
+            document.getElementById('monitor-uptime').textContent = formatDuration(monitorData.monitorUptime);
+            document.getElementById('error-count').textContent = monitorData.errorCount;
+            document.getElementById('reconnect-count').textContent = monitorData.reconnectCount;
+            document.getElementById('last-check').textContent = monitorData.lastCheck.toLocaleTimeString();
+        }
+
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else if (minutes > 0) {
+                return `${minutes}m ${secs}s`;
+            } else {
+                return `${secs}s`;
+            }
+        }
+
+        async function startMonitor() {
+            try {
+                // In real implementation, make API call to start monitor
+                alert('Monitor start command sent. Check logs for status.');
+                setTimeout(refreshStatus, 2000);
+            } catch (error) {
+                alert('Failed to start monitor: ' + error.message);
+            }
+        }
+
+        async function restartTunnel() {
+            try {
+                // In real implementation, make API call to restart tunnel
+                alert('Tunnel restart command sent. This may take a few moments.');
+                setTimeout(refreshStatus, 5000);
+            } catch (error) {
+                alert('Failed to restart tunnel: ' + error.message);
+            }
+        }
+
+        async function stopMonitor() {
+            if (confirm('Are you sure you want to stop the tunnel monitor?')) {
+                try {
+                    // In real implementation, make API call to stop monitor
+                    alert('Monitor stop command sent.');
+                    setTimeout(refreshStatus, 2000);
+                } catch (error) {
+                    alert('Failed to stop monitor: ' + error.message);
+                }
+            }
+        }
+
+        function showLogs() {
+            document.getElementById('logs-card').style.display = 'block';
+            refreshLogs();
+        }
+
+        function hideLogs() {
+            document.getElementById('logs-card').style.display = 'none';
+        }
+
+        function refreshLogs() {
+            const logsContainer = document.getElementById('logs-container');
+            
+            // Mock log entries - in real implementation, fetch from log files
+            const mockLogs = [
+                { time: new Date(), level: 'info', message: '✅ Tunnel healthy - URL: https://a4ba03bc220b.ngrok-free.app, Uptime: 2.3h, Health: 85.0%' },
+                { time: new Date(Date.now() - 30000), level: 'info', message: '🔍 Health check passed (score: 85.1)' },
+                { time: new Date(Date.now() - 60000), level: 'success', message: '✅ Ngrok tunnel started successfully (PID: 20016)' },
+                { time: new Date(Date.now() - 120000), level: 'info', message: '🚀 EQ12 Ngrok Tunnel Monitor starting...' },
+                { time: new Date(Date.now() - 180000), level: 'info', message: '📋 Ngrok tunnel monitoring logging initialized' }
+            ];
+
+            logsContainer.innerHTML = mockLogs.map(log => 
+                `<div class="log-entry log-${log.level}">
+                    [${log.time.toLocaleTimeString()}] ${log.message}
+                </div>`
+            ).join('');
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            stopAutoRefresh();
+        });
+    </script>
+</body>
+</html>

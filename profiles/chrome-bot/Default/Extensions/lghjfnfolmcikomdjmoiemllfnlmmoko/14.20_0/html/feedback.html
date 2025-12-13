@@ -1,0 +1,89 @@
+<div class="feedback_popup" style="top: 60px;">
+    <div class="feedback_icon icon pc_savings warning">
+      <svg width="12" height="18" viewBox="0 0 12 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4.44 11.904V12.912H7.584V12.384C7.584 11.4 8.232 10.776 9.24 9.93599C10.704 8.73599 11.76 7.72799 11.76 5.61599C11.76 2.71199 9.864 0.911987 6.384 0.911987C2.76 0.911987 0.672002 2.85599 0.552002 6.09599L4.056 6.64799C3.984 4.82399 4.632 3.67199 6.288 3.67199C7.656 3.67199 8.184 4.48799 8.184 5.66399C8.184 6.81599 7.368 7.48799 6.408 8.35199C5.184 9.43199 4.44 10.2 4.44 11.904ZM4.248 18H7.872V14.208H4.248V18Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="feedback_message">
+      <div class="feedback_title">Was this a good result?</div>
+      <div class="feedback_subtitle ih">Your feedback helps fellow CNET Shoppers</div>
+    </div>
+    <div class="feedback_buttons">
+      <div class="feedback_button-yes">Yes</div>
+      <div class="feedback_button-no">No</div>
+      <div class="feedback_close">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 2L10.5 10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10.5 2L2 10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="feedback_reason">
+    <div class="feedback_logo"> <img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg" /> </div>
+    <div class="feedback_reason-title">Could you tell us what went wrong?</div>
+    <div class="feedback_reason-subtitle">Select all that apply:</div>
+    <div class="feedback_close">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2L10.5 10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10.5 2L2 10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <form class="feedback_form">
+        <div  class="feedback_radio-container">
+          <input id="Not-the-same-product" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="Not-the-same-product">Not the same product</label>       
+        </div>
+
+        <div class="feedback_radio-container">        
+          <input id="Not-the-same-quantity" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="Not-the-same-quantity">Not the same quantity</label>
+        </div>
+        
+        <div class="feedback_radio-container">        
+          <input id="Price-is-incorrect" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="Price-is-incorrect">Price is incorrect</label>
+        </div>
+        
+        <div class="feedback_radio-container">        
+          <input id="Out-of-stock" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="Out-of-stock">Out of stock</label>
+        </div>
+        
+        <div class="feedback_radio-container">        
+          <input id="Item-condition" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="Item-condition">Item condition</label>
+        </div>
+        
+        <div class="feedback_radio-container">        
+          <input id="Bad-seller" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="Bad-seller">Bad seller</label>
+        </div>
+
+        <div class="feedback_radio-container">        
+          <input id="feedback-other" type="checkbox" class="feedback_radio" >
+          <label class="feedback_radio-label" for="feedback-other">Other (please explain)</label>
+        </div>
+        
+        <div class="feedback_text-container">        
+          <textarea class="feedback_textarea" rows="2" cols="20" wrap="hard" placeholder="Tell us more..."></textarea>
+        </div>
+    </form>
+    <button class="feedback_submit" disabled> Submit </button>
+  </div>
+
+  <div class="feedback_thanks">
+    <div class="feedback_close">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2L10.5 10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10.5 2L2 10.5" stroke="black" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="feedback_logo"> <img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg" /> </div>
+    <div class="feedback_thanks-title">Thank you!</div> 
+    <div class="feedback_subtitle">
+      Your feedback helps the next CNET Shopper get better results. 
+    </div>
+  </div>
+

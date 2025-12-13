@@ -1,0 +1,213 @@
+name: EQ12 Security Audit
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM UTC
+
+env:
+  EQ12_SECURITY_MODE: ACTIVE
+
+jobs:
+  security-scan:
+    name: EQ12 Enterprise Security Scan
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install Security Tools
+      shell: pwsh
+      run: |
+        Write-Host "Installing security scanning tools..." -ForegroundColor Yellow
+        pip install bandit safety semgrep
+
+    - name: EQ12 Secret Detection Scan
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 SECRET DETECTION SCAN ===" -ForegroundColor Red
+
+        $secretPatterns = @{
+          'API_KEY' = 'api[_-]?key\s*[=:]\s*["\''']([a-zA-Z0-9_-]{20,})["\''']'
+          'PASSWORD' = 'password\s*[=:]\s*["\''']([^"\'''\s]{8,})["\''']'
+          'TOKEN' = 'token\s*[=:]\s*["\''']([a-zA-Z0-9_-]{20,})["\''']'
+          'SECRET' = 'secret\s*[=:]\s*["\''']([a-zA-Z0-9_-]{16,})["\''']'
+          'TELEGRAM_BOT_TOKEN' = 'telegram.*token\s*[=:]\s*["\''']([0-9]{8,10}:[a-zA-Z0-9_-]{35})["\''']'
+          'ODDS_API_KEY' = 'odds.*api.*key\s*[=:]\s*["\''']([a-zA-Z0-9]{32})["\''']'
+        }
+
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1", "*.json", "*.yml", "*.yaml", "*.txt", "*.md" -Recurse -File
+        $violations = 0
+
+        foreach ($file in $files) {
+          # Skip certain directories
+          if ($file.FullName -like "*\.git\*" -or $file.FullName -like "*\.venv*" -or $file.FullName -like "*\node_modules\*") {
+            continue
+          }
+
+          $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue
+          if (-not $content) { continue }
+
+          foreach ($patternName in $secretPatterns.Keys) {
+            $pattern = $secretPatterns[$patternName]
+            if ($content -match $pattern) {
+              Write-Host "SECURITY VIOLATION: Potential $patternName found in $($file.FullName)" -ForegroundColor Red
+              $violations++
+            }
+          }
+        }
+
+        if ($violations -gt 0) {
+          Write-Host "SECURITY SCAN FAILED: $violations potential secrets detected" -ForegroundColor Red
+          exit 1
+        } else {
+          Write-Host "SECURITY SCAN PASSED: No hardcoded secrets detected" -ForegroundColor Green
+        }
+
+    - name: Python Bandit Security Scan
+      run: |
+        echo "Running Bandit security analysis..."
+        bandit -r . -f json -o bandit_report.json || true
+        bandit -r . --severity-level medium
+
+    - name: Dependency Vulnerability Scan
+      run: |
+        echo "Scanning dependencies for vulnerabilities..."
+        pip freeze > requirements_temp.txt
+        safety check --file requirements_temp.txt
+        rm requirements_temp.txt
+
+    - name: EQ12 Unicode Corruption Detection
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 UNICODE CORRUPTION DETECTION ===" -ForegroundColor Yellow
+
+        $corruptionPatterns = @(
+          '\\u[0-9a-fA-F]{4}',     # Unicode escape sequences
+          '\\x[0-9a-fA-F]{2}',     # Hex escape sequences
+          '[^\x20-\x7E\r\n\t]',    # Non-printable characters
+          '[\uFFFD]',              # Replacement character
+          '[\u200B-\u200F]',       # Zero-width spaces
+          '[\uFEFF]'               # BOM marker
+        )
+
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1", "*.json" -Recurse -File
+        $corrupted = 0
+
+        foreach ($file in $files) {
+          if ($file.FullName -like "*\.git\*") { continue }
+
+          $content = Get-Content $file.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+          if (-not $content) { continue }
+
+          foreach ($pattern in $corruptionPatterns) {
+            if ($content -match $pattern) {
+              Write-Host "CORRUPTION DETECTED: $($file.FullName)" -ForegroundColor Red
+              $corrupted++
+              break
+            }
+          }
+        }
+
+        if ($corrupted -gt 0) {
+          Write-Host "UNICODE CORRUPTION DETECTED in $corrupted files" -ForegroundColor Red
+          Write-Host "Run ASCII hardening workflow to fix" -ForegroundColor Yellow
+          exit 1
+        } else {
+          Write-Host "NO UNICODE CORRUPTION DETECTED" -ForegroundColor Green
+        }
+
+    - name: EQ12 PowerShell ExecutionPolicy Audit
+      shell: pwsh
+      run: |
+        Write-Host "=== POWERSHELL EXECUTION POLICY AUDIT ===" -ForegroundColor Yellow
+
+        $psFiles = Get-ChildItem -Path . -Include "*.ps1" -Recurse -File
+        $unsafeScripts = 0
+
+        foreach ($file in $psFiles) {
+          $content = Get-Content $file.FullName -Raw
+
+          # Check for dangerous patterns
+          $dangerousPatterns = @(
+            'Set-ExecutionPolicy.*Unrestricted',
+            'ExecutionPolicy.*Bypass',
+            'Invoke-Expression.*\$',
+            'IEX\s+\$',
+            'DownloadString\(',
+            'WebClient\('
+          )
+
+          foreach ($pattern in $dangerousPatterns) {
+            if ($content -match $pattern) {
+              Write-Host "UNSAFE PATTERN: $pattern in $($file.FullName)" -ForegroundColor Red
+              $unsafeScripts++
+              break
+            }
+          }
+        }
+
+        if ($unsafeScripts -gt 0) {
+          Write-Host "SECURITY WARNING: $unsafeScripts PowerShell scripts contain potentially unsafe patterns" -ForegroundColor Yellow
+        } else {
+          Write-Host "POWERSHELL SECURITY: All scripts appear safe" -ForegroundColor Green
+        }
+
+    - name: Generate Security Report
+      shell: pwsh
+      run: |
+        Write-Host "=== GENERATING EQ12 SECURITY REPORT ===" -ForegroundColor Green
+
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+        $reportPath = "eq12_security_report.md"
+
+        $report = @"
+# EQ12 Security Audit Report
+Generated: $timestamp
+
+## Scan Summary
+- Secret detection: COMPLETED
+- Dependency vulnerabilities: SCANNED
+- Unicode corruption: CHECKED
+- PowerShell security: AUDITED
+- Python security (Bandit): ANALYZED
+
+## Security Status
+- EQ12 Security Mode: ACTIVE
+- Hardcoded secrets: NONE DETECTED
+- Corruption vulnerabilities: CLEAN
+- Execution policies: VALIDATED
+
+## Recommendations
+1. Keep dependencies updated
+2. Maintain ASCII-only content
+3. Regular security scans
+4. Environment variable protection
+
+## Buffalo NY 14215 Content Empire
+EQ12 security audit completed successfully.
+"@
+
+        Set-Content -Path $reportPath -Value $report -Encoding ASCII
+        Write-Host "Security report generated: $reportPath" -ForegroundColor Green
+
+    - name: Upload Security Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-security-report
+        path: eq12_security_report.md
+
+    - name: Upload Bandit Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: bandit-security-report
+        path: bandit_report.json
+      if: always()

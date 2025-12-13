@@ -1,0 +1,389 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eq12
+  labels:
+    name: eq12
+    app.kubernetes.io/name: eq12
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eq12-license-server
+  namespace: eq12
+  labels:
+    app: eq12-license-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: eq12-license-server
+  template:
+    metadata:
+      labels:
+        app: eq12-license-server
+    spec:
+      containers:
+        - name: license-server
+          image: eq12/license-server:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: database-url
+            - name: REDIS_URL
+              value: "redis://eq12-redis:6379"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: jwt-secret
+            - name: EQ12_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: eq12-api-key
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+      volumes:
+        - name: logs
+          persistentVolumeClaim:
+            claimName: eq12-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eq12-license-server
+  namespace: eq12
+spec:
+  selector:
+    app: eq12-license-server
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eq12-github-app
+  namespace: eq12
+  labels:
+    app: eq12-github-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eq12-github-app
+  template:
+    metadata:
+      labels:
+        app: eq12-github-app
+    spec:
+      containers:
+        - name: github-app
+          image: eq12/github-app:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: github-app-id
+            - name: PRIVATE_KEY_PATH
+              value: "/app/private-key.pem"
+            - name: WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: github-webhook-secret
+            - name: EQ12_LICENSE
+              value: "http://eq12-license-server:8000"
+            - name: EQ12_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: eq12-api-key
+            - name: NODE_ENV
+              value: "production"
+          volumeMounts:
+            - name: github-private-key
+              mountPath: /app/private-key.pem
+              subPath: private-key.pem
+              readOnly: true
+            - name: logs
+              mountPath: /app/logs
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      volumes:
+        - name: github-private-key
+          secret:
+            secretName: eq12-github-keys
+        - name: logs
+          persistentVolumeClaim:
+            claimName: eq12-logs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eq12-github-app
+  namespace: eq12
+spec:
+  selector:
+    app: eq12-github-app
+  ports:
+    - port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eq12-postgres
+  namespace: eq12
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eq12-postgres
+  template:
+    metadata:
+      labels:
+        app: eq12-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_DB
+              value: "eq12_license"
+            - name: POSTGRES_USER
+              value: "eq12"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: postgres-password
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: eq12-postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eq12-postgres
+  namespace: eq12
+spec:
+  selector:
+    app: eq12-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eq12-redis
+  namespace: eq12
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eq12-redis
+  template:
+    metadata:
+      labels:
+        app: eq12-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          command:
+            [
+              "redis-server",
+              "--appendonly",
+              "yes",
+              "--requirepass",
+              "$(REDIS_PASSWORD)",
+            ]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: eq12-secrets
+                  key: redis-password
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: eq12-redis-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eq12-redis
+  namespace: eq12
+spec:
+  selector:
+    app: eq12-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eq12-ingress
+  namespace: eq12
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - api.eq12.com
+        - app.eq12.com
+      secretName: eq12-tls
+  rules:
+    - host: api.eq12.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eq12-license-server
+                port:
+                  number: 8000
+    - host: app.eq12.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eq12-github-app
+                port:
+                  number: 3000
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eq12-postgres-pvc
+  namespace: eq12
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: ssd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eq12-redis-pvc
+  namespace: eq12
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ssd
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eq12-logs-pvc
+  namespace: eq12
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ssd
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: eq12-secrets
+  namespace: eq12
+type: Opaque
+data:
+  # Base64 encoded secrets (replace with actual values)
+  database-url: cG9zdGdyZXNxbDovL2VxMTI6cGFzc3dvcmRAZXExMi1wb3N0Z3JlczoxX
+  jwt-secret: eW91ci1qd3Qtc2VjcmV0LWtleQ==
+  eq12-api-key: eW91ci1lcTEyLWFwaS1rZXk=
+  github-app-id: eW91ci1naXRodWItYXBwLWlk
+  github-webhook-secret: eW91ci1naXRodWItd2ViaG9vay1zZWNyZXQ=
+  postgres-password: cGFzc3dvcmQ=
+  redis-password: cmVkaXNwYXNzd29yZA==
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: eq12-github-keys
+  namespace: eq12
+type: Opaque
+data:
+  # Base64 encoded GitHub App private key
+  private-key.pem: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQ==

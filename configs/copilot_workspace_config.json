@@ -1,0 +1,33 @@
+{
+  "copilot": {
+    "enable": true,
+    "suggestions": {
+      "enabled": true,
+      "keyBindings": "tab"
+    },
+    "chat": {
+      "enabled": true,
+      "contextFiles": [
+        "AGENTS.md",
+        "README.md",
+        "package.json",
+        "requirements.txt",
+        ".gitignore"
+      ]
+    }
+  },
+  "eq12": {
+    "prompts": {
+      "security": "Use the EQ12 GitLeaks Guardian prompts for security analysis",
+      "quality": "Apply EQ12 Script Integrity Suite standards for code quality",
+      "performance": "Follow EQ12 optimization patterns for performance improvements",
+      "context": "Implement EQ12 context validation patterns for thread safety"
+    },
+    "standards": {
+      "logging": "Always use structured JSON logging to C:/EQ12/logs",
+      "secrets": "Never hardcode secrets - use environment variables only",
+      "errors": "Implement comprehensive error handling with proper logging",
+      "testing": "Include pytest and Pester tests for all new functionality"
+    }
+  }
+}

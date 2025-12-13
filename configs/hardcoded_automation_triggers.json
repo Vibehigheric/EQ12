@@ -1,0 +1,220 @@
+{
+  "hardcoded_automation_config": {
+    "version": "1.0.0",
+    "last_updated": "2025-11-02",
+    "description": "Hardcoded configuration defining EXACTLY when to use NFL roster prevention",
+    
+    "mandatory_triggers": {
+      "description": "These triggers ALWAYS activate prevention system",
+      "triggers": {
+        "before_sgp_creation": {
+          "enabled": true,
+          "action": "run_full_prevention",
+          "reason": "MANDATORY: Never create SGPs without roster verification",
+          "confidence": 100
+        },
+        "before_player_props": {
+          "enabled": true,
+          "action": "run_quick_check", 
+          "reason": "MANDATORY: Never bet player props without checking status",
+          "confidence": 100
+        },
+        "known_problem_players_detected": {
+          "enabled": true,
+          "action": "run_quick_check",
+          "reason": "MANDATORY: Problem players require immediate verification",
+          "confidence": 100
+        }
+      }
+    },
+    
+    "time_based_triggers": {
+      "description": "Automatic triggers based on time/schedule",
+      "triggers": {
+        "daily_morning_check": {
+          "enabled": true,
+          "time": "09:00",
+          "action": "run_full_prevention",
+          "reason": "Daily roster status update",
+          "confidence": 90
+        },
+        "pre_game_2_hours": {
+          "enabled": true,
+          "hours_before_kickoff": 2,
+          "action": "run_full_prevention", 
+          "reason": "Pre-game roster verification",
+          "confidence": 95
+        },
+        "final_check_90_minutes": {
+          "enabled": true,
+          "minutes_before_kickoff": 90,
+          "action": "run_quick_check",
+          "reason": "Final injury report check",
+          "confidence": 98
+        }
+      }
+    },
+    
+    "game_specific_triggers": {
+      "description": "Triggers for specific games requiring extra attention",
+      "games": {
+        "2025-11-02_SEA_vs_WAS": {
+          "enabled": true,
+          "kickoff": "20:15",
+          "priority": "MAXIMUM",
+          "reason": "Multiple known inactive players",
+          "problem_players": ["DK Metcalf", "Terry McLaurin", "Tyler Lockett"],
+          "action": "run_full_prevention",
+          "extra_checks": true
+        },
+        "2025-11-03_BUF_vs_KC": {
+          "enabled": true,
+          "kickoff": "16:30", 
+          "priority": "HIGH",
+          "reason": "High-value game with injury concerns",
+          "problem_players": ["Isiah Pacheco", "Stefon Diggs"],
+          "action": "run_full_prevention"
+        }
+      }
+    },
+    
+    "problem_player_database": {
+      "description": "Known problematic players requiring immediate attention",
+      "last_updated": "2025-11-02",
+      "players": {
+        "DK Metcalf": {
+          "team": "SEA",
+          "status": "INACTIVE",
+          "reason": "Confirmed injury - out for game",
+          "confidence": 100,
+          "trigger_action": "run_quick_check",
+          "betting_recommendation": "AVOID ALL PROPS"
+        },
+        "Terry McLaurin": {
+          "team": "WAS",
+          "status": "INACTIVE", 
+          "reason": "Confirmed injury - out for game",
+          "confidence": 100,
+          "trigger_action": "run_quick_check",
+          "betting_recommendation": "AVOID ALL PROPS"
+        },
+        "Tyler Lockett": {
+          "team": "SEA",
+          "status": "INACTIVE",
+          "reason": "Confirmed injury - out for game", 
+          "confidence": 100,
+          "trigger_action": "run_quick_check",
+          "betting_recommendation": "AVOID ALL PROPS"
+        },
+        "Isiah Pacheco": {
+          "team": "KC",
+          "status": "QUESTIONABLE",
+          "reason": "Recurring injury issues",
+          "confidence": 80,
+          "trigger_action": "run_quick_check",
+          "betting_recommendation": "REDUCE BET SIZES"
+        },
+        "Stefon Diggs": {
+          "team": "BUF",
+          "status": "MONITOR",
+          "reason": "Recent roster changes",
+          "confidence": 70,
+          "trigger_action": "run_quick_check", 
+          "betting_recommendation": "VERIFY BEFORE BETTING"
+        }
+      }
+    },
+    
+    "hardcoded_scenarios": {
+      "description": "Specific scenarios that always trigger prevention",
+      "scenarios": {
+        "user_creating_sgp": {
+          "trigger": "before_sgp_creation",
+          "action": "run_full_prevention",
+          "message": " MANDATORY: Running roster verification before SGP creation"
+        },
+        "user_betting_player_props": {
+          "trigger": "before_player_props", 
+          "action": "run_quick_check",
+          "message": " MANDATORY: Checking player status before prop betting"
+        },
+        "injury_report_released": {
+          "trigger": "condition_based",
+          "action": "run_full_prevention",
+          "message": " TRIGGERED: New injury report detected"
+        },
+        "game_day_morning": {
+          "trigger": "time_based",
+          "action": "run_full_prevention", 
+          "message": " SCHEDULED: Game day morning roster check"
+        },
+        "pre_game_window": {
+          "trigger": "time_based",
+          "action": "run_full_prevention",
+          "message": " SCHEDULED: Pre-game roster verification"
+        },
+        "final_verification": {
+          "trigger": "time_based",
+          "action": "run_quick_check",
+          "message": " FINAL: Last chance roster verification"
+        }
+      }
+    },
+    
+    "automation_rules": {
+      "description": "Rules governing when automation activates",
+      "rules": {
+        "never_skip_mandatory": {
+          "description": "Mandatory triggers cannot be disabled or skipped",
+          "enforcement": "system_level"
+        },
+        "problem_player_priority": {
+          "description": "Problem players always trigger immediate verification",
+          "enforcement": "automatic"
+        },
+        "game_day_intensification": {
+          "description": "More frequent checks on game days",
+          "enforcement": "schedule_based"
+        },
+        "confidence_threshold": {
+          "description": "Triggers with confidence > 95% are automatic",
+          "threshold": 95,
+          "enforcement": "confidence_based"
+        }
+      }
+    },
+    
+    "usage_instructions": {
+      "description": "How to use this hardcoded configuration",
+      "instructions": [
+        "System automatically checks this config every time it runs",
+        "Mandatory triggers CANNOT be disabled",
+        "Time-based triggers activate automatically based on schedule", 
+        "Problem players trigger immediate verification when detected",
+        "Game-specific settings override general settings",
+        "Confidence levels determine automation behavior"
+      ]
+    },
+    
+    "emergency_overrides": {
+      "description": "Emergency situations requiring immediate action",
+      "overrides": {
+        "all_players_questionable": {
+          "condition": "Major injury report changes",
+          "action": "run_full_prevention",
+          "frequency": "immediately"
+        },
+        "api_failures": {
+          "condition": "External data sources fail",
+          "action": "use_fallback_data",
+          "frequency": "as_needed"
+        },
+        "system_errors": {
+          "condition": "Prevention system encounters errors",
+          "action": "manual_verification_required",
+          "frequency": "immediately"
+        }
+      }
+    }
+  }
+}

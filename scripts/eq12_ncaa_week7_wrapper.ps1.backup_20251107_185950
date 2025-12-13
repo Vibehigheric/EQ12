@@ -1,0 +1,279 @@
+# EQ12 NCAA WEEK 7 CONFERENCE PARLAY AUTOMATION
+# =============================================
+# PowerShell automation wrapp        
+        Write-Host "`n🏆 Conference Coverage: $FoundOutputs/10 conferences" -ForegroundColor $(if ($FoundOutputs -eq 10) { "Green" } else { "Yellow" })
+    }
+    elseif ($Action -eq "conference") {ehensive Week 7 conference parlay generation
+
+[CmdletBinding()]
+param(
+    [Parameter()]
+    [string]$Action = "generate-all",
+    
+    [Parameter()]
+    [string]$Conference = "all",
+    
+    [Parameter()]
+    [switch]$VerboseOutput
+)
+
+# EQ12 System Integration
+$ErrorActionPreference = "Stop"
+$EQ12Root = "C:\EQ12"
+$StartTime = Get-Date
+
+Write-Host "🏈 EQ12 NCAA WEEK 7 CONFERENCE PARLAY SUITE" -ForegroundColor Green
+Write-Host ("=" * 60) -ForegroundColor DarkGray
+Write-Host "📅 Target: Week 7, 2025 NCAA Football Season" -ForegroundColor Cyan
+Write-Host "🎯 Covering ALL FBS Conferences + Top 25 Master Ticket" -ForegroundColor Yellow
+
+try {
+    # Verify Python environment
+    $PythonPath = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $PythonPath) {
+        throw "Python not found in PATH. Please install Python 3.12+"
+    }
+    
+    # Verify EQ12 Week 7 builder exists
+    $BuilderPath = Join-Path $EQ12Root "eq12_ncaa_week7_conference_builder.py"
+    if (-not (Test-Path $BuilderPath)) {
+        throw "Week 7 Conference Builder not found at: $BuilderPath"
+    }
+    
+    # Check for Week 7 pack integration
+    $Week7PackPath = Join-Path $EQ12Root "EQ12_NCAA_Parlay_Week7_Pack"
+    if (Test-Path $Week7PackPath) {
+        Write-Host "✅ Week 7 Pack detected - Enhanced features available" -ForegroundColor Green
+    }
+    
+    # Set up environment variables
+    Write-Verbose "Setting up environment variables..."
+    
+    # Check for API keys
+    $OddsApiKey = [Environment]::GetEnvironmentVariable("ODDS_API_KEY")
+    $OpenAIApiKey = [Environment]::GetEnvironmentVariable("OPENAI_API_KEY")
+    
+    if (-not $OddsApiKey) {
+        Write-Warning "⚠️ ODDS_API_KEY not set. Using simulated conference data."
+    }
+    
+    if (-not $OpenAIApiKey) {
+        Write-Warning "⚠️ OPENAI_API_KEY not set. Setting for session."
+        $env:OPENAI_API_KEY = "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"
+    }
+    
+    # Ensure output directories exist
+    $Directories = @("outputs", "logs\parlays")
+    foreach ($Dir in $Directories) {
+        $FullPath = Join-Path $EQ12Root $Dir
+        if (-not (Test-Path $FullPath)) {
+            New-Item -ItemType Directory -Path $FullPath -Force | Out-Null
+            Write-Verbose "Created directory: $FullPath"
+        }
+    }
+    
+    # Execute Week 7 parlay generation based on action
+    if ($Action -eq "generate-all") {
+        Write-Host "🎯 Generating ALL Conference Week 7 Parlays..." -ForegroundColor Yellow
+        Write-Host "📊 This includes: SEC, Big Ten, ACC, Big 12, American, Mountain West, MAC, Sun Belt, Pac-12, Independent" -ForegroundColor Cyan
+        
+        $PythonArgs = @($BuilderPath)
+        if ($VerboseOutput) { 
+            $PythonArgs += "--verbose" 
+        }
+        
+        & python @PythonArgs
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Week 7 conference parlays generated successfully!" -ForegroundColor Green
+            Show-Week7Results
+        } else {
+            throw "Week 7 conference parlay generation failed with exit code: $LASTEXITCODE"
+        }
+    }
+    elseif ($Action -eq "status") {
+            Write-Host "📊 EQ12 Week 7 Parlay System Status" -ForegroundColor Yellow
+            
+            # Check database
+            $DbPath = Join-Path $EQ12Root "database\sports_betting.db"
+            if (Test-Path $DbPath) {
+                $DbSize = (Get-Item $DbPath).Length / 1KB
+                $DbSizeRounded = [math]::Round($DbSize, 1)
+                Write-Host "✅ Database: $DbPath ($DbSizeRounded KB)" -ForegroundColor Green
+                
+                # Check for Week 7 tables
+                try {
+                    $PythonCmd = "import sqlite3; conn = sqlite3.connect('$($DbPath.Replace('\', '/'))'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM ncaa_week7_parlays'); print(f'Week 7 Parlays: {cursor.fetchone()[0]}'); conn.close()"
+                    $DbCheck = & python -c $PythonCmd
+                    Write-Host "📈 $DbCheck" -ForegroundColor Cyan
+                } catch {
+                    Write-Host "📈 Week 7 tables not found (first run)" -ForegroundColor Yellow
+                }
+            } else {
+                Write-Host "❌ Database not found" -ForegroundColor Red
+            }
+            
+            # Check conference outputs
+            $Conferences = @("sec", "bigten", "acc", "big12", "american", "mountainwest", "mac", "sunbelt", "pac12", "independent")
+            $FoundOutputs = 0
+            
+            foreach ($Conf in $Conferences) {
+                $Pattern = "outputs\${Conf}_week7_*.json"
+                $Files = Get-ChildItem -Path $Pattern -ErrorAction SilentlyContinue
+                if ($Files) {
+                    $FoundOutputs++
+                    $Latest = $Files | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+                    $TimeStr = Get-Date $Latest.LastWriteTime -Format 'MM/dd HH:mm'
+                    Write-Host "   📄 $($Conf.ToUpper()): $($Latest.Name) ($TimeStr)" -ForegroundColor White
+                }
+            }
+            
+            Write-Host "`n🏆 Conference Coverage: $FoundOutputs/10 conferences" -ForegroundColor $(if ($FoundOutputs -eq 10) { "Green" } else { "Yellow" })
+            
+            # Check Top 25 master ticket
+            $Top25Files = Get-ChildItem -Path "logs/parlays" -Filter "*top25*" -ErrorAction SilentlyContinue
+            if ($Top25Files) {
+                Write-Host "🎯 Top 25 Master Ticket: Available" -ForegroundColor Green
+            } else {
+                Write-Host "🎯 Top 25 Master Ticket: Not generated" -ForegroundColor Yellow
+            }
+        }
+        
+        "conference" {
+            if ($Conference -eq "all") {
+                Write-Host "❌ Please specify a conference with -Conference parameter" -ForegroundColor Red
+                Write-Host "Available: SEC, BigTen, ACC, Big12, American, MountainWest, MAC, SunBelt, Pac12, Independent" -ForegroundColor Yellow
+                exit 1
+            }
+            
+            Write-Host "🏈 Generating $Conference Conference Week 7 Parlays..." -ForegroundColor Yellow
+            
+            # Single conference generation (would need modification to main script)
+            Write-Host "⚠️ Single conference mode not yet implemented" -ForegroundColor Yellow
+            Write-Host "💡 Use 'generate-all' action to generate all conferences" -ForegroundColor Cyan
+        }
+        
+        "test" {
+            Write-Host "🧪 Testing Week 7 Conference System..." -ForegroundColor Yellow
+            
+            # Test imports and dependencies
+            $TestScript = @'
+try:
+    import asyncio
+    import json
+    from eq12_ncaa_week7_conference_builder import EQ12NCAAWeek7ConferenceBuilder
+    print("✅ Week 7 imports successful")
+    
+    # Quick builder initialization test
+    builder = EQ12NCAAWeek7ConferenceBuilder()
+    print("✅ Week 7 Conference Builder initialized")
+    
+    # Test conference definitions
+    conferences = list(builder.conferences.keys())
+    print(f"✅ {len(conferences)} conferences loaded: {', '.join(conferences[:3])}...")
+    
+    print("✅ Week 7 system test completed successfully")
+except Exception as e:
+    print(f"❌ Test failed: {e}")
+    exit(1)
+'@
+            
+            $TestScript | python
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ Week 7 Conference System test passed!" -ForegroundColor Green
+            } else {
+                Write-Host "❌ Week 7 Conference System test failed!" -ForegroundColor Red
+            }
+        }
+        
+        "clean" {
+            Write-Host "🧹 Cleaning Week 7 outputs..." -ForegroundColor Yellow
+            
+            # Clean old outputs
+            $CleanPatterns = @("outputs\*week7*.json", "logs\parlays\*week7*")
+            $CleanedFiles = 0
+            
+            foreach ($Pattern in $CleanPatterns) {
+                $Files = Get-ChildItem -Path $Pattern -ErrorAction SilentlyContinue
+                foreach ($File in $Files) {
+                    Remove-Item $File.FullName -Force
+                    $CleanedFiles++
+                }
+            }
+            
+            Write-Host "✅ Cleaned $CleanedFiles Week 7 files" -ForegroundColor Green
+        }
+        
+        default {
+            Write-Host "❌ Unknown action: $Action" -ForegroundColor Red
+            Write-Host "Available actions:" -ForegroundColor Yellow
+            Write-Host "  generate-all  - Generate all conference parlays + Top 25 master" -ForegroundColor White
+            Write-Host "  status       - Show system status and coverage" -ForegroundColor White
+            Write-Host "  conference   - Generate single conference (specify -Conference)" -ForegroundColor White
+            Write-Host "  test         - Test system functionality" -ForegroundColor White
+            Write-Host "  clean        - Clean old Week 7 outputs" -ForegroundColor White
+            exit 1
+        }
+    }
+    
+    # Performance summary
+    Write-Host "`n⚡ Performance Summary:" -ForegroundColor Magenta
+    Write-Host "   🕒 Execution Time: $((Get-Date) - $StartTime)" -ForegroundColor White
+    Write-Host "   🎯 Action: $Action" -ForegroundColor White
+    Write-Host "   📂 Output Path: $OutputPath" -ForegroundColor White
+    Write-Host "   🏈 Target: NCAA Week 7, 2025" -ForegroundColor White
+    
+} catch {
+    Write-Error "❌ EQ12 Week 7 operation failed: $($_.Exception.Message)"
+    Write-Host "`nTroubleshooting:" -ForegroundColor Yellow
+    Write-Host "1. Verify Python 3.12+ is installed" -ForegroundColor White
+    Write-Host "2. Check ODDS_API_KEY environment variable (optional)" -ForegroundColor White
+    Write-Host "3. Ensure eq12_ncaa_week7_conference_builder.py exists" -ForegroundColor White
+    Write-Host "4. Check logs in: $EQ12Root\logs\parlays\" -ForegroundColor White
+    Write-Host "5. Verify Week 7 Pack integration" -ForegroundColor White
+    exit 1
+}
+
+function Show-Week7Results {
+    Write-Host "`n📊 Week 7 Generation Results:" -ForegroundColor Cyan
+    
+    # Show conference files
+    $Conferences = @("sec", "bigten", "acc", "big12", "american", "mountainwest", "mac", "sunbelt", "pac12", "independent")
+    
+    Write-Host "`n🏈 Conference Parlays Generated:" -ForegroundColor Yellow
+    foreach ($Conf in $Conferences) {
+        $Pattern = "outputs\${Conf}_week7_*.json"
+        $Files = Get-ChildItem -Path $Pattern -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+        
+        if ($Files) {
+            $Latest = $Files | Select-Object -First 1
+            $Size = [math]::Round($Latest.Length / 1KB, 1)
+            Write-Host "   ✅ $($Conf.ToUpper()): $($Latest.Name) (${Size}KB)" -ForegroundColor Green
+        } else {
+            Write-Host "   ⚠️ $($Conf.ToUpper()): No output generated" -ForegroundColor Yellow
+        }
+    }
+    
+    # Show parlay logs
+    Write-Host "`n📋 Conference Logs:" -ForegroundColor Yellow
+    $LogFiles = Get-ChildItem -Path "logs\parlays" -Filter "*week7*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+    
+    if ($LogFiles) {
+        $LogFiles | Select-Object -First 5 | ForEach-Object {
+            Write-Host "   📄 $($_.Name) ($(Get-Date $_.LastWriteTime -Format 'MM/dd HH:mm'))" -ForegroundColor White
+        }
+    } else {
+        Write-Host "   ⚠️ No Week 7 logs found" -ForegroundColor Yellow
+    }
+    
+    # Show recommendations
+    Write-Host "`n💡 Next Steps:" -ForegroundColor Cyan
+    Write-Host "   🎯 Review conference outputs in: outputs\" -ForegroundColor White
+    Write-Host "   📊 Check detailed logs in: logs\parlays\" -ForegroundColor White
+    Write-Host "   🏆 Look for Top 25 Master Ticket in logs" -ForegroundColor White
+    Write-Host "   📈 Monitor database entries for tracking" -ForegroundColor White
+}
+
+# Success message
+Write-Host "`n🎉 EQ12 NCAA Week 7 Conference Suite operation completed!" -ForegroundColor Green

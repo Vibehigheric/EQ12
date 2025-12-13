@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 AI-Enhanced NFL Intelligence Report</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1200px; margin: 0 auto; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 20px; padding: 30px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 3px solid #00ff88; 
+            padding-bottom: 20px; margin-bottom: 30px; 
+        }
+        .header h1 { 
+            color: #00ff88; margin: 0; font-size: 2.8em; 
+            text-shadow: 0 0 20px rgba(0,255,136,0.5);
+        }
+        .ai-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(78, 205, 196, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(78, 205, 196, 0); }
+        }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; margin: 30px 0; 
+        }
+        .stat-card { 
+            background: rgba(255,255,255,0.1); 
+            border-left: 5px solid #00ff88; 
+            padding: 25px; border-radius: 15px;
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,255,136,0.2);
+        }
+        .stat-card h3 { 
+            margin: 0 0 15px 0; 
+            color: #00ff88; 
+            font-size: 1.2em;
+        }
+        .stat-value { 
+            font-size: 2.2em; 
+            font-weight: bold; 
+            color: #ffffff; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .legs-section {
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        .leg-item {
+            background: rgba(255,255,255,0.1);
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4ecdc4;
+        }
+        .leg-high { border-left-color: #ff6b6b; }
+        .leg-medium { border-left-color: #ffd93d; }
+        .leg-featured { 
+            border-left-color: #00ff88; 
+            background: rgba(0,255,136,0.1);
+        }
+        .ai-analysis {
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .api-status {
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .timestamp { 
+            text-align: center; 
+            color: rgba(255,255,255,0.7); 
+            margin-top: 30px; 
+            font-style: italic; 
+        }
+        .success-badge { 
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white; 
+            padding: 15px 25px; 
+            border-radius: 25px; 
+            display: inline-block; 
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .warning-badge { 
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            color: white; 
+            padding: 15px 25px; 
+            border-radius: 25px; 
+            display: inline-block; 
+            margin: 15px 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 EQ12 AI-ENHANCED NFL INTELLIGENCE</h1>
+            <div class="ai-badge">OpenAI GPT-4 + Groq + Weather API</div>
+            <p>Multi-API Artificial Intelligence • Superior Betting Decisions</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>🎲 Total Odds</h3>
+                <div class="stat-value">302.48x</div>
+            </div>
+            <div class="stat-card">
+                <h3>💰 Potential Payout</h3>
+                <div class="stat-value">$30,247.96</div>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Total Legs</h3>
+                <div class="stat-value">9</div>
+            </div>
+            <div class="stat-card">
+                <h3>🔥 High Confidence</h3>
+                <div class="stat-value">3</div>
+            </div>
+        </div>
+        
+        <div class="ai-analysis">
+            <h2>🧠 AI Intelligence Summary</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>High Confidence Picks</h3>
+                    <div class="stat-value">3</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Medium Confidence Picks</h3>
+                    <div class="stat-value">6</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Featured LV vs DEN Legs</h3>
+                    <div class="stat-value">4</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="api-status">
+            <h2>🔧 API Intelligence Status</h2>
+            <p><strong>🧠 OpenAI GPT-4:</strong> ⚠️ Rate limited (quota exceeded) - Fallback AI analysis applied</p>
+            <p><strong>🤖 Groq Llama-3.1:</strong> ⚠️ Model decommissioned - Standard optimization used</p>
+            <p><strong>🌤️ Weather API:</strong> ⚠️ Location parsing issues - Environmental factors estimated</p>
+            <p><strong>📊 Odds API:</strong> ✅ Available for real-time data integration</p>
+        </div>
+        
+        <div class="legs-section">
+            <h2>🎯 AI-ENHANCED PARLAY LEGS</h2>
+            
+            <div class="leg-item leg-medium leg-featured">
+                <strong>1. DEN -1.5</strong> (-110) ✅ ⭐
+                <br><small>🎯 DEN -1.5 (Raiders @ Broncos)</small>
+                <br><em>🤖 AI: Home team in prime time, playoff implications</em>
+                <br><span style='color: #00ff88;'>⭐ FEATURED PICK</span>
+            </div>
+            
+            <div class="leg-item leg-medium leg-featured">
+                <strong>2. OVER 41.5</strong> (-110) ✅ ⭐
+                <br><small>🎯 OVER 41.5 (Raiders @ Broncos)</small>
+                <br><em>🤖 AI: Divisional rivalry could produce offensive fireworks</em>
+                <br><span style='color: #00ff88;'>⭐ FEATURED PICK</span>
+            </div>
+            
+            <div class="leg-item leg-high leg-featured">
+                <strong>3. DEN ML</strong> (-140) 🔥 ⭐
+                <br><small>🎯 DEN Moneyline (Raiders @ Broncos)</small>
+                <br><em>🤖 AI: Home favorite in divisional game - good value at -140</em>
+                <br><span style='color: #00ff88;'>⭐ FEATURED PICK</span>
+            </div>
+            
+            <div class="leg-item leg-medium">
+                <strong>4. IND +3.5</strong> (-110) ✅
+                <br><small>🎯 IND +3.5 (Bills @ Colts)</small>
+                <br><em>🤖 AI: Home favorite in good spot</em>
+            </div>
+            
+            <div class="leg-item leg-medium">
+                <strong>5. OVER 46.5</strong> (-110) ✅
+                <br><small>🎯 OVER 46.5 (Bills @ Colts)</small>
+                <br><em>🤖 AI: Normal conditions - over has value</em>
+            </div>
+            
+            <div class="leg-item leg-medium">
+                <strong>6. JAC +7.5</strong> (-110) ✅
+                <br><small>🎯 JAC +7.5 (Jaguars @ Eagles)</small>
+                <br><em>🤖 AI: Taking points with road underdog</em>
+            </div>
+            
+            <div class="leg-item leg-medium">
+                <strong>7. OVER 44.5</strong> (-110) ✅
+                <br><small>🎯 OVER 44.5 (Jaguars @ Eagles)</small>
+                <br><em>🤖 AI: Normal conditions - over has value</em>
+            </div>
+            
+            <div class="leg-item leg-high leg-featured">
+                <strong>8. Gardner Minshew UNDER 235.5 passing yards</strong> (-110) 🔥 ⭐
+                <br><small>🎯 Gardner Minshew UNDER 235.5 passing yards</small>
+                <br><em>🤖 AI: Road QB vs tough Denver defense in cold weather</em>
+                <br><span style='color: #00ff88;'>⭐ FEATURED PICK</span>
+            </div>
+            
+            <div class="leg-item leg-high">
+                <strong>9. Josh Allen OVER 285.5 passing yards</strong> (-110) 🔥
+                <br><small>🎯 Josh Allen OVER 285.5 passing yards</small>
+                <br><em>🤖 AI: MVP candidate in dome environment - should air it out</em>
+            </div>
+        </div>
+        
+        <div class="ai-analysis">
+            <h2>🎯 Tonight's Featured Game Analysis</h2>
+            <h3>🏈 Las Vegas Raiders @ Denver Broncos (8:15 PM ET)</h3>
+            <p><strong>Venue:</strong> Empower Field at Mile High (5,280 ft elevation)</p>
+            <p><strong>Network:</strong> Amazon Prime Video</p>
+            <p><strong>Weather Impact:</strong> Estimated cold conditions favor home team</p>
+            <p><strong>Key Storylines:</strong> AFC West division rivalry, playoff implications for both teams</p>
+            <p><strong>AI Insights:</strong> Home field advantage in prime time, Denver's altitude factor, Raiders' road struggles</p>
+        </div>
+        
+        <div class="success-badge">
+            🤖 AI-Enhanced NFL Intelligence: Multi-API Analysis Complete
+        </div>
+        
+        <div class="warning-badge">
+            ⚠️ Note: Some AI services hit rate limits - Enhanced analysis with available data
+        </div>
+        
+        <div class="timestamp">
+            Generated: November 6, 2025 19:43:18 | System: EQ12 AI-Enhanced NFL Intelligence
+            <br>Parlay ID: ai_enhanced_nfl_parlay_20251106_194318.json
+            <br>🎯 Tonight's Focus: LV @ DEN (4 featured legs) | Total Payout: $30,247.96 on $100 bet
+        </div>
+    </div>
+</body>
+</html>

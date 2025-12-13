@@ -1,0 +1,82 @@
+
+# 🤖 EQ12 AI AGENT DEPLOYMENT ONE-SHOT
+# Automated AI agent deployment with configuration and monitoring
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$AgentType,
+    
+    [Parameter(Mandatory=$true)]
+    [string]$ClientName,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$WorkspacePath = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$ProductionMode
+)
+
+$ErrorActionPreference = "Stop"
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = "$WorkspacePath\logs\ai_agent_deployment_$AgentType_$Timestamp.log"
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $LogEntry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [$Level] $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry
+}
+
+try {
+    Write-Log "🤖 Deploying AI Agent: $AgentType for client: $ClientName"
+    
+    # Create client workspace
+    $ClientPath = "$WorkspacePath\clients\$ClientName"
+    New-Item -Path $ClientPath -ItemType Directory -Force | Out-Null
+    Write-Log "📁 Client workspace created: $ClientPath"
+    
+    # Generate agent configuration
+    $AgentConfig = @{
+        agent_type = $AgentType
+        client_name = $ClientName
+        deployment_date = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
+        production_mode = $ProductionMode.IsPresent
+        automation_level = "autonomous"
+        monitoring_enabled = $true
+        performance_tracking = $true
+    }
+    
+    $ConfigPath = "$ClientPath\agent_config.json"
+    $AgentConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $ConfigPath -Encoding UTF8
+    Write-Log "✅ Agent configuration saved: $ConfigPath"
+    
+    # Deploy agent
+    Write-Log "🚀 Deploying autonomous AI agent..."
+    $DeployResult = & python "$WorkspacePath\scripts\ai_agent_deployer.py" --type $AgentType --client $ClientName --config $ConfigPath
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Log "✅ AI Agent deployed successfully: $AgentType"
+        
+        # Generate client dashboard
+        $DashboardScript = @"
+# Auto-generated client dashboard for $ClientName
+python "$WorkspacePath\scripts\client_dashboard_generator.py" --client $ClientName --agent $AgentType
+"@
+        $DashboardScript | Out-File -FilePath "$ClientPath\dashboard.ps1" -Encoding UTF8
+        Write-Log "✅ Client dashboard created: $ClientPath\dashboard.ps1"
+        
+        # Setup monitoring
+        Write-Log "📊 Setting up agent monitoring..."
+        & python "$WorkspacePath\scripts\agent_monitor_setup.py" --client $ClientName --agent $AgentType
+        
+    } else {
+        throw "AI Agent deployment failed for: $AgentType"
+    }
+    
+} catch {
+    Write-Log "❌ AI Agent deployment failed: $_" -Level "ERROR"
+    exit 1
+}
+
+Write-Log "🎉 AI Agent deployment complete: $AgentType for $ClientName"

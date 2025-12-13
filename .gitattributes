@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2025 EQ12 Project Contributors
+
+# Git attributes for consistent line endings and secret handling
+* text=auto eol=lf
+
+# Windows specific files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Unix specific files
+*.sh text eol=lf
+
+# Binary files (no line ending conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.sqlite binary
+*.db binary
+*.key binary
+*.pem binary
+*.pfx binary
+*.p12 binary
+
+# Secret patterns (treat as binary to prevent accidental diffs)
+.env filter=git-crypt diff=git-crypt
+.env.* filter=git-crypt diff=git-crypt
+*.key filter=git-crypt diff=git-crypt
+*.pem filter=git-crypt diff=git-crypt
+secrets.json filter=git-crypt diff=git-crypt
+api_keys.json filter=git-crypt diff=git-crypt
+
+# Language specific
+*.py text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Generated files
+*.log text
+*.csv text
+*.sql text

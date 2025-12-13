@@ -1,0 +1,5 @@
+﻿C:\EQ12\keys\.env
+C:\EQ12\keys\creds.json
+C:\EQ12\keys\oddsapi.txt
+C:\EQ12\keys\tg_chatid.txt
+C:\EQ12\keys\tg_token.txt

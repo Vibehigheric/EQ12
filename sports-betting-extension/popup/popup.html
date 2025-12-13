@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Betting Assistant</title>
+    <style>
+        body {
+            width: 380px;
+            min-height: 500px;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .parlay-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .parlay-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .sport-badge {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .ev-badge {
+            background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .parlay-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .legs-container {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .leg {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .leg:last-child {
+            margin-bottom: 0;
+        }
+
+        .leg-odds {
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .button-secondary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .button-tertiary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-form {
+            display: none;
+        }
+
+        .settings-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #f1f5f9;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .no-parlay {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #94a3b8;
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #94a3b8;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>
+            🎯 Sports Betting Assistant
+            <div class="status-indicator" id="connectionStatus"></div>
+        </h1>
+    </div>
+
+    <div class="main-content">
+        <!-- Current Parlay Section -->
+        <div class="section" id="parlaySection">
+            <div class="section-title">Current Parlay</div>
+
+            <div id="parlayContainer">
+                <div class="no-parlay">
+                    No parlay available. Request a new one below.
+                </div>
+            </div>
+
+            <button class="button button-primary" id="applyParlayBtn" style="display: none;">
+                Apply to Bet Slip
+            </button>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="section">
+            <div class="section-title">Quick Actions</div>
+
+            <button class="button button-secondary" id="requestParlayBtn">
+                Request New Parlay
+            </button>
+
+            <button class="button button-tertiary" id="showSettingsBtn">
+                Settings
+            </button>
+        </div>
+
+        <!-- Settings Form -->
+        <div class="settings-form" id="settingsForm">
+            <div class="section-title">Parlay Settings</div>
+
+            <div class="form-group">
+                <label class="form-label">Sport</label>
+                <select class="form-select" id="sportSelect">
+                    <option value="nfl">NFL</option>
+                    <option value="cfb">College Football</option>
+                    <option value="nba">NBA</option>
+                    <option value="nhl">NHL</option>
+                    <option value="mlb">MLB</option>
+                    <option value="soccer">Soccer</option>
+                    <option value="ufc">UFC</option>
+                    <option value="tennis">Tennis</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Promo Type</label>
+                <select class="form-select" id="promoSelect">
+                    <option value="mystery">Mystery Boost</option>
+                    <option value="stepped">Stepped Up Boost</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Stake Amount ($)</label>
+                <input type="number" class="form-input" id="stakeInput" value="100" min="1" max="1000">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Max Legs</label>
+                <input type="number" class="form-input" id="maxLegsInput" value="6" min="3" max="15">
+            </div>
+
+            <button class="button button-primary" id="saveSettingsBtn">
+                Save & Request Parlay
+            </button>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="section" id="statsSection" style="display: none;">
+            <div class="section-title">Today's Stats</div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalParlays">0</div>
+                    <div class="stat-label">Parlays</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="avgEV">+0%</div>
+                    <div class="stat-label">Avg EV</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,14 @@
+{
+  "draftkings": {
+    "max_parlay_legs": 20,
+    "max_stake": 500
+  },
+  "fanduel": {
+    "max_parlay_legs": 15,
+    "max_stake": 300
+  },
+  "betmgm": {
+    "max_parlay_legs": 12,
+    "max_stake": 200
+  }
+}

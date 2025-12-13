@@ -1,0 +1,32 @@
+<link rel="stylesheet" type="text/css" href="chrome-extension://{{ extension_id }}/css/ac-savings-ratings.css">
+<link rel="stylesheet" type="text/css" href="chrome-extension://{{ extension_id }}/fonts/material-icons/material-icons.css">
+
+<div id="ac-savings-review">
+  <div id="ac-header">
+    <div id="ac-ih-icon"><img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg" /></div>
+    <div id="ac-close-icon"><i class="material-icons pb-close">close</i></div>
+  </div>
+  <div id="ac-content">
+    <div id="ac-savings-image"><img src="chrome-extension://{{ extension_id }}/images/savings@2x.png"></div>
+    <div id="ac-title">CNET Shopping just saved you:</div>
+    <div id="ac-savings-container">
+      <div id="ac-savings">__MSG_currency__0.00</div>
+    </div>
+  </div>
+  <div id="ac-footer">
+    <div id="ac-messsage">How are we doing?</div>
+    <div class="ac-rate">
+      <input type="radio" id="star1" name="rate" value="5" />
+      <label for="star1" title="5 STARS">5 STARS</label>
+      <input type="radio" id="star2" name="rate" value="4" />
+      <label for="star2" title="4 STARS">4 STARS</label>
+      <input type="radio" id="star3" name="rate" value="3" />
+      <label for="star3" title="3 STARS">3 STARS</label>
+      <input type="radio" id="star4" name="rate" value="2" />
+      <label for="star4" title="2 STARS">2 STARS</label>
+      <input type="radio" id="star5" name="rate" value="1" />
+      <label for="star5" title="1 STAR">1 STAR</label>
+    </div>
+    <a id="ac-share-feedback" href="https://invisiblehand.zendesk.com/hc/en-us/requests/new" target="_blank"></a>
+  </div>
+</div>

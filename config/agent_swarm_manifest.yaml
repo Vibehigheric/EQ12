@@ -1,0 +1,68 @@
+# EQ12 AGENT SWARM MANIFEST
+# Defines the 50-Assistant System
+
+master:
+  name: "EQ12-Overlord"
+  model: "gpt-4-turbo"
+  host: "EQ12-Main"
+  role: "Orchestrator"
+
+core_assistants:
+  - name: "Betting_AI"
+    role: "Sports Portfolio Manager"
+    tools: ["scraper_odds", "calc_ev"]
+  
+  - name: "Spice_Route_CEO"
+    role: "E-Commerce Manager"
+    tools: ["shop_china_direct", "amazon_seller_api"]
+
+  - name: "Travel_Agent"
+    role: "Travel Arbitrage"
+    tools: ["flight_scanner", "hotel_price_alert"]
+
+  - name: "Real_Estate_Tycoon"
+    role: "Asset Scout"
+    tools: ["zillow_scraper", "mortgage_calc"]
+
+  - name: "Credit_Optimizer"
+    role: "Financial Health"
+    tools: ["credit_karma_api", "churning_tracker"]
+
+  - name: "Auto_Broker"
+    role: "Car Rental/Turo Manager"
+    tools: ["turo_api", "car_value_estimator"]
+
+  - name: "Dev_Ops_Bot"
+    role: "System Engineer"
+    tools: ["docker", "git", "mcp_server"]
+
+  - name: "Cluster_Medic"
+    role: "Hardware Health"
+    tools: ["check_temps", "disk_usage"]
+
+  - name: "Cannabis_Intel"
+    role: "Market Analyst"
+    tools: ["regulatory_tracker", "dispensary_scraper"]
+
+  - name: "Executive_Assistant"
+    role: "Scheduler"
+    tools: ["calendar_api", "email_sender"]
+
+workers:
+  # Betting Workers
+  - { name: "Scraper_DK", role: "DraftKings Odds" }
+  - { name: "Scraper_FD", role: "FanDuel Odds" }
+  - { name: "Weather_Bot", role: "NFL Weather" }
+  - { name: "Injury_Bot", role: "Player Status" }
+  
+  # Spice Route Workers
+  - { name: "Alibaba_Watcher", role: "Price Tracker" }
+  - { name: "Review_Analyzer", role: "Sentiment Analysis" }
+  - { name: "Inventory_Bot", role: "Stock Levels" }
+  
+  # Tech Workers
+  - { name: "Log_Rotator", role: "Clean Logs" }
+  - { name: "Backup_Bot", role: "Daily Snapshots" }
+  - { name: "IP_Rotator", role: "Proxy Management" }
+
+  # ... (Extensible to 50+)

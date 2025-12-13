@@ -1,0 +1,166 @@
+{
+  "id": null,
+  "uid": "eq12-badges",
+  "title": "EQ12 Badge Health",
+  "description": "Monitoring dashboard for GitHub repository badges and CI/CD health",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "5m",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "graph",
+      "title": "CI/CD Badge Status Over Time",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": ["current", "min", "max"]
+        }
+      },
+      "targets": [
+        {
+          "expr": "eq12_badge_status{badge=\"ci\"}",
+          "legendFormat": "CI Badge",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "graph",
+      "title": "Security Badge Status Over Time",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "unit": "short",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "eq12_badge_status{badge=\"security\"}",
+          "legendFormat": "Security Badge",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "graph",
+      "title": "Code Coverage Percentage",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "continuous-GrYlRd"},
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "green", "value": 85}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "eq12_coverage_percentage",
+          "legendFormat": "Coverage %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Current Coverage",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "green", "value": 85}
+            ]
+          },
+          "unit": "percent"
+        }
+      },
+      "targets": [
+        {
+          "expr": "eq12_coverage_percentage",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Badge Health Score",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 0.7},
+              {"color": "green", "value": 0.9}
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "targets": [
+        {
+          "expr": "avg(eq12_badge_status)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "table",
+      "title": "Badge Status Summary",
+      "gridPos": {"h": 4, "w": 12, "x": 12, "y": 12},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "displayMode": "table",
+            "filterable": true
+          }
+        }
+      },
+      "targets": [
+        {
+          "expr": "eq12_badge_status",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

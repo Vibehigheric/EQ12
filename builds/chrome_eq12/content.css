@@ -1,0 +1,233 @@
+/* EQ12 Data Pusher - Content Styles */
+
+.eq12-highlight {
+    outline: 2px solid #00d4ff !important;
+    background: rgba(0, 212, 255, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.eq12-captured {
+    outline: 2px solid #00ff88 !important;
+    background: rgba(0, 255, 136, 0.1) !important;
+    transition: all 0.3s ease !important;
+}
+
+.eq12-affiliate-injected {
+    position: relative;
+}
+
+.eq12-affiliate-injected::after {
+    content: '💰';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff006e;
+    color: white;
+    font-size: 10px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    z-index: 1000;
+}
+
+.eq12-tooltip {
+    position: absolute !important;
+    background: #1a1f3a !important;
+    color: #ffffff !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-family: 'Segoe UI', sans-serif !important;
+    z-index: 10000 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #00d4ff !important;
+    max-width: 200px !important;
+    word-wrap: break-word !important;
+}
+
+.eq12-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.eq12-modal {
+    background: linear-gradient(135deg, #1a1f3a 0%, #2d2d2d 100%) !important;
+    border-radius: 12px !important;
+    padding: 30px !important;
+    max-width: 500px !important;
+    width: 90% !important;
+    color: #ffffff !important;
+    font-family: 'Segoe UI', sans-serif !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #00d4ff !important;
+}
+
+.eq12-modal h3 {
+    color: #00d4ff !important;
+    margin-bottom: 20px !important;
+    text-align: center !important;
+}
+
+.eq12-modal .close-btn {
+    position: absolute !important;
+    top: 10px !important;
+    right: 15px !important;
+    background: none !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 24px !important;
+    cursor: pointer !important;
+}
+
+.eq12-progress {
+    width: 100% !important;
+    height: 6px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 3px !important;
+    overflow: hidden !important;
+    margin: 15px 0 !important;
+}
+
+.eq12-progress-bar {
+    height: 100% !important;
+    background: linear-gradient(90deg, #00d4ff, #00ff88) !important;
+    transition: width 0.3s ease !important;
+}
+
+.eq12-status {
+    text-align: center !important;
+    margin-top: 15px !important;
+    font-size: 14px !important;
+    color: #cccccc !important;
+}
+
+/* Animation for data capture */
+@keyframes eq12-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 212, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 212, 255, 0);
+    }
+}
+
+.eq12-capturing {
+    animation: eq12-pulse 1s infinite !important;
+}
+
+/* Floating action button */
+.eq12-fab {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 56px !important;
+    height: 56px !important;
+    background: linear-gradient(45deg, #00d4ff, #ff006e) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    cursor: pointer !important;
+    z-index: 9999 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s ease !important;
+    color: white !important;
+    font-size: 24px !important;
+    border: none !important;
+}
+
+.eq12-fab:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Mini notification */
+.eq12-notification {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: #1a1f3a !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    z-index: 10001 !important;
+    border-left: 4px solid #00d4ff !important;
+    font-family: 'Segoe UI', sans-serif !important;
+    font-size: 14px !important;
+    max-width: 300px !important;
+    opacity: 0 !important;
+    transform: translateX(100%) !important;
+    transition: all 0.3s ease !important;
+}
+
+.eq12-notification.show {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+}
+
+.eq12-notification.success {
+    border-left-color: #00ff88 !important;
+}
+
+.eq12-notification.error {
+    border-left-color: #ff4444 !important;
+}
+
+/* Data preview popup */
+.eq12-data-preview {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    background: #1a1f3a !important;
+    color: #ffffff !important;
+    padding: 20px !important;
+    border-radius: 10px !important;
+    max-width: 80% !important;
+    max-height: 80% !important;
+    overflow-y: auto !important;
+    z-index: 10000 !important;
+    border: 1px solid #00d4ff !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 12px !important;
+}
+
+.eq12-data-preview pre {
+    white-space: pre-wrap !important;
+    margin: 0 !important;
+    color: #00ff88 !important;
+}
+
+/* Loading spinner */
+.eq12-spinner {
+    width: 40px !important;
+    height: 40px !important;
+    border: 4px solid rgba(0, 212, 255, 0.3) !important;
+    border-top: 4px solid #00d4ff !important;
+    border-radius: 50% !important;
+    animation: eq12-spin 1s linear infinite !important;
+    margin: 0 auto !important;
+}
+
+@keyframes eq12-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

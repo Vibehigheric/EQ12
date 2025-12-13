@@ -1,0 +1,36 @@
+name: Graphic Alerts
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'configs/**'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run graphic generator
+        run: |
+          # Expect a deals JSON to be present at configs/latest_deal.json
+          if [ -f configs/latest_deal.json ]; then
+            python -m graphics.graphics_alert --in configs/latest_deal.json --out out/deal_alert.png
+            ls -l out || true
+          else
+            echo "No deals JSON found; skipping"
+          fi
+      - name: Upload artifact
+        if: success() && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphic-alert
+          path: out/deal_alert.png

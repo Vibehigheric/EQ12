@@ -1,0 +1,216 @@
+# EQ12 Model Configuration: Moneyline Win Probability (v1)
+# Target: P(home_team_wins) for all major sports
+# Decision: Bet when model_prob - implied_prob > edge_threshold
+
+model:
+  name: "moneyline_win_probability"
+  version: "v1.0"
+  type: "binary_classification"
+  algorithm: "xgboost"
+  target: "home_team_win"
+  
+data:
+  # Data sources (all relative to workspace root)
+  train_data: "data/training/moneyline_train.csv"
+  val_data: "data/training/moneyline_val.csv"
+  test_data: "data/training/moneyline_test.csv"
+  
+  # Time-based splitting (CRITICAL for betting)
+  split_strategy: "temporal"
+  train_start: "2020-01-01"
+  train_end: "2023-12-31"
+  val_start: "2024-01-01"
+  val_end: "2024-06-30"
+  test_start: "2024-07-01"
+  test_end: "2024-12-04"
+  
+  # Feature groups (defined in build_features.py)
+  feature_groups:
+    - "team_stats_rolling"        # Rolling 10/20/30 game averages
+    - "opponent_adjusted"          # Strength-of-schedule adjusted
+    - "market_movement"            # Opening vs closing line
+    - "contextual"                 # Rest days, travel, home/away
+    - "injury_impact"              # IL-derived indicators
+    - "weather"                    # Temp, wind, precipitation
+    - "pace_tempo"                 # Game flow metrics
+    
+  # Leakage prevention
+  exclude_features:
+    - "final_score"
+    - "final_total"
+    - "actual_outcome"
+    - "post_game_*"
+  
+features:
+  # Feature engineering config
+  rolling_windows: [5, 10, 20, 30]
+  opponent_adjustment: true
+  market_features: true
+  weather_enabled: true
+  injury_weighted: true
+  
+  # Missing value strategy
+  missing_strategy: "indicator"  # Add _missing flag columns
+  impute_numeric: "median"
+  impute_categorical: "mode"
+
+hyperparameters:
+  # XGBoost config (conservative, well-regularized)
+  max_depth: 4
+  learning_rate: 0.05
+  n_estimators: 300
+  min_child_weight: 5
+  subsample: 0.8
+  colsample_bytree: 0.8
+  gamma: 1
+  reg_alpha: 0.5
+  reg_lambda: 1.0
+  
+  # Training config
+  early_stopping_rounds: 50
+  eval_metric: "logloss"
+  objective: "binary:logistic"
+  random_state: 42
+  n_jobs: -1
+  
+calibration:
+  # Post-training probability calibration
+  method: "isotonic"  # or "platt"
+  cv_folds: 5
+  
+metrics:
+  # Training metrics
+  primary: "log_loss"
+  secondary:
+    - "brier_score"
+    - "auc_roc"
+    - "calibration_error"
+    
+  # Business metrics (backtesting)
+  business:
+    - "roi"
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "avg_edge"
+    - "kelly_fraction"
+    
+evaluation:
+  # Baseline comparisons
+  baselines:
+    - name: "market_implied"
+      description: "Use closing line implied probability"
+    - name: "home_favorite"
+      description: "Always pick home favorite"
+    - name: "global_average"
+      description: "Historical home win rate"
+  
+  # Backtesting integration
+  backtest:
+    enabled: true
+    bankroll: 10000
+    kelly_fraction: 0.25
+    edge_threshold: 0.03  # Only bet when edge > 3%
+    max_bet_fraction: 0.05
+    script: "scripts/backtester.py"
+    
+promotion:
+  # Champion-challenger rules
+  challenger_must_beat_champion:
+    log_loss: true          # Lower is better
+    brier_score: true       # Lower is better
+    backtest_roi: true      # Higher is better
+    backtest_sharpe: true   # Higher is better
+  
+  minimum_improvement:
+    log_loss: 0.01          # 1% improvement required
+    roi: 0.05               # 5% ROI improvement required
+    sharpe: 0.1             # 0.1 Sharpe improvement required
+  
+  statistical_significance:
+    test: "permutation"
+    p_value_threshold: 0.05
+    n_permutations: 1000
+    
+monitoring:
+  # Drift detection
+  drift_detection: true
+  drift_window: 30  # days
+  drift_threshold: 0.15  # PSI > 0.15 triggers alert
+  
+  # Performance monitoring
+  calibration_check_frequency: "weekly"
+  retraining_frequency: "daily"
+  
+  # Alerts
+  alerts:
+    - metric: "log_loss"
+      threshold: 0.7
+      direction: "greater"
+      action: "email"
+    - metric: "roi"
+      threshold: -0.1
+      direction: "less"
+      action: "telegram"
+      
+output:
+  # Model artifacts
+  model_dir: "models/moneyline"
+  versioning: true
+  
+  # Save formats
+  formats:
+    - "pickle"
+    - "onnx"
+    - "json_metadata"
+  
+  # Logging
+  mlflow_tracking: false  # Enable when MLflow setup
+  azure_ml_logging: false # Enable when Azure ML configured
+  local_logs: true
+  log_dir: "logs/training"
+  
+  # Reports
+  generate_report: true
+  report_format: "html"
+  report_dir: "reports/models"
+  
+deployment:
+  # Inference config
+  inference_batch_size: 100
+  prediction_threshold: 0.5  # For binary classification (not used for probabilities)
+  
+  # API config
+  serve_via: "local_api"  # or "azure_ml" when ready
+  api_port: 8000
+  
+  # Integration
+  telegram_notifications: true
+  dashboard_integration: true
+  bi_core_feed: true
+  
+reproducibility:
+  # Ensure exact reproducibility
+  random_seed: 42
+  set_seeds:
+    - numpy
+    - random
+    - xgboost
+  deterministic: true
+  
+notes: |
+  This is the foundational model for EQ12 betting intelligence.
+  
+  Key principles:
+  1. Conservative hyperparameters (avoid overfitting)
+  2. Strong regularization (gamma, alpha, lambda)
+  3. Time-based splits (never random for temporal data)
+  4. Calibrated probabilities (isotonic regression)
+  5. Backtesting integration (model must prove ROI)
+  6. Champion-challenger deployment (never blind replace)
+  7. Drift monitoring (detect when model degrades)
+  
+  Next models to build:
+  - model_props_v1.yaml (HR, TD, etc.)
+  - model_totals_v1.yaml (over/under)
+  - model_parlays_v1.yaml (multi-leg optimization)

@@ -1,0 +1,56 @@
+# run_daily_maintenance_now.ps1 - Run daily EQ12 maintenance
+
+if (-not (Test-Path "C:\EQ12\logs")) { 
+    New-Item -ItemType Directory -Path "C:\EQ12\logs" | Out-Null 
+}
+
+# Import modules
+Import-Module "C:\EQ12\scripts\eq12_recycle.psm1" -Force -ErrorAction SilentlyContinue
+Import-Module "C:\EQ12\scripts\eq12_files.psm1" -Force -ErrorAction SilentlyContinue
+
+# Recycle report
+try { 
+    $reportPath = Export-RecycleReport -Format json -Path "C:\EQ12\logs\recycle_report.json"
+    Write-Output "Recycle report created: $reportPath" 
+} catch { 
+    Write-Warning "Recycle report failed: $($_.Exception.Message)" 
+}
+
+# Netcheck
+try { 
+    Test-Connection oddsapi.com -Count 3 | Out-File "C:\EQ12\logs\netcheck.txt" -Append
+    Write-Output "Netcheck logged." 
+} catch { 
+    Write-Warning "Netcheck failed: $($_.Exception.Message)" 
+}
+
+# Backup
+try { 
+    if (Test-Path "C:\AI_Projects") { 
+        robocopy "C:\AI_Projects" "D:\Backups\AI_Projects" /MIR /LOG:"C:\EQ12\logs\backup.log" | Out-Null
+        Write-Output "Backup run." 
+    } else { 
+        Write-Output "No AI_Projects folder; skipping backup." 
+    } 
+} catch { 
+    Write-Warning "Backup failed: $($_.Exception.Message)" 
+}
+
+# Telegram completion + status
+try { 
+    $msg = "✅ EQ12 maintenance completed. Recycle report: $reportPath"
+    $ok = Send-Telegram -Message $msg
+    if ($ok) { Write-Output "Telegram send OK." } else { Write-Warning "Telegram not sent." }
+
+    # Status summary
+    if (Get-Command eq12-status -ErrorAction SilentlyContinue) {
+        $status = eq12-status | Out-String
+        $msg2 = "📊 EQ12 STATUS REPORT`n" + $status
+        Send-Telegram -Message $msg2 | Out-Null
+        Write-Output "EQ12 status summary sent to Telegram."
+    }
+} catch { 
+    Write-Warning "Telegram send failed: $($_.Exception.Message)" 
+}
+
+Write-Output "=== EQ12 Maintenance Done ==="

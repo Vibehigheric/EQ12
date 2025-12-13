@@ -1,0 +1,28 @@
+# EQ12 Apple TV Command Center - Fixed Requirements
+
+# Core FastAPI and web framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+
+# Apple TV and streaming
+requests>=2.31.0
+websockets>=11.0
+zeroconf>=0.86.0
+netifaces>=0.11.0
+
+# Image and QR code generation
+Pillow>=10.0.0
+qrcode[pil]>=7.4.0
+
+# Telegram bot
+python-telegram-bot>=20.0
+
+# Template engine
+Jinja2>=3.1.0
+
+# System tray (optional)
+pystray>=0.19.0
+
+# Async utilities
+aiofiles>=23.0.0
+asyncio-mqtt>=0.13.0

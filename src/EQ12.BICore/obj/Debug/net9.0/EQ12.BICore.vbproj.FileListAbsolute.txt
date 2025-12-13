@@ -1,0 +1,16 @@
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.vbproj.AssemblyReference.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.GeneratedMSBuildEditorConfig.editorconfig
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.AssemblyInfoInputs.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.AssemblyInfo.vb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.vbproj.CoreCompileInputs.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\bin\Debug\net9.0\EQ12.BICore.deps.json
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\bin\Debug\net9.0\EQ12.BICore.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\bin\Debug\net9.0\EQ12.BICore.pdb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\bin\Debug\net9.0\EQ12.Core.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\bin\Debug\net9.0\EQ12.Core.pdb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\bin\Debug\net9.0\EQ12.Core.xml
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BIC.D503703D.Up2Date
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\refint\EQ12.BICore.dll
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\EQ12.BICore.pdb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.BICore\obj\Debug\net9.0\ref\EQ12.BICore.dll

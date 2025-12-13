@@ -1,0 +1,142 @@
+# EQ12 Elite Copilot Master Prompt
+#
+# You are an **expert automation + PowerShell/Python engineer**.
+# You are working on the EQ12 Elite Stack (stocks, crypto, sports, jobs, recycle, dashboard).
+#
+# ALWAYS DO:
+# - Mirror Crypto JSON exporter pattern across all modules.
+# - Fix issues globally — if you patch one (
+    stocks), also patch others (crypto,
+    jobs,
+    recycle,
+    sports
+).
+# - Dashboard = C:\EQ12\dashboard\index.html → always table-based, consistent format.
+# - Add JSON exporters (# TODO: export this as JSON for dashboard).
+# - Add pytest unit tests (# TODO: add pytest unit test for JSON schema).
+# - For PowerShell:
+#   - Use CmdletBinding() and Verb-Noun names (e.g., Get-EQ12Status).
+#   - Wrap errors with try/catch, log to C:\EQ12\logs.
+# - For Python:
+#   - Always output valid JSON + CSV.
+#   - Handle API keys (ODDS_API_KEY, Coinbase, yfinance).
+# - Hard-code $env:ODDS_API_KEY read from C:\EQ12\keys\oddsapi.txt.
+#
+# CHAIN PROMPTS:
+# 1. Write base function
+# 2. Add JSON export
+# 3. Add pytest schema unit test
+# 4. Rewrite in PowerShell style if PS1/PSM1
+# 5. Add dashboard integration (table row builder)
+#
+# EXAMPLES:
+# - Stocks: JSON like Crypto, includes EMA20, EMA50, RSI14, MOM5, signal.
+# - Sports: Use Odds API → log odds_{sport}.json.
+# - Jobs: Log to jobs_controltech.json.
+# - Recycle: Export to recycle_report.json.
+#
+# LOGGING:
+# - C:\EQ12\logs\elite_run_*.log for elite run.
+# - Each module logs its JSON.
+# - Dashboard builds tables from JSON logs.
+#
+# WATCHDOG:
+# - eq12-watchdog.ps1 runs hourly:
+#   - eq12-elite-run
+#   - eq12-build-dashboard
+#   - Telegram alert if FAIL > 0.
+#
+# ---
+#
+# ⚡ Copilot: ALWAYS treat this file as law.
+# ⚡ No silent failures.
+# ⚡ No $null paths.
+# ⚡ Apply fixes consistently across all modules.
+
+# === EQ12 Copilot Master Patch ===
+# Apply these rules across all EQ12 scripts:
+#
+# 1. Runner Stability
+#    - Define Retry-Exec BEFORE any calls.
+#    - Replace invalid Write-Host interpolations:
+#         ("[{0}] FAIL {1}: {2}" -f $Name, $i, $_.Exception.Message)
+#    - Ensure $ok/$fail counters increment and final summary always logs.
+#
+# 2. Dashboard Build
+#    - Always set $dashboardDir = "C:\EQ12\dashboard" and create if missing.
+#    - Define $html = Join-Path $dashboardDir "index.html".
+#    - Pre-seed HTML with <html><body> wrapper, close with </body></html>.
+#    - Use Add-Content -Path $html (not $html as variable only).
+#    - Auto-launch dashboard: Start-Process $html.
+#
+# 3. Odds API Integration
+#    - Ensure $env:ODDS_API_KEY loads from C:\EQ12\keys\oddsapi.txt.
+#    - If missing, prompt once, save, and reuse.
+#    - In sports.py and PowerShell, always call https://api.the-odds-api.com with apiKey=$env:ODDS_API_KEY.
+#
+# 4. JSON Export Consistency
+#    - Stocks, Crypto, Sports, Jobs, Recycle must export results to C:\EQ12\logs\*.json.
+#    - Dashboard reads JSON logs and renders table-based panels for ALL modules.
+#
+# 5. Copilot Rewrite Rules
+#    - PowerShell: rewrite functions with [CmdletBinding()] and Verb-Noun style.
+#    - Python: add `# TODO: export this as JSON for dashboard`.
+#    - Add `# TODO: add pytest unit test for this function`.
+#    - Mirror Crypto’s working export pattern in Stocks, Sports, Jobs, Recycle.
+#
+# 6. Error Hardening
+#    - Always wrap API/network calls in try/except or try/catch with logging.
+#    - Default to empty JSON snapshot if data fetch fails, so dashboard never breaks.
+#
+# === End Patch ===
+
+import json
+import os
+import sys
+
+import requests
+
+API_KEY = os.getenv("ODDS_API_KEY")
+if not API_KEY:
+    print(json.dumps({"error": "ODDS_API_KEY not set"}))
+    sys.exit(1)
+
+BASE = "https://api.the-odds-api.com/v4"
+
+# Step 1: Get all active sports
+sports_url = f"{BASE}/sports/?apiKey={API_KEY}"
+sports = requests.get(sports_url).json()
+
+# Filter to popular (NFL, MLB, NBA, NHL, soccer)
+popular_keys = [
+    "americanfootball_nfl",
+    "baseball_mlb",
+    "basketball_nba",
+    "icehockey_nhl",
+    "soccer_usa_mls",
+]
+sports = [s for s in sports if s["key"] in popular_keys]
+
+results = []
+for s in sports:
+    odds_url = (
+        f"{BASE}/sports/{s['key']}/odds/?apiKey={API_KEY}&regions=us&markets=h2h,spreads&oddsFormat=american"
+    )
+    try:
+        data = requests.get(odds_url).json()
+        results.append({"sport": s["title"], "events": data[:5]})  # Limit for dashboard
+    except Exception as e:
+        results.append({"sport": s["title"], "error": str(e)})
+
+outpath = r"C:\EQ12\logs\odds_snapshot.json"
+os.makedirs(os.path.dirname(outpath), exist_ok=True)
+with open(outpath, "w", encoding="utf-8") as f:
+    try:
+        json.dump(results, f, indent=2)
+
+    except OSError as e:
+        logging.error(f"Failed to write JSON: {e}")
+
+        raise
+
+print(f"Saved odds snapshot  {outpath}")

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EQ12.Diagnostics
+</name>
+</assembly>
+<members>
+<member name="T:EQ12.Diagnostics.EQ12.Diagnostics.SystemMonitor">
+ <summary>System monitoring and health checks</summary>
+</member>
+<member name="M:EQ12.Diagnostics.EQ12.Diagnostics.SystemMonitor.GetHealthMetrics">
+ <summary>Get current system health metrics</summary>
+</member>
+<member name="M:EQ12.Diagnostics.EQ12.Diagnostics.SystemMonitor.LogDiagnostics(System.String)">
+ <summary>Log diagnostic information to file</summary>
+</member>
+<member name="M:EQ12.Diagnostics.EQ12.Diagnostics.SystemMonitor.CheckSystemHealth">
+ <summary>Check if all critical systems are operational</summary>
+</member>
+</members>
+</doc>

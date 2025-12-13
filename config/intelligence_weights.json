@@ -1,0 +1,6 @@
+{
+  "line_discrepancy": 1.05,
+  "arbitrage": 1.05,
+  "prop_tensor": 1.05,
+  "ml_line_correction": 0.95
+}

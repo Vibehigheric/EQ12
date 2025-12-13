@@ -1,0 +1,1 @@
+import{i as o,m as r}from"./chunk-RPHHQKF6.js";import{b as e}from"./chunk-3GYLW4KZ.js";function u(){return o(new Date)}var n=e(()=>{"use strict";r()});function m(t){return c.some(i=>i===t)}var c,a=e(()=>{"use strict";c=["expedia.ca","expedia.com","hotels.com","orbitz.com","travelocity.com","vrbo.com"]});export{u as a,n as b,m as c,a as d};

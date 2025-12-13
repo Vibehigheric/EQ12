@@ -1,0 +1,215 @@
+# EQ12 Docker Desktop Setup and WSL Integration Guide
+# Run this script as Administrator to install Docker Desktop and configure WSL integration
+
+[CmdletBinding()]
+param(
+    [switch]$InstallOnly = $false,
+    [switch]$ConfigureOnly = $false
+)
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "EQ12 DOCKER DESKTOP SETUP" -ForegroundColor Cyan
+Write-Host "=========================" -ForegroundColor Cyan
+
+# Check if running as Administrator
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Error "This script must be run as Administrator. Right-click PowerShell and 'Run as Administrator'."
+}
+
+# Function to check if Docker Desktop is installed
+function Test-DockerInstalled {
+    $dockerPaths = @(
+        "C:\Program Files\Docker\Docker\Docker Desktop.exe",
+        "$env:LOCALAPPDATA\Programs\Docker\Docker Desktop.exe"
+    )
+    
+    foreach ($path in $dockerPaths) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+    return $false
+}
+
+# Function to install Docker Desktop via winget
+function Install-DockerDesktop {
+    Write-Host "`nInstalling Docker Desktop..." -ForegroundColor Yellow
+    
+    try {
+        # Try winget first (Windows 10/11)
+        winget install --id Docker.DockerDesktop --silent --accept-package-agreements --accept-source-agreements
+        Write-Host "[OK] Docker Desktop installed via winget" -ForegroundColor Green
+    } catch {
+        Write-Host "Winget installation failed. Please download manually from:" -ForegroundColor Yellow
+        Write-Host "https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe" -ForegroundColor Cyan
+        Write-Host "`nRun the installer, then rerun this script with -ConfigureOnly flag" -ForegroundColor Yellow
+        return $false
+    }
+    
+    return $true
+}
+
+# Function to start Docker Desktop
+function Start-DockerDesktop {
+    $dockerPath = Test-DockerInstalled
+    if ($dockerPath) {
+        Write-Host "`nStarting Docker Desktop..." -ForegroundColor Yellow
+        Start-Process $dockerPath
+        
+        # Wait for Docker to start
+        Write-Host "Waiting for Docker Desktop to initialize..." -ForegroundColor Gray
+        $timeout = 60
+        $elapsed = 0
+        
+        while ($elapsed -lt $timeout) {
+            Start-Sleep -Seconds 2
+            $elapsed += 2
+            
+            try {
+                $dockerVersion = docker version --format json 2>$null | ConvertFrom-Json
+                if ($dockerVersion.Server) {
+                    Write-Host "[OK] Docker Desktop is running" -ForegroundColor Green
+                    return $true
+                }
+            } catch {
+                # Docker not ready yet
+            }
+            
+            Write-Host "." -NoNewline -ForegroundColor Gray
+        }
+        
+        Write-Warning "Docker Desktop startup timed out. Please start it manually."
+        return $false
+    }
+    
+    Write-Error "Docker Desktop not found"
+}
+
+# Function to configure WSL integration
+function Configure-WSLIntegration {
+    Write-Host "`nConfiguring WSL Integration..." -ForegroundColor Yellow
+    
+    # Check WSL distros
+    $wslDistros = wsl -l -v | Select-String -Pattern "Ubuntu|Debian|Alpine"
+    
+    if (-not $wslDistros) {
+        Write-Warning "No compatible WSL distros found. Install Ubuntu from Microsoft Store first."
+        return
+    }
+    
+    Write-Host "Found WSL distros:" -ForegroundColor Gray
+    $wslDistros | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+    
+    # Docker Desktop settings path
+    $dockerSettingsPath = "$env:APPDATA\Docker\settings.json"
+    
+    if (Test-Path $dockerSettingsPath) {
+        Write-Host "`nUpdating Docker Desktop settings for WSL integration..." -ForegroundColor Yellow
+        
+        try {
+            $settings = Get-Content $dockerSettingsPath | ConvertFrom-Json
+            
+            # Enable WSL integration
+            $settings.wslEngineEnabled = $true
+            $settings.useWSL2 = $true
+            
+            # Enable integration for Ubuntu specifically
+            if (-not $settings.PSObject.Properties['integratedWslDistros']) {
+                $settings | Add-Member -NotePropertyName 'integratedWslDistros' -NotePropertyValue @{}
+            }
+            $settings.integratedWslDistros.Ubuntu = $true
+            
+            # Save settings
+            $settings | ConvertTo-Json -Depth 10 | Set-Content $dockerSettingsPath
+            Write-Host "[OK] WSL integration configured" -ForegroundColor Green
+            
+        } catch {
+            Write-Warning "Could not update Docker settings automatically. Please enable WSL integration manually:"
+            Write-Host "  1. Open Docker Desktop" -ForegroundColor Gray
+            Write-Host "  2. Go to Settings → Resources → WSL Integration" -ForegroundColor Gray  
+            Write-Host "  3. Enable 'Enable integration with my default WSL distro'" -ForegroundColor Gray
+            Write-Host "  4. Toggle on 'Ubuntu' → Apply & Restart" -ForegroundColor Gray
+        }
+    }
+}
+
+# Function to test WSL Docker connectivity
+function Test-WSLDockerConnection {
+    Write-Host "`nTesting WSL Docker connection..." -ForegroundColor Yellow
+    
+    try {
+        $wslTestResult = wsl -d Ubuntu -e bash -c "docker version --format json 2>/dev/null"
+        
+        if ($wslTestResult) {
+            $dockerInfo = $wslTestResult | ConvertFrom-Json
+            if ($dockerInfo.Server) {
+                Write-Host "[OK] Docker accessible from WSL Ubuntu" -ForegroundColor Green
+                return $true
+            }
+        }
+        
+        # If direct test fails, provide manual fix instructions
+        Write-Host "Docker not accessible from WSL. Trying manual socket fix..." -ForegroundColor Yellow
+        
+        $socketFix = @'
+# Run these commands in WSL Ubuntu terminal:
+sudo usermod -aG docker $USER
+newgrp docker
+
+# If socket still not accessible:
+if [ -S /mnt/wsl/shared-docker/docker.sock ]; then
+  sudo rm -f /var/run/docker.sock
+  sudo ln -s /mnt/wsl/shared-docker/docker.sock /var/run/docker.sock
+fi
+
+docker version
+'@
+        
+        Write-Host $socketFix -ForegroundColor Cyan
+        
+    } catch {
+        Write-Warning "WSL Docker test failed: $_"
+    }
+    
+    return $false
+}
+
+# Main execution
+try {
+    if (-not $ConfigureOnly) {
+        $dockerInstalled = Test-DockerInstalled
+        
+        if (-not $dockerInstalled) {
+            Write-Host "Docker Desktop not found. Installing..." -ForegroundColor Yellow
+            $installResult = Install-DockerDesktop
+            
+            if (-not $installResult) {
+                exit 1
+            }
+        } else {
+            Write-Host "[OK] Docker Desktop found at: $dockerInstalled" -ForegroundColor Green
+        }
+        
+        # Start Docker Desktop
+        Start-DockerDesktop
+    }
+    
+    if (-not $InstallOnly) {
+        # Configure WSL integration
+        Configure-WSLIntegration
+        
+        # Test WSL connection
+        Start-Sleep -Seconds 5
+        Test-WSLDockerConnection
+    }
+    
+    Write-Host "`n[SUCCESS] Docker Desktop setup complete!" -ForegroundColor Green
+    Write-Host "`nNext steps:" -ForegroundColor Cyan
+    Write-Host "  1. Restart Docker Desktop if it's running" -ForegroundColor Gray
+    Write-Host "  2. In VS Code: Dev Containers: Rebuild and Reopen in Container" -ForegroundColor Gray
+    Write-Host "  3. Test with: docker version (from WSL Ubuntu terminal)" -ForegroundColor Gray
+    
+} catch {
+    Write-Error "Setup failed: $_"
+}

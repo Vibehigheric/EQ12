@@ -1,0 +1,25 @@
+# Buffalo Stack Requirements
+# EQ12 Integration Dependencies
+
+requests>=2.31.0
+sqlite3  # Built-in with Python
+argparse  # Built-in with Python
+pathlib  # Built-in with Python
+datetime  # Built-in with Python
+json  # Built-in with Python
+logging  # Built-in with Python
+os  # Built-in with Python
+
+# Optional: For advanced notifications
+# python-telegram-bot>=20.0
+# sendgrid>=6.9.0
+# smtplib  # Built-in with Python
+
+# Optional: For web scraping civil service sites
+# beautifulsoup4>=4.12.0
+# selenium>=4.15.0
+# playwright>=1.40.0
+
+# Optional: For data analysis
+# pandas>=2.1.0
+# numpy>=1.24.0

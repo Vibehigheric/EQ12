@@ -1,0 +1,39 @@
+{
+   "action": {
+      "default_popup": "browser_action.html",
+      "default_title": "__MSG_extensionName__"
+   },
+   "background": {
+      "service_worker": "background.js",
+      "type": "module"
+   },
+   "content_scripts": [ {
+      "js": [ "content.js" ],
+      "matches": [ "https://twitter.com/*", "https://mobile.twitter.com/*", "https://x.com/*", "https://mobile.x.com/*" ],
+      "run_at": "document_start"
+   } ],
+   "default_locale": "en",
+   "description": "__MSG_extensionDescription__",
+   "homepage_url": "https://soitis.dev/control-panel-for-twitter",
+   "icons": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "64": "icons/icon64.png",
+      "96": "icons/icon96.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgZmdFhzH7O2KVoh75PN5XYprNtyummah//yQpndkoCB34LGX6jiYWjJofUe/8ycEPwaBmiSmR8z0W9vs4qcMo+sQX2v5KBnbwZmN++kYDW0Xty9Jh+lj9E6FjwDyKNzUT93VI+N7oO4wEWZG67q7Pfd5EAzT+vMoONJ/YfkBIuUPcKBSmHnImzLU2O9AVjkEbIFzFkyn0+QZ1XzFgFsgRTQEQvfUbCXz23xSlZ6Oy1H7pM8bXD7GW1DqtM4nLb4zRqRyG79IzHTI1VKZXYSwd0qiLXiBZzwUPij/2ekfcMAXFwbPhI2qoSxiRxTEgZd4YGNzgUcoGBg82+wMTR/h0QIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_extensionName__",
+   "options_ui": {
+      "page": "options.html"
+   },
+   "permissions": [ "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "4.14.0",
+   "web_accessible_resources": [ {
+      "matches": [ "https://twitter.com/*", "https://mobile.twitter.com/*", "https://x.com/*", "https://mobile.x.com/*" ],
+      "resources": [ "script.js" ]
+   } ]
+}

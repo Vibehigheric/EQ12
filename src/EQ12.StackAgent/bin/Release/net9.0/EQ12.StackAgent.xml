@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EQ12.StackAgent
+</name>
+</assembly>
+<members>
+<member name="T:EQ12.StackAgent.EQ12.StackAgent.StackAgentScheduler">
+ <summary>Automation scheduler using Quartz.NET for distributed job execution</summary>
+</member>
+<member name="M:EQ12.StackAgent.EQ12.StackAgent.StackAgentScheduler.ScheduleBettingAnalyzer">
+ <summary>Schedule a recurring betting analyzer task</summary>
+</member>
+<member name="M:EQ12.StackAgent.EQ12.StackAgent.StackAgentScheduler.ScheduleGumroadSync">
+ <summary>Schedule a Gumroad revenue sync task</summary>
+</member>
+<member name="M:EQ12.StackAgent.EQ12.StackAgent.StackAgentScheduler.ScheduleBankrollHealthCheck">
+ <summary>Schedule a bankroll health check</summary>
+</member>
+</members>
+</doc>

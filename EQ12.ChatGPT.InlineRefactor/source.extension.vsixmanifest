@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="EQ12.ChatGPT.InlineRefactor.6f9f7c02-f7b3-4b3a-b0e1-1e8f98d5f7c1" Version="1.0.0" Language="en-US" Publisher="PivotPoint Global Holdings" />
+    <DisplayName>EQ12 — Send to ChatGPT (Inline Refactor)</DisplayName>
+    <Description xml:space="preserve">Right‑click selected code → Send to ChatGPT via the OpenAI Responses API. Returns a refactor or explanation and can replace the selection or insert below. Adds a Tools → Options page to store your Service API key and model.</Description>
+    <Tags>ChatGPT; OpenAI; Responses API; Refactor; VB; C#; EQ12</Tags>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0,18.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[17.0,18.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[17.0,18.0)" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" Version="[4.7.2,)" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="EQ12.ChatGPT.InlineRefactor" Path="EQ12.ChatGPT.InlineRefactor.pkgdef" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="EQ12.ChatGPT.InlineRefactor" Path="|%CurrentProject%|" />
+  </Assets>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+</PackageManifest>

@@ -1,0 +1,75 @@
+{
+    "manifest_version": 2,
+    "name": "EQ12 Data Pusher",
+    "version": "1.0.0",
+    "description": "Advanced data capture for sports betting odds, travel deals, and financial data. Pushes structured data to EQ12 automation hub with AI-powered analysis.",
+    "homepage_url": "https://github.com/Vibehigheric/edgegod-parlay",
+    "author": "EQ12 Development Team",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "contextMenus",
+        "clipboardWrite",
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*",
+        "https://*.ngrok-free.app/*",
+        "https://*.ngrok.io/*",
+        "https://api.the-odds-api.com/*",
+        "https://*.sportsbook.ag/*",
+        "https://*.draftkings.com/*",
+        "https://*.fanduel.com/*",
+        "https://*.mybookie.ag/*",
+        "https://*.betrivers.com/*",
+        "https://*.bovada.lv/*",
+        "https://*.expedia.com/*",
+        "https://*.booking.com/*",
+        "https://*.kayak.com/*",
+        "https://*.stubhub.com/*"
+    ],
+    "browser_action": {
+        "default_popup": "popup.html",
+        "default_title": "EQ12 Data Pusher - Capture & Push Data",
+        "default_icon": {
+            "16": "icons/icon-16.png",
+            "32": "icons/icon-32.png",
+            "48": "icons/icon-48.png",
+            "128": "icons/icon-128.png"
+        }
+    },
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "persistent": false
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "content.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "web_accessible_resources": [
+        "injected.js",
+        "eq12-overlay.html"
+    ],
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "eq12-data-pusher@vibehigheric.com",
+            "update_url": "https://yourdomain.com/firefox_updates.json"
+        }
+    },
+    "icons": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png"
+    }
+}

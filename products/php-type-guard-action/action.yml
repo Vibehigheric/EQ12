@@ -1,0 +1,225 @@
+name: 'PHP Type Guard'
+description: 'Enforce typed standards and fail PRs with type violations for professional PHP development'
+author: 'EQ12 Development Team'
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  type-coverage-threshold:
+    description: 'Minimum type coverage percentage required (0-100)'
+    required: false
+    default: '80'
+  
+  fail-on-mixed:
+    description: 'Fail if mixed types are detected'
+    required: false
+    default: 'true'
+    
+  fail-on-missing-return:
+    description: 'Fail if functions missing return type annotations'
+    required: false
+    default: 'true'
+    
+  fail-on-missing-param:
+    description: 'Fail if parameters missing type hints'
+    required: false
+    default: 'false'
+    
+  exclude-paths:
+    description: 'Comma-separated list of paths to exclude from analysis'
+    required: false
+    default: 'vendor/,tests/legacy/,tmp/'
+    
+  phpstan-level:
+    description: 'PHPStan analysis level (0-8)'
+    required: false
+    default: '6'
+    
+  custom-rules:
+    description: 'Path to custom type rules configuration'
+    required: false
+    default: ''
+    
+  generate-report:
+    description: 'Generate detailed HTML type coverage report'
+    required: false
+    default: 'true'
+    
+  comment-on-pr:
+    description: 'Add comment to PR with type analysis results'
+    required: false
+    default: 'true'
+    
+  github-token:
+    description: 'GitHub token for PR comments'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  type-coverage:
+    description: 'Calculated type coverage percentage'
+    
+  violations-count:
+    description: 'Number of type violations found'
+    
+  report-url:
+    description: 'URL to detailed HTML report (if generated)'
+    
+  passed:
+    description: 'Whether all type checks passed'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Setup PHP'
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+        tools: composer:v2
+
+    - name: 'Install Type Guard Dependencies'
+      shell: bash
+      run: |
+        composer global require eq12/php-type-guard
+        echo "$(composer global config bin-dir --absolute --quiet)" >> $GITHUB_PATH
+
+    - name: 'Create Type Guard Config'
+      shell: bash
+      run: |
+        cat > type-guard.json << 'EOF'
+        {
+          "type_coverage_threshold": ${{ inputs.type-coverage-threshold }},
+          "fail_on_mixed": ${{ inputs.fail-on-mixed }},
+          "fail_on_missing_return": ${{ inputs.fail-on-missing-return }},
+          "fail_on_missing_param": ${{ inputs.fail-on-missing-param }},
+          "exclude_paths": "${{ inputs.exclude-paths }}".split(","),
+          "phpstan_level": ${{ inputs.phpstan-level }},
+          "custom_rules": "${{ inputs.custom-rules }}",
+          "generate_report": ${{ inputs.generate-report }},
+          "project_root": "${{ github.workspace }}"
+        }
+        EOF
+
+    - name: 'Run PHP Type Analysis'
+      id: type-analysis
+      shell: bash
+      run: |
+        echo "🛡️ Running PHP Type Guard Analysis..."
+        
+        # Run the type analysis
+        php-type-guard analyze \
+          --config=type-guard.json \
+          --output-format=github-action \
+          --workspace="${{ github.workspace }}" \
+          2>&1 | tee type-guard-output.txt
+        
+        # Extract results
+        TYPE_COVERAGE=$(grep "Type Coverage:" type-guard-output.txt | grep -oE '[0-9]+\.[0-9]+%' | head -1 || echo "0%")
+        VIOLATIONS_COUNT=$(grep "Total Violations:" type-guard-output.txt | grep -oE '[0-9]+' | head -1 || echo "0")
+        ANALYSIS_PASSED=$(grep "Analysis Result:" type-guard-output.txt | grep -q "PASSED" && echo "true" || echo "false")
+        
+        echo "type-coverage=$TYPE_COVERAGE" >> $GITHUB_OUTPUT
+        echo "violations-count=$VIOLATIONS_COUNT" >> $GITHUB_OUTPUT  
+        echo "passed=$ANALYSIS_PASSED" >> $GITHUB_OUTPUT
+        
+        # Generate HTML report if requested
+        if [[ "${{ inputs.generate-report }}" == "true" ]]; then
+          php-type-guard report \
+            --config=type-guard.json \
+            --format=html \
+            --output=type-coverage-report.html
+          
+          echo "report-url=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "::notice title=Type Coverage::Current type coverage: $TYPE_COVERAGE"
+        echo "::notice title=Violations::Found $VIOLATIONS_COUNT type violations"
+
+    - name: 'Upload Type Coverage Report'
+      if: inputs.generate-report == 'true'
+      uses: actions/upload-artifact@v3
+      with:
+        name: type-coverage-report
+        path: type-coverage-report.html
+        retention-days: 30
+
+    - name: 'Comment on PR'
+      if: inputs.comment-on-pr == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          
+          // Read analysis output
+          const output = fs.readFileSync('type-guard-output.txt', 'utf8');
+          const typeCoverage = '${{ steps.type-analysis.outputs.type-coverage }}';
+          const violationsCount = '${{ steps.type-analysis.outputs.violations-count }}';
+          const passed = '${{ steps.type-analysis.outputs.passed }}' === 'true';
+          
+          // Create comment content
+          const statusIcon = passed ? '✅' : '❌';
+          const statusText = passed ? 'PASSED' : 'FAILED';
+          
+          let comment = `## ${statusIcon} PHP Type Guard Analysis - ${statusText}\n\n`;
+          comment += `**Type Coverage:** ${typeCoverage}\n`;
+          comment += `**Violations Found:** ${violationsCount}\n\n`;
+          
+          if (!passed) {
+            comment += `### 🚨 Type Violations\n\n`;
+            comment += `This PR introduces type safety violations that must be fixed:\n\n`;
+            
+            // Extract specific violations from output
+            const violations = output.match(/VIOLATION:.*$/gm) || [];
+            violations.slice(0, 10).forEach(violation => {
+              comment += `- ${violation.replace('VIOLATION: ', '')}\n`;
+            });
+            
+            if (violations.length > 10) {
+              comment += `\n*...and ${violations.length - 10} more violations*\n`;
+            }
+            
+            comment += `\n### 📝 How to Fix\n\n`;
+            comment += `1. Add missing type hints to function parameters\n`;
+            comment += `2. Add return type annotations to all functions\n`;
+            comment += `3. Replace \`mixed\` types with specific types where possible\n`;
+            comment += `4. Add PHPDoc array shapes for complex arrays\n`;
+            comment += `5. Run \`composer cs:fix\` to auto-fix formatting issues\n\n`;
+          } else {
+            comment += `### 🎉 All Type Checks Passed!\n\n`;
+            comment += `This PR maintains excellent type safety standards.\n\n`;
+          }
+          
+          comment += `### 📊 Analysis Details\n\n`;
+          comment += `- **Threshold:** ${{ inputs.type-coverage-threshold }}%\n`;
+          comment += `- **PHPStan Level:** ${{ inputs.phpstan-level }}\n`;
+          comment += `- **Fail on Mixed:** ${{ inputs.fail-on-mixed }}\n`;
+          comment += `- **Fail on Missing Returns:** ${{ inputs.fail-on-missing-return }}\n\n`;
+          
+          if ('${{ inputs.generate-report }}' === 'true') {
+            comment += `📋 [View Detailed Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n`;
+          }
+          
+          comment += `---\n*Analysis powered by [PHP Type Guard](https://github.com/eq12/php-type-guard-action)*`;
+          
+          // Post comment
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+    - name: 'Set Status Check'
+      shell: bash
+      run: |
+        if [[ "${{ steps.type-analysis.outputs.passed }}" == "false" ]]; then
+          echo "❌ Type Guard analysis failed. Found ${{ steps.type-analysis.outputs.violations-count }} violations."
+          echo "Type coverage: ${{ steps.type-analysis.outputs.type-coverage }} (required: ${{ inputs.type-coverage-threshold }}%)"
+          exit 1
+        else
+          echo "✅ Type Guard analysis passed! Type coverage: ${{ steps.type-analysis.outputs.type-coverage }}"
+          exit 0
+        fi

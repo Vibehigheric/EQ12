@@ -1,0 +1,18 @@
+{
+   "app": {
+      "launch": {
+         "web_url": "http://rover.ebay.com/rover/1/711-146830-30130-0/4"
+      },
+      "urls": [ "http://anywhere.ebay.com/" ]
+   },
+   "description": "Buy and sell electronics, cars, fashion apparel, and everything else on eBay, the world's online marketplace",
+   "icons": {
+      "128": "ebay128.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkJf+iQBDPoRoD42RXu2NC4gcIQlgsGUEDRISBbmhw20vooI7CoqurLi6N9mMXz9dqT1yqnC8Bp3gJP/sqBQwjJii3V0MY5yeDumloMfq0hD3zFy0wxkUxtxagKSN8E/FuunaR3p/ENTqMWMg6HLAu4wcG9Ji1qedv5zexGg8k6wIDAQAB",
+   "manifest_version": 2,
+   "name": "eBay",
+   "permissions": [ "notifications" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.0.0"
+}

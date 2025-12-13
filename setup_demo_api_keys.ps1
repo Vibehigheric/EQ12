@@ -1,0 +1,47 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 API Key Testing Setup (Temporary)
+# This script sets up temporary environment variables for testing purposes
+
+Write-Host " EQ12 API Key Testing Setup" -ForegroundColor Green
+Write-Host "=============================" -ForegroundColor Green
+Write-Host ""
+
+Write-Host " CRITICAL: Setting up missing API keys..." -ForegroundColor Yellow
+Write-Host ""
+
+# SPORTSDATA_API_KEY - For sports statistics
+Write-Host " Setting SPORTSDATA_API_KEY..." -ForegroundColor Cyan
+$env:SPORTSDATA_API_KEY = "demo_key_12345_sportsdata_testing"
+Write-Host "    SPORTSDATA_API_KEY = $($env:SPORTSDATA_API_KEY.Substring(0,20))..." -ForegroundColor Green
+
+# TWITTER_API_KEY - For social intelligence
+Write-Host " Setting TWITTER_API_KEY..." -ForegroundColor Cyan
+$env:TWITTER_API_KEY = "demo_bearer_token_12345_twitter_testing"
+Write-Host "    TWITTER_API_KEY = $($env:TWITTER_API_KEY.Substring(0,20))..." -ForegroundColor Green
+
+# OPENWEATHER_API_KEY - For weather data
+Write-Host " Setting OPENWEATHER_API_KEY..." -ForegroundColor Cyan
+$env:OPENWEATHER_API_KEY = "demo_weather_key_12345_openweather"
+Write-Host "    OPENWEATHER_API_KEY = $($env:OPENWEATHER_API_KEY.Substring(0,20))..." -ForegroundColor Green
+
+# ESPN_API_KEY - For sports data
+Write-Host " Setting ESPN_API_KEY..." -ForegroundColor Cyan
+$env:ESPN_API_KEY = "demo_espn_key_12345_testing"
+Write-Host "    ESPN_API_KEY = $($env:ESPN_API_KEY.Substring(0,20))..." -ForegroundColor Green
+
+Write-Host ""
+Write-Host " Temporary API keys configured!" -ForegroundColor Green
+Write-Host ""
+Write-Host " IMPORTANT NOTES:" -ForegroundColor Red
+Write-Host "- These are DEMO keys and will not work with real APIs" -ForegroundColor Yellow
+Write-Host "- Use them only for testing the EQ12 system structure" -ForegroundColor Yellow
+Write-Host "- Get real API keys from the official websites for production use" -ForegroundColor Yellow
+Write-Host ""
+Write-Host " NEXT STEPS:" -ForegroundColor Cyan
+Write-Host "1. Test the system: python eq12_api_key_manager.py --test-all --use-test-keys" -ForegroundColor White
+Write-Host "2. Run social intelligence: python eq12_social_orchestrator.py" -ForegroundColor White
+Write-Host "3. Get real API keys for production from the setup guide" -ForegroundColor White
+Write-Host ""
+Write-Host " To get real API keys, run: python eq12_api_setup_assistant.py" -ForegroundColor Cyan

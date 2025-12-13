@@ -1,0 +1,4 @@
+# SPORTSBOOK API PINNING
+34.195.82.92 api.sportsdata.io
+34.239.224.249 api.the-odds-api.com
+3.211.234.58 api.draftkings.com

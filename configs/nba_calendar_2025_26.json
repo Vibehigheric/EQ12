@@ -1,0 +1,171 @@
+{
+  "generated_at": "2025-10-04T15:31:15.865815",
+  "source": "NBA.com Integration",
+  "season": "2025-26",
+  "events_count": 10,
+  "events": [
+    {
+      "event_id": "nba_20251017_preseason",
+      "title": "NBA Preseason Ends",
+      "date": "2025-10-17T00:00:00",
+      "category": "preseason",
+      "description": "End of 2025 NBA Preseason games",
+      "priority": "low",
+      "automation_triggers": [
+        "eq12_governance_assistant"
+      ],
+      "betting_relevance": false,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20251021_regular_season",
+      "title": "NBA Season Opens",
+      "date": "2025-10-21T00:00:00",
+      "category": "regular_season",
+      "description": "Start of 2025-26 NBA Regular Season - Rockets at Thunder (7:30 ET), Warriors at Lakers (10:00 ET)",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system",
+        "eq12_automation_bridge",
+        "eq12_godstack_orchestrator"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20251031_nba_cup",
+      "title": "Emirates NBA Cup Begins",
+      "date": "2025-10-31T00:00:00",
+      "category": "nba_cup",
+      "description": "Group Play tips off - First NBA Cup games on Prime Video",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system",
+        "eq12_automation_bridge",
+        "eq12_godstack_orchestrator",
+        "eq12_nba_cup_tracker"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20251128_nba_cup",
+      "title": "NBA Cup Group Play Ends",
+      "date": "2025-11-28T00:00:00",
+      "category": "nba_cup",
+      "description": "Conclusion of Emirates NBA Cup Group Play",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system",
+        "eq12_nba_cup_tracker"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20251209_nba_cup",
+      "title": "NBA Cup Quarterfinals",
+      "date": "2025-12-09T00:00:00",
+      "category": "nba_cup",
+      "description": "Emirates NBA Cup Knockout Rounds begin on Prime Video",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system",
+        "eq12_nba_cup_tracker"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20251216_nba_cup",
+      "title": "NBA Cup Championship",
+      "date": "2025-12-16T00:00:00",
+      "category": "nba_cup",
+      "description": "Emirates NBA Cup Championship in Las Vegas, NV on Prime Video",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system",
+        "eq12_nba_cup_tracker"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20251225_regular_season",
+      "title": "Christmas Day Games",
+      "date": "2025-12-25T00:00:00",
+      "category": "regular_season",
+      "description": "5 games: Cavs at Knicks, Spurs at Thunder, Mavs at Warriors, Rockets at Lakers, Wolves at Nuggets",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20260205_regular_season",
+      "title": "Trade Deadline",
+      "date": "2026-02-05T00:00:00",
+      "category": "regular_season",
+      "description": "NBA Trade Deadline at 3 PM ET",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system",
+        "eq12_roster_analytics"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20260213_all_star",
+      "title": "All-Star Weekend",
+      "date": "2026-02-13T00:00:00",
+      "category": "all_star",
+      "description": "2026 NBA All-Star in Los Angeles, CA",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant",
+        "eq12_mega_parlay_builder",
+        "eq12_historical_odds_engine",
+        "eq12_enhanced_daily_parlay_system"
+      ],
+      "betting_relevance": true,
+      "source": "NBA.com"
+    },
+    {
+      "event_id": "nba_20260412_regular_season",
+      "title": "Regular Season Ends",
+      "date": "2026-04-12T00:00:00",
+      "category": "regular_season",
+      "description": "End of 2025-26 NBA Regular Season - All 30 teams play",
+      "priority": "high",
+      "automation_triggers": [
+        "eq12_governance_assistant"
+      ],
+      "betting_relevance": false,
+      "source": "NBA.com"
+    }
+  ]
+}

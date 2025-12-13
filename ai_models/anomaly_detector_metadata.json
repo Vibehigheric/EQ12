@@ -1,0 +1,14 @@
+{
+  "model_type": "anomaly_detector",
+  "training_samples": 1050,
+  "normal_accuracy": 0.95,
+  "anomaly_accuracy": 1.0,
+  "features": [
+    "cpu_usage",
+    "ram_usage",
+    "api_latency",
+    "error_rate"
+  ],
+  "trained_at": "2025-11-07T20:20:10.798484",
+  "epochs": 50
+}

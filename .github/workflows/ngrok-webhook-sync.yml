@@ -1,0 +1,451 @@
+name: "Ngrok Webhook Sync & Tunnel Logging"
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Force webhook sync even if URLs unchanged'
+        required: false
+        default: false
+        type: boolean
+      create_discussion:
+        description: 'Create new discussion thread'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "*/10 * * * *"  # every 10 minutes
+
+permissions:
+  contents: read
+  discussions: write
+  pull-requests: write
+  issues: write
+
+env:
+  DISCUSSION_TITLE: "EQ12 Ngrok Tunnel Log"
+  GOVERNANCE_LABEL: "infra"
+
+jobs:
+  sync-webhooks:
+    runs-on: self-hosted   # must run on EQ12 (local ngrok API)
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check ngrok availability
+        id: ngrok-check
+        run: |
+          if curl -s --connect-timeout 5 http://127.0.0.1:4040/api/tunnels > /dev/null; then
+            echo "available=true" >> $GITHUB_OUTPUT
+            echo "✅ Ngrok API accessible"
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "❌ Ngrok API not accessible"
+          fi
+
+      - name: Fetch ngrok tunnels
+        if: steps.ngrok-check.outputs.available == 'true'
+        id: tunnels
+        run: |
+          curl -s http://127.0.0.1:4040/api/tunnels > tunnels.json
+          
+          # Extract primary HTTPS URL and all tunnel info
+          PRIMARY_URL=$(jq -r '.tunnels[] | select(.proto=="https") | .public_url' tunnels.json | head -n1)
+          TUNNEL_COUNT=$(jq '.tunnels | length' tunnels.json)
+          
+          if [ -z "$PRIMARY_URL" ] || [ "$PRIMARY_URL" = "null" ]; then
+            echo "primary_url=" >> $GITHUB_OUTPUT
+            echo "tunnel_count=0" >> $GITHUB_OUTPUT
+            echo "⚠️ No HTTPS tunnels found"
+          else
+            echo "primary_url=$PRIMARY_URL" >> $GITHUB_OUTPUT
+            echo "tunnel_count=$TUNNEL_COUNT" >> $GITHUB_OUTPUT
+            echo "✅ Found $TUNNEL_COUNT tunnels, primary: $PRIMARY_URL"
+          fi
+          
+          # Create tunnel summary for logging
+          TUNNEL_SUMMARY=$(jq -r '.tunnels[] | "• **\(.name)**: `\(.public_url)` → `\(.config.addr)`"' tunnels.json)
+          echo "tunnel_summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$TUNNEL_SUMMARY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check if URLs changed
+        if: steps.tunnels.outputs.primary_url != ''
+        id: url-check
+        run: |
+          PRIMARY_URL="${{ steps.tunnels.outputs.primary_url }}"
+          
+          # Check if we have a previous URL stored
+          if [ -f "/tmp/eq12_last_ngrok_url.txt" ]; then
+            LAST_URL=$(cat /tmp/eq12_last_ngrok_url.txt)
+            if [ "$PRIMARY_URL" = "$LAST_URL" ] && [ "${{ github.event.inputs.force_sync }}" != "true" ]; then
+              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "ℹ️ URL unchanged: $PRIMARY_URL"
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "🔄 URL changed from $LAST_URL to $PRIMARY_URL"
+            fi
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "🆕 First run, treating as changed"
+          fi
+          
+          # Store current URL for next run
+          echo "$PRIMARY_URL" > /tmp/eq12_last_ngrok_url.txt
+
+      - name: Update GitHub webhooks
+        if: steps.tunnels.outputs.primary_url != '' && (steps.url-check.outputs.changed == 'true' || github.event.inputs.force_sync == 'true')
+        id: webhook-update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PRIMARY_URL="${{ steps.tunnels.outputs.primary_url }}"
+          WEBHOOK_URL="${PRIMARY_URL}/webhook"
+          REPO="${{ github.repository }}"
+          
+          echo "🔄 Updating webhooks to: $WEBHOOK_URL"
+          
+          # Get all webhooks
+          gh api repos/$REPO/hooks > hooks.json
+          HOOK_COUNT=$(jq length hooks.json)
+          
+          if [ "$HOOK_COUNT" -eq 0 ]; then
+            echo "ℹ️ No webhooks found in repository"
+            echo "updated_count=0" >> $GITHUB_OUTPUT
+            echo "status=no_webhooks" >> $GITHUB_OUTPUT
+          else
+            # Update each webhook
+            UPDATED=0
+            FAILED=0
+            
+            for HOOK_ID in $(jq -r '.[].id' hooks.json); do
+              CURRENT_URL=$(jq -r --arg id "$HOOK_ID" '.[] | select(.id==($id|tonumber)) | .config.url' hooks.json)
+              
+              if [ "$CURRENT_URL" != "$WEBHOOK_URL" ]; then
+                echo "🔄 Updating webhook ID: $HOOK_ID"
+                if gh api repos/$REPO/hooks/$HOOK_ID \
+                  -X PATCH \
+                  -F "config.url=$WEBHOOK_URL" \
+                  -F "config.content_type=json" \
+                  -F "config.insecure_ssl=0" > /dev/null 2>&1; then
+                  UPDATED=$((UPDATED + 1))
+                else
+                  echo "❌ Failed to update webhook $HOOK_ID"
+                  FAILED=$((FAILED + 1))
+                fi
+              else
+                echo "✅ Webhook ID $HOOK_ID already up to date"
+              fi
+            done
+            
+            echo "updated_count=$UPDATED" >> $GITHUB_OUTPUT
+            echo "failed_count=$FAILED" >> $GITHUB_OUTPUT
+            
+            if [ "$FAILED" -eq 0 ]; then
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "✅ Successfully updated $UPDATED webhook(s)"
+            else
+              echo "status=partial" >> $GITHUB_OUTPUT
+              echo "⚠️ Updated $UPDATED, failed $FAILED webhook(s)"
+            fi
+          fi
+
+      - name: Send Telegram notification
+        if: steps.tunnels.outputs.primary_url != '' && (steps.url-check.outputs.changed == 'true' || github.event.inputs.force_sync == 'true')
+        run: |
+          TG_TOKEN="${{ secrets.TG_TOKEN }}"
+          TG_CHAT_ID="${{ secrets.TG_CHAT_ID }}"
+          
+          if [[ -n "$TG_TOKEN" && -n "$TG_CHAT_ID" ]]; then
+            PRIMARY_URL="${{ steps.tunnels.outputs.primary_url }}"
+            UPDATED="${{ steps.webhook-update.outputs.updated_count || '0' }}"
+            FAILED="${{ steps.webhook-update.outputs.failed_count || '0' }}"
+            TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
+            
+            # Status emoji based on webhook update results
+            if [ "${{ steps.webhook-update.outputs.status }}" = "success" ]; then
+              STATUS_EMOJI="✅"
+              STATUS_TEXT="All webhooks updated successfully"
+            elif [ "${{ steps.webhook-update.outputs.status }}" = "partial" ]; then
+              STATUS_EMOJI="⚠️"
+              STATUS_TEXT="Some webhook updates failed"
+            elif [ "${{ steps.webhook-update.outputs.status }}" = "no_webhooks" ]; then
+              STATUS_EMOJI="ℹ️"
+              STATUS_TEXT="No webhooks to update"
+            else
+              STATUS_EMOJI="❌"
+              STATUS_TEXT="Webhook update failed"
+            fi
+            
+            MESSAGE="🌐 *EQ12 Ngrok Webhook Sync*
+
+📅 *Time*: \`$TIMESTAMP\`
+🔗 *Primary URL*: \`$PRIMARY_URL\`
+🔄 *Webhooks*: $UPDATED updated, $FAILED failed
+$STATUS_EMOJI *Status*: $STATUS_TEXT
+
+Quick Access:
+• 📊 Dashboard: $PRIMARY_URL
+• 🔌 API: $PRIMARY_URL/api
+• 📈 Metrics: $PRIMARY_URL/metrics
+• 🪝 Webhook: $PRIMARY_URL/webhook
+
+EQ12 GODSTACK ready for secure access!"
+            
+            curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"chat_id\": \"$TG_CHAT_ID\",
+                \"text\": \"$MESSAGE\",
+                \"parse_mode\": \"Markdown\",
+                \"disable_web_page_preview\": true
+              }"
+            echo "📲 Telegram notification sent"
+          else
+            echo "⚠️ Telegram not configured (TG_TOKEN/TG_CHAT_ID missing)"
+          fi
+
+      - name: Find or create Ngrok Tunnel Log discussion
+        if: steps.ngrok-check.outputs.available == 'true'
+        id: discussion
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          REPO_OWNER="${REPO%/*}"
+          REPO_NAME="${REPO#*/}"
+          
+          echo "🔍 Looking for existing Ngrok Tunnel Log discussion..."
+          
+          # Search for existing discussion
+          DISCUSSION_ID=$(gh api graphql -F query='
+            query($owner: String!, $name: String!) {
+              repository(owner: $owner, name: $name) {
+                discussions(first: 50, states: OPEN) {
+                  nodes {
+                    id
+                    title
+                    url
+                    labels(first: 10) {
+                      nodes { name }
+                    }
+                  }
+                }
+              }
+            }' \
+            -F owner="$REPO_OWNER" \
+            -F name="$REPO_NAME" \
+            --jq '.data.repository.discussions.nodes[] | select(.title=="'"$DISCUSSION_TITLE"'") | .id')
+          
+          if [ -n "$DISCUSSION_ID" ]; then
+            echo "discussion_id=$DISCUSSION_ID" >> $GITHUB_OUTPUT
+            echo "created=false" >> $GITHUB_OUTPUT
+            echo "✅ Found existing discussion: $DISCUSSION_ID"
+          elif [ "${{ github.event.inputs.create_discussion }}" = "true" ] || [ "${{ steps.url-check.outputs.changed }}" = "true" ]; then
+            echo "📝 Creating new Ngrok Tunnel Log discussion..."
+            
+            # Get Governance category ID
+            GOVERNANCE_CAT_ID=$(gh api graphql -F query='
+              query($owner: String!, $name: String!) {
+                repository(owner: $owner, name: $name) {
+                  discussionCategories(first: 20) {
+                    nodes { id name }
+                  }
+                }
+              }' \
+              -F owner="$REPO_OWNER" \
+              -F name="$REPO_NAME" \
+              --jq '.data.repository.discussionCategories.nodes[] | select(.name=="Governance") | .id')
+            
+            if [ -z "$GOVERNANCE_CAT_ID" ]; then
+              # Fallback to General category
+              GOVERNANCE_CAT_ID=$(gh api graphql -F query='
+                query($owner: String!, $name: String!) {
+                  repository(owner: $owner, name: $name) {
+                    discussionCategories(first: 20) {
+                      nodes { id name }
+                    }
+                  }
+                }' \
+                -F owner="$REPO_OWNER" \
+                -F name="$REPO_NAME" \
+                --jq '.data.repository.discussionCategories.nodes[] | select(.name=="General") | .id')
+            fi
+            
+            REPO_NODE_ID=$(gh api repos/$REPO --jq '.node_id')
+            
+            INITIAL_BODY="# 📜 EQ12 Ngrok Tunnel Continuous Log
+
+This is a **continuous audit log** of EQ12 ngrok tunnel changes and webhook synchronization.
+
+## Purpose
+- 🔍 **Audit Trail**: Track all tunnel URL changes for compliance
+- 🔄 **Webhook Sync**: Monitor GitHub webhook updates  
+- 📱 **Integration Status**: Verify Telegram and other integrations
+- 🌐 **Access Points**: Current tunnel URLs for secure access
+
+## Labels
+- \`$GOVERNANCE_LABEL\` - Infrastructure governance tracking
+- \`ngrok\` - Tunnel management
+- \`automation\` - Automated workflow updates
+
+
+**Latest Update**: $(date '+%Y-%m-%d %H:%M:%S UTC')
+**Status**: Log initialized
+**Environment**: EQ12 GODSTACK
+
+___
+*This discussion is automatically updated every 10 minutes by the Ngrok Webhook Sync workflow.*"
+            
+            # Create discussion
+            DISCUSSION_RESULT=$(gh api graphql -F query='
+              mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                createDiscussion(input: {
+                  repositoryId: $repositoryId,
+                  categoryId: $categoryId,
+                  title: $title,
+                  body: $body
+                }) {
+                  discussion {
+                    id
+                    url
+                  }
+                }
+              }' \
+              -F repositoryId="$REPO_NODE_ID" \
+              -F categoryId="$GOVERNANCE_CAT_ID" \
+              -F title="$DISCUSSION_TITLE" \
+              -F body="$INITIAL_BODY")
+            
+            DISCUSSION_ID=$(echo "$DISCUSSION_RESULT" | jq -r '.data.createDiscussion.discussion.id')
+            DISCUSSION_URL=$(echo "$DISCUSSION_RESULT" | jq -r '.data.createDiscussion.discussion.url')
+            
+            if [ -n "$DISCUSSION_ID" ] && [ "$DISCUSSION_ID" != "null" ]; then
+              echo "discussion_id=$DISCUSSION_ID" >> $GITHUB_OUTPUT
+              echo "created=true" >> $GITHUB_OUTPUT
+              echo "✅ Created new discussion: $DISCUSSION_URL"
+            else
+              echo "❌ Failed to create discussion"
+              exit 1
+            fi
+          else
+            echo "ℹ️ No discussion found and creation not requested"
+            echo "discussion_id=" >> $GITHUB_OUTPUT
+            echo "created=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Append update to discussion
+        if: steps.discussion.outputs.discussion_id != '' && (steps.url-check.outputs.changed == 'true' || github.event.inputs.force_sync == 'true')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DISCUSSION_ID="${{ steps.discussion.outputs.discussion_id }}"
+          TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
+          PRIMARY_URL="${{ steps.tunnels.outputs.primary_url }}"
+          TUNNEL_COUNT="${{ steps.tunnels.outputs.tunnel_count }}"
+          UPDATED_COUNT="${{ steps.webhook-update.outputs.updated_count || '0' }}"
+          FAILED_COUNT="${{ steps.webhook-update.outputs.failed_count || '0' }}"
+          
+          # Create status badge
+          if [ "${{ steps.webhook-update.outputs.status }}" = "success" ]; then
+            STATUS_BADGE="🟢 **SUCCESS**"
+          elif [ "${{ steps.webhook-update.outputs.status }}" = "partial" ]; then
+            STATUS_BADGE="🟡 **PARTIAL**"
+          elif [ "${{ steps.webhook-update.outputs.status }}" = "no_webhooks" ]; then
+            STATUS_BADGE="🔵 **NO WEBHOOKS**"
+          else
+            STATUS_BADGE="🔴 **FAILED**"
+          fi
+          
+          # Create tunnel table
+          TUNNEL_TABLE="| Service | Public URL | Local Address |
+|---------|------------|---------------|"
+          
+          if [ -n "${{ steps.tunnels.outputs.tunnel_summary }}" ]; then
+            TUNNEL_ROWS=$(echo '${{ steps.tunnels.outputs.tunnel_summary }}' | sed 's/• \*\*\([^*]*\)\*\*: `\([^`]*\)` → `\([^`]*\)`/| \1 | [\2](\2) | `\3` |/g')
+            TUNNEL_TABLE="$TUNNEL_TABLE
+$TUNNEL_ROWS"
+          else
+            TUNNEL_TABLE="$TUNNEL_TABLE
+| None | No tunnels active | N/A |"
+          fi
+          
+          COMMENT_BODY="## 🕒 $TIMESTAMP
+
+$STATUS_BADGE | **Tunnels**: $TUNNEL_COUNT | **Webhooks**: $UPDATED_COUNT updated, $FAILED_COUNT failed
+
+### 🌐 Active Tunnels
+$TUNNEL_TABLE
+
+### 🔧 Integration Status
+- **Primary URL**: \`$PRIMARY_URL\`
+- **GitHub Webhooks**: $UPDATED_COUNT repositories synchronized
+- **Telegram Notifications**: $( [ -n '${{ secrets.TG_TOKEN }}' ] && echo 'Sent' || echo 'Not configured' )
+- **Workflow Trigger**: ${{ github.event_name }}
+
+### 📊 Quick Access
+- 📊 [EQ12 Dashboard]($PRIMARY_URL)
+- 🔌 [API Endpoints]($PRIMARY_URL/api)
+- 📈 [Prometheus Metrics]($PRIMARY_URL/metrics)
+- 🪝 [Webhooks Endpoint]($PRIMARY_URL/webhook)
+
+___"
+          
+          # Add comment to discussion
+          gh api graphql -F query='
+            mutation($discussionId: ID!, $body: String!) {
+              addDiscussionComment(input: {
+                discussionId: $discussionId,
+                body: $body
+              }) {
+                comment {
+                  id
+                  url
+                }
+              }
+            }' \
+            -F discussionId="$DISCUSSION_ID" \
+            -F body="$COMMENT_BODY"
+          
+          echo "✅ Appended update to Ngrok Tunnel Log discussion"
+
+      - name: Add governance labels to discussion
+        if: steps.discussion.outputs.discussion_id != '' && steps.discussion.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Note: GitHub Discussions API doesn't currently support labels via GraphQL
+          # This is a placeholder for when the feature becomes available
+          echo "ℹ️ Discussion labels not yet supported via API"
+          echo "   Manually add labels: $GOVERNANCE_LABEL, ngrok, automation"
+
+      - name: Log sync summary
+        run: |
+          echo "📊 EQ12 Ngrok Webhook Sync Summary:"
+          echo "  🌐 Ngrok Available: ${{ steps.ngrok-check.outputs.available }}"
+          echo "  🔗 Primary URL: ${{ steps.tunnels.outputs.primary_url || 'N/A' }}"
+          echo "  🔄 URL Changed: ${{ steps.url-check.outputs.changed || 'N/A' }}"
+          echo "  🪝 Webhooks Updated: ${{ steps.webhook-update.outputs.updated_count || '0' }}"
+          echo "  ❌ Webhook Failures: ${{ steps.webhook-update.outputs.failed_count || '0' }}"
+          echo "  💬 Discussion: ${{ steps.discussion.outputs.discussion_id || 'Not found/created' }}"
+          echo "  📱 Telegram: $([ -n '${{ secrets.TG_TOKEN }}' ] && echo 'Configured' || echo 'Not configured')"
+          echo "  ⏰ Next sync: $(date -d '+10 minutes' '+%H:%M:%S' 2>/dev/null || echo 'Next scheduled run')"
+
+  # Cleanup job to manage old tunnel data
+  cleanup-old-data:
+    runs-on: self-hosted
+    if: github.event_name == 'schedule'
+    needs: sync-webhooks
+    
+    steps:
+      - name: Clean up temporary files
+        run: |
+          # Clean up old tunnel data files (keep last 7 days)
+          find /tmp -name "eq12_last_ngrok_url.txt" -mtime +7 -delete 2>/dev/null || true
+          find /tmp -name "tunnels_*.json" -mtime +1 -delete 2>/dev/null || true
+          echo "🧹 Cleaned up old tunnel data files"

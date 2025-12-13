@@ -1,0 +1,38 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Automated Code Quality & Formatting Script (PowerShell)
+# This script runs multiple code quality tools in sequence for comprehensive fixes
+
+$ErrorActionPreference = "Stop"
+
+Write-Host "🚀 EQ12 Code Quality Automation Starting..." -ForegroundColor Green
+
+# Install if missing (assumes pip + python)
+Write-Host "📦 Installing/updating required packages..." -ForegroundColor Yellow
+pip install ruff black autoflake autopep8 isort flake8
+
+Write-Host "🔧 Running ruff fixes..." -ForegroundColor Cyan
+ruff check --fix .
+
+Write-Host "🎨 Running black formatter..." -ForegroundColor Magenta
+black .
+
+Write-Host "📋 Running isort (sort imports)..." -ForegroundColor Blue
+isort .
+
+Write-Host "🧹 Running autoflake to remove unused imports/vars (run carefully)..." -ForegroundColor Yellow
+autoflake --in-place --remove-all-unused-imports --remove-unused-variables -r .
+
+Write-Host "⚡ Running autopep8 aggressive pass..." -ForegroundColor Red
+autopep8 --in-place --aggressive --aggressive -r .
+
+Write-Host "📊 Final quality check with flake8..." -ForegroundColor DarkGreen
+try {
+    python -m flake8 scripts/ tests/ --statistics --max-line-length=100
+} catch {
+    Write-Host "⚠️ Some issues remain - see output above" -ForegroundColor Yellow
+}
+
+Write-Host "✅ Done. Run: git add -A && git commit -m 'style: autoformat + autofix" (inspect diff first)." -ForegroundColor Green
+Write-Host "🎯 EQ12 Code Quality Automation Complete!" -ForegroundColor Green

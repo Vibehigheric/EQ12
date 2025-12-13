@@ -1,0 +1,37 @@
+name: EQ12 Cost Guard
+description: Monitor and control GitHub Actions usage costs with intelligent analysis
+author: EQ12
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  token:
+    description: "GitHub token with appropriate permissions"
+    required: true
+  cost-threshold:
+    description: "Maximum cost threshold in USD (default: 10.00)"
+    required: false
+    default: "10.00"
+  analysis-level:
+    description: "Analysis depth: basic, standard, premium (default: standard)"
+    required: false
+    default: "standard"
+  eq12-api-key:
+    description: "EQ12 API key for premium analysis features"
+    required: false
+  notification-webhook:
+    description: "Webhook URL for cost alerts"
+    required: false
+
+outputs:
+  cost-analysis:
+    description: "Detailed cost analysis report"
+  recommendations:
+    description: "Cost optimization recommendations"
+  projected-savings:
+    description: "Projected monthly savings"
+
+runs:
+  using: "node16"
+  main: "dist/index.js"

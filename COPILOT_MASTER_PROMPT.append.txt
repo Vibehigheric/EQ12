@@ -1,0 +1,11 @@
+Additional EQ12 directives:
+
+- Always assume EQ12 repositories live on GitHub.
+- All commits must be signed (use `git commit -S` and ensure `commit.gpgsign` is true).
+- Generated or updated CI workflow `.github/workflows/eq12-ci.yml` must:
+  - Run `pytest` (Python tests) and `Pester` (PowerShell tests).
+  - Verify the last commit signature (import public keys and check `git log --show-signature -1`).
+  - Build the dashboard snapshot on a nightly schedule and publish the JSON snapshot to `logs/dashboard_snapshot.json`.
+- Generated `.devcontainer/devcontainer.json` must include Python 3.12, PowerShell (pwsh), GitHub CLI (`gh`), `gpg`, Playwright and browsers; `postCreateCommand` should install `requirements.txt` and (optionally) clone/install user dotfiles from `DOTFILES_REPO` environment variable.
+- Always read secrets from Codespaces/GitHub secrets in CI or Codespaces runtime via environment variables: `ODDS_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+- Ensure parity between Windows (PowerShell) and Codespaces (Linux pwsh): scripts should detect `pwsh` vs `powershell.exe` and use `os.environ`/`$env:` for secrets.

@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------
+  # CORE SERVICES (EQ12 Manager)
+  # ---------------------------------------------------------
+  orchestrator:
+    image: eq12/core:latest
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    command: python src/core/orchestrator.py --daemon
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          memory: 256M
+      restart_policy:
+        condition: any
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+
+  parlay-engine:
+    image: eq12/parlay-engine:latest
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          memory: 512M
+    depends_on:
+      - redis
+
+  risk-engine:
+    image: eq12/risk-engine:latest
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          memory: 256M
+
+  # ---------------------------------------------------------
+  # INFERENCE SERVICES (Pi + TPU)
+  # ---------------------------------------------------------
+  prop-tensor:
+    image: eq12/prop-tensor:latest
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == pi
+      resources:
+        limits:
+          memory: 2G  # Pi has 8GB, give it room
+    environment:
+      - USE_TPU=true
+
+  # ---------------------------------------------------------
+  # HEAVY COMPUTE & DATA (M70q Ubuntu)
+  # ---------------------------------------------------------
+  heavy-scraper:
+    image: eq12/scraper:latest
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == worker
+      resources:
+        limits:
+          memory: 4G
+    environment:
+      - MAX_THREADS=16
+
+  database:
+    image: postgres:15-alpine
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == worker
+      resources:
+        limits:
+          memory: 2G
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=eq12_secret
+
+  redis:
+    image: redis:alpine
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == worker
+
+  # ---------------------------------------------------------
+  # VISUALIZATION (TCL TV - via Web Server)
+  # ---------------------------------------------------------
+  dashboard:
+    image: eq12/dashboard:latest
+    dns:
+      - 192.168.100.1
+      - 1.1.1.1
+    ports:
+      - "3000:3000"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  db-data:
+
+networks:
+  default:
+    driver: overlay
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+    attachable: true

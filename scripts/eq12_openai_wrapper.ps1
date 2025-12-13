@@ -1,0 +1,502 @@
+#!/usr/bin/env powershell
+<#
+EQ12 OpenAI Key Wrapper - PowerShell Management Interface
+Professional PowerShell wrapper for OpenAI API key management and optimization.
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("AddKey", "TestAll", "Health", "Rotate", "Monitor", "Cache", "Gateway", "Status")]
+    [string]$Action = "Status",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$ApiKey,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$KeyId,
+    
+    [Parameter(Mandatory=$false)]
+    [int]$GatewayPort = 8080,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$GenerateReport,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$AutoRotate
+)
+
+# EQ12 OpenAI Key Engine Wrapper
+# Professional PowerShell interface for advanced AI key management
+
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+# Global configuration
+$SCRIPT_NAME = "EQ12 OpenAI Key Engine Wrapper"
+$VERSION = "1.0.0"
+$LOG_PATH = Join-Path $Workspace "logs\openai_key_wrapper.log"
+$PYTHON_SCRIPT = Join-Path $Workspace "scripts\eq12_openai_key_engine.py"
+$CONFIG_PATH = Join-Path $Workspace "configs\openai_config.json"
+
+# Ensure directories exist
+$null = New-Item -ItemType Directory -Force -Path (Split-Path $LOG_PATH)
+
+function Write-Log {
+    param(
+        [string]$Message,
+        [ValidateSet("INFO", "WARNING", "ERROR", "SUCCESS")]
+        [string]$Level = "INFO"
+    )
+    
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogMessage = "[$Timestamp] [$Level] $Message"
+    
+    # Color output
+    switch ($Level) {
+        "SUCCESS" { Write-Host $LogMessage -ForegroundColor Green }
+        "WARNING" { Write-Host $LogMessage -ForegroundColor Yellow }
+        "ERROR" { Write-Host $LogMessage -ForegroundColor Red }
+        default { Write-Host $LogMessage -ForegroundColor White }
+    }
+    
+    # Log to file
+    try {
+        $LogMessage | Out-File -Append -FilePath $LOG_PATH -Encoding UTF8
+    }
+    catch {
+        # Ignore logging errors
+    }
+}
+
+function Test-Prerequisites {
+    $issues = @()
+    
+    # Test Python
+    try {
+        $null = python --version 2>&1
+    }
+    catch {
+        $issues += "Python not available in PATH"
+    }
+    
+    # Test script
+    if (-not (Test-Path $PYTHON_SCRIPT)) {
+        $issues += "OpenAI Key Engine script not found: $PYTHON_SCRIPT"
+    }
+    
+    # Test workspace
+    if (-not (Test-Path $Workspace)) {
+        $issues += "Workspace directory not found: $Workspace"
+    }
+    
+    return $issues
+}
+
+function Add-OpenAIKey {
+    param(
+        [string]$Key,
+        [string]$Id
+    )
+    
+    Write-Log "Adding new OpenAI API key..." "INFO"
+    
+    if (-not $Key) {
+        Write-Log "API key is required" "ERROR"
+        return $false
+    }
+    
+    if (-not $Id) {
+        $Id = "openai_key_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+        Write-Log "Generated key ID: $Id" "INFO"
+    }
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--add-key", $Key
+            "--key-id", $Id
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "API key added successfully: $Id" "SUCCESS"
+            return $true
+        }
+        else {
+            Write-Log "Failed to add API key" "ERROR"
+            if ($VerboseOutput) {
+                Write-Host $result
+            }
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Key addition error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Test-AllKeys {
+    Write-Log "Testing all active OpenAI API keys..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--test-all"
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "All keys tested successfully" "SUCCESS"
+            
+            if ($VerboseOutput) {
+                Write-Host $result
+            }
+            
+            # Parse and display results
+            try {
+                $testResults = $result | ConvertFrom-Json
+                Show-KeyTestResults $testResults
+            }
+            catch {
+                Write-Host $result
+            }
+            
+            return $true
+        }
+        else {
+            Write-Log "Key testing failed" "ERROR"
+            Write-Host $result
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Key testing error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Get-HealthReport {
+    Write-Log "Generating OpenAI key health report..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--health-report"
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Health report generated successfully" "SUCCESS"
+            
+            try {
+                $report = $result | ConvertFrom-Json
+                Show-HealthReport $report
+                
+                if ($GenerateReport) {
+                    $reportFile = Join-Path $Workspace "reports\openai_health_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+                    $result | Out-File -FilePath $reportFile -Encoding UTF8
+                    Write-Log "Report saved: $reportFile" "INFO"
+                }
+                
+                return $true
+            }
+            catch {
+                Write-Host $result
+                return $true
+            }
+        }
+        else {
+            Write-Log "Health report generation failed" "ERROR"
+            Write-Host $result
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Health report error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Start-KeyMonitoring {
+    Write-Log "Starting OpenAI key monitoring..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--monitor"
+        )
+        
+        Write-Host " Starting continuous monitoring (Ctrl+C to stop)..." -ForegroundColor Yellow
+        python @arguments
+        
+        Write-Log "Monitoring stopped" "INFO"
+        return $true
+    }
+    catch {
+        Write-Log "Monitoring error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Clear-ExpiredCache {
+    Write-Log "Cleaning expired cache entries..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--cleanup-cache"
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Cache cleanup completed" "SUCCESS"
+            return $true
+        }
+        else {
+            Write-Log "Cache cleanup failed" "ERROR"
+            Write-Host $result
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Cache cleanup error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Start-APIGateway {
+    param(
+        [int]$Port = 8080
+    )
+    
+    Write-Log "Starting API Gateway on port $Port..." "INFO"
+    
+    try {
+        # This would start the gateway server
+        # For now, just configure and log
+        $gatewayConfig = @{
+            enabled = $true
+            port = $Port
+            timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+        }
+        
+        $configFile = Join-Path $Workspace "configs\gateway_config.json"
+        $gatewayConfig | ConvertTo-Json -Depth 3 | Out-File -FilePath $configFile -Encoding UTF8
+        
+        Write-Log "API Gateway configured successfully" "SUCCESS"
+        Write-Host " Gateway would be available at: http://localhost:$Port" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Log "Gateway setup error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Show-KeyTestResults {
+    param(
+        [object]$Results
+    )
+    
+    Write-Host "`n OpenAI Key Test Results" -ForegroundColor Cyan
+    Write-Host "=" * 50 -ForegroundColor Gray
+    
+    if ($Results -is [array]) {
+        foreach ($result in $Results) {
+            $status = if ($result.status -eq "success") { "" } else { "" }
+            $color = if ($result.status -eq "success") { "Green" } else { "Red" }
+            
+            Write-Host "$status Key: $($result.key_id)" -ForegroundColor $color
+            
+            if ($result.status -eq "success") {
+                Write-Host "   Latency: $($result.latency)s" -ForegroundColor White
+                Write-Host "   Tokens: $($result.tokens_used)" -ForegroundColor White
+                Write-Host "   Response: $($result.response)" -ForegroundColor Gray
+            }
+            else {
+                Write-Host "   Error: $($result.message)" -ForegroundColor Red
+            }
+            Write-Host ""
+        }
+    }
+    else {
+        Write-Host $Results -ForegroundColor White
+    }
+}
+
+function Show-HealthReport {
+    param(
+        [object]$Report
+    )
+    
+    Write-Host "`n OpenAI Key Health Report" -ForegroundColor Cyan
+    Write-Host "=" * 60 -ForegroundColor Gray
+    
+    if ($Report.summary) {
+        $summary = $Report.summary
+        Write-Host " Total Keys: $($Report.total_keys)" -ForegroundColor White
+        Write-Host " Requests (24h): $($summary.total_requests_24h)" -ForegroundColor White
+        Write-Host " Tokens (24h): $($summary.total_tokens_24h)" -ForegroundColor White
+        Write-Host " Avg Latency: $($summary.avg_latency)s" -ForegroundColor White
+        Write-Host " Cost (24h): `$$($summary.total_cost_24h)" -ForegroundColor White
+        Write-Host " Error Rate: $($summary.overall_error_rate)%" -ForegroundColor White
+        
+        if ($Report.key_details) {
+            Write-Host "`n Key Details:" -ForegroundColor Yellow
+            
+            foreach ($key in $Report.key_details) {
+                $statusIcon = if ($key.status -eq "healthy") { "" } else { "" }
+                $color = if ($key.status -eq "healthy") { "Green" } else { "Yellow" }
+                
+                Write-Host "$statusIcon $($key.key_id)" -ForegroundColor $color
+                Write-Host "   Requests: $($key.requests_24h) | Latency: $($key.avg_latency)s | Errors: $($key.error_rate)%" -ForegroundColor Gray
+            }
+        }
+    }
+    else {
+        Write-Host $Report -ForegroundColor White
+    }
+}
+
+function Show-SystemStatus {
+    Write-Host "`n EQ12 OpenAI Key Engine Status" -ForegroundColor Cyan
+    Write-Host "=" * 50 -ForegroundColor Gray
+    
+    # Check prerequisites
+    $issues = Test-Prerequisites
+    if ($issues.Count -eq 0) {
+        Write-Host " System: Ready" -ForegroundColor Green
+    }
+    else {
+        Write-Host " System: Issues Found" -ForegroundColor Red
+        foreach ($issue in $issues) {
+            Write-Host "    $issue" -ForegroundColor Red
+        }
+    }
+    
+    # Show configuration
+    if (Test-Path $CONFIG_PATH) {
+        try {
+            $config = Get-Content $CONFIG_PATH | ConvertFrom-Json
+            Write-Host "`n Configuration:" -ForegroundColor Yellow
+            Write-Host "   Auto Rotate: $($config.key_rotation.auto_rotate)" -ForegroundColor White
+            Write-Host "   Caching: $($config.optimization.caching_enabled)" -ForegroundColor White
+            Write-Host "   Load Balancing: $($config.load_balancing.enabled)" -ForegroundColor White
+        }
+        catch {
+            Write-Host " Configuration file exists but couldn't be parsed" -ForegroundColor Yellow
+        }
+    }
+    else {
+        Write-Host " No configuration file found" -ForegroundColor Yellow
+    }
+    
+    # Show workspace info
+    Write-Host "`n Workspace: $Workspace" -ForegroundColor Yellow
+    
+    # Recent log entries
+    if (Test-Path $LOG_PATH) {
+        Write-Host "`n Recent Activity:" -ForegroundColor Yellow
+        Get-Content $LOG_PATH -Tail 3 | ForEach-Object {
+            Write-Host "   $_" -ForegroundColor Gray
+        }
+    }
+}
+
+# Main execution logic
+function Main {
+    Write-Log "Starting $SCRIPT_NAME v$VERSION" "INFO"
+    Write-Log "Action: $Action | Workspace: $Workspace" "INFO"
+    
+    # Check prerequisites for most actions
+    if ($Action -ne "Status") {
+        $issues = Test-Prerequisites
+        if ($issues.Count -gt 0) {
+            Write-Log "Prerequisites check failed:" "ERROR"
+            foreach ($issue in $issues) {
+                Write-Log "  - $issue" "ERROR"
+            }
+            exit 1
+        }
+    }
+    
+    switch ($Action.ToLower()) {
+        "addkey" {
+            if (-not $ApiKey) {
+                Write-Log "API key is required for AddKey action" "ERROR"
+                Write-Host "Usage: -Action AddKey -ApiKey 'your-key-here' [-KeyId 'custom-id']" -ForegroundColor Yellow
+                exit 1
+            }
+            
+            $success = Add-OpenAIKey -Key $ApiKey -Id $KeyId
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "testall" {
+            $success = Test-AllKeys
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "health" {
+            $success = Get-HealthReport
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "monitor" {
+            $success = Start-KeyMonitoring
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "cache" {
+            $success = Clear-ExpiredCache
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "gateway" {
+            $success = Start-APIGateway -Port $GatewayPort
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "status" {
+            Show-SystemStatus
+            exit 0
+        }
+        
+        default {
+            Write-Log "Unknown action: $Action" "ERROR"
+            Write-Host "Available actions: AddKey, TestAll, Health, Monitor, Cache, Gateway, Status" -ForegroundColor Yellow
+            exit 1
+        }
+    }
+}
+
+# Execute main function
+try {
+    Main
+}
+catch {
+    Write-Log "Unexpected error: $($_.Exception.Message)" "ERROR"
+    Write-Host "Stack trace:" -ForegroundColor Red
+    Write-Host $_.ScriptStackTrace -ForegroundColor Red
+    exit 1
+}
+finally {
+    Write-Log "$SCRIPT_NAME execution completed" "INFO"
+}

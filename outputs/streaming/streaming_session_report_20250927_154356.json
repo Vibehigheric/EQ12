@@ -1,0 +1,38 @@
+{
+  "session_summary": {
+    "start_time": "2025-09-27T15:43:54.401777",
+    "end_time": "2025-09-27T15:43:56.731401",
+    "duration_seconds": 2.329624,
+    "total_events": 12,
+    "events_per_second": 5.151045834005831
+  },
+  "event_metrics": {
+    "text_deltas": 4,
+    "function_calls": 2,
+    "reasoning_events": 2,
+    "error_events": 0,
+    "image_events": 0,
+    "search_events": 0,
+    "mcp_events": 0,
+    "code_interpreter_events": 0
+  },
+  "event_type_counts": {
+    "response_created": 1,
+    "output_text_delta": 4,
+    "reasoning_delta": 2,
+    "function_call_delta": 2,
+    "function_call_done": 1,
+    "output_text_done": 1,
+    "response_done": 1
+  },
+  "content_summary": {
+    "main_text_length": 36,
+    "reasoning_length": 36,
+    "reasoning_summary_length": 0,
+    "function_call_count": 1,
+    "code_snippet_count": 0,
+    "image_count": 0,
+    "annotation_count": 0,
+    "error_count": 0
+  }
+}

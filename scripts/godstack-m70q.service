@@ -1,0 +1,14 @@
+[Unit]
+Description=GodStack M70q Node Boot Pipeline
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/eq12/m70q_boot.sh
+User=root
+Group=root
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

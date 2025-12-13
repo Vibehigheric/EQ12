@@ -1,0 +1,246 @@
+{
+    "starting_bankroll":  5000,
+    "max_bet_percentage":  0.03,
+    "min_edge":  0.025,
+    "min_odds":  1.6,
+    "max_daily_loss":  0.08,
+    "kelly_fraction":  0.25,
+    "supported_sports":  [
+                             "NFL",
+                             "NBA",
+                             "MLB",
+                             "NHL",
+                             "EPL",
+                             "NCAA_FB",
+                             "NCAA_BB"
+                         ],
+    "bookmakers":  [
+                       "fanduel",
+                       "draftkings",
+                       "betmgm",
+                       "caesars",
+                       "betrivers",
+                       "espnbet",
+                       "pointsbet"
+                   ],
+    "auto_bet_enabled":  true,
+    "hedge_threshold":  0.12,
+    "arb_threshold":  0.008,
+    "steam_detection":  true,
+    "twitter_sentiment_weight":  0.15,
+    "weather_impact_sports":  [
+                                  "NFL",
+                                  "MLB",
+                                  "NCAA_FB"
+                              ],
+    "injury_impact_weight":  0.2,
+    "rest_advantage_weight":  0.1,
+    "travel_fatigue_weight":  0.05,
+    "referee_bias_weight":  0.03,
+    "public_betting_fade_threshold":  0.7,
+    "sharp_money_follow_threshold":  0.15,
+    "closing_line_value_importance":  0.3,
+    "model_weights":  {
+                          "elo_rating":  0.4,
+                          "recent_form":  0.25,
+                          "matchup_specific":  0.2,
+                          "situational":  0.15
+                      },
+    "sport_specific_settings":  {
+                                    "NFL":  {
+                                                "home_field_advantage":  2.5,
+                                                "weather_impact":  true,
+                                                "primetime_bias":  1.2,
+                                                "divisional_rivalry_factor":  1.1,
+                                                "playoff_intensity_multiplier":  1.3,
+                                                "backup_qb_penalty":  -7.0,
+                                                "short_week_penalty":  -1.5,
+                                                "cross_country_travel_penalty":  -1.0
+                                            },
+                                    "NBA":  {
+                                                "home_court_advantage":  3.2,
+                                                "back_to_back_penalty":  -4.0,
+                                                "altitude_advantage":  2.0,
+                                                "rest_advantage_per_day":  0.8,
+                                                "playoff_intensity_multiplier":  1.4,
+                                                "star_player_injury_impact":  -8.0,
+                                                "garbage_time_adjustment":  true
+                                            },
+                                    "MLB":  {
+                                                "home_field_advantage":  0.1,
+                                                "weather_impact":  true,
+                                                "pitcher_matchup_weight":  0.6,
+                                                "bullpen_fatigue_weight":  0.2,
+                                                "wind_impact_threshold":  15,
+                                                "temperature_impact":  true,
+                                                "day_night_adjustment":  0.05
+                                            },
+                                    "NHL":  {
+                                                "home_ice_advantage":  0.15,
+                                                "goalie_impact":  0.7,
+                                                "back_to_back_penalty":  -0.3,
+                                                "altitude_advantage":  0.1,
+                                                "playoff_intensity_multiplier":  1.2,
+                                                "trade_deadline_uncertainty":  0.05
+                                            },
+                                    "EPL":  {
+                                                "home_advantage":  0.4,
+                                                "fixture_congestion_penalty":  -0.2,
+                                                "european_competition_fatigue":  -0.15,
+                                                "relegation_desperation_boost":  0.3,
+                                                "title_race_pressure":  0.2,
+                                                "manager_new_bounce":  0.25
+                                            }
+                                },
+    "risk_management":  {
+                            "max_correlated_exposure":  0.15,
+                            "diversification_requirement":  3,
+                            "losing_streak_reduction":  {
+                                                            "3_losses":  0.8,
+                                                            "5_losses":  0.6,
+                                                            "7_losses":  0.4
+                                                        },
+                            "winning_streak_enhancement":  {
+                                                               "5_wins":  1.1,
+                                                               "10_wins":  1.2,
+                                                               "15_wins":  1.25
+                                                           },
+                            "volatility_adjustment":  true,
+                            "black_swan_protection":  0.02
+                        },
+    "data_sources":  {
+                         "odds_api":  {
+                                          "primary":  "the-odds-api",
+                                          "backup":  "pinnacle-api",
+                                          "update_frequency":  300
+                                      },
+                         "injuries":  {
+                                          "primary":  "rotoworld",
+                                          "backup":  "espn",
+                                          "update_frequency":  1800
+                                      },
+                         "weather":  {
+                                         "primary":  "openweather",
+                                         "backup":  "weather-api",
+                                         "update_frequency":  3600
+                                     },
+                         "twitter":  {
+                                         "api_version":  "v2",
+                                         "sentiment_keywords":  [
+                                                                    "injury",
+                                                                    "lineup",
+                                                                    "weather",
+                                                                    "motivation",
+                                                                    "coaching"
+                                                                ],
+                                         "influencer_accounts":  [
+                                                                     "adamschefter",
+                                                                     "wojespn",
+                                                                     "jeffpassan"
+                                                                 ],
+                                         "update_frequency":  900
+                                     },
+                         "news":  {
+                                      "sources":  [
+                                                      "espn",
+                                                      "athletic",
+                                                      "rotowire",
+                                                      "actionnetwork"
+                                                  ],
+                                      "sentiment_analysis":  true,
+                                      "breaking_news_alerts":  true
+                                  }
+                     },
+    "advanced_features":  {
+                              "machine_learning":  {
+                                                       "model_retraining_frequency":  "weekly",
+                                                       "feature_importance_tracking":  true,
+                                                       "ensemble_methods":  true,
+                                                       "neural_network_enabled":  false
+                                                   },
+                              "arbitrage_detection":  {
+                                                          "enabled":  true,
+                                                          "minimum_profit":  0.5,
+                                                          "maximum_stakes":  2000,
+                                                          "auto_execution":  false,
+                                                          "notification_methods":  [
+                                                                                       "email",
+                                                                                       "discord"
+                                                                                   ]
+                                                      },
+                              "middle_hunting":  {
+                                                     "enabled":  true,
+                                                     "minimum_middle_size":  1.0,
+                                                     "maximum_total_risk":  500
+                                                 },
+                              "steam_chasing":  {
+                                                    "enabled":  true,
+                                                    "minimum_line_move":  0.5,
+                                                    "maximum_chase_time":  300,
+                                                    "respected_books":  [
+                                                                            "pinnacle",
+                                                                            "circa",
+                                                                            "bookmaker"
+                                                                        ]
+                                                },
+                              "closing_line_value":  {
+                                                         "tracking_enabled":  true,
+                                                         "benchmark_books":  [
+                                                                                 "pinnacle"
+                                                                             ],
+                                                         "clv_importance_weight":  0.4
+                                                     },
+                              "public_betting_data":  {
+                                                          "fade_public_threshold":  75,
+                                                          "contrarian_bonus":  0.02,
+                                                          "sharp_money_indicators":  [
+                                                                                         "reverse_line_movement",
+                                                                                         "low_ticket_high_money"
+                                                                                     ]
+                                                      }
+                          },
+    "notifications":  {
+                          "discord_webhook":  "",
+                          "email_alerts":  true,
+                          "sms_alerts":  false,
+                          "alert_thresholds":  {
+                                                   "high_confidence_bet":  0.8,
+                                                   "arbitrage_opportunity":  0.01,
+                                                   "steam_move_detected":  true,
+                                                   "injury_news_impact":  0.1,
+                                                   "weather_alert":  true
+                                               }
+                      },
+    "backtesting":  {
+                        "enabled":  true,
+                        "lookback_periods":  [
+                                                 30,
+                                                 90,
+                                                 365
+                                             ],
+                        "monte_carlo_simulations":  10000,
+                        "walk_forward_analysis":  true,
+                        "paper_trading_mode":  false
+                    },
+    "compliance":  {
+                       "jurisdiction":  "US",
+                       "responsible_gambling":  {
+                                                    "daily_loss_limit":  200,
+                                                    "session_time_limit":  180,
+                                                    "cooling_off_period":  24
+                                                },
+                       "record_keeping":  {
+                                              "bet_history_retention":  2555,
+                                              "tax_reporting_ready":  true,
+                                              "audit_trail":  true
+                                          }
+                   },
+    "ui_preferences":  {
+                           "dashboard_refresh_rate":  30,
+                           "default_timezone":  "America/New_York",
+                           "currency":  "USD",
+                           "decimal_places":  2,
+                           "color_scheme":  "dark",
+                           "compact_view":  false
+                       }
+}

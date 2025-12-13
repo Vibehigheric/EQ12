@@ -1,0 +1,2 @@
+/*! For license information please see 521.js.LICENSE.txt */
+"use strict";(self.webpackChunksource=self.webpackChunksource||[]).push([[521],{3521:(t,s,n)=>{n.d(s,{getExtensionsList:()=>c});const e="https://www.rakuten.com/toolbar/config/settings.json";async function c(t=e){try{return(await(await fetch(t)).json()).installed_extensions}catch(t){return}}}}]);

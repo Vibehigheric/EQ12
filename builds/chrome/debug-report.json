@@ -1,0 +1,112 @@
+{
+  "timestamp": "2025-10-08T23:33:43.502477",
+  "extension_path": "example_extension",
+  "debug_config": {
+    "debug_level": "INFO",
+    "enable_console_logs": true,
+    "enable_error_tracking": true,
+    "enable_performance_monitoring": true,
+    "debug_components": {
+      "background": true,
+      "content_scripts": true,
+      "popup": true,
+      "options": true,
+      "storage": true
+    },
+    "log_filters": {
+      "exclude_patterns": [
+        "webpack",
+        "hot-reload"
+      ],
+      "include_patterns": [
+        "EQ12",
+        "governance"
+      ]
+    }
+  },
+  "files": {
+    "background.js": {
+      "size": 14862,
+      "lines": 412,
+      "has_debug_code": true
+    },
+    "content.js": {
+      "size": 17585,
+      "lines": 525,
+      "has_debug_code": true
+    },
+    "debug-config.json": {
+      "size": 432,
+      "lines": 23,
+      "has_debug_code": false
+    },
+    "debug-test-page.html": {
+      "size": 8709,
+      "lines": 204,
+      "has_debug_code": true
+    },
+    "debug-utils.js": {
+      "size": 8096,
+      "lines": 232,
+      "has_debug_code": true
+    },
+    "manifest.json": {
+      "size": 1020,
+      "lines": 50,
+      "has_debug_code": false
+    },
+    "monetization_config.json": {
+      "size": 634,
+      "lines": 33,
+      "has_debug_code": false
+    },
+    "popup.html": {
+      "size": 2693,
+      "lines": 134,
+      "has_debug_code": false
+    },
+    "popup.js": {
+      "size": 18636,
+      "lines": 577,
+      "has_debug_code": true
+    },
+    "monetization\\ad_manager.js": {
+      "size": 4435,
+      "lines": 140,
+      "has_debug_code": false
+    },
+    "monetization\\donation_manager.js": {
+      "size": 4681,
+      "lines": 140,
+      "has_debug_code": false
+    },
+    "monetization\\freemium_gate.js": {
+      "size": 2820,
+      "lines": 93,
+      "has_debug_code": false
+    },
+    "monetization\\license_manager.js": {
+      "size": 5054,
+      "lines": 181,
+      "has_debug_code": true
+    },
+    "monetization\\monetization.css": {
+      "size": 2784,
+      "lines": 188,
+      "has_debug_code": false
+    }
+  },
+  "manifest_analysis": {
+    "manifest_version": 2,
+    "has_background": true,
+    "has_content_scripts": true,
+    "has_popup": true,
+    "permissions": [
+      "activeTab",
+      "storage",
+      "https://*/*"
+    ],
+    "debug_ready": true
+  },
+  "debug_utilities_status": "installed"
+}

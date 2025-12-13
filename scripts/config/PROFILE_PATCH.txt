@@ -1,0 +1,5 @@
+# === EQ12 Elite bots & runner aliases ===
+Set-Alias eq12-chrome-bot "C:\EQ12\scripts\eq12-chrome-bot.ps1"
+Set-Alias eq12-edge-bot   "C:\EQ12\scripts\eq12-edge-bot.ps1"
+Set-Alias eq12-firefox-bot "C:\EQ12\scripts\eq12-firefox-bot.ps1"
+Set-Alias eq12-elite-run  "C:\EQ12\scripts\eq12_market_sports_job_runner.ps1"

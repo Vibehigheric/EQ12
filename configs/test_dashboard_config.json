@@ -1,0 +1,47 @@
+{
+    "component_info": {
+        "name": "test_dashboard",
+        "type": "dashboard",
+        "script_path": "C:\\EQ12\\dashboard\\test_dashboard.html",
+        "dependencies": [],
+        "version": "1.0.0"
+    },
+    "runtime_settings": {
+        "enabled": true,
+        "auto_start": true,
+        "restart_on_failure": true,
+        "max_memory_mb": 512,
+        "execution_timeout": 300,
+        "priority": "normal"
+    },
+    "monitoring": {
+        "health_check_enabled": true,
+        "performance_monitoring": true,
+        "error_tracking": true,
+        "metrics_collection": true
+    },
+    "logging": {
+        "log_level": "INFO",
+        "log_file": "C:/EQ12/logs/test_dashboard.log",
+        "log_rotation": true,
+        "max_log_size_mb": 100,
+        "backup_count": 5
+    },
+    "security": {
+        "require_authentication": true,
+        "encrypt_data": true,
+        "audit_operations": true,
+        "access_level": "standard"
+    },
+    "dashboard_settings": {
+        "refresh_interval": 30,
+        "theme": "dark",
+        "auto_layout": true,
+        "responsive": true
+    },
+    "data_sources": [
+        "betting_engines",
+        "monitoring_systems",
+        "api_endpoints"
+    ]
+}

@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203,W503
+extend-exclude = .git,.venv,venv,build,dist,__pycache__,archive_duplicates,logs,eq12_godstack_final/tasks,.pip-cache,configs,dashboard
+per-file-ignores =
+    __init__.py:F401
+    scripts/*:E402

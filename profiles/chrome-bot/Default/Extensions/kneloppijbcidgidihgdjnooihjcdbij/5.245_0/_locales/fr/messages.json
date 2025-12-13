@@ -1,0 +1,10 @@
+{
+   "appDesc": {
+      "description": "App description.",
+      "message": "Publier des actualités, surveiller et analyser les résultats au travers de multiples réseaux sociaux dont Twitter et Facebook."
+   },
+   "appName": {
+      "description": "App name.",
+      "message": "Hootsuite"
+   }
+}

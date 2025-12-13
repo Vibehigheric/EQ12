@@ -1,0 +1,90 @@
+{
+  "version": "2025.12.03",
+  "environment": "production",
+  "revenue_target_annual": 12000000.0,
+  "revenue_streams": {
+    "betting_intelligence": {
+      "enabled": true,
+      "revenue": 0.0,
+      "last_run": null,
+      "status": "idle",
+      "error_count": 0,
+      "settings": {
+        "scan_interval_minutes": 60,
+        "sports": ["nfl", "nba", "nhl", "ncaaf", "ncaab", "mlb"],
+        "min_edge_percentage": 2.5,
+        "max_api_requests_per_hour": 500
+      }
+    },
+    "prompt_monetization": {
+      "enabled": true,
+      "revenue": 0.0,
+      "last_run": null,
+      "status": "idle",
+      "error_count": 0,
+      "settings": {
+        "daily_prompt_target": 100,
+        "library_size": 20000,
+        "categories": ["business", "tech", "education", "marketing"]
+      }
+    },
+    "pacer_legal": {
+      "enabled": true,
+      "revenue": 0.0,
+      "last_run": null,
+      "status": "idle",
+      "error_count": 0,
+      "settings": {
+        "scan_frequency_hours": 24,
+        "document_types": ["13F", "SEC filings", "bankruptcies"],
+        "target_jurisdictions": ["federal", "state"]
+      }
+    },
+    "travel_automation": {
+      "enabled": true,
+      "revenue": 0.0,
+      "last_run": null,
+      "status": "idle",
+      "error_count": 0,
+      "settings": {
+        "origin": "BUF",
+        "destinations": ["MIA", "LAS", "MCO", "HOU", "YYZ", "CLE"],
+        "deal_threshold_percentage": 30,
+        "scan_frequency_hours": 6
+      }
+    },
+    "content_empire": {
+      "enabled": true,
+      "revenue": 0.0,
+      "last_run": null,
+      "status": "idle",
+      "error_count": 0,
+      "settings": {
+        "platforms": ["gumroad", "ebay", "tiktok", "youtube"],
+        "content_types": ["betting_sheets", "templates", "videos", "courses"],
+        "daily_content_target": 5
+      }
+    }
+  },
+  "performance_metrics": {
+    "total_revenue_ytd": 0.0,
+    "target_revenue_ytd": 8500000.0,
+    "revenue_today": 0.0,
+    "uptime_hours": 0.0,
+    "total_executions": 0,
+    "successful_executions": 0,
+    "failed_executions": 0
+  },
+  "notifications": {
+    "telegram_enabled": true,
+    "telegram_chat_id": "${TELEGRAM_CHAT_ID}",
+    "email_enabled": false,
+    "alert_on_failure": true,
+    "daily_summary": true
+  },
+  "security": {
+    "api_keys_location": "environment_variables",
+    "log_retention_days": 90,
+    "encryption_enabled": false
+  }
+}

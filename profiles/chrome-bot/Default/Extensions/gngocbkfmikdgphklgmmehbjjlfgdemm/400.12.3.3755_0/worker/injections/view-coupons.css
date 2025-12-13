@@ -1,0 +1,208 @@
+.button-injection-standard {
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+#x-close-button::before {
+  content: "";
+  display: inline-block;
+  min-height: 10px;
+  min-width: 10px;
+  background-image: var(--x-image);
+}
+
+#x-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.injection {
+  font-feature-settings: normal;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#secondary-content {
+  background: #FFFFFF;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.15);
+}
+#secondary-content #terms {
+  padding: 5px;
+}
+#secondary-content .full-terms {
+  color: #27798D;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+#secondary-content #individual-terms-container {
+  padding: 5px;
+}
+#secondary-content .special-terms {
+  font-size: 14px;
+  margin: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+#secondary-content .special-terms .title {
+  font-size: 14px;
+  color: #757575;
+}
+#secondary-content .special-terms .open-close button {
+  font-weight: bold;
+  text-align: right;
+  color: #27798D;
+  cursor: pointer;
+}
+#secondary-content .term {
+  margin-top: 3px;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px;
+}
+#secondary-content .term .term-text {
+  color: #333333;
+  flex: 1;
+  max-width: 250px;
+  margin-right: 5px;
+  overflow-wrap: break-word;
+}
+#secondary-content .term .reward {
+  color: #27798D;
+  float: right;
+}
+
+#view-coupons {
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 5px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  width: 385px;
+  background: white;
+  color: black;
+  position: fixed;
+  z-index: 2147483647;
+  top: 10px;
+  right: 10px;
+  transition: right 0.75s ease;
+}
+#view-coupons.slide {
+  right: -500px;
+}
+#view-coupons #merchant-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#view-coupons #merchant-logo-container #merchant-logo {
+  margin: 6px;
+  margin-left: auto;
+  margin-right: auto;
+  border: solid 1px #f1f1f1;
+  display: block;
+  max-height: 60px;
+  margin-bottom: 20px;
+}
+#view-coupons #coupon-count {
+  font-size: 24px;
+  font-weight: 400;
+}
+#view-coupons #coupons {
+  max-height: 50vh;
+  overflow: scroll;
+  overflow-x: hidden;
+  margin-right: -20px;
+}
+#view-coupons #coupons .coupon {
+  border-top: solid 1px #CCCCCC;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  display: flex;
+  flex-direction: row;
+}
+#view-coupons #coupons .coupon .coupon-text {
+  font-size: 12px;
+  line-height: 18px;
+  padding-right: 10px;
+  width: 200px;
+}
+#view-coupons #coupons .coupon .coupon-interaction {
+  border: dashed 1px black;
+  padding: 5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  min-width: 145px;
+  align-self: center;
+  text-align: center;
+  position: relative;
+  height: 20px;
+  font-size: 15px;
+  line-height: 1;
+}
+#view-coupons #coupons .coupon .coupon-interaction:hover {
+  background-color: #f7f5ff;
+}
+#view-coupons #coupons .coupon .coupon-interaction.active {
+  border-color: #aaa2e4;
+  color: #aaa2e4;
+}
+#view-coupons #coupons .coupon .coupon-interaction .coupon-code, #view-coupons #coupons .coupon .coupon-interaction .coupon-copied {
+  width: 145px;
+  position: absolute;
+  left: 5px;
+  top: 8px;
+  transition: opacity 0.75s ease, background-color 0.75s ease, border-color 0.75s ease;
+}
+#view-coupons #coupons .coupon .coupon-interaction .coupon-code.opaque, #view-coupons #coupons .coupon .coupon-interaction .coupon-copied.opaque {
+  opacity: 0;
+}
+#view-coupons #coupons .coupon .coupon-interaction .coupon-code {
+  opacity: 1;
+}
+#view-coupons #no-coupons {
+  margin-top: 10px;
+  margin-bottom: 50px;
+  color: #AAA;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.4;
+}
+#view-coupons #no-coupons b {
+  color: gray;
+}
+#view-coupons #inline {
+  margin-left: -20px;
+  margin-right: -20px;
+  background: transparent;
+  margin-top: -24px;
+}
+#view-coupons #client-logo {
+  margin-top: 10px;
+  max-height: 30px;
+}
+
+#slider {
+  top: 10px;
+}
+
+#TEST-CLASS {
+  top: 10px;
+}

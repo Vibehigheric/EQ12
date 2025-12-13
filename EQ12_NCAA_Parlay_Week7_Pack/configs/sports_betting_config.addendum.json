@@ -1,0 +1,11 @@
+{
+  "EQ12_PARLAY": {
+    "edge_min": 0.08,
+    "sentiment_min": 0.6,
+    "max_wind_mph": 15,
+    "week": 7,
+    "bankroll": 1000.0,
+    "kelly_fraction": 0.25,
+    "simulate_if_missing": true
+  }
+}

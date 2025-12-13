@@ -1,0 +1,394 @@
+name: EQ12 Nightly Parlay Model Retraining
+
+on:
+  schedule:
+    # Run at 2 AM EST daily (6 AM UTC)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      force_retrain:
+        description: 'Force retraining even if performance is good'
+        required: false
+        default: 'false'
+      min_new_samples:
+        description: 'Minimum new samples required for retraining'
+        required: false
+        default: '10'
+
+env:
+  PYTHON_VERSION: '3.12'
+  MODEL_PERFORMANCE_THRESHOLD: 0.60
+  MIN_TRAINING_SAMPLES: 50
+
+jobs:
+  check-new-data:
+    runs-on: ubuntu-latest
+    outputs:
+      should_retrain: ${{ steps.check.outputs.should_retrain }}
+      new_samples: ${{ steps.check.outputs.new_samples }}
+      last_model_date: ${{ steps.check.outputs.last_model_date }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy scikit-learn>=1.3.0
+        
+    - name: Check for new parlay data
+      id: check
+      run: |
+        python -c "
+        import os
+        import json
+        import pandas as pd
+        from datetime import datetime, timedelta
+        from pathlib import Path
+        
+        # Check for new parlay analysis files
+        logs_dir = Path('logs/')
+        parlay_files = list(logs_dir.glob('parlay_analysis_*.json')) if logs_dir.exists() else []
+        feedback_files = list(logs_dir.glob('parlay_feedback.jsonl')) if logs_dir.exists() else []
+        
+        print(f'Found {len(parlay_files)} parlay analysis files')
+        print(f'Found {len(feedback_files)} feedback files')
+        
+        # Check last model training date
+        models_dir = Path('eq12_learn/')
+        model_files = list(models_dir.glob('parlay_ensemble_model_*.pkl')) if models_dir.exists() else []
+        
+        if model_files:
+            latest_model = max(model_files, key=lambda x: x.stat().st_mtime)
+            last_model_time = datetime.fromtimestamp(latest_model.stat().st_mtime)
+            print(f'Latest model: {latest_model.name} from {last_model_time}')
+        else:
+            last_model_time = datetime(2020, 1, 1)  # Force training if no model
+            print('No existing model found')
+        
+        # Count new data since last model
+        new_samples = 0
+        cutoff_time = last_model_time - timedelta(days=1)  # Include 1 day buffer
+        
+        for file_path in parlay_files:
+            file_time = datetime.fromtimestamp(file_path.stat().st_mtime)
+            if file_time > cutoff_time:
+                try:
+                    with open(file_path, 'r') as f:
+                        data = json.load(f)
+                        new_samples += len(data.get('parlays', []))
+                except Exception as e:
+                    print(f'Error reading {file_path}: {e}')
+        
+        # Count new feedback
+        new_feedback = 0
+        for file_path in feedback_files:
+            file_time = datetime.fromtimestamp(file_path.stat().st_mtime)
+            if file_time > cutoff_time:
+                try:
+                    with open(file_path, 'r') as f:
+                        new_feedback += len(f.readlines())
+                except Exception as e:
+                    print(f'Error reading feedback {file_path}: {e}')
+        
+        print(f'New samples since last model: {new_samples}')
+        print(f'New feedback since last model: {new_feedback}')
+        
+        # Decision logic
+        min_samples = int('${{ github.event.inputs.min_new_samples }}' or '10')
+        force_retrain = '${{ github.event.inputs.force_retrain }}' == 'true'
+        
+        should_retrain = (
+            force_retrain or
+            new_samples >= min_samples or
+            new_feedback >= 5 or
+            len(model_files) == 0  # No model exists
+        )
+        
+        print(f'Should retrain: {should_retrain}')
+        print(f'Reason: force={force_retrain}, new_samples={new_samples}>={min_samples}, new_feedback={new_feedback}>=5, no_model={len(model_files)==0}')
+        
+        # Set outputs
+        print(f'::set-output name=should_retrain::{str(should_retrain).lower()}')
+        print(f'::set-output name=new_samples::{new_samples + new_feedback}')
+        print(f'::set-output name=last_model_date::{last_model_time.isoformat()}')
+        "
+
+  retrain-model:
+    needs: check-new-data
+    if: needs.check-new-data.outputs.should_retrain == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install ML dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy scikit-learn>=1.3.0 xgboost>=1.7.0 joblib
+        pip install fastapi uvicorn pydantic
+        
+    - name: Create directories
+      run: |
+        mkdir -p logs eq12_learn
+        
+    - name: Build parlay dataset
+      id: build_dataset
+      run: |
+        cd eq12_learn
+        echo "Building parlay dataset from logs..."
+        
+        # Run dataset builder
+        python build_parlay_dataset.py --logs-dir ../logs --output-dir . --verbose
+        
+        # Check if dataset was created
+        if ls parlay_dataset_*.pkl 1> /dev/null 2>&1; then
+          DATASET_FILE=$(ls parlay_dataset_*.pkl | head -1)
+          echo "Dataset created: $DATASET_FILE"
+          echo "::set-output name=dataset_file::$DATASET_FILE"
+          echo "::set-output name=dataset_created::true"
+        else
+          echo "No dataset created - insufficient data"
+          echo "::set-output name=dataset_created::false"
+        fi
+        
+    - name: Train ML model
+      if: steps.build_dataset.outputs.dataset_created == 'true'
+      id: train_model
+      run: |
+        cd eq12_learn
+        DATASET_FILE="${{ steps.build_dataset.outputs.dataset_file }}"
+        
+        echo "Training ML model with dataset: $DATASET_FILE"
+        
+        # Run model training
+        python train_parlay_model.py --dataset "$DATASET_FILE" --output-dir . --verbose
+        
+        # Check if model was created
+        if ls parlay_ensemble_model_*.pkl 1> /dev/null 2>&1; then
+          MODEL_FILE=$(ls parlay_ensemble_model_*.pkl | head -1)
+          REPORT_FILE="${MODEL_FILE%.*}_report.json"
+          
+          echo "Model trained: $MODEL_FILE"
+          echo "Training report: $REPORT_FILE"
+          
+          # Extract performance metrics
+          if [ -f "$REPORT_FILE" ]; then
+            ACCURACY=$(python -c "
+            import json
+            with open('$REPORT_FILE', 'r') as f:
+                data = json.load(f)
+            print(data.get('ensemble', {}).get('ensemble_roc_auc', 0.0))
+            ")
+            echo "Model ROC-AUC: $ACCURACY"
+            echo "::set-output name=model_file::$MODEL_FILE"
+            echo "::set-output name=model_accuracy::$ACCURACY"
+            echo "::set-output name=training_success::true"
+          else
+            echo "Training report not found"
+            echo "::set-output name=training_success::false"
+          fi
+        else
+          echo "Model training failed - no model file created"
+          echo "::set-output name=training_success::false"
+        fi
+        
+    - name: Validate model performance
+      if: steps.train_model.outputs.training_success == 'true'
+      id: validate_model
+      run: |
+        MODEL_ACCURACY="${{ steps.train_model.outputs.model_accuracy }}"
+        THRESHOLD="${{ env.MODEL_PERFORMANCE_THRESHOLD }}"
+        
+        echo "Model accuracy: $MODEL_ACCURACY"
+        echo "Threshold: $THRESHOLD"
+        
+        # Compare accuracy to threshold
+        MEETS_THRESHOLD=$(python -c "print(float('$MODEL_ACCURACY') >= float('$THRESHOLD'))")
+        
+        if [ "$MEETS_THRESHOLD" = "True" ]; then
+          echo "✅ Model meets performance threshold"
+          echo "::set-output name=deploy_model::true"
+        else
+          echo "❌ Model performance below threshold"
+          echo "::set-output name=deploy_model::false"
+        fi
+        
+    - name: Deploy model
+      if: steps.validate_model.outputs.deploy_model == 'true'
+      run: |
+        MODEL_FILE="${{ steps.train_model.outputs.model_file }}"
+        
+        # Copy to standard location
+        cp "eq12_learn/$MODEL_FILE" "eq12_learn/parlay_ensemble_model.pkl"
+        
+        echo "✅ Model deployed as parlay_ensemble_model.pkl"
+        
+        # Create deployment manifest
+        cat > eq12_learn/deployment_manifest.json << EOF
+        {
+          "deployment_timestamp": "$(date -Iseconds)",
+          "model_file": "$MODEL_FILE",
+          "model_accuracy": ${{ steps.train_model.outputs.model_accuracy }},
+          "new_samples": ${{ needs.check-new-data.outputs.new_samples }},
+          "last_model_date": "${{ needs.check-new-data.outputs.last_model_date }}",
+          "github_run_id": "${{ github.run_id }}",
+          "commit_sha": "${{ github.sha }}"
+        }
+        EOF
+        
+    - name: Run model tests
+      if: steps.validate_model.outputs.deploy_model == 'true'
+      run: |
+        cd eq12_learn
+        
+        echo "Testing deployed model..."
+        
+        # Basic model loading test
+        python -c "
+        import sys
+        sys.path.append('.')
+        from train_parlay_model import load_trained_model
+        
+        try:
+            model = load_trained_model('parlay_ensemble_model.pkl')
+            print('✅ Model loads successfully')
+        except Exception as e:
+            print(f'❌ Model loading failed: {e}')
+            sys.exit(1)
+        "
+        
+        # API integration test
+        python -c "
+        import sys
+        sys.path.append('.')
+        from builder import IntelligentParlayBuilder
+        
+        try:
+            builder = IntelligentParlayBuilder(model_path='parlay_ensemble_model.pkl')
+            suggestions = builder.generate_suggestions('NFL', max_suggestions=1)
+            print(f'✅ Generated {len(suggestions)} test suggestions')
+        except Exception as e:
+            print(f'❌ Builder test failed: {e}')
+            sys.exit(1)
+        "
+        
+    - name: Commit and push model
+      if: steps.validate_model.outputs.deploy_model == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Add new model files
+        git add eq12_learn/parlay_ensemble_model.pkl
+        git add eq12_learn/deployment_manifest.json
+        
+        # Commit with detailed message
+        git commit -m "🤖 Auto-deploy ML model - ROC-AUC ${{ steps.train_model.outputs.model_accuracy }}
+
+        - New samples: ${{ needs.check-new-data.outputs.new_samples }}
+        - Model performance: ${{ steps.train_model.outputs.model_accuracy }}
+        - Deployment time: $(date -Iseconds)
+        - GitHub run: ${{ github.run_id }}"
+        
+        git push
+
+  send-notification:
+    needs: [check-new-data, retrain-model]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send Telegram notification
+      if: env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        # Determine status
+        if [ "${{ needs.retrain-model.result }}" = "success" ]; then
+          STATUS="✅ SUCCESS"
+          MESSAGE="EQ12 parlay model retrained successfully!
+        
+        📊 Performance: ROC-AUC ${{ needs.retrain-model.outputs.model_accuracy || 'N/A' }}
+        📈 New samples: ${{ needs.check-new-data.outputs.new_samples }}
+        🚀 Deployed: $(date)
+        🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+        elif [ "${{ needs.check-new-data.outputs.should_retrain }}" = "false" ]; then
+          STATUS="ℹ️ SKIPPED"
+          MESSAGE="EQ12 model retraining skipped - insufficient new data.
+        
+        📊 New samples: ${{ needs.check-new-data.outputs.new_samples }}
+        ⏰ Last model: ${{ needs.check-new-data.outputs.last_model_date }}
+        🔗 Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+        else
+          STATUS="❌ FAILED"
+          MESSAGE="EQ12 model retraining failed!
+        
+        🔍 Check logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        📊 New samples: ${{ needs.check-new-data.outputs.new_samples }}
+        ⏰ Timestamp: $(date)"
+        fi
+        
+        # Send notification
+        curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+          -d chat_id="$TELEGRAM_CHAT_ID" \
+          -d text="$STATUS: $MESSAGE" \
+          -d parse_mode="HTML"
+          
+    - name: Create GitHub release on success
+      if: needs.retrain-model.result == 'success'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: model-v${{ github.run_number }}
+        release_name: EQ12 Parlay Model v${{ github.run_number }}
+        body: |
+          🤖 **Automated ML Model Deployment**
+          
+          **Model Performance:**
+          - ROC-AUC Score: ${{ needs.retrain-model.outputs.model_accuracy }}
+          - Training Samples: ${{ needs.check-new-data.outputs.new_samples }} new
+          - Performance Threshold: ${{ env.MODEL_PERFORMANCE_THRESHOLD }}
+          
+          **Deployment Details:**
+          - Deployment Time: ${{ steps.deploy.outputs.timestamp }}
+          - GitHub Run: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - Commit SHA: ${{ github.sha }}
+          
+          **Model Components:**
+          - Calibrated Random Forest + XGBoost ensemble
+          - Kelly criterion risk management
+          - Correlation detection and limits
+          - EV optimization with safety controls
+          
+          This model has been automatically validated and deployed to the production API.
+        draft: false
+        prerelease: false

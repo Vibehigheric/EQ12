@@ -1,0 +1,196 @@
+{
+   "action": {
+      "default_title": "Automate Your Job Application Process"
+   },
+   "background": {
+      "service_worker": "./background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "./jquery.min.js", "./atsAutomation.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://cse.google.com/cse*", "https://*.dice.com/*", "https://*.indeed.com/*", "https://*.careerbuilder.com/*", "https://*.linkedin.com/jobs/*", "https://*.simplyhired.com/*", "https://*.ziprecruiter.com/jobs*", "https://*.ziprecruiter.com/jobs-search*", "https://*.glassdoor.ca/job-listing/*", "https://*.glassdoor.ca/Job/*", "https://*.glassdoor.com.au/job-listing/*", "https://*.glassdoor.com.au/Job/*", "https://*.glassdoor.co.in/job-listing/*", "https://*.glassdoor.co.in/Job/*", "https://*.glassdoor.co.nz/job-listing/*", "https://*.glassdoor.co.nz/Job/*", "https://*.glassdoor.co.uk/job-listing/*", "https://*.glassdoor.co.uk/Job/*", "https://*.glassdoor.com/job-listing/*", "https://*.glassdoor.com/Job/*", "https://*.glassdoor.ie/job-listing/*", "https://*.glassdoor.ie/Job/*", "https://*.glassdoor.sg/job-listing/*", "https://*.glassdoor.sg/Job/*", "https://www.glassdoor.fr/job-listing/*", "https://www.glassdoor.fr/Job/*", "https://www.glassdoor.de/job-listing/*", "https://www.glassdoor.de/Job/*", "https://www.glassdoor.it/Lavoro/*", "https://www.glassdoor.it/Job/*", "https://www.glassdoor.it/job-listing/*", "https://www.glassdoor.es/Empleo/*", "https://www.glassdoor.es/Job/*", "https://www.glassdoor.es/job-listing/*", "https://www.glassdoor.nl/Vacature/*", "https://www.glassdoor.nl/Job/*", "https://www.glassdoor.nl/job-listing/*", "https://app.lazyapply.com/dashboard", "https://beta.lazyapply.com/dashboard", "https://dev--lazyapply-extension-dashboard.netlify.app/dashboard", "https://ats.rippling.com/*/*/jobs/*/*", "https://ats.rippling.com/*/jobs/*/*", "https://ats.rippling.com/*/*/jobs/*", "https://ats.rippling.com/*/jobs/*", "https://ats.rippling.com/*/jobs*", "https://jobs.lever.co/*/*/*", "https://jobs.lever.co/*/*", "https://jobs.ashbyhq.com/*/*/*", "https://jobs.ashbyhq.com/*/*", "https://jobs.vivahr.com/*/*/*", "https://jobs.vivahr.com/*/*", "https://job-boards.greenhouse.io/*/jobs/*", "https://job-boards.greenhouse.io/*", "https://boards.greenhouse.io/*", "https://boards.greenhouse.io/*/jobs/*", "https://boards.greenhouse.io/embed/job_app*", "https://wellfound.com/jobs/*" ]
+   }, {
+      "js": [ "./twitterTemplate.bundle.js" ],
+      "matches": [ "*://x.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./indeed.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.indeed.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.indeed.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./simplyHired.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.indeed.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./careerBuilder.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.careerbuilder.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./careerBuilder.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.careerbuilder.ca/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./careerBuilder.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.careerbuilder.co.uk/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./monster.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.monster.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./monster.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.monster.ca/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./monster.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.monster.co.uk/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./simplyHired.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.simplyhired.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.founditgulf.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.foundit.in/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.foundit.hk/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.foundit.sg/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.foundit.id/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.foundit.my/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.foundit.com.ph/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.monster.co.th/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./foundit.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.monster.com.vn/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./seek.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.seek.com.au/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./seek.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.seek.co.nz/*" ]
+   }, {
+      "js": [ "./eventblock.bundle.js" ],
+      "matches": [ "https://*.indeed.com/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./linkedin.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.linkedin.com/jobs/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./contentScriptNew.bundle.js" ],
+      "matches": [ "https://*.linkedin.com/jobs/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./contentScriptNew.bundle.js" ],
+      "matches": [ "https://*.glassdoor.ca/job-listing/*", "https://*.glassdoor.ca/Job/*", "https://*.glassdoor.com.au/job-listing/*", "https://*.glassdoor.com.au/Job/*", "https://*.glassdoor.co.in/job-listing/*", "https://*.glassdoor.co.in/Job/*", "https://*.glassdoor.co.nz/job-listing/*", "https://*.glassdoor.co.nz/Job/*", "https://*.glassdoor.co.uk/job-listing/*", "https://*.glassdoor.co.uk/Job/*", "https://*.glassdoor.com/job-listing/*", "https://*.glassdoor.com/Job/*", "https://*.glassdoor.ie/job-listing/*", "https://*.glassdoor.ie/Job/*", "https://*.glassdoor.sg/job-listing/*", "https://*.glassdoor.sg/Job/*", "https://www.glassdoor.fr/Job/*", "https://www.glassdoor.fr/job-listing/*", "https://www.glassdoor.de/job-listing/*", "https://www.glassdoor.de/Job/*", "https://www.glassdoor.it/Lavoro/*", "https://www.glassdoor.it/Job/*", "https://www.glassdoor.it/job-listing/*", "https://www.glassdoor.es/Empleo/*", "https://www.glassdoor.es/Job/*", "https://www.glassdoor.es/job-listing/*", "https://www.glassdoor.nl/Vacature/*", "https://www.glassdoor.nl/Job/*", "https://www.glassdoor.nl/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./contentScriptNew.bundle.js" ],
+      "matches": [ "https://*.indeed.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./contentScriptNew.bundle.js" ],
+      "matches": [ "https://*.ziprecruiter.com/jobs-search*", "https://*.ziprecruiter.com/jobs*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./contentScriptNew.bundle.js" ],
+      "matches": [ "https://www.dice.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./contentScriptNew.bundle.js" ],
+      "matches": [ "https://*.simplyhired.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./ziprecruiter.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.ziprecruiter.com/jobs-search*", "https://*.ziprecruiter.com/jobs*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./dice.bundle.js" ],
+      "matches": [ "https://www.dice.com/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.com/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.com/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.co.uk/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.co.uk/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.ca/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.ca/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.com.au/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.com.au/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.co.in/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.co.in/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.sg/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.sg/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.co.nz/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.co.nz/job-listing/*" ]
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.ie/Job/*", "https://www.glassdoor.fr/Job/*", "https://www.glassdoor.de/Job/*" ],
+      "run_at": "document_start"
+   }, {
+      "js": [ "./jquery.min.js", "./glassdoor.bundle.js", "./debug.bundle.js" ],
+      "matches": [ "https://*.glassdoor.ie/job-listing/*", "https://www.glassdoor.fr/job-listing/*", "https://www.glassdoor.de/job-listing/*" ]
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "description": "Apply to 100’s of jobs in just one click… Automate your application for Job with the lifetime job application system LazyApply.",
+   "externally_connectable": {
+      "matches": [ "https://lazyapply.com/*", "https://app.lazyapply.com/*", "https://dev--lazyapply-extension-dashboard.netlify.app/*", "https://beta.lazyapply.com/*", "https://referralai.lazyapply.com/*" ]
+   },
+   "host_permissions": [ "http://*/", "https://*/" ],
+   "icons": {
+      "128": "mainicon.png",
+      "16": "mainicon.png",
+      "32": "mainicon.png",
+      "48": "mainicon.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArWbvdFn5sijM0bwYE2204HebxheazX4uVBbuUhbSc8S0JKR3NRiRY922ZtcH1o2vZCXUQCJXFulZf0qFFQBjVCb5kKxnYNSCXXtK/g/Qivvl9kgVZcwtRZvPvMqEpqZnETbPLacBzi2MB46NsCuF6ogqnYIfAzmXXk708j7F8YaIFHfkt8uTZjaOT901KSXRLrHOfokAOmf7GjB0mBQ3sc7I23E+M/FdKdThhynqIzwUgiKrbmEtTj0PgmBpx9Xp6E7p7pysr0leXXePFDhexYYKR7EqelUh0ncILk2mzO0ERfuq6CH6uORbI/aYEJ3buQvREM7/sSh+W5H8KScwHwIDAQAB",
+   "manifest_version": 3,
+   "name": "LazyApply : Job Application Bot",
+   "permissions": [ "declarativeNetRequest", "power", "cookies", "activeTab", "storage", "unlimitedStorage", "tabs", "scripting", "webNavigation" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.8.86",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "images/*" ]
+   }, {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "images/*" ],
+      "use_dynamic_url": true
+   }, {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "styles.css" ]
+   } ]
+}

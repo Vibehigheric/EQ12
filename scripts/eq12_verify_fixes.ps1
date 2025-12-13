@@ -1,0 +1,100 @@
+# EQ12 VS Code Fix Verification Script
+# Quick verification that all fixes are in place
+
+Write-Host "EQ12 VS Code Fix Verification" -ForegroundColor Green
+Write-Host "=" * 40
+
+# 1. Check XML Schema files
+Write-Host ""
+Write-Host "XML Schema Setup:" -ForegroundColor Cyan
+if (Test-Path "schemas\nunit.xsd") {
+    Write-Host "✅ NUnit schema exists" -ForegroundColor Green
+} else {
+    Write-Host "❌ NUnit schema missing" -ForegroundColor Red
+}
+
+if (Test-Path "schemas\catalog.xml") {
+    Write-Host "✅ XML catalog exists" -ForegroundColor Green
+} else {
+    Write-Host "❌ XML catalog missing" -ForegroundColor Red  
+}
+
+# 2. Check VS Code settings
+Write-Host ""
+Write-Host "VS Code Configuration:" -ForegroundColor Cyan
+if (Test-Path ".vscode\settings.json") {
+    $settings = Get-Content ".vscode\settings.json" -Raw
+    if ($settings -match '"xml.catalogs"') {
+        Write-Host "✅ XML catalog configured in VS Code" -ForegroundColor Green
+    } else {
+        Write-Host "❌ XML catalog not configured" -ForegroundColor Red
+    }
+    
+    if ($settings -match '"xml.downloadExternalResources": false') {
+        Write-Host "✅ External resource downloads disabled" -ForegroundColor Green
+    } else {
+        Write-Host "❌ External resource downloads not disabled" -ForegroundColor Red
+    }
+} else {
+    Write-Host "❌ VS Code settings.json missing" -ForegroundColor Red
+}
+
+# 3. Check manifest files
+Write-Host ""
+Write-Host "SourceForge Manifests:" -ForegroundColor Cyan
+if (Test-Path "configs\sourceforge_manifest.json") {
+    Write-Host "✅ Core tools manifest exists" -ForegroundColor Green
+} else {
+    Write-Host "❌ Core tools manifest missing" -ForegroundColor Red
+}
+
+if (Test-Path "configs\sourceforge_sports.json") {
+    Write-Host "✅ Sports tools manifest exists" -ForegroundColor Green
+} else {
+    Write-Host "❌ Sports tools manifest missing" -ForegroundColor Red
+}
+
+# 4. Check Copilot instructions
+Write-Host ""
+Write-Host "AI Integration:" -ForegroundColor Cyan
+if (Test-Path ".github\COPILOT_INSTRUCTIONS.md") {
+    Write-Host "✅ Copilot instructions exist" -ForegroundColor Green
+} else {
+    Write-Host "❌ Copilot instructions missing" -ForegroundColor Red
+}
+
+# 5. Check workspace file
+Write-Host ""
+Write-Host "Workspace Setup:" -ForegroundColor Cyan
+if (Test-Path "eq12.code-workspace") {
+    Write-Host "✅ Multi-folder workspace file exists" -ForegroundColor Green
+} else {
+    Write-Host "❌ Workspace file missing" -ForegroundColor Red
+}
+
+# 6. Memory settings check
+Write-Host ""
+Write-Host "Memory Optimization:" -ForegroundColor Cyan
+$nodeOptions = [Environment]::GetEnvironmentVariable("NODE_OPTIONS", [EnvironmentVariableTarget]::User)
+if ($nodeOptions -eq "--max-old-space-size=4096") {
+    Write-Host "✅ Node.js memory limit set to 4GB" -ForegroundColor Green
+} else {
+    Write-Host "⚠️  Node.js memory limit not set (restart required)" -ForegroundColor Yellow
+}
+
+# 7. System info
+Write-Host ""
+Write-Host "System Information:" -ForegroundColor Cyan
+$memory = Get-WmiObject -Class Win32_ComputerSystem
+$totalRAM = [math]::Round($memory.TotalPhysicalMemory / 1GB, 2)
+Write-Host "RAM: $totalRAM GB" -ForegroundColor White
+
+Write-Host ""
+Write-Host "Next Steps:" -ForegroundColor Yellow
+Write-Host "1. Restart VS Code to apply all settings" -ForegroundColor White
+Write-Host "2. Open eq12.code-workspace" -ForegroundColor White
+Write-Host "3. Check Output panel -> LemMinX (should be quiet)" -ForegroundColor White
+Write-Host "4. Install SourceForge tools: .\scripts\eq12_sf_installer.ps1 -VerifyOnly" -ForegroundColor White
+
+Write-Host ""
+Write-Host "Verification complete!" -ForegroundColor Green

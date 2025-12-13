@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "components": [
+    "Microsoft.VisualStudio.Workload.ManagedDesktop",
+    "Microsoft.VisualStudio.Workload.NetCoreTools",
+    "Microsoft.VisualStudio.Workload.NetWeb",
+    "Microsoft.VisualStudio.Workload.Data",
+    "Microsoft.VisualStudio.Workload.Azure",
+    "Microsoft.VisualStudio.Workload.Python",
+    "Microsoft.VisualStudio.ComponentGroup.WebToolsExtensions",
+    "Microsoft.VisualStudio.Component.NuGet",
+    "Microsoft.VisualStudio.Component.Git"
+  ],
+  "extensions": [
+    "GitHub.Copilot",
+    "GitHub.Copilot.Chat",
+    "ms-dotnettools.csdevkit",
+    "ms-vscode.powershell",
+    "Azure.Toolkit"
+  ]
+}

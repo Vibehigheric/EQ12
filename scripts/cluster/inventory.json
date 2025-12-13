@@ -1,0 +1,26 @@
+[
+  {
+    "name": "eq12-controller",
+    "ip": "192.168.1.144",
+    "role": "controller",
+    "os": "windows",
+    "user": "ricoj100",
+    "description": "Cluster Controller + Heavy AI / Dev Workstation"
+  },
+  {
+    "name": "m70q-manager",
+    "ip": "192.168.1.52",
+    "role": "manager",
+    "os": "linux",
+    "user": "richj",
+    "description": "Primary Cluster Server / Swarm Manager"
+  },
+  {
+    "name": "pi-inference",
+    "ip": "192.168.1.80",
+    "role": "worker",
+    "os": "linux",
+    "user": "ricoj100",
+    "description": "Edge TPU Inference / 24-7 Low-Power AI Node"
+  }
+]

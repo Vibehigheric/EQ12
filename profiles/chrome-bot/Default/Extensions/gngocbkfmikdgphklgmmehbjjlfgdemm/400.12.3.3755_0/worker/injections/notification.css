@@ -1,0 +1,223 @@
+.button-injection-standard {
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+#x-close-button::before {
+  content: "";
+  display: inline-block;
+  min-height: 10px;
+  min-width: 10px;
+  background-image: var(--x-image);
+}
+
+#x-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.injection {
+  font-feature-settings: normal;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#secondary-content {
+  background: #FFFFFF;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.15);
+}
+#secondary-content #terms {
+  padding: 5px;
+}
+#secondary-content .full-terms {
+  color: #27798D;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+#secondary-content #individual-terms-container {
+  padding: 5px;
+}
+#secondary-content .special-terms {
+  font-size: 14px;
+  margin: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+#secondary-content .special-terms .title {
+  font-size: 14px;
+  color: #757575;
+}
+#secondary-content .special-terms .open-close button {
+  font-weight: bold;
+  text-align: right;
+  color: #27798D;
+  cursor: pointer;
+}
+#secondary-content .term {
+  margin-top: 3px;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px;
+}
+#secondary-content .term .term-text {
+  color: #333333;
+  flex: 1;
+  max-width: 250px;
+  margin-right: 5px;
+  overflow-wrap: break-word;
+}
+#secondary-content .term .reward {
+  color: #27798D;
+  float: right;
+}
+
+.button-injection-standard {
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+#x-close-button::before {
+  content: "";
+  display: inline-block;
+  min-height: 10px;
+  min-width: 10px;
+  background-image: var(--x-image);
+}
+
+#x-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.injection {
+  font-feature-settings: normal;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#secondary-content {
+  background: #FFFFFF;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.15);
+}
+#secondary-content #terms {
+  padding: 5px;
+}
+#secondary-content .full-terms {
+  color: #27798D;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+#secondary-content #individual-terms-container {
+  padding: 5px;
+}
+#secondary-content .special-terms {
+  font-size: 14px;
+  margin: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+#secondary-content .special-terms .title {
+  font-size: 14px;
+  color: #757575;
+}
+#secondary-content .special-terms .open-close button {
+  font-weight: bold;
+  text-align: right;
+  color: #27798D;
+  cursor: pointer;
+}
+#secondary-content .term {
+  margin-top: 3px;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px;
+}
+#secondary-content .term .term-text {
+  color: #333333;
+  flex: 1;
+  max-width: 250px;
+  margin-right: 5px;
+  overflow-wrap: break-word;
+}
+#secondary-content .term .reward {
+  color: #27798D;
+  float: right;
+}
+
+#notification {
+  width: 372px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  z-index: 999999;
+  background: white;
+  border: solid 1px #999;
+  border-radius: 4px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+}
+#notification #icon {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+#notification #icon img {
+  height: 50px;
+}
+#notification #body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#notification #body span, #notification #body a {
+  line-height: 20px;
+}
+#notification #body span {
+  color: #4C4C4C;
+  font-weight: bold;
+}
+#notification #body a {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#notification #body a {
+  color: #2388AF;
+}

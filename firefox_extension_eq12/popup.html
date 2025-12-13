@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Data Pusher</title>
+    <style>
+        body {
+            width: 380px;
+            min-height: 500px;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #00d4ff, #ff006e);
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header .version {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .status-bar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-dot.online {
+            background: #00ff88;
+            box-shadow: 0 0 8px #00ff88;
+        }
+
+        .status-dot.offline {
+            background: #ff4444;
+            box-shadow: 0 0 8px #ff4444;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .capture-section {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title .icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffaa00, #ff8800);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+        }
+
+        .btn-full {
+            grid-column: 1 / -1;
+        }
+
+        .data-preview {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 120px;
+            overflow-y: auto;
+            color: #00ff88;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #cccccc;
+            margin-top: 2px;
+        }
+
+        .settings-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .toggle {
+            width: 40px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: #00d4ff;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle.active::after {
+            left: 22px;
+        }
+
+        .url-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #ccc;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .footer {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+        }
+
+        .loading {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #333;
+            border-top: 2px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 11px;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .alert-error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 1px solid #ff4444;
+            color: #ff4444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🧠 EQ12 Data Pusher</h1>
+        <div class="version">v1.0.0 | Firefox Edition</div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-indicator">
+            <div class="status-dot offline" id="api-status"></div>
+            <span id="api-status-text">Checking API...</span>
+        </div>
+        <div class="status-indicator">
+            <span id="page-type">Unknown Page</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Current URL Display -->
+        <div class="url-display" id="current-url">Loading current page...</div>
+
+        <!-- Alerts -->
+        <div class="alert alert-success" id="success-alert"></div>
+        <div class="alert alert-error" id="error-alert"></div>
+
+        <!-- Data Capture Section -->
+        <div class="capture-section">
+            <div class="section-title">
+                <span class="icon">⚡</span>
+                Quick Capture
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="capture-odds">
+                    📊 Capture Odds
+                </button>
+                <button class="btn btn-success" id="capture-deals">
+                    💰 Capture Deals
+                </button>
+                <button class="btn btn-warning" id="capture-selection">
+                    ✂️ Capture Selected
+                </button>
+                <button class="btn btn-danger" id="capture-page">
+                    📄 Full Page
+                </button>
+            </div>
+
+            <button class="btn btn-primary btn-full" id="ai-analyze">
+                🤖 AI Analyze & Push to EQ12
+            </button>
+        </div>
+
+        <!-- Data Preview -->
+        <div class="data-preview" id="data-preview">
+            Ready to capture data from current page...
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-today">0</div>
+                <div class="stat-label">Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-success">0</div>
+                <div class="stat-label">Success</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-errors">0</div>
+                <div class="stat-label">Errors</div>
+            </div>
+        </div>
+
+        <!-- Advanced Actions -->
+        <div class="capture-section">
+            <div class="section-title">
+                <span class="icon">🚀</span>
+                Advanced Actions
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="affiliate-inject">
+                    🔗 Inject Affiliate
+                </button>
+                <button class="btn btn-success" id="open-dashboard">
+                    📊 EQ12 Dashboard
+                </button>
+                <button class="btn btn-warning" id="vpn-rotate">
+                    🛡️ Rotate VPN
+                </button>
+                <button class="btn btn-danger" id="test-api">
+                    🧪 Test API
+                </button>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-section">
+            <div class="section-title">
+                <span class="icon">⚙️</span>
+                Settings
+            </div>
+
+            <div class="setting-item">
+                <span>Auto-capture enabled</span>
+                <div class="toggle" id="auto-capture-toggle"></div>
+            </div>
+
+            <div class="setting-item">
+                <span>Affiliate injection</span>
+                <div class="toggle active" id="affiliate-toggle"></div>
+            </div>
+
+            <div class="setting-item">
+                <span>AI analysis</span>
+                <div class="toggle active" id="ai-toggle"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        EQ12 Advanced Data Pipeline |
+        <span id="footer-status">Ready</span>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading" id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

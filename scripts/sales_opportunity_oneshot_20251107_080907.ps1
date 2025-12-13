@@ -1,0 +1,65 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+
+#  EQ12 SALES OPPORTUNITY AUTOMATION ONE-SHOT
+# Automated lead generation and opportunity tracking
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$Industry,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$WorkspacePath = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [int]$LeadTarget = 50
+)
+
+$ErrorActionPreference = "Stop"
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = "$WorkspacePath\logs\sales_opportunity_$Industry_$Timestamp.log"
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $LogEntry = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [$Level] $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry
+}
+
+try {
+    Write-Log " Starting sales opportunity analysis for: $Industry"
+    
+    # Generate lead research
+    Write-Log " Generating lead research for $Industry..."
+    $LeadResult = & python "$WorkspacePath\scripts\lead_generator.py" --industry $Industry --target $LeadTarget
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Log " Lead generation successful for: $Industry"
+        
+        # Create opportunity tracking
+        $OpportunityPath = "$WorkspacePath\sales\opportunities\$Industry"
+        New-Item -Path $OpportunityPath -ItemType Directory -Force | Out-Null
+        
+        # Generate sales materials
+        Write-Log " Generating sales materials..."
+        & python "$WorkspacePath\scripts\sales_material_generator.py" --industry $Industry --output $OpportunityPath
+        
+        # Setup CRM integration
+        Write-Log " Setting up CRM integration..."
+        & python "$WorkspacePath\scripts\crm_integrator.py" --industry $Industry --leads $LeadTarget
+        
+        Write-Log " Sales opportunity automation complete for: $Industry"
+        
+    } else {
+        throw "Lead generation failed for: $Industry"
+    }
+    
+} catch {
+    Write-Log " Sales opportunity automation failed: $_" -Level "ERROR"
+    exit 1
+}
+
+Write-Log " Sales opportunity automation complete: $Industry"
+

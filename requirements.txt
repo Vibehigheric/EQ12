@@ -1,0 +1,130 @@
+# EQ12 Enhanced Sports Betting Platform - Complete Dependencies
+# ===========================================================
+
+# CRITICAL: Core OpenAI SDK and Environment (FIXES API ISSUES)
+openai>=2.1.0
+python-dotenv>=1.0.0
+
+# CRITICAL: Date/Time Handling (FIXES TIMEZONE ISSUES)
+python-dateutil>=2.8.2
+pytz>=2023.3
+tzdata>=2023.3
+
+# Base utilities
+requests>=2.31.0
+
+# Data processing
+pandas>=2.1.0
+numpy>=1.24.0
+
+# Enhanced Console Output (FIXES UTF-8/EMOJI ISSUES)
+rich>=13.7.0
+colorama>=0.4.6
+
+# Code Quality (FIXES RUFF WARNINGS)
+ruff>=0.6.8
+black>=23.7.0
+
+# Version Control Integration
+GitPython>=3.1.40
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.11.0
+pytest-asyncio>=0.21.0
+
+# Web scraping and automation
+beautifulsoup4>=4.12.0
+playwright>=1.37.0
+playwright-stealth>=1.0.6
+undetected-chromedriver>=3.5.0
+fake-useragent>=1.4.0
+
+# AI and ML
+transformers>=4.33.0
+sentence-transformers>=2.2.2
+langchain>=0.0.300
+
+# Data storage and caching
+redis>=4.6.0
+weaviate-client>=3.24.0
+
+# Graphics and visualization
+pillow>=10.0.0
+matplotlib>=3.7.0
+
+# Web frameworks
+flask>=2.3.0
+aiohttp>=3.8.0
+
+# Telegram bot
+python-telegram-bot>=20.5
+
+# Optional Intel optimizations (install when available)
+# intel-openmp
+# oneapi-numpy
+# oneapi-pandas
+# openvino
+
+# Google Sheets Integration (optional - for dashboard features)
+gspread>=5.12.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
+
+# Additional Web and API Integration
+httpx>=0.25.0
+
+# Data Serialization and Validation
+pydantic>=2.5.0
+
+# Development Tools (uncomment as needed)
+# mypy>=1.11.0
+# pre-commit>=3.0.0
+
+# Optional Extended Features
+python-telegram-bot>=20.5
+discord.py>=2.3.0
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+psycopg2-binary>=2.9.0
+bs4>=0.0.1
+PyYAML>=6.0.0
+nltk>=3.8
+textblob>=0.17.0
+yfinance>=0.2.18
+psutil>=5.9.0
+reportlab>=4.0.4
+qrcode>=7.4.2
+jinja2>=3.1.2
+aiofiles>=23.2.1
+netifaces>=0.11.0
+
+# Crypto and Security
+cryptography>=41.0.0
+
+# Additional Utilities for Production
+structlog>=23.2.0
+python-json-logger>=2.0.7
+tqdm>=4.66.0
+zeroconf>=0.131.0
+pystray>=0.19.4
+watchdog>=3.0.0
+tesseract>=0.1.3
+pytest>=7.4.0
+scipy>=1.11.0
+httpx>=0.25.0
+pytz>=2023.3
+prometheus-client>=0.18.0
+feedparser>=6.0.10
+python-dateutil>=2.8.2
+
+# Added by EQ12 Code Fixer
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+SQLAlchemy>=2.0.0
+stripe>=7.0.0
+pydantic>=2.0.0
+psycopg2-binary>=2.9.0
+slowapi>=0.1.9
+python-multipart>=0.0.6

@@ -1,0 +1,117 @@
+# EQ12 Ngrok Gateway Configuration
+# Complete ngrok setup for secure tunnels to EQ12 automation services
+
+version: "2"
+authtoken: "YOUR_NGROK_AUTH_TOKEN_HERE"  # Get from https://dashboard.ngrok.com/auth/your-authtoken
+
+# Global configuration
+console_ui: true
+console_ui_color: transparent
+http_timeout: 30s
+log_level: info
+log_format: json
+log: C:\EQ12\logs\ngrok.log
+
+# Update check settings
+update_channel: stable
+update_check: true
+
+# Web interface configuration
+web_addr: localhost:4040
+inspect_db_size: 50000000  # 50MB
+
+# Tunnel definitions for EQ12 services
+tunnels:
+
+  # Main EQ12 API - FastAPI backend
+  eq12-api:
+    addr: 8000
+    proto: http
+    subdomain: eq12-api  # Requires ngrok Pro for custom subdomains
+    auth: "eq12user:eq12pass2025"  # Basic auth protection
+    host_header: localhost:8000
+    bind_tls: true
+    metadata: '{"service": "eq12-backend", "type": "fastapi"}'
+
+  # Sports betting webhook endpoint
+  sports-webhook:
+    addr: 8001
+    proto: http
+    subdomain: eq12-sports
+    auth: "sportsbot:BettingAPI2025"
+    metadata: '{"service": "sports-betting", "type": "webhook"}'
+
+  # Travel deals API
+  travel-api:
+    addr: 8002
+    proto: http
+    subdomain: eq12-travel
+    auth: "travelbot:DealsAPI2025"
+    metadata: '{"service": "travel-deals", "type": "api"}'
+
+  # Commerce automation endpoint
+  commerce-api:
+    addr: 8003
+    proto: http
+    subdomain: eq12-commerce
+    auth: "commercebot:ShopAPI2025"
+    metadata: '{"service": "commerce", "type": "automation"}'
+
+  # Financial tracking dashboard
+  finance-dashboard:
+    addr: 8004
+    proto: http
+    subdomain: eq12-finance
+    auth: "financeuser:MoneyTracker2025"
+    metadata: '{"service": "finance-tracker", "type": "dashboard"}'
+
+  # Telegram bot webhook
+  telegram-webhook:
+    addr: 8005
+    proto: http
+    subdomain: eq12-telegram
+    auth: "telegram:BotWebhook2025"
+    metadata: '{"service": "telegram-bot", "type": "webhook"}'
+
+  # SSH remote access (secure)
+  ssh-access:
+    addr: 22
+    proto: tcp
+    remote_addr: "0.tcp.ngrok.io:12345"  # Will be assigned by ngrok
+    metadata: '{"service": "ssh", "type": "remote-access"}'
+
+  # RDP remote desktop (if needed)
+  rdp-access:
+    addr: 3389
+    proto: tcp
+    remote_addr: "1.tcp.ngrok.io:54321"
+    metadata: '{"service": "rdp", "type": "remote-desktop"}'
+
+  # Database access (PostgreSQL/MySQL)
+  database-tunnel:
+    addr: 5432
+    proto: tcp
+    remote_addr: "2.tcp.ngrok.io:15432"
+    metadata: '{"service": "database", "type": "data-access"}'
+
+  # Development server (hot reload)
+  dev-server:
+    addr: 3000
+    proto: http
+    subdomain: eq12-dev
+    host_header: localhost:3000
+    metadata: '{"service": "development", "type": "preview"}'
+
+  # File transfer service
+  file-server:
+    addr: 8080
+    proto: http
+    subdomain: eq12-files
+    auth: "fileuser:FileTransfer2025"
+    metadata: '{"service": "file-server", "type": "utility"}'
+
+# Regional configuration (optional)
+region: us  # us, eu, ap, au, sa, jp, in
+
+# Advanced configuration
+root_cas: trusted

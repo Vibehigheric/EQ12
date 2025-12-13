@@ -1,0 +1,10 @@
+/*!
+ * Rakuten Cash Back Button v5.71.0
+ * Copyrights 2025 Ebates Inc. dba Rakuten
+ */
+
+/*!
+ * perfect-scrollbar v1.5.6
+ * Copyright 2024 Hyunje Jun, MDBootstrap and Contributors
+ * Licensed under MIT
+ */

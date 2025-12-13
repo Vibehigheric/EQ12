@@ -1,0 +1,97 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Start", "Test", "Status")]
+    [string]$Action = "Start",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput
+)
+
+<#
+.SYNOPSIS
+NBA SGP Continuous Monitoring System - PowerShell Wrapper
+
+.DESCRIPTION
+Manages the NBA SGP continuous monitoring system that scans every 2 hours
+
+.EXAMPLE
+.\eq12_nba_monitoring_simple.ps1 -Action Start
+#>
+
+function Write-MonitorLog {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $color = switch($Level) {
+        "ERROR" { "Red" }
+        "WARN" { "Yellow" }
+        default { "Green" }
+    }
+    Write-Host "[$timestamp] [$Level] $Message" -ForegroundColor $color
+}
+
+Write-MonitorLog "🏀 NBA SGP Continuous Monitoring System"
+Write-MonitorLog "🎯 Action: $Action | Workspace: $Workspace"
+
+switch ($Action) {
+    "Start" {
+        Write-MonitorLog "🚀 Starting continuous monitoring..."
+        Write-MonitorLog "📱 Will scan every 2 hours and send Telegram updates"
+        
+        $monitoringScript = Join-Path $Workspace "scripts\eq12_nba_continuous_monitoring.py"
+        $arguments = @($monitoringScript, "--workspace", $Workspace)
+        
+        if ($VerboseOutput) {
+            $arguments += "--verbose"
+        }
+        
+        try {
+            Start-Process -FilePath "python" -ArgumentList $arguments -NoNewWindow -Wait
+        }
+        catch {
+            Write-MonitorLog "❌ Failed to start: $($_.Exception.Message)" -Level "ERROR"
+        }
+    }
+    
+    "Test" {
+        Write-MonitorLog "🧪 Running test cycle..."
+        
+        $monitoringScript = Join-Path $Workspace "scripts\eq12_nba_continuous_monitoring.py"
+        $arguments = @($monitoringScript, "--workspace", $Workspace, "--test")
+        
+        if ($VerboseOutput) {
+            $arguments += "--verbose"
+        }
+        
+        try {
+            $result = Start-Process -FilePath "python" -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+            
+            if ($result.ExitCode -eq 0) {
+                Write-MonitorLog "✅ Test completed successfully"
+            } else {
+                Write-MonitorLog "❌ Test failed" -Level "ERROR"
+            }
+        }
+        catch {
+            Write-MonitorLog "❌ Test error: $($_.Exception.Message)" -Level "ERROR"
+        }
+    }
+    
+    "Status" {
+        Write-MonitorLog "📊 Checking status..."
+        
+        $pythonProcesses = Get-Process | Where-Object { $_.ProcessName -eq "python" }
+        Write-MonitorLog "🔢 Python processes running: $($pythonProcesses.Count)"
+        
+        $logsPath = Join-Path $Workspace "logs"
+        if (Test-Path $logsPath) {
+            $recentLogs = Get-ChildItem -Path $logsPath -Filter "*monitoring_scan_*" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 3
+            Write-MonitorLog "📋 Recent scans: $($recentLogs.Count)"
+        }
+    }
+}
+
+Write-MonitorLog "🏁 Monitoring wrapper completed"

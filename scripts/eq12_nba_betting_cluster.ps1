@@ -1,0 +1,533 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Status", "Pipeline", "Collect", "Train", "Predict", "Monitor", "Telegram", "Setup", "Test")]
+    [string]$Action = "Status",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$GameDate = (Get-Date -Format "yyyy-MM-dd"),
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$Verbose,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$Force,
+    
+    [Parameter(Mandatory=$false)]
+    [int]$MonitorInterval = 15
+)
+
+<#
+.SYNOPSIS
+EQ12 NBA Betting Cluster PowerShell Controller
+
+.DESCRIPTION
+Master control script for the EQ12 + Pi5 + Coral TPU NBA betting intelligence cluster.
+Orchestrates data collection, model training, inference, and prop generation.
+
+.PARAMETER Action
+Action to perform: Status, Pipeline, Collect, Train, Predict, Monitor, Telegram, Setup, Test
+
+.PARAMETER GameDate
+Target game date for processing (YYYY-MM-DD format)
+
+.PARAMETER Verbose
+Enable verbose output
+
+.PARAMETER Force
+Force execution even if prerequisites aren't met
+
+.PARAMETER MonitorInterval
+Monitoring interval in minutes for continuous monitoring
+
+.EXAMPLE
+.\eq12_nba_betting_cluster.ps1 -Action Status
+Get current cluster status
+
+.EXAMPLE
+.\eq12_nba_betting_cluster.ps1 -Action Pipeline -GameDate "2024-11-08"
+Run complete betting pipeline for specific date
+
+.EXAMPLE
+.\eq12_nba_betting_cluster.ps1 -Action Telegram
+Generate Telegram betting recommendations
+#>
+
+# EQ12 NBA Cluster Configuration
+$script:ClusterConfig = @{
+    EQ12Host = "192.168.100.1"
+    PiHost = "192.168.100.2"
+    PiUser = "eq12"
+    SSHKey = "C:\Users\admin\.ssh\id_rsa"
+    DataDir = "C:\EQ12\data"
+    LogsDir = "C:\EQ12\logs"
+    ScriptsDir = "C:\EQ12\scripts"
+    ModelsDir = "C:\EQ12\models"
+    DashboardDir = "C:\EQ12\dashboard"
+}
+
+function Write-ClusterLog {
+    param(
+        [string]$Message,
+        [ValidateSet("Info", "Warning", "Error", "Success")]
+        [string]$Level = "Info"
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logFile = "$($script:ClusterConfig.LogsDir)\nba_cluster_$(Get-Date -Format 'yyyyMMdd').log"
+    
+    $colors = @{
+        "Info" = "White"
+        "Warning" = "Yellow" 
+        "Error" = "Red"
+        "Success" = "Green"
+    }
+    
+    $prefix = switch ($Level) {
+        "Info" { "[INFO]" }
+        "Warning" { "[WARN]" }
+        "Error" { "[ERROR]" }
+        "Success" { "[SUCCESS]" }
+    }
+    
+    $logMessage = "[$timestamp] [$Level] $Message"
+    Write-Host "$prefix $Message" -ForegroundColor $colors[$Level]
+    
+    # Write to log file
+    $logMessage | Out-File -FilePath $logFile -Append -Encoding UTF8
+}
+
+function Test-Prerequisites {
+    Write-ClusterLog " Checking EQ12 NBA cluster prerequisites..."
+    
+    $issues = @()
+    
+    # Check Python installation
+    try {
+        $pythonVersion = & python --version 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Python: $pythonVersion" -Level Success
+        } else {
+            $issues += "Python not found or not in PATH"
+        }
+    } catch {
+        $issues += "Python installation check failed"
+    }
+    
+    # Check required directories
+    $requiredDirs = @($script:ClusterConfig.DataDir, $script:ClusterConfig.LogsDir, 
+                     $script:ClusterConfig.ScriptsDir, $script:ClusterConfig.ModelsDir)
+    
+    foreach ($dir in $requiredDirs) {
+        if (-not (Test-Path $dir)) {
+            Write-ClusterLog "Creating directory: $dir" -Level Info
+            New-Item -Path $dir -ItemType Directory -Force | Out-Null
+        }
+    }
+    
+    # Check SSH key
+    if (-not (Test-Path $script:ClusterConfig.SSHKey)) {
+        $issues += "SSH key not found: $($script:ClusterConfig.SSHKey)"
+    }
+    
+    # Check Pi connectivity
+    try {
+        $pingResult = Test-Connection -ComputerName $script:ClusterConfig.PiHost -Count 1 -Quiet
+        if ($pingResult) {
+            Write-ClusterLog "Pi connectivity: ONLINE" -Level Success
+        } else {
+            $issues += "Pi node not reachable at $($script:ClusterConfig.PiHost)"
+        }
+    } catch {
+        $issues += "Network connectivity test failed"
+    }
+    
+    # Check required Python scripts
+    $requiredScripts = @(
+        "eq12_nba_odds_collector.py",
+        "eq12_nba_feature_builder.py", 
+        "eq12_nba_tpu_model.py",
+        "eq12_nba_prop_engine.py",
+        "eq12_nba_cluster_manager.py"
+    )
+    
+    foreach ($script in $requiredScripts) {
+        $scriptPath = Join-Path $script:ClusterConfig.ScriptsDir $script
+        if (-not (Test-Path $scriptPath)) {
+            $issues += "Missing script: $script"
+        }
+    }
+    
+    if ($issues.Count -gt 0 -and -not $Force) {
+        Write-ClusterLog "Prerequisites check failed:" -Level Error
+        foreach ($issue in $issues) {
+            Write-ClusterLog "  - $issue" -Level Error
+        }
+        return $false
+    } elseif ($issues.Count -gt 0) {
+        Write-ClusterLog "Prerequisites issues found but Force flag used" -Level Warning
+    } else {
+        Write-ClusterLog "All prerequisites satisfied" -Level Success
+    }
+    
+    return $true
+}
+
+function Get-ClusterStatus {
+    Write-ClusterLog " Getting EQ12 NBA cluster status..."
+    
+    try {
+        $statusScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_cluster_manager.py"
+        $result = & python $statusScript --action status
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Cluster status retrieved successfully" -Level Success
+            return $true
+        } else {
+            Write-ClusterLog "Failed to get cluster status" -Level Error
+            return $false
+        }
+    } catch {
+        Write-ClusterLog "Error getting cluster status: $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+function Start-DataCollection {
+    Write-ClusterLog " Starting NBA data collection..."
+    
+    try {
+        $collectorScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_odds_collector.py"
+        $args = @("--mode", "single", "--export-tpu")
+        if ($Verbose) { $args += "--verbose" }
+        
+        $result = & python $collectorScript @args
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Data collection completed successfully" -Level Success
+            return $true
+        } else {
+            Write-ClusterLog "Data collection failed" -Level Error
+            return $false
+        }
+    } catch {
+        Write-ClusterLog "Error during data collection: $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+function Start-ModelTraining {
+    Write-ClusterLog " Starting NBA model training..."
+    
+    try {
+        $modelScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_tpu_model.py"
+        $args = @("--action", "train", "--days-back", "90")
+        if ($Verbose) { $args += "--verbose" }
+        
+        Write-ClusterLog "Training model with 90 days of historical data..." -Level Info
+        $result = & python $modelScript @args
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Model training completed" -Level Success
+            
+            # Convert to TFLite
+            Write-ClusterLog "Converting model to TensorFlow Lite..." -Level Info
+            $convertResult = & python $modelScript --action convert --quantize
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-ClusterLog "Model conversion completed" -Level Success
+                return $true
+            } else {
+                Write-ClusterLog "Model conversion failed" -Level Error
+                return $false
+            }
+        } else {
+            Write-ClusterLog "Model training failed" -Level Error
+            return $false
+        }
+    } catch {
+        Write-ClusterLog "Error during model training: $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+function Start-Prediction {
+    param([string]$Date = $GameDate)
+    
+    Write-ClusterLog " Starting prediction pipeline for $Date..."
+    
+    try {
+        $clusterScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_cluster_manager.py"
+        $args = @("--action", "pipeline")
+        if ($Date) { $args += @("--game-date", $Date) }
+        if ($Verbose) { $args += "--verbose" }
+        
+        $result = & python $clusterScript @args
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Prediction pipeline completed successfully" -Level Success
+            return $true
+        } else {
+            Write-ClusterLog "Prediction pipeline failed" -Level Error
+            return $false
+        }
+    } catch {
+        Write-ClusterLog "Error during prediction: $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+function Start-PropAnalysis {
+    Write-ClusterLog " Starting prop betting analysis..."
+    
+    try {
+        $propScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_prop_engine.py"
+        $args = @("--action", "analyze", "--min-ev", "0.05")
+        if ($Verbose) { $args += "--verbose" }
+        
+        $result = & python $propScript @args
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Prop analysis completed successfully" -Level Success
+            return $true
+        } else {
+            Write-ClusterLog "Prop analysis failed" -Level Error
+            return $false
+        }
+    } catch {
+        Write-ClusterLog "Error during prop analysis: $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+function Get-TelegramRecommendations {
+    Write-ClusterLog " Generating Telegram recommendations..."
+    
+    try {
+        $propScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_prop_engine.py"
+        $result = & python $propScript --action telegram
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-ClusterLog "Telegram recommendations generated" -Level Success
+            
+            # Save to file for easy copying
+            $telegramFile = "$($script:ClusterConfig.LogsDir)\telegram_message_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+            $result | Out-File -FilePath $telegramFile -Encoding UTF8
+            
+            Write-ClusterLog "Telegram message saved to: $telegramFile" -Level Info
+            Write-Host "`n" + "="*60
+            Write-Host "TELEGRAM MESSAGE READY:" -ForegroundColor Cyan
+            Write-Host "="*60
+            Write-Host $result
+            Write-Host "="*60
+            
+            return $true
+        } else {
+            Write-ClusterLog "Failed to generate Telegram recommendations" -Level Error
+            return $false
+        }
+    } catch {
+        Write-ClusterLog "Error generating Telegram recommendations: $($_.Exception.Message)" -Level Error
+        return $false
+    }
+}
+
+function Start-Monitoring {
+    param([int]$Interval = $MonitorInterval)
+    
+    Write-ClusterLog " Starting continuous cluster monitoring (every $Interval minutes)..."
+    
+    try {
+        $clusterScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_cluster_manager.py"
+        $args = @("--action", "monitor", "--monitor-interval", $Interval.ToString())
+        if ($Verbose) { $args += "--verbose" }
+        
+        Write-ClusterLog "Press Ctrl+C to stop monitoring" -Level Info
+        & python $clusterScript @args
+        
+    } catch {
+        Write-ClusterLog "Monitoring stopped: $($_.Exception.Message)" -Level Warning
+    }
+}
+
+function Initialize-ClusterSetup {
+    Write-ClusterLog " Initializing EQ12 NBA betting cluster setup..."
+    
+    # Create all required directories
+    $directories = @(
+        $script:ClusterConfig.DataDir,
+        $script:ClusterConfig.LogsDir,
+        $script:ClusterConfig.ModelsDir,
+        $script:ClusterConfig.DashboardDir,
+        "$($script:ClusterConfig.DataDir)\exports",
+        "$($script:ClusterConfig.LogsDir)\archived"
+    )
+    
+    foreach ($dir in $directories) {
+        if (-not (Test-Path $dir)) {
+            New-Item -Path $dir -ItemType Directory -Force | Out-Null
+            Write-ClusterLog "Created directory: $dir" -Level Success
+        }
+    }
+    
+    # Create example environment file
+    $envExample = @"
+# EQ12 NBA Betting Cluster Environment Variables
+ODDS_API_KEY=your_odds_api_key_here
+RAPIDAPI_KEY=your_rapidapi_key_here
+SPORTSDATA_KEY=your_sportsdata_key_here
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
+TELEGRAM_CHAT_ID=your_telegram_chat_id_here
+
+# Cluster Configuration
+EQ12_HOST=192.168.100.1
+PI_HOST=192.168.100.2
+PI_USER=eq12
+"@
+    
+    $envFile = "$($script:ClusterConfig.DataDir)\.env.example"
+    if (-not (Test-Path $envFile)) {
+        $envExample | Out-File -FilePath $envFile -Encoding UTF8
+        Write-ClusterLog "Created environment example: $envFile" -Level Success
+    }
+    
+    # Test basic functionality
+    Write-ClusterLog "Testing basic cluster functionality..." -Level Info
+    
+    if (Test-Prerequisites) {
+        Write-ClusterLog "Cluster setup validation passed" -Level Success
+        
+        # Try to get status
+        Get-ClusterStatus | Out-Null
+        
+        Write-ClusterLog "EQ12 NBA betting cluster is ready!" -Level Success
+        Write-ClusterLog "Next steps:" -Level Info
+        Write-ClusterLog "  1. Configure API keys in .env file" -Level Info
+        Write-ClusterLog "  2. Run: .\eq12_nba_betting_cluster.ps1 -Action Train" -Level Info
+        Write-ClusterLog "  3. Run: .\eq12_nba_betting_cluster.ps1 -Action Pipeline" -Level Info
+        
+    } else {
+        Write-ClusterLog "Cluster setup validation failed" -Level Error
+    }
+}
+
+function Test-ClusterFunctionality {
+    Write-ClusterLog " Running cluster functionality tests..."
+    
+    $testResults = @{}
+    
+    # Test 1: Prerequisites
+    Write-ClusterLog "Test 1: Prerequisites check..." -Level Info
+    $testResults["Prerequisites"] = Test-Prerequisites
+    
+    # Test 2: Cluster status
+    Write-ClusterLog "Test 2: Cluster status..." -Level Info
+    $testResults["Status"] = Get-ClusterStatus
+    
+    # Test 3: Data collection (dry run)
+    Write-ClusterLog "Test 3: Data collection..." -Level Info
+    $testResults["DataCollection"] = Start-DataCollection
+    
+    # Test 4: Feature engineering
+    Write-ClusterLog "Test 4: Feature engineering..." -Level Info
+    try {
+        $featureScript = Join-Path $script:ClusterConfig.ScriptsDir "eq12_nba_feature_builder.py"
+        $result = & python $featureScript --date $GameDate --verbose
+        $testResults["Features"] = ($LASTEXITCODE -eq 0)
+    } catch {
+        $testResults["Features"] = $false
+    }
+    
+    # Test Results Summary
+    Write-Host "`n" + "="*50
+    Write-Host "EQ12 NBA CLUSTER TEST RESULTS" -ForegroundColor Cyan
+    Write-Host "="*50
+    
+    $passCount = 0
+    foreach ($test in $testResults.GetEnumerator()) {
+        $status = if ($test.Value) { " PASS"; $passCount++ } else { " FAIL" }
+        Write-Host "$($test.Key.PadRight(20)): $status"
+    }
+    
+    Write-Host "="*50
+    Write-Host "Overall: $passCount/$($testResults.Count) tests passed" -ForegroundColor $(if ($passCount -eq $testResults.Count) { "Green" } else { "Yellow" })
+    
+    return ($passCount -eq $testResults.Count)
+}
+
+# Main execution logic
+try {
+    Write-Host @"
+ EQ12 NBA BETTING CLUSTER CONTROLLER 
+============================================
+Action: $Action
+Date: $GameDate
+Cluster: EQ12 + Pi5 + Coral TPU
+============================================
+"@ -ForegroundColor Cyan
+
+    # Check prerequisites unless it's a setup action
+    if ($Action -ne "Setup" -and -not (Test-Prerequisites)) {
+        Write-ClusterLog "Prerequisites not met. Run with -Action Setup first." -Level Error
+        exit 1
+    }
+    
+    switch ($Action) {
+        "Status" {
+            $success = Get-ClusterStatus
+        }
+        
+        "Pipeline" {
+            Write-ClusterLog " Running complete NBA betting pipeline..." -Level Info
+            $success = Start-Prediction -Date $GameDate
+        }
+        
+        "Collect" {
+            $success = Start-DataCollection
+        }
+        
+        "Train" {
+            $success = Start-ModelTraining
+        }
+        
+        "Predict" {
+            $success = Start-Prediction -Date $GameDate
+        }
+        
+        "Monitor" {
+            Start-Monitoring -Interval $MonitorInterval
+            $success = $true
+        }
+        
+        "Telegram" {
+            $success = Get-TelegramRecommendations
+        }
+        
+        "Setup" {
+            Initialize-ClusterSetup
+            $success = $true
+        }
+        
+        "Test" {
+            $success = Test-ClusterFunctionality
+        }
+        
+        default {
+            Write-ClusterLog "Unknown action: $Action" -Level Error
+            $success = $false
+        }
+    }
+    
+    if ($success) {
+        Write-ClusterLog "Action '$Action' completed successfully" -Level Success
+        exit 0
+    } else {
+        Write-ClusterLog "Action '$Action' failed" -Level Error
+        exit 1
+    }
+    
+} catch {
+    Write-ClusterLog "Unexpected error: $($_.Exception.Message)" -Level Error
+    Write-ClusterLog "Stack trace: $($_.ScriptStackTrace)" -Level Error
+    exit 1
+}

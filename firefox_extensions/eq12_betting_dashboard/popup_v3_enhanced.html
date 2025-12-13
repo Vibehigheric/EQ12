@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Betting Dashboard</title>
+    <style>
+        /* Modern CSS using MDN guidelines and CSS tools */
+
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 380px;
+            min-height: 600px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header with EQ12 Branding */
+        .header {
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 3px solid #00ff88;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header .version {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Status Cards Container */
+        .status-container {
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        /* VPN Status Card with Enhanced Styling */
+        .vpn-status {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #ddd;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vpn-status::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 300% 100%;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        .vpn-status.connected {
+            border-left-color: #00ff88;
+            background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+        }
+
+        .vpn-status.disconnected {
+            border-left-color: #ff4757;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-text {
+            flex-grow: 1;
+        }
+
+        .status-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-subtitle {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .status-details {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Enhanced Button Styles with CSS Box-Shadow Generator */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow:
+                0 4px 8px rgba(102, 126, 234, 0.3),
+                0 1px 3px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 6px 16px rgba(102, 126, 234, 0.4),
+                0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow:
+                0 2px 4px rgba(102, 126, 234, 0.3),
+                0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            box-shadow:
+                0 4px 8px rgba(0, 255, 136, 0.3),
+                0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+            box-shadow:
+                0 4px 8px rgba(255, 71, 87, 0.3),
+                0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #57606f 0%, #3d4454 100%);
+            box-shadow:
+                0 4px 8px rgba(87, 96, 111, 0.3),
+                0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Loading Animation */
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 16px;
+            margin: -8px 0 0 -8px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Parlay Display Section */
+        .parlay-section {
+            background: white;
+            border-radius: 12px;
+            margin: 0 16px 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-content {
+            padding: 16px;
+        }
+
+        .parlay-item {
+            padding: 12px;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .parlay-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        .parlay-item.featured {
+            background: linear-gradient(135deg, #fff7e6 0%, #ffedd5 100%);
+            border-color: #f59e0b;
+        }
+
+        .parlay-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .parlay-odds {
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .parlay-ev {
+            background: #00ff88;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Action Buttons Grid */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 16px 16px;
+        }
+
+        .action-single {
+            grid-column: 1 / -1;
+        }
+
+        /* Quick Stats Display */
+        .stats-container {
+            background: white;
+            border-radius: 12px;
+            margin: 0 16px 16px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        /* Telegram Section */
+        .telegram-section {
+            background: white;
+            border-radius: 12px;
+            margin: 0 16px 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .telegram-input {
+            width: 100%;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        .telegram-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Footer with Quick Links */
+        .footer {
+            background: #1a1a2e;
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 8px;
+        }
+
+        .footer-link {
+            color: #00ff88;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Accessibility and Dark Mode Support */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .vpn-status.connected {
+                background: linear-gradient(135deg, #0f2027 0%, #203a43 100%);
+            }
+
+            .parlay-section,
+            .stats-container,
+            .telegram-section {
+                background: #2d3748;
+                color: #e2e8f0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 360px) {
+            body {
+                width: 320px;
+            }
+
+            .header {
+                padding: 12px 16px;
+            }
+
+            .status-container {
+                padding: 12px;
+            }
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 0 16px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hidden class for dynamic content */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Loading states */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <header class="header">
+        <h1>EQ12 Betting Dashboard</h1>
+        <div class="version">v1.0.0 - Enhanced</div>
+    </header>
+
+    <div id="message-container"></div>
+
+    <div class="status-container">
+        <!-- VPN Status Card -->
+        <div id="vpn-status" class="vpn-status disconnected">
+            <div class="status-header">
+                <div class="status-icon">🔒</div>
+                <div class="status-text">
+                    <div class="status-title">VPN Status</div>
+                    <div class="status-subtitle" id="vpn-subtitle">Checking connection...</div>
+                </div>
+            </div>
+            <div class="status-details" id="vpn-details">
+                Last check: <span id="vpn-last-check">Never</span><br>
+                IP Address: <span id="vpn-ip">Unknown</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-container">
+        <div class="section-header">
+            <span>📊 Session Statistics</span>
+            <span id="session-time">00:00</span>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="active-parlays">0</div>
+                <div class="stat-label">Active Parlays</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="opportunities">0</div>
+                <div class="stat-label">EV Opportunities</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="success-rate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parlay Display Section -->
+    <div class="parlay-section">
+        <div class="section-header">
+            <span>🎯 Top Parlays</span>
+            <button id="refresh-parlays" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">↻</button>
+        </div>
+        <div class="section-content" id="parlay-content">
+            <div class="parlay-item featured">
+                <div class="parlay-meta">
+                    <span>NBA • Lakers vs Warriors</span>
+                    <span class="parlay-ev">+12.3% EV</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 4px;">Lakers -4.5 + Over 215.5</div>
+                <div class="parlay-meta">
+                    <span class="parlay-odds">+280</span>
+                    <span style="font-size: 11px; color: #666;">Confidence: High</span>
+                </div>
+            </div>
+            <div class="parlay-item">
+                <div class="parlay-meta">
+                    <span>NFL • Chiefs vs Bills</span>
+                    <span class="parlay-ev">+8.7% EV</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 4px;">Mahomes 250+ Pass Yds + Chiefs Win</div>
+                <div class="parlay-meta">
+                    <span class="parlay-odds">+185</span>
+                    <span style="font-size: 11px; color: #666;">Confidence: Medium</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-grid">
+        <button id="check-vpn" class="btn btn-primary">Check VPN</button>
+        <button id="scan-odds" class="btn btn-secondary">Scan Odds</button>
+        <button id="open-dashboard" class="btn btn-primary action-single">Open Dashboard</button>
+        <button id="emergency-stop" class="btn btn-danger">Emergency Stop</button>
+        <button id="test-telegram" class="btn btn-secondary">Test Bot</button>
+    </div>
+
+    <!-- Telegram Section -->
+    <div class="telegram-section">
+        <div class="section-header">
+            <span>📱 Telegram Controls</span>
+            <div id="telegram-status" style="font-size: 11px;">●</div>
+        </div>
+        <div class="section-content">
+            <input type="text" id="telegram-message" class="telegram-input" placeholder="Send message to EQ12 bot..."
+                maxlength="200">
+            <button id="send-telegram" class="btn btn-primary action-single">Send Message</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#" id="open-options" class="footer-link">Settings</a>
+            <a href="#" id="view-logs" class="footer-link">Logs</a>
+            <a href="#" id="help" class="footer-link">Help</a>
+        </div>
+        <div>EQ12 Betting System © 2024</div>
+    </footer>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

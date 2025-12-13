@@ -1,0 +1,61 @@
+{
+    "component_info": {
+        "name": "nfl_live_roster_verification",
+        "type": "betting_engine",
+        "script_path": "C:\\EQ12\\scripts\\nfl_live_roster_verification.py",
+        "dependencies": [
+            "requests"
+        ],
+        "version": "1.0.0"
+    },
+    "runtime_settings": {
+        "enabled": true,
+        "auto_start": true,
+        "restart_on_failure": true,
+        "max_memory_mb": 512,
+        "execution_timeout": 300,
+        "priority": "normal"
+    },
+    "monitoring": {
+        "health_check_enabled": true,
+        "performance_monitoring": true,
+        "error_tracking": true,
+        "metrics_collection": true
+    },
+    "logging": {
+        "log_level": "INFO",
+        "log_file": "C:/EQ12/logs/nfl_live_roster_verification.log",
+        "log_rotation": true,
+        "max_log_size_mb": 100,
+        "backup_count": 5
+    },
+    "security": {
+        "require_authentication": true,
+        "encrypt_data": true,
+        "audit_operations": true,
+        "access_level": "standard"
+    },
+    "betting_settings": {
+        "target_win_probability": 0.01,
+        "kelly_fraction": 0.25,
+        "max_bet_amount": 100,
+        "min_ev_threshold": 0.05,
+        "correlation_threshold": 0.4
+    },
+    "api_settings": {
+        "odds_api_key": "${ODDS_API_KEY}",
+        "update_interval": 300,
+        "sports": [
+            "NBA",
+            "NHL",
+            "NFL",
+            "CBB",
+            "CFB"
+        ]
+    },
+    "coral_acceleration": {
+        "enabled": true,
+        "model_path": "C:/EQ12/ai_models/coral_model.tflite",
+        "simulation_mode": true
+    }
+}

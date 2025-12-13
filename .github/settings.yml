@@ -1,0 +1,58 @@
+# EQ12 repository starter settings
+# This file is a starter for repository settings and should be applied via the GitHub API or organization settings.
+
+repository:
+  name: eq12-stack
+  private: true
+  has_issues: true
+  has_wiki: false
+
+settings:
+  # Default branch and branch protection rules
+  default_branch: main
+  branch_protection:
+    - branch: main
+      enforce_admins: true
+      required_status_checks:
+        strict: true
+        contexts:
+          - eq12-ci/test-python
+          - eq12-ci/test-powershell
+      require_code_owner_reviews: false
+      required_pull_request_reviews:
+        dismissal_restrictions: false
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+        required_approving_review_count: 1
+      restrictions: null
+      allow_force_pushes: false
+      allow_deletions: false
+      require_signed_commits: true
+
+  merge_options:
+    allow_merge_commit: false
+    allow_squash_merge: true
+    allow_rebase_merge: false
+    delete_branch_on_merge: true
+
+  security_and_analysis:
+    advanced_security:
+      enabled: false
+
+  issues:
+    templates:
+      - name: Bug report
+        about: 'Use this template for scraper or dashboard failures.'
+        title: 'Bug: '
+        labels: ['bug']
+        body: |
+          **Describe the bug**
+          Steps to reproduce:
+          1. ...
+
+      - name: Feature request
+        about: 'Use this template to request a new panel, data source, or automation.'
+        title: 'Feature: '
+        labels: ['enhancement']
+        body: |
+          **Describe the feature**

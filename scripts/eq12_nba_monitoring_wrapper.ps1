@@ -1,0 +1,289 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Start", "Test", "Status", "Stop")]
+    [string]$Action = "Start",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$GenerateReport
+)
+
+<#
+.SYNOPSIS
+ EQ12 NBA SGP Continuous Monitoring System - PowerShell Wrapper
+Manages the Python monitoring system that scans every 2 hours
+
+.DESCRIPTION
+This PowerShell wrapper manages the NBA SGP continuous monitoring system:
+- Start: Begin continuous monitoring with 2-hour intervals
+- Test: Run single monitoring cycle
+- Status: Check current monitoring status
+- Stop: Stop running monitoring processes
+
+.EXAMPLE
+.\eq12_nba_monitoring_wrapper.ps1 -Action Start -VerboseOutput
+Start continuous monitoring with verbose output
+
+.EXAMPLE
+.\eq12_nba_monitoring_wrapper.ps1 -Action Test
+Run a single test monitoring cycle
+#>
+
+function Write-CoralLog {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    Write-Host $logEntry -ForegroundColor $(if($Level -eq "ERROR"){"Red"} elseif($Level -eq "WARN"){"Yellow"} else {"Green"})
+    
+    if ($GenerateReport) {
+        $logFile = Join-Path $Workspace "logs\nba_monitoring_wrapper_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+        Add-Content -Path $logFile -Value $logEntry -ErrorAction SilentlyContinue
+    }
+}
+
+function Test-Prerequisites {
+    Write-CoralLog " Checking monitoring system prerequisites..."
+    
+    # Check Python installation
+    try {
+        $pythonVersion = python --version 2>&1
+        Write-CoralLog " Python found: $pythonVersion"
+    }
+    catch {
+        Write-CoralLog " Python not found in PATH" -Level "ERROR"
+        return $false
+    }
+    
+    # Check workspace structure
+    $requiredPaths = @(
+        (Join-Path $Workspace "scripts"),
+        (Join-Path $Workspace "logs"),
+        (Join-Path $Workspace "coral_betting_ai")
+    )
+    
+    foreach ($path in $requiredPaths) {
+        if (-not (Test-Path $path)) {
+            New-Item -Path $path -ItemType Directory -Force | Out-Null
+            Write-CoralLog " Created directory: $path"
+        }
+    }
+    
+    # Check monitoring script
+    $monitoringScript = Join-Path $Workspace "scripts\eq12_nba_continuous_monitoring.py"
+    if (-not (Test-Path $monitoringScript)) {
+        Write-CoralLog " Monitoring script not found: $monitoringScript" -Level "ERROR"
+        return $false
+    }
+    
+    Write-CoralLog " All prerequisites met"
+    return $true
+}
+
+function Start-MonitoringSystem {
+    Write-CoralLog " STARTING NBA SGP CONTINUOUS MONITORING SYSTEM"
+    Write-CoralLog " Will scan every 2 hours and send Telegram updates"
+    
+    if (-not (Test-Prerequisites)) {
+        Write-CoralLog " Prerequisites check failed" -Level "ERROR"
+        return
+    }
+    
+    $monitoringScript = Join-Path $Workspace "scripts\eq12_nba_continuous_monitoring.py"
+    $arguments = @("$monitoringScript", "--workspace", $Workspace)
+    
+    if ($VerboseOutput) {
+        $arguments += "--verbose"
+    }
+    
+    try {
+        Write-CoralLog " Launching continuous monitoring..."
+        Write-CoralLog " System will scan every 2 hours automatically"
+        Write-CoralLog " Telegram updates will be sent for all changes"
+        Write-CoralLog " Press Ctrl+C to stop monitoring"
+        
+        # Start the monitoring system
+        Start-Process -FilePath "python" -ArgumentList $arguments -NoNewWindow -Wait
+        
+    }
+    catch {
+        Write-CoralLog " Failed to start monitoring system: $($_.Exception.Message)" -Level "ERROR"
+    }
+}
+
+function Start-TestCycle {
+    Write-CoralLog " RUNNING TEST MONITORING CYCLE"
+    
+    if (-not (Test-Prerequisites)) {
+        Write-CoralLog " Prerequisites check failed" -Level "ERROR"
+        return
+    }
+    
+    $monitoringScript = Join-Path $Workspace "scripts\eq12_nba_continuous_monitoring.py"
+    $arguments = @("$monitoringScript", "--workspace", $Workspace, "--test")
+    
+    if ($VerboseOutput) {
+        $arguments += "--verbose"
+    }
+    
+    try {
+        Write-CoralLog " Running single monitoring cycle..."
+        
+        $result = Start-Process -FilePath "python" -ArgumentList $arguments -NoNewWindow -Wait -PassThru
+        
+        if ($result.ExitCode -eq 0) {
+            Write-CoralLog " Test cycle completed successfully"
+        } else {
+            Write-CoralLog " Test cycle failed with exit code: $($result.ExitCode)" -Level "ERROR"
+        }
+        
+    }
+    catch {
+        Write-CoralLog " Failed to run test cycle: $($_.Exception.Message)" -Level "ERROR"
+    }
+}
+
+function Get-MonitoringStatus {
+    Write-CoralLog " CHECKING NBA MONITORING SYSTEM STATUS"
+    
+    # Check for running Python processes
+    $pythonProcesses = Get-Process | Where-Object { $_.ProcessName -eq "python" -and $_.CommandLine -like "*nba_continuous_monitoring*" }
+    
+    if ($pythonProcesses) {
+        Write-CoralLog " Monitoring system is RUNNING"
+        Write-CoralLog " Active processes: $($pythonProcesses.Count)"
+        
+        foreach ($process in $pythonProcesses) {
+            $runtime = (Get-Date) - $process.StartTime
+            Write-CoralLog "   Process ID: $($process.Id) | Runtime: $($runtime.ToString('hh\:mm\:ss'))"
+        }
+    } else {
+        Write-CoralLog " Monitoring system is NOT RUNNING"
+    }
+    
+    # Check recent logs
+    $logsPath = Join-Path $Workspace "logs"
+    $recentLogs = Get-ChildItem -Path $logsPath -Filter "*monitoring_scan_*" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 3
+    
+    if ($recentLogs) {
+        Write-CoralLog " Recent monitoring scans:"
+        foreach ($log in $recentLogs) {
+            $age = (Get-Date) - $log.LastWriteTime
+            Write-CoralLog "   $($log.Name) - $($age.ToString('hh\:mm')) ago"
+        }
+    } else {
+        Write-CoralLog " No recent monitoring logs found"
+    }
+    
+    # Check Telegram configuration
+    $configFile = Join-Path $Workspace "coral_betting_ai\coral_config.env"
+    if (Test-Path $configFile) {
+        $configContent = Get-Content $configFile -Raw
+        if ($configContent -match "TELEGRAM_BOT_TOKEN=" -and $configContent -notmatch "YOUR_BOT_TOKEN") {
+            Write-CoralLog " Telegram configuration appears valid"
+        } else {
+            Write-CoralLog " Telegram configuration may need setup" -Level "WARN"
+        }
+    } else {
+        Write-CoralLog " Telegram configuration file not found" -Level "WARN"
+    }
+}
+
+function Stop-MonitoringSystem {
+    Write-CoralLog " STOPPING NBA MONITORING SYSTEM"
+    
+    # Find and stop Python monitoring processes
+    $pythonProcesses = Get-Process | Where-Object { $_.ProcessName -eq "python" -and $_.CommandLine -like "*nba_continuous_monitoring*" }
+    
+    if ($pythonProcesses) {
+        Write-CoralLog " Found $($pythonProcesses.Count) monitoring process(es)"
+        
+        foreach ($process in $pythonProcesses) {
+            try {
+                Write-CoralLog " Stopping process ID: $($process.Id)"
+                Stop-Process -Id $process.Id -Force
+                Write-CoralLog " Process stopped successfully"
+            }
+            catch {
+                Write-CoralLog " Failed to stop process $($process.Id): $($_.Exception.Message)" -Level "ERROR"
+            }
+        }
+    } else {
+        Write-CoralLog " No monitoring processes found running"
+    }
+}
+
+function Generate-StatusReport {
+    if (-not $GenerateReport) { return }
+    
+    $reportFile = Join-Path $Workspace "logs\nba_monitoring_status_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+    
+    $report = @{
+        timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+        action = $Action
+        workspace = $Workspace
+        system_status = @{
+            python_available = (Get-Command python -ErrorAction SilentlyContinue) -ne $null
+            monitoring_script_exists = Test-Path (Join-Path $Workspace "scripts\eq12_nba_continuous_monitoring.py")
+            logs_directory_exists = Test-Path (Join-Path $Workspace "logs")
+        }
+        recent_scans = @()
+    }
+    
+    # Add recent scan information
+    $logsPath = Join-Path $Workspace "logs"
+    if (Test-Path $logsPath) {
+        $recentLogs = Get-ChildItem -Path $logsPath -Filter "*monitoring_scan_*" -File | Sort-Object LastWriteTime -Descending | Select-Object -First 5
+        foreach ($log in $recentLogs) {
+            $report.recent_scans += @{
+                filename = $log.Name
+                last_modified = $log.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss")
+                size_bytes = $log.Length
+            }
+        }
+    }
+    
+    $report | ConvertTo-Json -Depth 10 | Out-File -FilePath $reportFile -Encoding UTF8
+    Write-CoralLog " Status report generated: $reportFile"
+}
+
+# Main execution logic
+try {
+    Write-CoralLog " EQ12 NBA SGP Continuous Monitoring System - PowerShell Wrapper"
+    Write-CoralLog " Action: $Action | Workspace: $Workspace"
+    
+    switch ($Action) {
+        "Start" {
+            Start-MonitoringSystem
+        }
+        "Test" {
+            Start-TestCycle
+        }
+        "Status" {
+            Get-MonitoringStatus
+        }
+        "Stop" {
+            Stop-MonitoringSystem
+        }
+        default {
+            Write-CoralLog " Unknown action: $Action" -Level "ERROR"
+            Write-CoralLog " Valid actions: Start, Test, Status, Stop"
+        }
+    }
+    
+    Generate-StatusReport
+    
+} catch {
+    Write-CoralLog " Critical error in monitoring wrapper: $($_.Exception.Message)" -Level "ERROR"
+    Write-CoralLog " Error at line: $($_.InvocationInfo.ScriptLineNumber)" -Level "ERROR"
+} finally {
+    Write-CoralLog " NBA monitoring wrapper execution completed"
+}

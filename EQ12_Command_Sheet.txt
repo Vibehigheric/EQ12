@@ -1,0 +1,167 @@
+===============================================================================
+                           EQ12 GODSTACK COMMAND SHEET
+                         Quick Reference Guide - October 2025
+===============================================================================
+
+dY"? SYSTEM STATUS & MANAGEMENT
+-----------------------------
+Check API Status:           .\scripts\eq12_status.ps1
+System Health Check:        python eq12_system_health.py
+Full System Start:          .\Start-EQ12-GODSTACK-Clean.ps1
+Status Dashboard:           python eq12_status_dashboard.py
+System Cleanup:             python eq12_cleanup.py
+
+dY"S DASHBOARD & WEB SERVICES
+----------------------------
+Main Dashboard:             python eq12_unified_dashboard.py
+Enterprise API:             python eq12_enterprise_api.py
+Node.js Server:             npm start --prefix server
+Bridge API:                 python eq12_bridge.py
+AI Status API:              python eq12_ai_status_api.py
+
+dY?- ARTIFICIAL INTELLIGENCE SUITE
+---------------------------------
+OpenAI Governance:          python eq12_openai_governance.py
+Streaming Assistant:        python eq12_streaming_assistant.py
+Governance Assistant:       python eq12_governance_assistant.py --question "Your question"
+AI Guardrails:              python scripts\eq12_ai_guardrails.py
+Enhanced AI:                python scripts\eq12_enhanced_ai.py
+ChatGPT Integration:        python scripts\eq12_chatgpt.py
+Copilot API:                python scripts\eq12_copilot_api.py
+GPT-5 Manager:              python scripts\eq12_gpt5_manager.py
+
+dYO? BROWSER AUTOMATION & GOVERNANCE
+------------------------------------
+Chrome Governance:          python chrome_governance_automation.py
+Firefox Governance:         python scripts\firefox_governance_automation.py
+Firefox Bookmarks:          python scripts\eq12_firefox_bookmarks.py
+Extension Backend:          python scripts\eq12_extension_backend.py
+Extension Tester:           python scripts\eq12_extension_tester.py
+URL Scanner:                python scripts\eq12_url_scanner.py
+Copilot URL Handler:        python scripts\eq12_copilot_url_handler.py
+
+dYZ_ SPORTS BETTING & ANALYTICS
+------------------------------
+CFB Optimizer:              python scripts\eq12_cfb_optimizer.py
+CFB Backend:                python scripts\eq12_cfb_backend.py
+Advanced Optimizer:         python eq12_advanced_optimizer.py
+Monte Carlo Suite:          python eq12_monte_carlo_suite.py
+CFB Manual Picker:          python scripts\cfb_manual_picker.py
+Bankroll Tracker:           python scripts\bankroll_tracker_clean.py
+Aligned Model:              python scripts\aligned_model.py
+Parlay Builder:             python parlay_builder.py
+
+?sT?,? GITHUB INTEGRATION & AUTOMATION
+-----------------------------------
+GitHub CLI:                 python scripts\eq12_github_cli.py
+GitHub Security:            python scripts\deploy_github_security.py
+Bug Bounty Hunter:          python eq12_bug_bounty_hunter.py
+Command Center:             python eq12_command_center.py
+Orchestrator:               python scripts\eq12_orchestrator.py
+
+dY"' SYSTEM MONITORING & SECURITY
+--------------------------------
+Security Scanner:           python eq12_security_scanner.py
+Security Firewall:          python eq12_security_firewall.py
+Badge Health Monitor:       python scripts\badge_health_monitor.py
+VPN Guard:                  .\eq12_vpn_guard.ps1
+System Scanner:             python eq12_system_scanner.py
+
+dY"S DATA SCRAPING & INTELLIGENCE
+-------------------------------
+CF Rewards Scraper:         python scripts\cf_rewards_scraper.py
+CCC Tracker:                python scripts\ccc_tracker.py
+News Intelligence:          python news_intelligence.py
+Swagbucks Intelligence:     python swagbucks_intelligence.py
+Crypto Tracker:             python scripts\crypto.py
+Unified Search:             python eq12_unified_search.py
+
+dY'? COMMUNICATION & BOTS
+-----------------------
+Telegram Master Bot:        python eq12_telegram_master_bot.py
+Discord Bot:                python eq12_discord_bot.py
+Alert Pipeline:             python alert_pipe.py
+Autosuggest Intelligence:   python autosuggest_intelligence.py
+
+dY>??,? DEVELOPMENT & DEPLOYMENT
+-----------------------------
+Master Ecosystem:           python eq12_master_ecosystem.py
+Production Launcher:         python eq12_production_launcher.py
+System Manager:             python eq12_system_manager.py`r`nSystem Diagnostics:         dotnet run --project visual_studio_projects\EQ12SystemDiagnostics -- --repo-root C:\EQ12
+Code Fixer:                 python eq12_code_fixer.py
+VB.NET Integration:         python eq12_vbnet_copilot_integration.py
+
+?s? POWERSHELL UTILITIES
+-----------------------
+Master Launcher:            .\eq12_master_launcher.ps1
+Status Check:               .\eq12_status_check_clean.ps1
+Simple Start:               .\eq12_simple_start.ps1
+Chrome Task Manager:        .\manage_chrome_task.ps1
+GODSTACK Starter:           .\Start-EQ12-GODSTACK-Clean.ps1
+VPN Guard:                  .\eq12_vpn_guard.ps1
+
+dY?? X (TWITTER) API INTEGRATION
+-------------------------------
+X Ads Client:               XAdsClient.vb (VB.NET)
+X API Models:               XAdsApiModels.vb (VB.NET)
+X Client Enhanced:          XClientEnhanced.vb (VB.NET)
+X PowerShell Wrappers:      .\EQ12XAdsApiWrappers.ps1
+X API Schema:               XApiCompleteSchema.sql
+
+dY"? SPECIALIZED SYSTEMS
+----------------------
+Stream Event Processor:     python eq12_stream_processor.py
+Meta Framework:             python eq12_meta_framework.py
+Plugin Marketplace:         python eq12_plugin_marketplace.py
+Premium Features:           python eq12_premium_features.py
+Billing System:             python eq12_billing_system.py
+Intelligent Router:         python eq12_intelligent_router.py
+
+===============================================================================
+                                  ACCESS POINTS
+===============================================================================
+
+dYO? WEB INTERFACES:
+------------------
+Local Dashboard:            http://localhost:3000/dashboard
+Emergency Server:           http://localhost:8081
+Public Access (Ngrok):      https://b342ccc2bde9.ngrok-free.app/dashboard
+Ngrok Inspector:            http://127.0.0.1:4040
+
+dY"S VS CODE TASKS (Ctrl+Shift+P -> Tasks: Run Task):
+---------------------------------------------------
+- EQ12: Run Firefox Governance Setup
+- EQ12: Setup Chrome Governance Profile
+- EQ12: AI Chrome Analysis
+- EQ12: AI Security Audit
+- EQ12: AI Governance Assistant Interactive
+- EQ12: Complete AI Governance Suite
+- EQ12: Streaming AI Assistant
+- EQ12: Chrome Daily Task Scheduler
+- EQ12: Run Tests
+- EQ12: Black Format
+
+dY"` ENVIRONMENT SETUP:
+---------------------
+OpenAI API Key:             C:\EQ12\keys\openai_api_key.txt
+ChatGPT API Key:            C:\EQ12\keys\chatgpt_api_key.txt
+Logs Directory:             C:\EQ12\logs\
+Configs Directory:          C:\EQ12\configs\
+
+dY'? QUICK TIPS:
+--------------
+? Stop Services: Ctrl+C in terminal
+? Background Jobs: Start-Job { python script_name.py }
+? View Processes: Get-Process | Where-Object {$_.ProcessName -match "python|node"}
+? System Stats: 29,209+ total files (17,510 Python, 253 PowerShell, 77 VB.NET, 11,369 JS)
+? Emergency Stop: .\eq12_recycle.ps1
+
+===============================================================================
+                              EQ12 GODSTACK v2025.10
+                        All systems operational and ready!
+===============================================================================
+
+System Manager:             python eq12_system_manager.py
+Sports Edge Pipeline:       powershell -ExecutionPolicy Bypass -File scripts/automation/run_sports_edge_pipeline.ps1
+Control Diagnostics:        powershell -ExecutionPolicy Bypass -File scripts/control/control_system_toolkit.ps1 -Diagnostics
+Freelance Scaffold:         python scripts/freelance/freelance_scaffold.py SampleProject --type web --no-install

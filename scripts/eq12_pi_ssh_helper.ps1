@@ -1,0 +1,145 @@
+#Requires -Version 5.0
+<#
+.SYNOPSIS
+    EQ12 Pi SSH Configuration Helper
+.DESCRIPTION
+    Helps fix Pi SSH issues and configure cluster networking
+.PARAMETER Action
+    Action to perform: TestSSH, FixSSH, or ConfigureCluster
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet("TestSSH", "FixSSH", "ConfigureCluster")]
+    [string]$Action = "TestSSH"
+)
+
+function Test-PiSSH {
+    param([string]$IPAddress)
+    
+    Write-Host "Testing SSH connection to $IPAddress..." -ForegroundColor Yellow
+    
+    try {
+        # Test basic connectivity
+        $ping = Test-Connection -ComputerName $IPAddress -Count 1 -Quiet -ErrorAction SilentlyContinue
+        if (-not $ping) {
+            Write-Host " Pi not responding to ping" -ForegroundColor Red
+            return $false
+        }
+        
+        Write-Host " Pi responding to ping" -ForegroundColor Green
+        
+        # Test SSH port
+        $ssh = Test-NetConnection -ComputerName $IPAddress -Port 22 -WarningAction SilentlyContinue -ErrorAction SilentlyContinue
+        if (-not $ssh.TcpTestSucceeded) {
+            Write-Host " SSH port 22 not responding" -ForegroundColor Red
+            return $false
+        }
+        
+        Write-Host " SSH port 22 responding" -ForegroundColor Green
+        return $true
+    }
+    catch {
+        Write-Host " Connection test failed: $_" -ForegroundColor Red
+        return $false
+    }
+}
+
+function Show-SSHCommands {
+    Write-Host ""
+    Write-Host " PI CLUSTER CONFIGURATION COMMANDS" -ForegroundColor Cyan
+    Write-Host "Once SSH connection works, run these on the Pi:" -ForegroundColor Yellow
+    Write-Host ""
+    
+    $commands = @(
+        "# Backup current network config",
+        "sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.backup",
+        "",
+        "# Add cluster network configuration", 
+        "echo '# EQ12 Cluster Static IP Configuration' | sudo tee -a /etc/dhcpcd.conf",
+        "echo 'interface eth0' | sudo tee -a /etc/dhcpcd.conf",
+        "echo 'static ip_address=192.168.100.2/24' | sudo tee -a /etc/dhcpcd.conf",
+        "echo 'static routers=192.168.100.1' | sudo tee -a /etc/dhcpcd.conf",
+        "echo 'static domain_name_servers=8.8.8.8 8.8.4.4' | sudo tee -a /etc/dhcpcd.conf",
+        "",
+        "# Verify configuration",
+        "tail -6 /etc/dhcpcd.conf",
+        "",
+        "# Apply changes (Pi will reboot)",
+        "sudo reboot"
+    )
+    
+    foreach ($cmd in $commands) {
+        if ($cmd.StartsWith("#")) {
+            Write-Host $cmd -ForegroundColor Gray
+        } elseif ($cmd -eq "") {
+            Write-Host ""
+        } else {
+            Write-Host $cmd -ForegroundColor Green
+        }
+    }
+}
+
+function Show-SSHFixOptions {
+    Write-Host ""
+    Write-Host " SSH TROUBLESHOOTING OPTIONS" -ForegroundColor Yellow
+    Write-Host ""
+    
+    Write-Host "Option 1: Pi Imager SSH Re-enable" -ForegroundColor Cyan
+    Write-Host " Re-flash USB drive with Pi Imager" -ForegroundColor White
+    Write-Host " In advanced options: Enable SSH + Password Auth" -ForegroundColor White
+    Write-Host " Set username: ricoj100, password: 102120sRO1!" -ForegroundColor White
+    Write-Host ""
+    
+    Write-Host "Option 2: Manual SSH Enable (if you have HDMI/keyboard)" -ForegroundColor Cyan
+    Write-Host " Connect monitor + keyboard to Pi" -ForegroundColor White
+    Write-Host " Run: sudo systemctl enable ssh" -ForegroundColor Green
+    Write-Host " Edit: sudo nano /etc/ssh/sshd_config" -ForegroundColor Green
+    Write-Host " Set: PasswordAuthentication yes" -ForegroundColor Green
+    Write-Host " Restart: sudo systemctl restart ssh" -ForegroundColor Green
+    Write-Host ""
+    
+    Write-Host "Option 3: USB Boot Drive Fix" -ForegroundColor Cyan
+    Write-Host " Remove USB from Pi, connect to EQ12" -ForegroundColor White
+    Write-Host " Create empty file named 'ssh' in boot partition" -ForegroundColor White
+    Write-Host " Create userconf.txt with: ricoj100:102120sRO1!" -ForegroundColor White
+    Write-Host ""
+}
+
+# Main execution
+Write-Host ""
+Write-Host " EQ12 PI SSH HELPER" -ForegroundColor Green
+Write-Host ""
+
+switch ($Action) {
+    "TestSSH" {
+        if (Test-PiSSH -IPAddress "192.168.1.80") {
+            Write-Host ""
+            Write-Host " SSH SERVICE IS RUNNING" -ForegroundColor Green
+            Write-Host "Issue is likely password authentication disabled" -ForegroundColor Yellow
+            Write-Host ""
+            Write-Host "Try SSH connection again:" -ForegroundColor Cyan
+            Write-Host "ssh ricoj100@192.168.1.80" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "If it still closes immediately:" -ForegroundColor Yellow
+            Show-SSHFixOptions
+        } else {
+            Write-Host ""
+            Write-Host " Pi SSH not accessible" -ForegroundColor Red
+            Show-SSHFixOptions
+        }
+    }
+    
+    "FixSSH" {
+        Show-SSHFixOptions
+    }
+    
+    "ConfigureCluster" {
+        Show-SSHCommands
+    }
+}
+
+Write-Host ""
+Write-Host " TIP: Try SSH again with verbose mode:" -ForegroundColor Yellow
+Write-Host "ssh -v ricoj100@192.168.1.80" -ForegroundColor Cyan
+Write-Host "This will show exactly why the connection is failing" -ForegroundColor White

@@ -1,0 +1,301 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 .NET Tools Manager PowerShell Wrapper
+# Purpose: Comprehensive .NET development tools download and configuration
+# Agent: GitHub Copilot with EQ12 expertise  
+# Timestamp: 2025-10-10T22:00:00Z
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet('DownloadAll', 'Roslyn', 'Rubberduck', 'AwesomeDotNet', 'VSCodeVBDebug', 'CheckPrerequisites')]
+    [string]$Action = 'DownloadAll',
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$GenerateReport
+)
+
+# Initialize EQ12 environment
+$ErrorActionPreference = "Stop"
+$Timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogDir = "$Workspace\logs"
+$LogFile = "$LogDir\dotnet_tools_wrapper_$Timestamp.log"
+
+# Ensure logs directory exists
+if (-not (Test-Path $LogDir)) {
+    New-Item -Path $LogDir -ItemType Directory -Force | Out-Null
+}
+
+# EQ12 Logging Function
+function Write-EQ12Log {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Level,
+        
+        [Parameter(Mandatory=$true)]
+        [string]$Message
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+    $logEntry = @{
+        timestamp = $timestamp
+        level = $Level
+        message = $Message
+        component = "EQ12-DotNet-Tools-Wrapper"
+        workspace = $Workspace
+    }
+    
+    # Console output with color coding
+    $color = switch ($Level) {
+        "SUCCESS" { "Green" }
+        "INFO" { "White" }
+        "WARN" { "Yellow" }
+        "ERROR" { "Red" }
+        "CRITICAL" { "Magenta" }
+        default { "Gray" }
+    }
+    
+    Write-Host "[$timestamp] $Level`: $Message" -ForegroundColor $color
+    
+    # Append to log file
+    $logEntry | ConvertTo-Json -Compress | Add-Content -Path $LogFile
+}
+
+# Check System Prerequisites
+function Test-DotNetPrerequisites {
+    Write-EQ12Log "INFO" "Checking .NET development prerequisites..."
+    
+    $prerequisites = @{
+        Git = $false
+        DotNetSDK = $false
+        PowerShell = $true
+        VSCode = $false
+        VisualStudio = $false
+    }
+    
+    # Check Git
+    try {
+        $gitVersion = git --version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $prerequisites.Git = $true
+            Write-EQ12Log "SUCCESS" "Git found: $gitVersion"
+        }
+    } catch {
+        Write-EQ12Log "WARN" "Git not found - required for cloning repositories"
+    }
+    
+    # Check .NET SDK
+    try {
+        $dotnetVersion = dotnet --version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $prerequisites.DotNetSDK = $true
+            Write-EQ12Log "SUCCESS" ".NET SDK found: $dotnetVersion"
+        }
+    } catch {
+        Write-EQ12Log "WARN" ".NET SDK not found - required for building projects"
+    }
+    
+    # Check VS Code
+    try {
+        $codeVersion = code --version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $prerequisites.VSCode = $true
+            Write-EQ12Log "SUCCESS" "VS Code found"
+        }
+    } catch {
+        Write-EQ12Log "INFO" "VS Code not in PATH (may still be installed)"
+    }
+    
+    # Check Visual Studio
+    $vsInstances = Get-ChildItem "HKLM:\SOFTWARE\Microsoft\VisualStudio\" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -match "\d+\.\d+" }
+    
+    if ($vsInstances) {
+        $prerequisites.VisualStudio = $true
+        Write-EQ12Log "SUCCESS" "Visual Studio found: $($vsInstances.Count) installation(s)"
+    }
+    
+    return $prerequisites
+}
+
+# Execute .NET Tools Manager Python Script
+function Invoke-DotNetToolsManager {
+    param([string]$PythonAction, [string[]]$ExtraArgs = @())
+    
+    Write-EQ12Log "INFO" "Starting .NET tools management process..."
+    
+    # Build command arguments
+    $pythonScript = "$Workspace\scripts\eq12_dotnet_tools_manager.py"
+    $args = @(
+        $pythonScript,
+        "--workspace", $Workspace
+    )
+    
+    # Add specific action
+    switch ($PythonAction) {
+        'check' { $args += @("--check-prerequisites") }
+        'all' { $args += @("--download-all") }
+        'roslyn' { $args += @("--tool", "roslyn") }
+        'rubberduck' { $args += @("--tool", "rubberduck") }
+        'awesome_dotnet' { $args += @("--tool", "awesome_dotnet") }
+        'vscode_vb_debug' { $args += @("--tool", "vscode_vb_debug") }
+    }
+    
+    if ($VerboseOutput) {
+        $args += "--verbose"
+    }
+    
+    try {
+        Write-EQ12Log "INFO" "Executing: python $($args -join ' ')"
+        
+        $result = Start-Process -FilePath "python" -ArgumentList $args -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$LogDir\dotnet_tools_output.log" -RedirectStandardError "$LogDir\dotnet_tools_error.log"
+        
+        if ($result.ExitCode -eq 0) {
+            Write-EQ12Log "SUCCESS" ".NET tools management completed successfully"
+            
+            # Display output if available
+            if (Test-Path "$LogDir\dotnet_tools_output.log") {
+                $output = Get-Content "$LogDir\dotnet_tools_output.log" | Where-Object { $_ -ne "" }
+                if ($output) {
+                    Write-EQ12Log "INFO" "Results:"
+                    $output | ForEach-Object { Write-Host "   $_" -ForegroundColor White }
+                }
+            }
+        } else {
+            Write-EQ12Log "ERROR" ".NET tools management failed with exit code $($result.ExitCode)"
+            
+            # Display error if available
+            if (Test-Path "$LogDir\dotnet_tools_error.log") {
+                $errorOutput = Get-Content "$LogDir\dotnet_tools_error.log" | Where-Object { $_ -ne "" }
+                if ($errorOutput) {
+                    Write-EQ12Log "ERROR" "Error details:"
+                    $errorOutput | ForEach-Object { Write-Host "   $_" -ForegroundColor Red }
+                }
+            }
+        }
+        
+        return $result.ExitCode
+        
+    } catch {
+        Write-EQ12Log "ERROR" "Failed to execute .NET tools manager: $($_.Exception.Message)"
+        return 1
+    }
+}
+
+# Display Available Tools Information
+function Show-AvailableTools {
+    Write-EQ12Log "INFO" "Displaying available .NET development tools..."
+    
+    Write-Host ""
+    Write-Host "EQ12 .NET Development Tools" -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+    
+    Write-Host ""
+    Write-Host "dotnet/roslyn" -ForegroundColor Yellow
+    Write-Host "   Microsoft .NET Compiler Platform (C# and VB.NET)" -ForegroundColor Gray
+    Write-Host "   Features: Syntax analysis, Code fixes, Custom analyzers" -ForegroundColor White
+    
+    Write-Host ""
+    Write-Host "rubberduck-vba/Rubberduck" -ForegroundColor Yellow
+    Write-Host "   Advanced VBA IDE with debugging and testing" -ForegroundColor Gray
+    Write-Host "   Features: Code inspections, Unit testing, Git integration" -ForegroundColor White
+    
+    Write-Host ""
+    Write-Host "awesome-dotnet" -ForegroundColor Yellow
+    Write-Host "   Curated list of .NET libraries and tools" -ForegroundColor Gray
+    Write-Host "   Features: Testing frameworks, Code analysis, Logging libraries" -ForegroundColor White
+    
+    Write-Host ""
+    Write-Host "VS Code VB Debug" -ForegroundColor Yellow
+    Write-Host "   VB.NET debugging support for Visual Studio Code" -ForegroundColor Gray
+    Write-Host "   Features: Breakpoint debugging, Variable inspection" -ForegroundColor White
+    
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Cyan
+}
+
+# Main execution logic
+Write-EQ12Log "INFO" "EQ12 .NET Tools Manager Wrapper starting..."
+Write-EQ12Log "INFO" "Action: $Action | Workspace: $Workspace"
+
+try {
+    # Execute based on action
+    $exitCode = 0
+    
+    switch ($Action) {
+        'CheckPrerequisites' {
+            Write-EQ12Log "INFO" "Checking system prerequisites..."
+            $prerequisites = Test-DotNetPrerequisites
+            Show-AvailableTools
+        }
+        
+        'DownloadAll' {
+            Write-EQ12Log "INFO" "Downloading all .NET development tools..."
+            $exitCode = Invoke-DotNetToolsManager -PythonAction "all"
+        }
+        
+        'Roslyn' {
+            Write-EQ12Log "INFO" "Downloading Microsoft Roslyn compiler platform..."
+            $exitCode = Invoke-DotNetToolsManager -PythonAction "roslyn"
+        }
+        
+        'Rubberduck' {
+            Write-EQ12Log "INFO" "Downloading Rubberduck VBA IDE..."
+            $exitCode = Invoke-DotNetToolsManager -PythonAction "rubberduck"
+        }
+        
+        'AwesomeDotNet' {
+            Write-EQ12Log "INFO" "Downloading awesome-dotnet resources..."
+            $exitCode = Invoke-DotNetToolsManager -PythonAction "awesome_dotnet"
+        }
+        
+        'VSCodeVBDebug' {
+            Write-EQ12Log "INFO" "Setting up VS Code VB debugging..."
+            $exitCode = Invoke-DotNetToolsManager -PythonAction "vscode_vb_debug"
+        }
+    }
+    
+    # Generate report summary if requested
+    if ($GenerateReport -and $exitCode -eq 0) {
+        Write-EQ12Log "INFO" "Generating summary report..."
+        
+        $reportSummary = @{
+            Timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+            Action = $Action
+            Workspace = $Workspace
+            ExitCode = $exitCode
+            LogFile = $LogFile
+            ToolsDirectory = "$Workspace\dotnet_tools"
+        }
+        
+        $reportFile = "$LogDir\dotnet_tools_summary_$Timestamp.json"
+        $reportSummary | ConvertTo-Json | Set-Content -Path $reportFile
+        Write-EQ12Log "SUCCESS" "Report saved: $reportFile"
+    }
+    
+    # Final status
+    if ($exitCode -eq 0) {
+        Write-EQ12Log "SUCCESS" "EQ12 .NET tools operation completed successfully!"
+        Write-Host ""
+        Write-Host "Next Steps:" -ForegroundColor Green
+        Write-Host "• Check $Workspace\dotnet_tools for downloaded tools" -ForegroundColor White
+        Write-Host "• Review logs in $LogDir for detailed information" -ForegroundColor White
+        Write-Host "• Follow tool-specific setup instructions" -ForegroundColor White
+    } else {
+        Write-EQ12Log "ERROR" "EQ12 .NET tools operation completed with errors"
+    }
+    
+    Write-EQ12Log "INFO" "Logs saved to: $LogFile"
+    exit $exitCode
+    
+} catch {
+    Write-EQ12Log "ERROR" "Fatal error: $($_.Exception.Message)"
+    exit 1
+}

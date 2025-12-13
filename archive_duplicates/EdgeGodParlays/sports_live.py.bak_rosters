@@ -1,0 +1,146 @@
+﻿import datetime as _dt
+import requests as _rq
+
+# ---------- Utilities ----------
+def _today_iso():
+    return _dt.date.today().isoformat()
+
+def _yymmdd():
+    return _dt.date.today().strftime("%Y%m%d")
+
+def concise_list(games, max_items=8):
+    if not games: return "No games found."
+    s = []
+    for i, g in enumerate(games[:max_items], 1):
+        if isinstance(g, dict):
+            home = g.get("home")
+            away = g.get("away")
+        else:
+            home, away = g
+        s.append(f"{i}. {away} @ {home}")
+    return "\n".join(s)
+
+# ---------- MLB ----------
+def mlb_schedule_detailed():
+    """
+    Return list of dicts: {
+      'home','away','gamePk','probHome','probAway','homeId','awayId'
+    }
+    Uses MLB Stats API.
+    """
+    url = "https://statsapi.mlb.com/api/v1/schedule"
+    params = {"sportId": 1, "date": _today_iso(), "hydrate": "team,probablePitcher"}
+    out = []
+    try:
+        r = _rq.get(url, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        for date in data.get("dates", []):
+            for g in date.get("games", []):
+                home_t = g.get("teams", {}).get("home", {})
+                away_t = g.get("teams", {}).get("away", {})
+                home = (home_t.get("team") or {}).get("name")
+                away = (away_t.get("team") or {}).get("name")
+                homeId = (home_t.get("team") or {}).get("id")
+                awayId = (away_t.get("team") or {}).get("id")
+                probHome = (home_t.get("probablePitcher") or {}).get("fullName")
+                probAway = (away_t.get("probablePitcher") or {}).get("fullName")
+                gamePk = g.get("gamePk")
+                if home and away:
+                    out.append({
+                        "home": home, "away": away, "homeId": homeId, "awayId": awayId,
+                        "probHome": probHome, "probAway": probAway, "gamePk": gamePk
+                    })
+    except Exception:
+        pass
+    return out
+
+def mlb_active_roster(team_id):
+    """Return list of {'name','position'} for the active MLB roster of a team."""
+    url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster?rosterType=active"
+    try:
+        r = _rq.get(url, timeout=10)
+        r.raise_for_status()
+        roster = []
+        for p in r.json().get("roster", []):
+            per = p.get("person", {})
+            pos = p.get("position", {})
+            roster.append({"name": per.get("fullName"), "position": pos.get("abbreviation")})
+        return roster
+    except Exception:
+        return []
+
+def build_mlb_context(max_games=10):
+    games = mlb_schedule_detailed()
+    if not games:
+        return "TODAYS MLB: none.", []
+    # limit games and get rosters for the ones in play
+    games = games[:max_games]
+    blocks = ["TODAYS MLB GAMES:"]
+    roster_map = {}
+    for g in games:
+        blocks.append(f"- {g['away']} @ {g['home']}  "
+                      f"(Probable P: {g.get('probAway') or 'TBD'} / {g.get('probHome') or 'TBD'})")
+    # attach short active rosters (names only) for each team
+    blocks.append("\nACTIVE ROSTERS (short list):")
+    for g in games:
+        for team_name, tid in [(g["away"], g["awayId"]), (g["home"], g["homeId"])]:
+            if tid and team_name not in roster_map:
+                roster = mlb_active_roster(tid)
+                names = [r["name"] for r in roster if r.get("name")]
+                # short list top 8 names
+                roster_map[team_name] = names[:8]
+                blocks.append(f" {team_name}: " + (", ".join(names[:8]) if names else "TBD"))
+    return "\n".join(blocks), games
+
+# ---------- WNBA ----------
+def wnba_schedule_detailed():
+    """
+    Return list of dicts: {'home','away'}
+    Uses ESPN WNBA scoreboard.
+    """
+    url = "https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/scoreboard"
+    params = {"dates": _yymmdd()}
+    out = []
+    try:
+        r = _rq.get(url, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        for e in data.get("events", []):
+            comps = e.get("competitions", [])
+            if not comps: continue
+            teams = comps[0].get("competitors", [])
+            if len(teams) == 2:
+                home = next((t["team"]["displayName"] for t in teams if t.get("homeAway")=="home"), None)
+                away = next((t["team"]["displayName"] for t in teams if t.get("homeAway")=="away"), None)
+                if home and away:
+                    out.append({"home":home, "away":away})
+    except Exception:
+        pass
+    return out
+
+def build_wnba_context(max_games=8):
+    games = wnba_schedule_detailed()
+    if not games: return "TODAYS WNBA: none.", games
+    lines = ["TODAYS WNBA GAMES:", concise_list(games, max_games)]
+    return "\n".join(lines), games
+
+# ---------- Command Router ----------
+def context_for_command(cmd: str):
+    """
+    Return (sport, context_text) for a known command key.
+    """
+    cmd = (cmd or "").lower()
+    if cmd in {"hr_tripod","ks_two_leg","parlay_mlb_safe","mixed_10_leg","odds_summary"}:
+        ctx, games = build_mlb_context()
+        return ("mlb", ctx)
+    if cmd in {"wnba_points"}:
+        ctx, games = build_wnba_context()
+        return ("wnba", ctx)
+    if cmd in {"ufc_mov"}:
+        return ("ufc", "UFC: Use current official card only. If card is not today, say so briefly.")
+    if cmd in {"boxing_underdog"}:
+        return ("boxing", "BOXING: Only sanctioned, scheduled bouts; use recent comps and line drift.")
+    if cmd in {"affiliate_convert","travel_deals"}:
+        return ("info", "General info utility.")
+    return ("general", "")

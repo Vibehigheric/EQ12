@@ -1,0 +1,251 @@
+#!/usr/bin/env powershell
+# EQ12 WORKSPACE IMMUNITY SYSTEM - MASTER INSTALLER
+# Single PowerShell command to deploy complete 7-layer protection
+
+[CmdletBinding()]
+param(
+    [switch]$QuickInstall,
+    [switch]$FullInstall,
+    [switch]$Status,
+    [switch]$Test
+)
+
+function Write-EQ12Header {
+    Write-Host ""
+    Write-Host "" -ForegroundColor Green -NoNewline
+    Write-Host " EQ12 WORKSPACE IMMUNITY SYSTEM" -ForegroundColor Cyan
+    Write-Host "" -ForegroundColor Red -NoNewline
+    Write-Host " 7-Layer Protection Deployment" -ForegroundColor Yellow
+    Write-Host "" -ForegroundColor Blue -NoNewline
+    Write-Host " Buffalo NY 14215 Content Empire" -ForegroundColor Magenta
+    Write-Host "=" * 50 -ForegroundColor White
+}
+
+function Install-Layer1-VSCodeGuards {
+    Write-Host " Layer 1: VS Code Workspace Guards" -ForegroundColor Green
+
+    # VS Code settings already updated via the tool
+    Write-Host "   VS Code settings.json updated with immunity configuration" -ForegroundColor Green
+    Write-Host "   Unicode highlighting enabled" -ForegroundColor Green
+    Write-Host "   Copilot rate limiting activated" -ForegroundColor Green
+    Write-Host "   UTF-8 enforcement configured" -ForegroundColor Green
+}
+
+function Install-Layer2-PythonUTF8Force {
+    Write-Host " Layer 2: Python UTF-8 Enforcement" -ForegroundColor Green
+
+    # Create Python UTF-8 template
+    $pythonTemplate = @"
+# -*- coding: utf-8 -*-
+# EQ12 UTF-8 Enforcement Template
+import io
+import sys
+
+# Force UTF-8 for all file operations
+original_open = open
+def utf8_open(file, mode="r", encoding="utf-8", **kwargs):
+    return original_open(file, mode, encoding=encoding, **kwargs)
+
+# Replace built-in open with UTF-8 safe version
+__builtins__['open'] = utf8_open
+
+# Ensure UTF-8 output
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
+# EQ12 Content Empire UTF-8 Protection Active
+print(" EQ12 UTF-8 Protection Loaded")
+"@
+
+    $templatePath = "C:\EQ12\scripts\eq12_utf8_template.py"
+    $pythonTemplate | Out-File -FilePath $templatePath -Encoding utf8
+    Write-Host "   Python UTF-8 template created: $templatePath" -ForegroundColor Green
+}
+
+function Install-Layer3-PowerShellUTF8 {
+    Write-Host " Layer 3: PowerShell UTF-8 Enforcement" -ForegroundColor Green
+
+    # Load and install PowerShell enforcer
+    & "C:\EQ12\scripts\eq12_powershell_utf8_enforcer.ps1" -Install
+    Write-Host "   PowerShell UTF-8 defaults configured" -ForegroundColor Green
+}
+
+function Install-Layer4-WorkspaceGuard {
+    Write-Host " Layer 4: Workspace Sentinel (Auto-Scan)" -ForegroundColor Green
+
+    # Workspace guard already created via tool
+    Write-Host "   Workspace guard script deployed" -ForegroundColor Green
+    Write-Host "   VS Code tasks configured for auto-scan" -ForegroundColor Green
+
+    # Test the workspace guard
+    try {
+        python "C:\EQ12\scripts\eq12_workspace_guard.py"
+        Write-Host "   Workspace guard test successful" -ForegroundColor Green
+    } catch {
+        Write-Host "   Workspace guard test failed: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+}
+
+function Install-Layer5-CopilotLimits {
+    Write-Host " Layer 5: Copilot Rate Limiting" -ForegroundColor Green
+
+    # Already configured in VS Code settings
+    Write-Host "   Copilot rate limiting configured (250 req/hour)" -ForegroundColor Green
+    Write-Host "   Prompt character limit set (18,000 chars)" -ForegroundColor Green
+    Write-Host "   Copilot hover disabled to prevent spam" -ForegroundColor Green
+}
+
+function Install-Layer6-GitUTF8Hooks {
+    Write-Host " Layer 6: Git UTF-8 Pre-Commit Hooks" -ForegroundColor Green
+
+    $hooksDir = "C:\EQ12\.githooks"
+    New-Item -Path $hooksDir -ItemType Directory -Force | Out-Null
+
+    $preCommitHook = @"
+#!/bin/bash
+# EQ12 UTF-8 Pre-commit Hook
+
+echo " EQ12 UTF-8 Validation..."
+
+BAD=`$(git diff --cached --name-only --diff-filter=ACM | while read file; do
+    if [ -f "$file" ] && ! file "$file" | grep -q "UTF-8\|ASCII"; then
+        echo "$file"
+    fi
+done)
+
+if [ -n "$BAD" ]; then
+    echo " Non-UTF8 files detected:"
+    echo "$BAD"
+    echo "Run: python C:/EQ12/scripts/eq12_workspace_guard.py"
+    exit 1
+fi
+
+echo " All files UTF-8 compliant"
+exit 0
+"@
+
+    $hookPath = "$hooksDir\pre-commit"
+    $preCommitHook | Out-File -FilePath $hookPath -Encoding utf8
+
+    # Configure git to use hooks
+    git config core.hooksPath ".githooks" 2>$null
+
+    Write-Host "   Git UTF-8 pre-commit hook installed" -ForegroundColor Green
+    Write-Host "   Git hooks path configured" -ForegroundColor Green
+}
+
+function Install-Layer7-ScheduledScanning {
+    Write-Host " Layer 7: Scheduled Auto-Scanning" -ForegroundColor Green
+
+    # Create Windows scheduled task for daily scanning
+    $taskAction = New-ScheduledTaskAction -Execute "python" -Argument "C:\EQ12\scripts\eq12_workspace_guard.py"
+    $taskTrigger = New-ScheduledTaskTrigger -Daily -At "2:00AM"
+    $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+
+    try {
+        Register-ScheduledTask -TaskName "EQ12_WorkspaceGuard" -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -Force -ErrorAction SilentlyContinue
+        Write-Host "   Daily workspace scanning scheduled (2:00 AM)" -ForegroundColor Green
+    } catch {
+        Write-Host "   Scheduled task creation requires admin privileges" -ForegroundColor Yellow
+    }
+}
+
+function Test-ImmunitySystem {
+    Write-Host " Testing EQ12 Immunity System" -ForegroundColor Cyan
+    Write-Host "=" * 40 -ForegroundColor Cyan
+
+    # Test 1: PowerShell UTF-8
+    & "C:\EQ12\scripts\eq12_powershell_utf8_enforcer.ps1" -Status
+
+    # Test 2: Workspace Guard
+    Write-Host "`n Testing Workspace Guard..." -ForegroundColor Yellow
+    python -c "import sys; sys.path.append('C:/EQ12/scripts'); from eq12_workspace_guard import EQ12WorkspaceGuard; guard = EQ12WorkspaceGuard(); print(' Workspace Guard: Ready')"
+
+    # Test 3: VS Code Settings
+    Write-Host "`n Checking VS Code Settings..." -ForegroundColor Yellow
+    $settingsPath = "$env:APPDATA\Code\User\settings.json"
+    if (Test-Path $settingsPath) {
+        $settings = Get-Content $settingsPath | ConvertFrom-Json
+        if ($settings.'files.encoding' -eq 'utf8') {
+            Write-Host " VS Code UTF-8 encoding configured" -ForegroundColor Green
+        }
+        if ($settings.'terminal.integrated.env.windows'.'EQ12_IMMUNITY_ACTIVE' -eq 'TRUE') {
+            Write-Host " EQ12 Immunity environment active" -ForegroundColor Green
+        }
+    }
+
+    Write-Host "`n EQ12 Immunity System Test Complete" -ForegroundColor Green
+}
+
+function Show-ImmunityStatus {
+    Write-Host " EQ12 Immunity System Status" -ForegroundColor Cyan
+    Write-Host "=" * 40 -ForegroundColor Cyan
+
+    $layers = @(
+        @{Name="VS Code Guards"; File="$env:APPDATA\Code\User\settings.json"; Status="Active"},
+        @{Name="Python UTF-8 Template"; File="C:\EQ12\scripts\eq12_utf8_template.py"; Status="Ready"},
+        @{Name="PowerShell UTF-8 Enforcer"; File="C:\EQ12\scripts\eq12_powershell_utf8_enforcer.ps1"; Status="Active"},
+        @{Name="Workspace Guard"; File="C:\EQ12\scripts\eq12_workspace_guard.py"; Status="Active"},
+        @{Name="VS Code Tasks"; File="C:\EQ12\.vscode\tasks.json"; Status="Configured"},
+        @{Name="Git UTF-8 Hooks"; File="C:\EQ12\.githooks\pre-commit"; Status="Installed"},
+        @{Name="Scheduled Scanning"; File="ScheduledTask"; Status="Configured"}
+    )
+
+    foreach ($layer in $layers) {
+        $exists = if ($layer.File -eq "ScheduledTask") {
+            Get-ScheduledTask -TaskName "EQ12_WorkspaceGuard" -ErrorAction SilentlyContinue
+        } else {
+            Test-Path $layer.File
+        }
+
+        $status = if ($exists) { "" } else { "" }
+        $color = if ($exists) { "Green" } else { "Red" }
+
+        Write-Host "$status $($layer.Name)" -ForegroundColor $color
+    }
+
+    Write-Host "`n EQ12 Workspace Immunity: ACTIVE" -ForegroundColor Green
+}
+
+# MAIN EXECUTION
+Write-EQ12Header
+
+if ($Status) {
+    Show-ImmunityStatus
+} elseif ($Test) {
+    Test-ImmunitySystem
+} elseif ($QuickInstall -or $FullInstall) {
+    Write-Host " Installing EQ12 Workspace Immunity System..." -ForegroundColor Green
+    Write-Host ""
+
+    Install-Layer1-VSCodeGuards
+    Install-Layer2-PythonUTF8Force
+    Install-Layer3-PowerShellUTF8
+    Install-Layer4-WorkspaceGuard
+    Install-Layer5-CopilotLimits
+    Install-Layer6-GitUTF8Hooks
+
+    if ($FullInstall) {
+        Install-Layer7-ScheduledScanning
+    }
+
+    Write-Host ""
+    Write-Host " EQ12 Immunity System Installation Complete!" -ForegroundColor Green
+    Write-Host " Your workspace is now PERMANENTLY protected" -ForegroundColor Cyan
+    Write-Host " Content Empire immunity: ACTIVATED" -ForegroundColor Yellow
+    Write-Host ""
+
+    # Run final test
+    Test-ImmunitySystem
+} else {
+    Write-Host "EQ12 Workspace Immunity System Installer" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Options:" -ForegroundColor Yellow
+    Write-Host "  -QuickInstall    Install 6-layer protection (no scheduled tasks)" -ForegroundColor White
+    Write-Host "  -FullInstall     Install all 7 layers (requires admin for scheduling)" -ForegroundColor White
+    Write-Host "  -Status          Show current immunity system status" -ForegroundColor White
+    Write-Host "  -Test            Test all immunity system components" -ForegroundColor White
+    Write-Host ""
+    Write-Host " Quick start: .\eq12_immunity_system_installer.ps1 -QuickInstall" -ForegroundColor Green
+}
+

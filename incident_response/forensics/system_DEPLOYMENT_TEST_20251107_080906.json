@@ -1,0 +1,14 @@
+{
+  "platform": "win32",
+  "hostname": "DESKTOP-2T2F2PJ",
+  "username": "Ricoj100",
+  "python_version": "3.12.2 (tags/v3.12.2:6abddd9, Feb  6 2024, 21:26:36) [MSC v.1937 64 bit (AMD64)]",
+  "collection_time": "2025-11-07T08:09:10.725792",
+  "memory": {
+    "total": 34111381504,
+    "available": 6296711168,
+    "percent": 81.5,
+    "used": 27814670336,
+    "free": 6296711168
+  }
+}

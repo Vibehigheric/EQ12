@@ -1,0 +1,171 @@
+# EQ12 WireGuard VPN Integration - Complete Setup Guide
+
+## Overview
+WireGuard VPN has been integrated into your EQ12 betting system to protect your betting operations and ensure anonymity. All necessary scripts and configurations have been created.
+
+## Installation Summary
+✅ **WireGuard Installed**: Found at `C:\Program Files\WireGuard\`
+✅ **Configuration Files Created**:
+   - `C:\EQ12\wireguard\eq12-betting.conf` (your private config)
+   - `C:\EQ12\wireguard\eq12-betting-example.conf` (template for VPN providers)
+✅ **Testing Script Created**: `C:\EQ12\wireguard_test.ps1`
+✅ **Installation Script Available**: `C:\EQ12\wireguard_install.ps1`
+
+## Current Status
+- **WireGuard Software**: ✅ Installed and ready
+- **VPN Tunnel**: ❌ Not yet configured with a VPN provider
+- **Current IP**: 24.25.140.198 (your real IP - not protected yet)
+
+## Next Steps to Complete VPN Setup
+
+### Step 1: Choose a VPN Provider
+You need a WireGuard-compatible VPN provider. Popular options:
+- **NordVPN** (supports WireGuard as "NordLynx")
+- **ExpressVPN** (supports WireGuard)
+- **Surfshark** (supports WireGuard)
+- **Mullvad** (native WireGuard support)
+- **ProtonVPN** (supports WireGuard)
+
+### Step 2: Get Your VPN Provider's WireGuard Configuration
+1. Log into your VPN provider's account
+2. Look for "WireGuard" configuration download
+3. Download the `.conf` file for your preferred server location
+4. Note the server's public key, endpoint, and your account's private key
+
+### Step 3: Update Your Configuration
+Edit `C:\EQ12\wireguard\eq12-betting.conf` with your provider's details:
+
+```ini
+[Interface]
+PrivateKey = YOUR_ACCOUNT_PRIVATE_KEY_FROM_PROVIDER
+Address = YOUR_ASSIGNED_IP_FROM_PROVIDER
+DNS = 1.1.1.1, 1.0.0.1
+
+[Peer]
+PublicKey = PROVIDER_SERVER_PUBLIC_KEY
+Endpoint = PROVIDER_SERVER_IP:PORT
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
+```
+
+### Step 4: Install the VPN Tunnel
+Run this command to install your VPN tunnel as a Windows service:
+
+```powershell
+# Install tunnel service
+powershell -ExecutionPolicy Bypass -File .\wireguard_install.ps1 -InstallTunnel
+
+# Or use the testing script
+powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -InstallTunnel
+```
+
+### Step 5: Test Your VPN Connection
+```powershell
+# Check VPN status and IP
+powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -ShowStatus
+
+# Test IP leak protection
+powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -TestConnection
+```
+
+## Available Commands
+
+### Installation & Setup
+```powershell
+# Install WireGuard (if needed)
+powershell -ExecutionPolicy Bypass -File .\wireguard_install.ps1 -InstallMethod Winget
+
+# Generate new keys (if needed)
+powershell -ExecutionPolicy Bypass -File .\wireguard_install.ps1 -GenerateKeys
+```
+
+### Testing & Monitoring
+```powershell
+# Show complete status
+powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -ShowStatus
+
+# Test connection and IP
+powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -TestConnection
+
+# Both status and connection test
+powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -ShowStatus -TestConnection
+```
+
+## Security Features Implemented
+
+### ✅ Key Generation
+- Private Key: `IOQ9drZ8R2U5wjEmcr7Ppg2Ckqh93sGOpHUHHwMVPE4=`
+- Public Key: `9/NWNG+i9djhNCx06OikTKJ1nBnYyy9J94JFbSJI01k=`
+
+### ✅ DNS Protection
+- Configured to use Cloudflare DNS (1.1.1.1, 1.0.0.1)
+- Prevents DNS leaks that could expose your location
+
+### ✅ IP leak Testing
+- Automatic IP detection and reporting
+- Manual testing URLs provided (ipleak.net, dnsleaktest.com)
+
+### ✅ Kill Switch (via AllowedIPs)
+- All traffic (0.0.0.0/0) routed through VPN
+- No internet access if VPN disconnects
+
+## Integration with EQ12 Betting System
+
+### Automated VPN Checks
+Add VPN status checks to your betting scripts:
+```powershell
+# Check VPN before running betting operations
+$vpnStatus = & "C:\EQ12\wireguard_test.ps1" -ShowStatus
+if ($vpnStatus -match "No active interfaces") {
+    Write-Error "VPN not connected! Aborting betting operations."
+    exit 1
+}
+```
+
+### Logging Integration
+All VPN operations are logged to `C:\EQ12\logs\wireguard_test_YYYYMMDD.log`
+
+## Troubleshooting
+
+### Common Issues
+
+**"Tunnel Service: NOT INSTALLED"**
+- Run: `powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -InstallTunnel`
+
+**"No active interfaces"**
+- Check your VPN provider configuration
+- Ensure the tunnel service is started
+- Verify your provider's server endpoint is reachable
+
+**IP not changing**
+- Verify tunnel service is running: `Get-Service WireGuardTunnel*`
+- Check Windows firewall isn't blocking WireGuard
+- Try different server endpoint from your VPN provider
+
+### Manual Service Management
+```powershell
+# Start tunnel
+Start-Service "WireGuardTunnel`$eq12-betting"
+
+# Stop tunnel
+Stop-Service "WireGuardTunnel`$eq12-betting"
+
+# Check service status
+Get-Service "WireGuardTunnel*"
+```
+
+## Files Created
+- `C:\EQ12\wireguard_install.ps1` - Installation and key generation
+- `C:\EQ12\wireguard_test.ps1` - Testing and status monitoring
+- `C:\EQ12\wireguard\eq12-betting.conf` - Your VPN configuration
+- `C:\EQ12\wireguard\eq12-betting-example.conf` - Example provider config
+- `C:\EQ12\WIREGUARD_SETUP_INSTRUCTIONS.txt` - This guide
+
+## Next Actions Required
+1. 🔹 Choose and subscribe to a WireGuard-compatible VPN provider
+2. 🔹 Download your provider's WireGuard configuration
+3. 🔹 Update `eq12-betting.conf` with provider details
+4. 🔹 Install the tunnel service
+5. 🔹 Test VPN connection and verify IP change
+
+**Your EQ12 betting system is now ready for secure VPN operation!**

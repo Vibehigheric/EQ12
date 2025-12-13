@@ -1,0 +1,5 @@
+Design a dropshipping automation platform that:
+- Monitors trending products across multiple marketplaces
+- Analyzes supplier reliability and shipping times
+- Optimizes pricing strategies based on market data
+- Generates marketing content and social media campaigns

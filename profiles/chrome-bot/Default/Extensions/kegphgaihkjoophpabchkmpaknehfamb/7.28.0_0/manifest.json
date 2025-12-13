@@ -1,0 +1,38 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "icons/catc2-disabled-128.png"
+      },
+      "default_title": "Cently"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "contentScript.js" ],
+      "matches": [ "https://*/*", "http://*/*" ],
+      "run_at": "document_start"
+   }, {
+      "css": [ "css/fonts.css" ],
+      "matches": [ "https://*/*", "http://*/*" ],
+      "run_at": "document_start"
+   } ],
+   "description": "Get Cently for free to save an average of $15 per purchase in coupons + cashback, automatically at checkout.",
+   "host_permissions": [ "\u003Call_urls>" ],
+   "icons": {
+      "128": "icons/catc2-128.png",
+      "16": "icons/catc2-16.png",
+      "48": "icons/catc2-32.png",
+      "64": "icons/catc2-64.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCsOcwqlL4TlbCLW89Qzm+acuYhmmpwn8j9b94LbnqlezJh6fUu8QweFNUGguhifwGrGaA+4V6AL1E8pioHMCCCEl2nX2HQ0myI3+RtikXl4JPxaTPERvTV4s8xh0atH8FvfqgMjAdO+ZVPeWvbl06gmIGmMB9kabyeB3H1IzKpRwIDAQAB",
+   "manifest_version": 3,
+   "name": "Cently: Automatic Coupons + Cashback for Free",
+   "permissions": [ "storage", "alarms", "webRequest", "scripting" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "7.28.0",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "siteScript.js", "*.js.map", "*.css", "*.css.map", "fonts/*", "images/*", "merchantTermsPage.html" ]
+   } ]
+}

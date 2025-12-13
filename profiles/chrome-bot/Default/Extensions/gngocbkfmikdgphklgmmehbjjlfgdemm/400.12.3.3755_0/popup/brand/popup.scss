@@ -1,0 +1,111 @@
+@import '../assets/css/open-sans.css';
+
+:root {
+  --font: 'Open Sans';
+  --default: #757575;
+  --default-dark: #555555;
+  --default-darker: #333333;
+  --primary: #15768D;
+  --primary-light: #EBF5F8;
+  --primary-dark: #156477;
+  --secondary: #6E5CC9;
+  --secondary-light: #F0EEF9;
+  --emerald-2: #BEE4CB;
+  --emerald-4: #65C084;
+  --emerald-5: #38AD60;
+  --emerald-6: #319855;
+  --emerald-8: #246F3D;
+  --emerald-10: #164526;
+  --tertiary: var(--emerald-6);
+  --tertiary-light: var(--emerald-2);
+  --error: #E61B2B;
+  --bg-gradient: linear-gradient(267.9deg, #2D8CA4 1.19%, #15758D 96.83%);
+}
+
+.sb {
+  .popup {
+    color: var(--default);
+
+    .coupon {
+      &.card {
+        padding: 14px 38px 14px 18px !important;
+      }
+      .callout {
+        width: 85px !important;
+        height: 85px !important;
+        padding: 0 !important;
+        border-color: var(--emerald-4) !important;
+        margin-right: 21px !important;
+        .discount {
+          color: var(--emerald-6) !important;
+          .label {
+            font-size: 12px;
+            line-height: 15px;
+          }
+        }
+        .tagline {
+          background: var(--emerald-2) !important;
+          color: var(--emerald-10) !important;
+        }
+      }
+      .button {
+        .text, .peel div {
+          font-size: 14px !important;
+          line-height: 18px !important;  
+          color: var(--emerald-8) !important;  
+        }
+        .text {
+          background: var(--emerald-2) !important;
+          border: 1px solid var(--emerald-5) !important;
+          border-radius: 20px !important;
+          box-shadow: none !important;
+        }
+        .peel {
+          div {
+            background: white !important;
+            border: 1px dashed var(--emerald-5) !important;
+            border-radius: 20px !important;
+            border-right: none !important;
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            box-shadow: none !important;
+            width: calc(100% - 65px) !important;
+          }
+        }
+      }
+      .expiration {
+        color: var(--default) !important;
+        font-size: 12px !important;
+        font-weight: normal !important;
+        line-height: 18px !important;
+        text-align: center !important;
+      }
+    }
+  }
+  &.settings {
+    .pill-select {
+      .pill {
+        &.selected {
+          background: var(--emerald-5) !important;
+        }
+      }
+    }
+    .switch {
+      &.on {
+        .track {
+          background-color: var(--emerald-4) !important;
+        }
+      }  
+    }
+  }
+
+  popup-alert b {
+    color: var(--primary);
+  }
+
+  popup-promo-codes {
+    .info a {
+      color: var(--primary);
+    }
+  }
+}

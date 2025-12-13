@@ -1,0 +1,53 @@
+{
+  "name": "EQ12-GODSTACK",
+  "description": "EQ12 automation and intelligence stack with multiple business verticals",
+  "repository": {
+    "type": "local",
+    "path": "C:\\EQ12",
+    "exclude_patterns": [
+      "logs/*",
+      "*.log",
+      "__pycache__/*",
+      "node_modules/*",
+      ".git/*",
+      "*.pyc",
+      "venv/*",
+      "envs/*"
+    ]
+  },
+  "analysis": {
+    "languages": [
+      "python",
+      "powershell",
+      "javascript",
+      "xml"
+    ],
+    "frameworks": [
+      "fastapi",
+      "playwright",
+      "telegram-bot",
+      "task-scheduler"
+    ],
+    "business_contexts": [
+      "betting intelligence and EdgeGod parlays",
+      "travel booking and flight deals",
+      "cannabis compliance and regulatory tracking",
+      "fleet management and vehicle operations",
+      "credit scoring and housing market analysis",
+      "educational grants and SUNY programs",
+      "AliDropship and e-commerce automation"
+    ]
+  },
+  "common_queries": [
+    "Where are Telegram messages sent from?",
+    "How is enrichment.py integrated across stacks?",
+    "What are the database schema patterns?",
+    "Where are API keys and secrets managed?",
+    "How do Task Scheduler XMLs chain operations?",
+    "What are the logging patterns across modules?",
+    "How is error handling implemented?",
+    "Where are the browser automation patterns?",
+    "How is the dashboard integrated with data collection?",
+    "What are the cross-stack correlation patterns?"
+  ]
+}

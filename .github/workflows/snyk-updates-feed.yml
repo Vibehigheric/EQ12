@@ -1,0 +1,90 @@
+name: Snyk Updates Feed
+
+on:
+    workflow_dispatch:
+    schedule:
+        - cron: "5 7 * * *" # daily at 07:05 UTC
+
+permissions:
+    contents: write
+    issues: write
+
+jobs:
+    feed:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.12"
+
+            - name: Run Snyk RSS sync
+              id: sync
+              run: |
+                  python scripts/snyk_rss_sync.py > feed.jsonl || true
+                  echo "Generated feed.jsonl"
+
+            - name: Parse new items
+              id: collect
+              run: |
+                  if [ -s feed.jsonl ]; then
+                    echo "has_new=true" >> $GITHUB_OUTPUT
+                    echo "New items present"
+                  else
+                    echo "has_new=false" >> $GITHUB_OUTPUT
+                    echo "No new items"
+                  fi
+
+            - name: Commit state (seen GUIDs)
+              if: steps.collect.outputs.has_new == 'true'
+              run: |
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@users.noreply.github.com"
+                  git add data/snyk_rss_state.json || true
+                  git commit -m "chore: update Snyk RSS state" || true
+                  git push || true
+
+            - name: Open or update Snyk Updates issue
+              if: steps.collect.outputs.has_new == 'true'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const lines = fs.readFileSync('feed.jsonl', 'utf8')
+                        .split('\n')
+                        .filter(Boolean)
+                        .map(l => JSON.parse(l))
+                        .filter(o => o.type === 'snyk_update');
+                      if (lines.length === 0) return;
+                      const title = 'Snyk Updates Feed';
+                      const body = lines.map(o => `- [${o.title}](${o.link})\n  - ${o.pubDate}\n  - ${o.description?.slice(0,160)}...`).join('\n');
+                      const { data: issues } = await github.rest.issues.listForRepo({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        state: 'open',
+                        labels: 'snyk-updates'
+                      });
+                      if (issues.length > 0) {
+                        await github.rest.issues.createComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: issues[0].number,
+                          body
+                        });
+                      } else {
+                        await github.rest.issues.create({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          title,
+                          body,
+                          labels: ['snyk-updates']
+                        });
+                      }
+
+            - name: Upload feed artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: snyk-updates-feed
+                  path: feed.jsonl

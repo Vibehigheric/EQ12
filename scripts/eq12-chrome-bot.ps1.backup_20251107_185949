@@ -1,0 +1,1 @@
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --user-data-dir="C:\EQ12\profiles\chrome-bot" --profile-directory="Default" --disable-features=AutomationControlled --no-first-run --no-default-browser-check

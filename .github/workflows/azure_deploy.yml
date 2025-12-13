@@ -1,0 +1,62 @@
+name: Deploy to Azure ML
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/EQ12.*/**.vb'
+      - '.azureml/**'
+      - 'scripts/train*.py'
+  workflow_dispatch:
+
+jobs:
+  deploy-model:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install Azure ML SDK
+        run: |
+          pip install azure-ai-ml
+          pip install azure-identity
+      
+      - name: Authenticate with Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Submit training job to Azure ML
+        run: |
+          python scripts/train_model.py \
+            --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --workspace ${{ secrets.AZURE_ML_WORKSPACE }}
+      
+      - name: Register model
+        run: |
+          python scripts/register_model.py \
+            --model-path outputs/model.pkl \
+            --model-name EQ12BettingOptimizer
+      
+      - name: Deploy to staging
+        run: |
+          python scripts/deploy_model.py \
+            --model-name EQ12BettingOptimizer \
+            --environment staging
+      
+      - name: Run integration tests
+        run: |
+          dotnet test tests/ --configuration Release
+      
+      - name: Deploy to production
+        if: success()
+        run: |
+          python scripts/deploy_model.py \
+            --model-name EQ12BettingOptimizer \
+            --environment production

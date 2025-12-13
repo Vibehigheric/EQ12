@@ -1,0 +1,23 @@
+{
+  "Multichem/NHL_Betting_Models": {
+    "model": "Multichem/NHL_Betting_Models",
+    "predictions": 3,
+    "confidence_avg": 0.75,
+    "high_confidence_picks": 1,
+    "last_updated": "2025-10-09T19:29:15.371038"
+  },
+  "elladeandra/sports-prediction": {
+    "model": "elladeandra/sports-prediction",
+    "predictions": 3,
+    "confidence_avg": 0.75,
+    "high_confidence_picks": 1,
+    "last_updated": "2025-10-09T19:29:15.371038"
+  },
+  "Custom EQ12 Ensemble Model": {
+    "model": "Custom EQ12 Ensemble Model",
+    "predictions": 3,
+    "confidence_avg": 0.75,
+    "high_confidence_picks": 1,
+    "last_updated": "2025-10-09T19:29:15.371038"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "eq12-agentic-ai": {
+      "command": "python",
+      "args": [
+        "C:\\EQ12\\scripts\\eq12_mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "C:\\EQ12;C:\\EQ12\\scripts;C:\\EQ12\\configs"
+      }
+    }
+  }
+}

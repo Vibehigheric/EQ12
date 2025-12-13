@@ -1,0 +1,61 @@
+{
+  "budgets": {
+    "openai": {
+      "daily": 25.0,
+      "monthly": 500.0
+    },
+    "azure_openai": {
+      "daily": 25.0,
+      "monthly": 500.0
+    },
+    "odds_api": {
+      "daily": 5.0,
+      "monthly": 100.0
+    },
+    "telegram": {
+      "daily": 1.0,
+      "monthly": 20.0
+    },
+    "total": {
+      "daily": 50.0,
+      "monthly": 1000.0
+    }
+  },
+  "rate_limits": {
+    "openai": {
+      "requests_per_minute": 60,
+      "requests_per_hour": 500,
+      "requests_per_day": 10000
+    },
+    "azure_openai": {
+      "requests_per_minute": 60,
+      "requests_per_hour": 1000,
+      "requests_per_day": 20000
+    },
+    "odds_api": {
+      "requests_per_minute": 10,
+      "requests_per_hour": 500,
+      "requests_per_day": 5000
+    },
+    "telegram": {
+      "requests_per_minute": 20,
+      "requests_per_hour": 100,
+      "requests_per_day": 1000
+    }
+  },
+  "thresholds": {
+    "warning": 0.7,
+    "critical": 0.9,
+    "emergency": 1.0
+  },
+  "alerts": {
+    "telegram_notifications": true,
+    "email_notifications": false,
+    "log_file_alerts": true
+  },
+  "circuit_breaker": {
+    "enabled": true,
+    "failure_threshold": 5,
+    "reset_timeout": 300
+  }
+}

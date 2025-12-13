@@ -1,0 +1,127 @@
+name: 🚨 Security Issue
+description: Report a security vulnerability in EQ12 GODSTACK
+title: "[SECURITY]: "
+labels: ["security", "urgent"]
+assignees: ["Vibehigheric"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚨 Security Issue Report
+        
+        **⚠️ IMPORTANT: If this is a critical security vulnerability that could lead to immediate harm, please contact @Vibehigheric directly instead of filing this public issue.**
+        
+        For non-critical security improvements or questions, please use this template.
+
+  - type: checkboxes
+    id: severity-check
+    attributes:
+      label: "🔴 Security Severity"
+      description: "Please confirm the severity level"
+      options:
+        - label: "🟢 Low - Security improvement suggestion"
+        - label: "🟡 Medium - Potential vulnerability, no immediate risk"
+        - label: "🟠 High - Active vulnerability, limited exposure"
+        - label: "🔴 Critical - Active vulnerability, high risk (CONTACT DIRECTLY)"
+
+  - type: checkboxes
+    id: affected-areas
+    attributes:
+      label: "🎯 Affected Security Areas"
+      description: "Which security areas are involved?"
+      options:
+        - label: "🔐 Authentication & Authorization"
+        - label: "🗝️ API Keys & Secrets Management"
+        - label: "🗄️ Database Security"
+        - label: "🌐 Web Application Security"
+        - label: "📱 External API Security"
+        - label: "💰 Financial Data Protection"
+        - label: "🏈 Gambling Compliance Security"
+        - label: "🌿 Cannabis Regulatory Security"
+        - label: "📋 Personal Data Protection"
+
+  - type: textarea
+    id: security-issue
+    attributes:
+      label: "📝 Security Issue Description"
+      description: "Describe the security concern (avoid specific exploit details in public)"
+      placeholder: "General description of the security issue..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: potential-impact
+    attributes:
+      label: "⚠️ Potential Impact"
+      description: "What could happen if this issue is exploited?"
+      placeholder: |
+        - Data exposure risk
+        - Revenue impact
+        - Compliance violation
+        - System compromise
+    validations:
+      required: true
+
+  - type: dropdown
+    id: discovery-method
+    attributes:
+      label: "🔍 How was this discovered?"
+      options:
+        - "Code review"
+        - "Security testing"
+        - "Automated scanning"
+        - "External report"
+        - "Incident response"
+        - "Other"
+
+  - type: textarea
+    id: affected-components
+    attributes:
+      label: "🛠️ Affected Components"
+      description: "Which EQ12 components are affected?"
+      placeholder: |
+        - trending_monitor.py
+        - dashboard.py
+        - Task Scheduler XMLs
+        - Database connections
+        - API integrations
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: "🔧 Suggested Fix"
+      description: "If you have ideas for fixing this issue"
+      placeholder: "Suggested remediation steps..."
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: "✅ Verification Steps"
+      description: "Have you verified this issue?"
+      options:
+        - label: "I have confirmed this is a legitimate security concern"
+        - label: "I have not disclosed this publicly elsewhere"
+        - label: "I understand this will be addressed with appropriate priority"
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "📎 Additional Context"
+      description: "Any other relevant information (no exploit details)"
+      placeholder: "Additional context that might be helpful..."
+
+  - type: markdown
+    attributes:
+      value: |
+        ## 🔒 Security Response Process
+        
+        1. **Triage**: Security issues are reviewed within 24 hours
+        2. **Assessment**: Impact and severity evaluation
+        3. **Fix Development**: Patches developed and tested
+        4. **Deployment**: Security fixes deployed immediately
+        5. **Follow-up**: Verification and prevention measures
+        
+        **Thank you for helping keep EQ12 GODSTACK secure!**

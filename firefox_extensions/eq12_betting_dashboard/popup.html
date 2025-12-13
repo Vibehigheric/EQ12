@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 350px;
+            height: 500px;
+            margin: 0;
+            padding: 16px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #0f3460;
+            padding-bottom: 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .status-section {
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .status-label {
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .status-value {
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .status-connected {
+            color: #00ff88;
+        }
+
+        .status-disconnected {
+            color: #ff4444;
+        }
+
+        .status-warning {
+            color: #ffaa00;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+            transform: translateY(-1px);
+        }
+
+        .parlay-section {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid #00d4ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .parlay-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .parlay-item {
+            font-size: 11px;
+            margin-bottom: 4px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .ev-positive {
+            border-left: 3px solid #00ff88;
+        }
+
+        .ev-negative {
+            border-left: 3px solid #ff4444;
+        }
+
+        .quick-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .quick-btn {
+            padding: 6px 10px;
+            background: transparent;
+            border: 1px solid #00d4ff;
+            border-radius: 4px;
+            color: #00d4ff;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .quick-btn:hover {
+            background: #00d4ff;
+            color: #1a1a2e;
+        }
+
+        .notification {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            background: #00ff88;
+            color: #1a1a2e;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">EQ12</div>
+        <div class="subtitle">Betting Dashboard Companion</div>
+    </div>
+
+    <div class="status-section">
+        <div class="status-item">
+            <span class="status-label">VPN Status:</span>
+            <span id="vpn-status" class="status-value status-disconnected">Checking...</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Current IP:</span>
+            <span id="current-ip" class="status-value">Loading...</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Region:</span>
+            <span id="vpn-region" class="status-value">Unknown</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">EQ12 API:</span>
+            <span id="api-status" class="status-value status-warning">Checking...</span>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button id="refresh-status" class="btn btn-primary">Refresh</button>
+        <button id="toggle-vpn" class="btn btn-secondary">Toggle VPN</button>
+        <button id="fetch-parlays" class="btn btn-primary">Get Parlays</button>
+        <button id="run-audit" class="btn btn-secondary">Run Audit</button>
+    </div>
+
+    <div id="parlay-container">
+        <!-- Parlays will be loaded here -->
+    </div>
+
+    <div class="quick-actions">
+        <button id="telegram-bot" class="quick-btn">Telegram</button>
+        <button id="odds-scraper" class="quick-btn">Scraper</button>
+        <button id="settings" class="quick-btn">Settings</button>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

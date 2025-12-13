@@ -1,0 +1,11 @@
+{
+  "rotation_enabled": true,
+  "max_files_per_category": {
+    "nfl_parlay": 50,
+    "chrome_governance": 30,
+    "system_core": 100,
+    "default": 25
+  },
+  "max_file_size_mb": 10,
+  "archive_after_days": 30
+}

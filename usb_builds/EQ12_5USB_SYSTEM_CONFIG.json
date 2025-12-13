@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-11-15T23:34:00.783545",
+  "system": "EQ12_5USB_RASPBERRY_PI_KIT",
+  "location": "Buffalo NY 14215",
+  "usb_systems": {
+    "usb1": {
+      "usb": "USB1",
+      "name": "EQ12_RECOVERY_REINSTALL",
+      "path": "C:\\EQ12\\usb_builds\\USB1_EQ12_RECOVERY",
+      "status": "created",
+      "components": 13,
+      "size_estimate": "2.5GB"
+    },
+    "usb2": {
+      "usb": "USB2",
+      "name": "CORAL_TPU_MODEL_CACHE",
+      "path": "C:\\EQ12\\usb_builds\\USB2_CORAL_TPU_CACHE",
+      "status": "created",
+      "components": 10,
+      "size_estimate": "8GB"
+    },
+    "usb3": {
+      "usb": "USB3",
+      "name": "BUFFALO_14215_INTEL_FEED",
+      "path": "C:\\EQ12\\usb_builds\\USB3_BUFFALO_14215_INTEL",
+      "status": "created",
+      "components": 11,
+      "size_estimate": "5GB"
+    },
+    "usb4": {
+      "usb": "USB4",
+      "name": "REVENUE_CONTENT_EMPIRE_VAULT",
+      "path": "C:\\EQ12\\usb_builds\\USB4_REVENUE_CONTENT_VAULT",
+      "status": "created",
+      "components": 11,
+      "size_estimate": "10GB"
+    },
+    "usb5": {
+      "usb": "USB5",
+      "name": "ENTERPRISE_SECRETS_AUTH_KEY",
+      "path": "C:\\EQ12\\usb_builds\\USB5_ENTERPRISE_AUTH_KEY",
+      "status": "created",
+      "components": 11,
+      "size_estimate": "1GB"
+    }
+  },
+  "total_storage": "160GB (5 x 32GB)",
+  "deployment_strategy": "hot_swap_limited_ports",
+  "status": "COMPLETE",
+  "master_deployment": {
+    "script": "DEPLOY_ALL_USB_SYSTEMS.ps1",
+    "path": "C:\\EQ12\\usb_builds\\DEPLOY_ALL_USB_SYSTEMS.ps1",
+    "status": "created"
+  }
+}

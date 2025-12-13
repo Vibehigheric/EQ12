@@ -8,11 +8,11 @@
 # Monitoring thresholds (can be overridden by calling scripts)
 if (-not $Global:Thresholds) {
     $Global:Thresholds = @{
-        CPUPercent = 85
-        MemoryPercent = 90
-        DiskPercent = 90
+        CPUPercent             = 85
+        MemoryPercent          = 90
+        DiskPercent            = 90
         EventLogErrorsLast5Min = 10
-        CriticalServicesDown = 1
+        CriticalServicesDown   = 1
     }
 }
 
@@ -52,8 +52,8 @@ function Get-SystemMetrics {
     try {
         # CPU metrics
         $CPULoad = Get-CimInstance -ClassName Win32_Processor | 
-            Measure-Object -Property LoadPercentage -Average | 
-            Select-Object -ExpandProperty Average
+        Measure-Object -Property LoadPercentage -Average | 
+        Select-Object -ExpandProperty Average
 
         # Memory metrics
         $OS = Get-CimInstance -ClassName Win32_OperatingSystem
@@ -64,57 +64,57 @@ function Get-SystemMetrics {
 
         # Disk metrics
         $Disks = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DriveType=3" | 
-            ForEach-Object {
-                @{
-                    Drive = $_.DeviceID
-                    TotalGB = [math]::Round($_.Size / 1GB, 2)
-                    FreeGB = [math]::Round($_.FreeSpace / 1GB, 2)
-                    UsedPercent = [math]::Round((($_.Size - $_.FreeSpace) / $_.Size) * 100, 2)
-                }
+        ForEach-Object {
+            @{
+                Drive       = $_.DeviceID
+                TotalGB     = [math]::Round($_.Size / 1GB, 2)
+                FreeGB      = [math]::Round($_.FreeSpace / 1GB, 2)
+                UsedPercent = [math]::Round((($_.Size - $_.FreeSpace) / $_.Size) * 100, 2)
             }
+        }
 
         # Network metrics (current session)
         $NetworkAdapters = Get-NetAdapterStatistics | 
-            Where-Object { $_.Name -notlike "*Bluetooth*" -and $_.Name -notlike "*Virtual*" } |
-            Select-Object -First 3 |
-            ForEach-Object {
-                @{
-                    Name = $_.Name
-                    ReceivedMB = [math]::Round($_.ReceivedBytes / 1MB, 2)
-                    SentMB = [math]::Round($_.SentBytes / 1MB, 2)
-                }
+        Where-Object { $_.Name -notlike "*Bluetooth*" -and $_.Name -notlike "*Virtual*" } |
+        Select-Object -First 3 |
+        ForEach-Object {
+            @{
+                Name       = $_.Name
+                ReceivedMB = [math]::Round($_.ReceivedBytes / 1MB, 2)
+                SentMB     = [math]::Round($_.SentBytes / 1MB, 2)
             }
+        }
 
         # Process metrics
         $TopProcessesCPU = Get-Process | 
-            Sort-Object CPU -Descending | 
-            Select-Object -First 5 -Property Name, 
-                @{Name="CPU"; Expression={[math]::Round($_.CPU, 2)}},
-                @{Name="MemoryMB"; Expression={[math]::Round($_.WorkingSet64 / 1MB, 2)}}
+        Sort-Object CPU -Descending | 
+        Select-Object -First 5 -Property Name, 
+        @{Name = "CPU"; Expression = { [math]::Round($_.CPU, 2) } },
+        @{Name = "MemoryMB"; Expression = { [math]::Round($_.WorkingSet64 / 1MB, 2) } }
 
         $TopProcessesMemory = Get-Process | 
-            Sort-Object WorkingSet64 -Descending | 
-            Select-Object -First 5 -Property Name, 
-                @{Name="MemoryMB"; Expression={[math]::Round($_.WorkingSet64 / 1MB, 2)}},
-                @{Name="CPU"; Expression={[math]::Round($_.CPU, 2)}}
+        Sort-Object WorkingSet64 -Descending | 
+        Select-Object -First 5 -Property Name, 
+        @{Name = "MemoryMB"; Expression = { [math]::Round($_.WorkingSet64 / 1MB, 2) } },
+        @{Name = "CPU"; Expression = { [math]::Round($_.CPU, 2) } }
 
         return @{
-            Timestamp = (Get-Date).ToUniversalTime().ToString("o")
-            CPU = @{
+            Timestamp    = (Get-Date).ToUniversalTime().ToString("o")
+            CPU          = @{
                 LoadPercent = $CPULoad
-                Status = if ($CPULoad -ge $Global:Thresholds.CPUPercent) { "CRITICAL" } else { "OK" }
+                Status      = if ($CPULoad -ge $Global:Thresholds.CPUPercent) { "CRITICAL" } else { "OK" }
             }
-            Memory = @{
-                TotalGB = $TotalMemoryGB
-                UsedGB = $UsedMemoryGB
-                FreeGB = $FreeMemoryGB
+            Memory       = @{
+                TotalGB     = $TotalMemoryGB
+                UsedGB      = $UsedMemoryGB
+                FreeGB      = $FreeMemoryGB
                 UsedPercent = $MemoryPercent
-                Status = if ($MemoryPercent -ge $Global:Thresholds.MemoryPercent) { "CRITICAL" } else { "OK" }
+                Status      = if ($MemoryPercent -ge $Global:Thresholds.MemoryPercent) { "CRITICAL" } else { "OK" }
             }
-            Disks = $Disks
-            Network = $NetworkAdapters
+            Disks        = $Disks
+            Network      = $NetworkAdapters
             TopProcesses = @{
-                ByCPU = $TopProcessesCPU
+                ByCPU    = $TopProcessesCPU
                 ByMemory = $TopProcessesMemory
             }
         }
@@ -139,20 +139,20 @@ function Get-ServiceStatus {
             
             if ($Service) {
                 @{
-                    Name = $ServiceName
+                    Name        = $ServiceName
                     DisplayName = $Service.DisplayName
-                    Status = $Service.Status.ToString()
-                    StartType = $Service.StartType.ToString()
-                    IsHealthy = ($Service.Status -eq "Running")
+                    Status      = $Service.Status.ToString()
+                    StartType   = $Service.StartType.ToString()
+                    IsHealthy   = ($Service.Status -eq "Running")
                 }
             }
             else {
                 @{
-                    Name = $ServiceName
+                    Name        = $ServiceName
                     DisplayName = "Service not found"
-                    Status = "NotFound"
-                    StartType = "Unknown"
-                    IsHealthy = $false
+                    Status      = "NotFound"
+                    StartType   = "Unknown"
+                    IsHealthy   = $false
                 }
             }
         }
@@ -160,11 +160,11 @@ function Get-ServiceStatus {
         $UnhealthyCount = ($ServiceStatus | Where-Object { -not $_.IsHealthy }).Count
 
         return @{
-            Timestamp = (Get-Date).ToUniversalTime().ToString("o")
-            Services = $ServiceStatus
+            Timestamp      = (Get-Date).ToUniversalTime().ToString("o")
+            Services       = $ServiceStatus
             TotalMonitored = $Global:CriticalServices.Count
-            Unhealthy = $UnhealthyCount
-            Status = if ($UnhealthyCount -ge $Global:Thresholds.CriticalServicesDown) { "CRITICAL" } else { "OK" }
+            Unhealthy      = $UnhealthyCount
+            Status         = if ($UnhealthyCount -ge $Global:Thresholds.CriticalServicesDown) { "CRITICAL" } else { "OK" }
         }
     }
     catch {
@@ -187,25 +187,25 @@ function Get-EventLogSummary {
         $StartTime = (Get-Date).AddMinutes(-$Minutes)
         
         $LogSummary = @{
-            System = @{
-                Errors = 0
+            System      = @{
+                Errors   = 0
                 Warnings = 0
                 Critical = 0
             }
             Application = @{
-                Errors = 0
+                Errors   = 0
                 Warnings = 0
                 Critical = 0
             }
-            Security = @{
-                FailedLogins = 0
+            Security    = @{
+                FailedLogins     = 0
                 SuccessfulLogins = 0
             }
         }
 
         # System log
         $SystemEvents = Get-WinEvent -FilterHashtable @{
-            LogName = "System"
+            LogName   = "System"
             StartTime = $StartTime
         } -ErrorAction SilentlyContinue
 
@@ -217,7 +217,7 @@ function Get-EventLogSummary {
 
         # Application log
         $AppEvents = Get-WinEvent -FilterHashtable @{
-            LogName = "Application"
+            LogName   = "Application"
             StartTime = $StartTime
         } -ErrorAction SilentlyContinue
 
@@ -229,9 +229,9 @@ function Get-EventLogSummary {
 
         # Security log (login attempts)
         $SecurityEvents = Get-WinEvent -FilterHashtable @{
-            LogName = "Security"
+            LogName   = "Security"
             StartTime = $StartTime
-            ID = @(4624, 4625)  # 4624 = Success, 4625 = Failed
+            ID        = @(4624, 4625)  # 4624 = Success, 4625 = Failed
         } -ErrorAction SilentlyContinue
 
         if ($SecurityEvents) {
@@ -242,11 +242,11 @@ function Get-EventLogSummary {
         $TotalErrors = $LogSummary.System.Errors + $LogSummary.Application.Errors + $LogSummary.System.Critical + $LogSummary.Application.Critical
 
         return @{
-            Timestamp = (Get-Date).ToUniversalTime().ToString("o")
+            Timestamp         = (Get-Date).ToUniversalTime().ToString("o")
             TimeWindowMinutes = $Minutes
-            Summary = $LogSummary
-            TotalErrors = $TotalErrors
-            Status = if ($TotalErrors -ge $Global:Thresholds.EventLogErrorsLast5Min) { "WARNING" } else { "OK" }
+            Summary           = $LogSummary
+            TotalErrors       = $TotalErrors
+            Status            = if ($TotalErrors -ge $Global:Thresholds.EventLogErrorsLast5Min) { "WARNING" } else { "OK" }
         }
     }
     catch {
@@ -289,8 +289,8 @@ function Send-TelegramAlert {
 
         $Uri = "https://api.telegram.org/bot$($Global:TelegramBotToken)/sendMessage"
         $Body = @{
-            chat_id = $Global:TelegramChatId
-            text = $FormattedMessage
+            chat_id    = $Global:TelegramChatId
+            text       = $FormattedMessage
             parse_mode = "Markdown"
         } | ConvertTo-Json
 
@@ -327,8 +327,8 @@ function Save-Snapshot {
 
         # Cleanup old snapshots (keep last 100)
         $OldSnapshots = Get-ChildItem -Path $Global:SnapshotDir -Filter "sentinel_snapshot_*.json" | 
-            Sort-Object LastWriteTime -Descending | 
-            Select-Object -Skip 100
+        Sort-Object LastWriteTime -Descending | 
+        Select-Object -Skip 100
 
         if ($OldSnapshots) {
             $OldSnapshots | Remove-Item -Force

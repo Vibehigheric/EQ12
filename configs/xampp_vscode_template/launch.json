@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Listen for Xdebug (Apache/XAMPP)",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "hostname": "127.0.0.1",
+      "pathMappings": {
+        "/xampp/htdocs": "C:/xampp/htdocs"
+      }
+    },
+    {
+      "name": "Listen for Xdebug (PHP CLI)",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "hostname": "127.0.0.1",
+      "pathMappings": {
+        "${workspaceFolder}": "${workspaceFolder}"
+      }
+    }
+  ]
+}

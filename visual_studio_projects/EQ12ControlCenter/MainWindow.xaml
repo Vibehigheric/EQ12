@@ -1,0 +1,223 @@
+<Window x:Class="MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="EQ12 Control Center" Height="900" Width="1400"
+        WindowState="Maximized">
+    
+    <Window.Resources>
+        <!-- Styles -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+        </Style>
+        
+        <Style x:Key="MetricLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#7F8C8D"/>
+        </Style>
+        
+        <Style x:Key="MetricValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#2C3E50"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Background="#ECF0F1">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="EQ12 CONTROL CENTER" FontSize="24" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                    <Ellipse x:Name="statusIcon" Width="15" Height="15" Fill="Orange" Margin="15,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="btnSettings" Content="⚙ Settings" Margin="5,0" Padding="15,5" Background="#34495E" Foreground="White" BorderThickness="0" Click="btnSettings_Click"/>
+                    <Button x:Name="btnViewLogs" Content="📋 Logs" Margin="5,0" Padding="15,5" Background="#34495E" Foreground="White" BorderThickness="0" Click="btnViewLogs_Click"/>
+                    <Button x:Name="btnDataExplorer" Content="📊 Data" Margin="5,0" Padding="15,5" Background="#34495E" Foreground="White" BorderThickness="0" Click="btnDataExplorer_Click"/>
+                    <Button x:Name="btnBankrollManager" Content="💰 Bankroll" Margin="5,0" Padding="15,5" Background="#27AE60" Foreground="White" BorderThickness="0" Click="btnBankrollManager_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="20">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Resource Metrics Row -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- CPU Card -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="CPU USAGE" Style="{StaticResource HeaderStyle}"/>
+                            <TextBlock x:Name="lblCpuValue" Text="0.0%" Style="{StaticResource MetricValueStyle}"/>
+                            <ProgressBar x:Name="cpuProgressBar" Height="10" Margin="0,10,0,0" Minimum="0" Maximum="100" Value="0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Memory Card -->
+                    <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="MEMORY USAGE" Style="{StaticResource HeaderStyle}"/>
+                            <TextBlock x:Name="lblMemoryValue" Text="0.0% (0.0 GB)" Style="{StaticResource MetricValueStyle}"/>
+                            <ProgressBar x:Name="memoryProgressBar" Height="10" Margin="0,10,0,0" Minimum="0" Maximum="100" Value="0"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Disk Card -->
+                    <Border Grid.Column="2" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="DISK FREE" Style="{StaticResource HeaderStyle}"/>
+                            <TextBlock x:Name="lblDiskValue" Text="0 GB Free" Style="{StaticResource MetricValueStyle}"/>
+                            <ProgressBar x:Name="diskProgressBar" Height="10" Margin="0,10,0,0" Minimum="0" Maximum="100" Value="30"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Workers Card -->
+                    <Border Grid.Column="3" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="ACTIVE WORKERS" Style="{StaticResource HeaderStyle}"/>
+                            <TextBlock x:Name="lblActiveWorkers" Text="0" Style="{StaticResource MetricValueStyle}"/>
+                            <TextBlock Text="Scanner: " FontSize="12" Margin="0,10,0,0">
+                                <Run x:Name="lblScannerWorkers" Text="0"/>
+                                <Run Text=" | Validator: "/>
+                                <Run x:Name="lblValidatorWorkers" Text="0"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                
+                <!-- Control Panel Row -->
+                <Grid Grid.Row="1" Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Scanner Control -->
+                    <Border Grid.Column="0" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="SPORTS SCANNER CONTROL" Style="{StaticResource HeaderStyle}"/>
+                            
+                            <Grid Margin="0,10,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Workers:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBox x:Name="txtWorkerCount" Grid.Row="0" Grid.Column="1" Text="6" Width="60" HorizontalAlignment="Left" Margin="0,0,20,0"/>
+                                
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="Duration (min):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <TextBox x:Name="txtDuration" Grid.Row="0" Grid.Column="3" Text="60" Width="60" HorizontalAlignment="Left"/>
+                                
+                                <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="0,10,0,0">
+                                    <Button x:Name="btnStartScanner" Content="▶ Start Scanner" Padding="20,10" Background="#27AE60" Foreground="White" BorderThickness="0" Click="btnStartScanner_Click"/>
+                                    <Button x:Name="btnStopScanner" Content="⏹ Stop Scanner" Padding="20,10" Background="#E74C3C" Foreground="White" BorderThickness="0" IsEnabled="False" Margin="10,0,0,0" Click="btnStopScanner_Click"/>
+                                </StackPanel>
+                                
+                                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" Margin="0,10,0,0">
+                                    <Run Text="Status: "/>
+                                    <Run x:Name="lblScannerStatus" Text="Idle" FontWeight="Bold"/>
+                                </TextBlock>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Validator Control -->
+                    <Border Grid.Column="1" Style="{StaticResource CardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="PARLAY VALIDATOR" Style="{StaticResource HeaderStyle}"/>
+                            
+                            <Button x:Name="btnStartValidator" Content="▶ Start" Padding="15,10" Background="#3498DB" Foreground="White" BorderThickness="0" Margin="0,10,0,5" Click="btnStartValidator_Click"/>
+                            <Button x:Name="btnStopValidator" Content="⏹ Stop" Padding="15,10" Background="#E74C3C" Foreground="White" BorderThickness="0" IsEnabled="False" Margin="0,5,0,10" Click="btnStopValidator_Click"/>
+                            
+                            <TextBlock>
+                                <Run Text="Status: "/>
+                                <Run x:Name="lblValidatorStatus" Text="Idle" FontWeight="Bold"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                
+                <!-- Opportunities List -->
+                <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="10,20,10,10">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,15">
+                            <TextBlock Text="LATEST OPPORTUNITIES" Style="{StaticResource HeaderStyle}"/>
+                            <TextBlock Text=" (" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="lblTotalOpportunities" Text="0" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <TextBlock Text=" total)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <DataGrid x:Name="lstOpportunities" AutoGenerateColumns="False" IsReadOnly="True" 
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                                  AlternatingRowBackground="#F8F9FA">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Sport" Binding="{Binding Sport}" Width="80"/>
+                                <DataGridTextColumn Header="Game" Binding="{Binding Game}" Width="*"/>
+                                <DataGridTextColumn Header="Market" Binding="{Binding MarketType}" Width="100"/>
+                                <DataGridTextColumn Header="Profit %" Binding="{Binding ProfitMargin, StringFormat={}{0:F2}%}" Width="80"/>
+                                <DataGridTextColumn Header="EV" Binding="{Binding ExpectedValue, StringFormat={}{0:F2}%}" Width="80"/>
+                                <DataGridTextColumn Header="Time" Binding="{Binding Timestamp, StringFormat={}{0:HH:mm:ss}}" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="2" Background="#34495E" Padding="10,5">
+            <TextBlock x:Name="statusLabel" Text="Initializing..." Foreground="White" FontSize="12"/>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,135 @@
+name: EQ12 Daily SGP Generation
+
+on:
+    schedule:
+        # Run daily at 6 AM EST (11:00 UTC)
+        - cron: "0 11 * * *"
+    workflow_dispatch:
+        inputs:
+            date:
+                description: "Date to process (YYYY-MM-DD) or leave empty for today"
+                required: false
+                type: string
+            min_odds:
+                description: "Minimum odds multiplier"
+                required: false
+                default: "10.0"
+                type: string
+            stake_range:
+                description: "Stake range (min-max)"
+                required: false
+                default: "8-20"
+                type: string
+
+jobs:
+    generate-sgps:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.12"
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  if [ -f requirements.txt ]; then
+                    pip install -r requirements.txt
+                  else
+                    # Fallback essential packages
+                    pip install requests pytest
+                  fi
+
+            - name: Set up environment variables
+              env:
+                  ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              run: |
+                  echo "Environment variables configured"
+                  # Export for subsequent steps
+                  echo "ODDS_API_KEY=$ODDS_API_KEY" >> $GITHUB_ENV
+                  echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" >> $GITHUB_ENV
+                  echo "TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID" >> $GITHUB_ENV
+
+            - name: Parse stake range
+              id: parse-stakes
+              run: |
+                  stake_range="${{ github.event.inputs.stake_range || '8-20' }}"
+                  IFS='-' read -r stake_min stake_max <<< "$stake_range"
+                  echo "stake_min=$stake_min" >> $GITHUB_OUTPUT
+                  echo "stake_max=$stake_max" >> $GITHUB_OUTPUT
+
+            - name: Generate SGPs
+              run: |
+                  # Build arguments
+                  args="--stake-min ${{ steps.parse-stakes.outputs.stake_min }}"
+                  args="$args --stake-max ${{ steps.parse-stakes.outputs.stake_max }}"
+                  args="$args --min-odds ${{ github.event.inputs.min_odds || '10.0' }}"
+                  args="$args --payout-min 1000"
+
+                  # Add date if specified
+                  if [ -n "${{ github.event.inputs.date }}" ]; then
+                    args="$args --date ${{ github.event.inputs.date }}"
+                  fi
+
+                  echo "Running: python eq12_run_sgps_today.py $args"
+                  python eq12_run_sgps_today.py $args
+
+            - name: Upload SGP artifacts
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: sgp-results-${{ github.event.inputs.date || 'today' }}
+                  path: |
+                      logs/sgp_*.json
+                      logs/sgp_*.csv
+                      logs/sgp_*.txt
+                  retention-days: 30
+
+            - name: Check for results
+              id: check-results
+              run: |
+                  if ls logs/sgp_*.json 1> /dev/null 2>&1; then
+                    echo "results_found=true" >> $GITHUB_OUTPUT
+                    echo "Found SGP result files"
+                  else
+                    echo "results_found=false" >> $GITHUB_OUTPUT
+                    echo "No SGP result files found"
+                  fi
+
+            - name: Create summary report
+              if: steps.check-results.outputs.results_found == 'true'
+              run: |
+                  echo "## 🎯 EQ12 SGP Generation Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  # Get latest report file
+                  latest_report=$(ls -t logs/sgp_report_*.txt 2>/dev/null | head -1)
+                  if [ -f "$latest_report" ]; then
+                    echo "### 📊 Daily Report" >> $GITHUB_STEP_SUMMARY
+                    echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                    head -20 "$latest_report" >> $GITHUB_STEP_SUMMARY
+                    echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  # List generated files
+                  echo "### 📁 Generated Files" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  for file in logs/sgp_*; do
+                    if [ -f "$file" ]; then
+                      size=$(ls -lh "$file" | awk '{print $5}')
+                      echo "- \`$(basename "$file")\` ($size)" >> $GITHUB_STEP_SUMMARY
+                    fi
+                  done
+
+            - name: Notify on failure
+              if: failure()
+              run: |
+                  echo "❌ SGP generation failed"
+                  echo "Check logs for details"
+                  # Could add Telegram notification here with TELEGRAM_BOT_TOKEN

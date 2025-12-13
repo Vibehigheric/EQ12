@@ -1,0 +1,40 @@
+{
+   "$schema": "https://json.schemastore.org/chrome-manifest",
+   "action": {
+      "default_icon": {
+         "128": "assets/buster-icon-128.png"
+      },
+      "default_title": "Open PhantomBuster Sidepanel"
+   },
+   "background": {
+      "service_worker": "src/background/background.js"
+   },
+   "content_scripts": [ {
+      "css": [ "src/contentscript/contentscript.css" ],
+      "js": [ "src/contentscript/contentscript.js" ],
+      "matches": [ "*://*.phantombuster.com/*", "*://*.zapier.com/*" ],
+      "run_at": "document_end"
+   } ],
+   "description": "Retrieve session cookies and boost LinkedIn prospecting with contact saving and CRM sync via PhantomBuster.",
+   "homepage_url": "http://www.phantombuster.com/",
+   "host_permissions": [ "*://*.phantombuster.com/*", "*://*.facebook.com/*", "*://*.github.com/*", "*://*.instagram.com/*", "*://*.intercom.io/*", "*://*.linkedin.com/*", "*://*.medium.com/*", "*://*.producthunt.com/*", "*://*.slack.com/*", "*://*.twitter.com/*", "*://*.uber.com/*", "*://*.youtube.com/*", "*://*.quora.com/*", "*://*.pinterest.com/*", "*://*.tiktok.com/*" ],
+   "icons": {
+      "128": "assets/buster-icon-128.png",
+      "16": "assets/buster-icon-16.png",
+      "48": "assets/buster-icon-48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0yiv9BLncoz6E/dTwIHfKnUsp63TzGtPaNzQDaw2F/v4k7DNsWUpxwaYPVp0PkGtYYmb0dqQs+xpeXZEk3yyDwmJPJu94GW4DWC+nLA6HPs7BK5YuxSZM7x5m6OUIaLMumj1w+NttTkCE1vXKsMkiy8VziCyF7Fot64sHwxE+8lHdGEO4MX79af8xS+4fj7nbFsYfM0BjGsSrDGpexopJ52ec6WliNz0XAgZYFfCF88srSJY97ANXZVYbcvTWZmPQ+ILAgSSKZ20bSOX6ETBKroqt4pkEJ5WDkyvRc4j619erg24DCmamZJOWhLR/3v4Z6IF8nhvBC9WjcylrsV5RQIDAQAB",
+   "manifest_version": 3,
+   "name": "PhantomBuster",
+   "optional_host_permissions": [ "*://*.x.com/*" ],
+   "permissions": [ "notifications", "activeTab", "tabs", "cookies", "sidePanel" ],
+   "side_panel": {
+      "default_path": "src/sidepanel/sidepanel.html"
+   },
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.3.7",
+   "web_accessible_resources": [ {
+      "matches": [  ],
+      "resources": [ "assets/*" ]
+   } ]
+}

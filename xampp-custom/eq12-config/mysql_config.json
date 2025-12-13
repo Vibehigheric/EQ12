@@ -1,0 +1,14 @@
+{
+  "databases": [
+    "eq12_betting",
+    "eq12_analytics",
+    "eq12_users"
+  ],
+  "settings": {
+    "innodb_buffer_pool_size": "256M",
+    "max_connections": "100",
+    "query_cache_size": "64M",
+    "tmp_table_size": "64M",
+    "max_heap_table_size": "64M"
+  }
+}

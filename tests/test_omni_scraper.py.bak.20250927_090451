@@ -1,0 +1,49 @@
+import json
+import sys
+from pathlib import Path
+
+import types
+import pytest
+
+
+# Ensure project root (C:/EQ12) is on sys.path for tests
+root = Path(__file__).resolve().parents[1]
+if str(root) not in sys.path:
+    sys.path.insert(0, str(root))
+
+from omni_scraper.omni_scraper import OmniScraper, ScraperConfig, FetchSportsState, FetchOddsState
+
+
+def fake_fetcher_factory(sports_resp=None, odds_map=None):
+    sports_resp = sports_resp or [{"key": "soccer", "active": True}, {"key": "basketball", "active": False}]
+    odds_map = odds_map or {"soccer": [{"id": 1, "sport_key": "soccer", "teams": []}]}
+
+    def fetcher(url):
+        if url.endswith("/v4/sports?apiKey=None") or "/v4/sports?" in url:
+            return sports_resp
+        for k, v in odds_map.items():
+            if f"/v4/sports/{k}/odds/" in url:
+                return v
+        return []
+
+    return fetcher
+
+
+def test_fetch_sports_and_odds(tmp_path) -> None:
+    cfg = ScraperConfig(api_key=None, dry_run=True)
+    scraper = OmniScraper(cfg)
+    scraper.set_fetcher(fake_fetcher_factory())
+    scraper.run()
+    # We expect it to have fetched soccer
+    assert any(g.get("sport_key") == "soccer" for g in scraper.all_games)
+
+
+def test_persist_to_json(tmp_path) -> None:
+    out = tmp_path / "out.json"
+    cfg = ScraperConfig(api_key=None, dry_run=False)
+    scraper = OmniScraper(cfg)
+    scraper.set_fetcher(fake_fetcher_factory())
+    scraper.output_path = str(out)
+    scraper.run()
+    data = json.loads(out.read_text())
+    assert isinstance(data, list)

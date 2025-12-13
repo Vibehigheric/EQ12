@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Comprehensive System Monitor - Live Status</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .status-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .status-active { border-left: 5px solid #00ff88; }
+        .status-warning { border-left: 5px solid #ffaa00; }
+        .status-error { border-left: 5px solid #ff4444; }
+        .status-title { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+        .status-detail { font-size: 0.9em; opacity: 0.8; margin-bottom: 5px; }
+        .monitoring-info {
+            background: rgba(0,255,136,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0,255,136,0.3);
+        }
+        .critical-alerts {
+            background: rgba(255,68,68,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,68,68,0.3);
+            margin-top: 20px;
+        }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .timer { font-size: 2em; font-weight: bold; color: #00ff88; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 EQ12 COMPREHENSIVE SYSTEM MONITOR</h1>
+            <p>All Scans Running Until 5:30 PM with Telegram Notifications</p>
+            <div class="timer pulse" id="timer">ACTIVE MONITORING</div>
+        </div>
+
+        <div class="monitoring-info">
+            <h2>📋 MONITORING STATUS - LIVE</h2>
+            <div class="status-detail">🚀 Started: November 5, 2025 6:19 AM</div>
+            <div class="status-detail">⏰ Running Until: 5:30 PM (11 hours 11 minutes remaining)</div>
+            <div class="status-detail">🔄 Current Cycle: #1 (60-second intervals)</div>
+            <div class="status-detail">📱 Telegram: ACTIVE for all critical alerts</div>
+        </div>
+
+        <div class="status-grid">
+            <div class="status-card status-active">
+                <div class="status-title">🏀 NBA Intelligence</div>
+                <div class="status-detail">✅ RUNNING - Every 5 minutes</div>
+                <div class="status-detail">🚑 7 injury alerts detected</div>
+                <div class="status-detail">🚨 3 critical alerts active</div>
+                <div class="status-detail">🛡️ Damian Lillard blocked (torn Achilles)</div>
+            </div>
+
+            <div class="status-card status-active">
+                <div class="status-title">🛡️ Security Guardian</div>
+                <div class="status-detail">✅ RUNNING - Every 15 minutes</div>
+                <div class="status-detail">🔍 GitLeaks comprehensive scanning</div>
+                <div class="status-detail">📊 Copilot prompts generated</div>
+                <div class="status-detail">🔒 Security status: MONITORED</div>
+            </div>
+
+            <div class="status-card status-warning">
+                <div class="status-title">🔧 Script Integrity</div>
+                <div class="status-detail">⚠️ RUNNING - Every 20 minutes</div>
+                <div class="status-detail">🔨 Auto-fix enabled</div>
+                <div class="status-detail">📋 Reports generated</div>
+                <div class="status-detail">🎯 PowerShell automation active</div>
+            </div>
+
+            <div class="status-card status-active">
+                <div class="status-title">🏥 Universal Repair</div>
+                <div class="status-detail">✅ RUNNING - Every 10 minutes</div>
+                <div class="status-detail">💚 Health Score: 80% (HEALTHY)</div>
+                <div class="status-detail">🔄 Continuous health monitoring</div>
+                <div class="status-detail">🎯 Workspace optimization active</div>
+            </div>
+
+            <div class="status-card status-active">
+                <div class="status-title">🐍 Flake8 Autofix</div>
+                <div class="status-detail">✅ RUNNING - Every 30 minutes</div>
+                <div class="status-detail">🔨 Comprehensive fixes applied</div>
+                <div class="status-detail">📝 Code quality monitoring</div>
+                <div class="status-detail">⚡ Auto-formatting active</div>
+            </div>
+
+            <div class="status-card status-active">
+                <div class="status-title">📊 Business Intelligence</div>
+                <div class="status-detail">✅ RUNNING - Every 60 minutes</div>
+                <div class="status-detail">🎯 Full strategy analysis</div>
+                <div class="status-detail">📈 Revenue optimization</div>
+                <div class="status-detail">🚀 Portfolio acceleration</div>
+            </div>
+
+            <div class="status-card status-active">
+                <div class="status-title">🏦 Coral Crypto Monitor</div>
+                <div class="status-detail">✅ RUNNING - Every 7 minutes</div>
+                <div class="status-detail">💰 Trading status monitoring</div>
+                <div class="status-detail">📊 Portfolio tracking</div>
+                <div class="status-detail">⚡ Real-time updates</div>
+            </div>
+        </div>
+
+        <div class="critical-alerts">
+            <h2>🚨 CRITICAL ALERTS ACTIVE</h2>
+            <div class="status-detail">🏀 Blake Wesley: Out Due To Broken Bone In Right Foot</div>
+            <div class="status-detail">🏀 Anthony Edwards: Cleared For Basketball Activities (Hamstring Rehab)</div>
+            <div class="status-detail">🏀 Giannis Antetokounmpo: Game-winning buzzer beater news</div>
+            <div class="status-detail">🛡️ Damian Lillard: BLOCKED for torn Achilles (April 2025)</div>
+            <div class="status-detail">📱 All alerts sent to Telegram automatically</div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px;">
+            <p>🔧 <strong>EQ12 GODSTACK</strong> - Comprehensive System Monitoring</p>
+            <p>📱 Telegram notifications active | 🔄 Continuous scanning | ⏰ Until 5:30 PM</p>
+            <p style="opacity: 0.7; margin-top: 10px;">Monitoring 7 core systems with intelligent intervals</p>
+        </div>
+    </div>
+
+    <script>
+        function updateTimer() {
+            const now = new Date();
+            const endTime = new Date();
+            endTime.setHours(17, 30, 0, 0);
+            
+            if (now > endTime) {
+                endTime.setDate(endTime.getDate() + 1);
+            }
+            
+            const diff = endTime - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('timer').textContent = 
+                `${hours}h ${minutes}m REMAINING`;
+        }
+        
+        updateTimer();
+        setInterval(updateTimer, 60000);
+        
+        // Auto-refresh every 5 minutes
+        setTimeout(() => location.reload(), 300000);
+    </script>
+</body>
+</html>

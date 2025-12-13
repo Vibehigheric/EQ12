@@ -1,0 +1,44 @@
+{
+  "total_items": 3,
+  "profitable_items": 3,
+  "marginal_items": 0,
+  "unprofitable_items": 0,
+  "avg_profit_margin": 35.455111141556074,
+  "shipping_optimization": {
+    "flat_rate_recommended": 3,
+    "priority_regular_recommended": 0,
+    "potential_savings": 33.87
+  },
+  "item_analysis": [
+    {
+      "sku": "TECH001",
+      "title": "Vintage Camera Lens 50mm",
+      "category": "PROFITABLE",
+      "profit_margin": 27.67,
+      "net_profit": 15.27,
+      "recommended_shipping": "medium_box",
+      "shipping_cost": 17.1,
+      "box_type": "medium_box"
+    },
+    {
+      "sku": "ELEC002",
+      "title": "Bluetooth Wireless Headphones",
+      "category": "PROFITABLE",
+      "profit_margin": 39.83,
+      "net_profit": 16.01,
+      "recommended_shipping": "padded_envelope",
+      "shipping_cost": 10.2,
+      "box_type": "padded_envelope"
+    },
+    {
+      "sku": "BOOK003",
+      "title": "Programming Python 4th Edition",
+      "category": "PROFITABLE",
+      "profit_margin": 38.87,
+      "net_profit": 17.53,
+      "recommended_shipping": "padded_envelope",
+      "shipping_cost": 10.2,
+      "box_type": "padded_envelope"
+    }
+  ]
+}

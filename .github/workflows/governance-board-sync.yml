@@ -1,0 +1,74 @@
+name: Governance Board Sync
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, closed, ready_for_review]
+  issues:
+    types: [opened, labeled, unlabeled, closed]
+  check_suite:
+    types: [completed]
+
+jobs:
+  sync-board:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      repository-projects: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Sync PRs/Issues with Governance Board
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const issue = context.payload.issue;
+            const eventType = context.eventName;
+            
+            console.log(`Event: ${eventType}`);
+            
+            if (pr) {
+              console.log(`PR #${pr.number}: ${pr.title}`);
+              console.log(`State: ${pr.state}, Mergeable: ${pr.mergeable_state}`);
+              console.log(`Labels: ${pr.labels.map(l => l.name).join(', ')}`);
+              
+              // Determine governance status
+              const labels = pr.labels.map(l => l.name);
+              const hasSensitive = labels.some(l => l.includes('Sensitive'));
+              const hasReviewNeeded = labels.includes('review-needed');
+              const hasGovernance = labels.includes('Governance');
+              const hasBlocking = labels.some(l => l.includes('ci-fail') || l.includes('secrets-fail'));
+              
+              let status = '🚧 Needs Copilot Review';
+              
+              if (pr.state === 'closed') {
+                status = 'Archived';
+              } else if (hasBlocking) {
+                status = '⏳ Blocked';
+              } else if (hasSensitive && !hasReviewNeeded) {
+                status = '🔍 In Governance Review';
+              } else if (pr.mergeable_state === 'clean' && !hasReviewNeeded) {
+                status = '✅ Ready for Merge';
+              }
+              
+              console.log(`Governance Status: ${status}`);
+              
+              // Add comment for sensitive PRs
+              if (hasSensitive && eventType === 'pull_request' && context.payload.action === 'opened') {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `🚨 **Sensitive Stack Detected**\n\nThis PR modifies sensitive business logic. Please:\n\n1. Use Copilot Chat with prompts from [COPILOT_REVIEW.md](../COPILOT_REVIEW.md)\n2. Ensure CODEOWNERS approval is obtained\n3. Verify compliance with sensitive module requirements\n\n**Labels detected:** ${labels.filter(l => l.includes('Sensitive')).join(', ')}`
+                });
+              }
+            }
+            
+            if (issue) {
+              console.log(`Issue #${issue.number}: ${issue.title}`);
+              console.log(`Labels: ${issue.labels.map(l => l.name).join(', ')}`);
+            }

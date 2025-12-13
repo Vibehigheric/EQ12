@@ -1,0 +1,149 @@
+{
+    "system_name": "EQ12 Enhanced Copilot Integration",
+    "version": "1.0.0",
+    "configuration": {
+        "openai": {
+            "preferred_model": "gpt-5",
+            "fallback_models": [
+                "o1-preview",
+                "gpt-4-turbo",
+                "gpt-4",
+                "gpt-3.5-turbo"
+            ],
+            "api_timeout": 30,
+            "max_retries": 3,
+            "temperature": 0.7,
+            "max_tokens": 2000
+        },
+        "copilot": {
+            "auto_check_interval": 300,
+            "auto_fix_enabled": true,
+            "background_monitoring": true,
+            "health_check_timeout": 10,
+            "extension_requirements": [
+                "github.copilot",
+                "github.copilot-chat"
+            ]
+        },
+        "dashboard": {
+            "port": 5012,
+            "host": "127.0.0.1",
+            "auto_open": true,
+            "refresh_interval": 30,
+            "log_retention_days": 7
+        },
+        "git_integration": {
+            "commit_message_ai": true,
+            "pr_analysis_ai": true,
+            "auto_commit_suggestions": true,
+            "conventional_commits": true,
+            "commit_categories": [
+                "feat",
+                "fix",
+                "docs",
+                "style",
+                "refactor",
+                "test",
+                "chore",
+                "perf",
+                "ci",
+                "build"
+            ]
+        },
+        "eq12_integration": {
+            "base_path": "C:/EQ12",
+            "logs_path": "C:/EQ12/logs",
+            "scripts_path": "C:/EQ12/scripts",
+            "dashboard_path": "C:/EQ12/dashboard",
+            "configs_path": "C:/EQ12/configs",
+            "data_sync": true,
+            "auto_backup": true
+        },
+        "monitoring": {
+            "system_health_checks": true,
+            "performance_monitoring": true,
+            "error_tracking": true,
+            "usage_analytics": true,
+            "alert_thresholds": {
+                "cpu_usage": 80,
+                "memory_usage": 85,
+                "disk_usage": 90,
+                "response_time": 5000
+            }
+        },
+        "logging": {
+            "level": "INFO",
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "max_file_size": "10MB",
+            "backup_count": 5,
+            "structured_logging": true
+        }
+    },
+    "features": {
+        "ai_powered_commits": {
+            "enabled": true,
+            "description": "Generate intelligent commit messages using AI analysis"
+        },
+        "pr_analysis": {
+            "enabled": true,
+            "description": "Automated pull request analysis and suggestions"
+        },
+        "auto_issue_detection": {
+            "enabled": true,
+            "description": "Automatically detect and report Copilot integration issues"
+        },
+        "auto_issue_repair": {
+            "enabled": true,
+            "description": "Automatically fix common Copilot integration problems"
+        },
+        "background_monitoring": {
+            "enabled": true,
+            "description": "Continuous monitoring of Copilot system health"
+        },
+        "dashboard_ui": {
+            "enabled": true,
+            "description": "Web-based management dashboard for Copilot integration"
+        },
+        "gpt5_integration": {
+            "enabled": true,
+            "description": "Enhanced AI capabilities using GPT-5 and latest models"
+        },
+        "eq12_system_sync": {
+            "enabled": true,
+            "description": "Integration with existing EQ12 automation systems"
+        }
+    },
+    "endpoints": {
+        "api_base": "/api/copilot",
+        "status": "/api/copilot/status",
+        "check": "/api/copilot/check",
+        "autofix": "/api/copilot/autofix",
+        "commit": "/api/copilot/commit",
+        "pr_analysis": "/api/copilot/pr-analysis",
+        "metrics": "/api/copilot/metrics",
+        "config": "/api/copilot/config",
+        "logs": "/api/copilot/logs"
+    },
+    "files": {
+        "main_script": "scripts/eq12_copilot_enhanced.ps1",
+        "api_server": "scripts/eq12_copilot_api.py",
+        "content_engine": "scripts/eq12_copilot_content.py",
+        "server_wrapper": "scripts/eq12_copilot_server.ps1",
+        "dashboard_ui": "dashboard/copilot_management.html",
+        "main_dashboard": "dashboard/index.html",
+        "ai_integration": "scripts/eq12_enhanced_ai.py",
+        "gpt5_manager": "scripts/eq12_gpt5_manager.py"
+    },
+    "installation": {
+        "requirements_file": "requirements_copilot_system.txt",
+        "setup_command": "scripts/eq12_copilot_enhanced.ps1 -Install",
+        "test_command": "scripts/eq12_copilot_enhanced.ps1 -TestOnly",
+        "start_command": "scripts/eq12_copilot_server.ps1 -AutoStart"
+    },
+    "documentation": {
+        "setup_guide": "Run 'scripts/eq12_copilot_enhanced.ps1 -Install' to set up the system",
+        "usage_guide": "Use 'scripts/eq12_copilot_server.ps1' to start the dashboard server",
+        "api_reference": "Visit http://127.0.0.1:5012/api/copilot/status for API documentation",
+        "dashboard_url": "http://127.0.0.1:5012/dashboard/copilot_management.html"
+    }
+}

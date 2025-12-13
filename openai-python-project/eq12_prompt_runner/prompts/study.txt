@@ -1,0 +1,5 @@
+Design a personalized study automation system that:
+- Creates adaptive learning schedules based on progress
+- Generates practice questions and flashcards
+- Tracks performance metrics and identifies weak areas
+- Provides spaced repetition algorithms for optimal retention

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Task version="1.4"
+  xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Date>2025-09-27T15:00:00.000000</Date>
+    <Author>EQ12 GODSTACK</Author>
+    <Version>1.0</Version>
+    <Description>EQ12 Chrome Governance - Daily automation for profile management, bookmark updates, and extension compliance. Runs every morning to ensure Chrome governance profile is up-to-date with latest bookmarks and configurations.</Description>
+    <URI>\EQ12\ChromeGovernanceDailyUpdate</URI>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2025-09-28T07:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <UserId>S-1-5-21-1004336348-1982817020-725345543-1001</UserId>
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>true</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <DisallowStartOnRemoteAppSession>false</DisallowStartOnRemoteAppSession>
+    <UseUnifiedSchedulingEngine>true</UseUnifiedSchedulingEngine>
+    <WakeToRun>false</WakeToRun>
+    <ExecutionTimeLimit>PT30M</ExecutionTimeLimit>
+    <Priority>6</Priority>
+    <RestartPolicy>
+      <Interval>PT1M</Interval>
+      <Count>3</Count>
+    </RestartPolicy>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>C:\Program Files\Python312\python.exe</Command>
+      <Arguments>C:\EQ12\chrome_governance_automation.py --setup-profile --create-bookmarks --verbose</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>

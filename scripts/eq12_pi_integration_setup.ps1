@@ -1,0 +1,453 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [string]$PiIPAddress = "192.168.1.200",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$PiUsername = "pi",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$PiPassword = "",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$AutoSetup,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput
+)
+
+<#
+.SYNOPSIS
+    EQ12 Raspberry Pi Integration Setup Script
+
+.DESCRIPTION
+    Automated setup script for integrating Raspberry Pi 5 with Coral USB into EQ12 system.
+    Handles network detection, SSH configuration, and cluster integration.
+
+.PARAMETER PiIPAddress
+    IP address of the Raspberry Pi (default: 192.168.1.200)
+
+.PARAMETER PiUsername
+    SSH username for Pi connection (default: pi)
+
+.PARAMETER PiPassword
+    SSH password for initial connection
+
+.PARAMETER AutoSetup
+    Attempt automatic setup with default settings
+
+.PARAMETER VerboseOutput
+    Enable verbose logging output
+
+.EXAMPLE
+    .\eq12_pi_integration_setup.ps1 -PiIPAddress 192.168.1.200 -PiPassword raspberry -AutoSetup
+
+.NOTES
+    Run this script after your Raspberry Pi is connected and SSH is enabled
+#>
+
+# Script configuration
+$script:WorkspaceRoot = "C:\EQ12"
+$script:SSHKeyDir = "$WorkspaceRoot\ssh_keys"
+$script:LogPath = "$WorkspaceRoot\logs"
+
+# Ensure directories exist
+@($script:SSHKeyDir, $script:LogPath) | ForEach-Object {
+    if (-not (Test-Path $_)) {
+        New-Item -ItemType Directory -Path $_ -Force | Out-Null
+    }
+}
+
+function Write-SetupLog {
+    param(
+        [string]$Message,
+        [ValidateSet('INFO', 'WARNING', 'ERROR', 'SUCCESS')]
+        [string]$Level = 'INFO'
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "[$timestamp] [$Level] $Message"
+    
+    # Console output with colors
+    switch ($Level) {
+        'SUCCESS' { Write-Host $logMessage -ForegroundColor Green }
+        'WARNING' { Write-Host $logMessage -ForegroundColor Yellow }
+        'ERROR'   { Write-Host $logMessage -ForegroundColor Red }
+        default   { Write-Host $logMessage -ForegroundColor Cyan }
+    }
+    
+    # Log to file
+    $logFile = "$script:LogPath\pi_integration_setup_$(Get-Date -Format 'yyyyMMdd').log"
+    Add-Content -Path $logFile -Value $logMessage
+}
+
+function Test-PiConnectivity {
+    param([string]$IPAddress)
+    
+    Write-SetupLog " Testing connectivity to Pi at $IPAddress..."
+    
+    # Test ping
+    try {
+        $pingResult = Test-Connection -ComputerName $IPAddress -Count 2 -Quiet
+        if ($pingResult) {
+            Write-SetupLog " Ping successful to $IPAddress" -Level SUCCESS
+        } else {
+            Write-SetupLog " Ping failed to $IPAddress" -Level ERROR
+            return $false
+        }
+    } catch {
+        Write-SetupLog " Ping test failed: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+    
+    # Test SSH port
+    try {
+        $sshTest = Test-NetConnection -ComputerName $IPAddress -Port 22 -WarningAction SilentlyContinue
+        if ($sshTest.TcpTestSucceeded) {
+            Write-SetupLog " SSH port (22) is open on $IPAddress" -Level SUCCESS
+            return $true
+        } else {
+            Write-SetupLog " SSH port (22) is not accessible on $IPAddress" -Level ERROR
+            Write-SetupLog " Enable SSH on Pi: sudo systemctl enable ssh && sudo systemctl start ssh" -Level INFO
+            return $false
+        }
+    } catch {
+        Write-SetupLog " SSH connectivity test failed: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function New-SSHKeyPair {
+    Write-SetupLog " Generating SSH key pair for Pi authentication..."
+    
+    $keyPath = "$script:SSHKeyDir\eq12_pi_key"
+    
+    # Check if key already exists
+    if (Test-Path "$keyPath") {
+        Write-SetupLog "  SSH key already exists at $keyPath" -Level WARNING
+        $choice = Read-Host "Overwrite existing key? (y/N)"
+        if ($choice -ne 'y' -and $choice -ne 'Y') {
+            Write-SetupLog " Using existing SSH key" -Level INFO
+            return $keyPath
+        }
+    }
+    
+    try {
+        # Generate SSH key using ssh-keygen
+        $sshKeyGenCmd = "ssh-keygen -t rsa -b 4096 -f `"$keyPath`" -N `"`""
+        Write-SetupLog " Executing: $sshKeyGenCmd"
+        
+        Invoke-Expression $sshKeyGenCmd
+        
+        if (Test-Path "$keyPath" -and Test-Path "$keyPath.pub") {
+            Write-SetupLog " SSH key pair generated successfully" -Level SUCCESS
+            Write-SetupLog " Private key: $keyPath" -Level INFO
+            Write-SetupLog " Public key: $keyPath.pub" -Level INFO
+            return $keyPath
+        } else {
+            throw "Key files not created"
+        }
+    } catch {
+        Write-SetupLog " SSH key generation failed: $($_.Exception.Message)" -Level ERROR
+        return $null
+    }
+}
+
+function Copy-SSHKeyToPi {
+    param(
+        [string]$PiIP,
+        [string]$Username,
+        [string]$Password,
+        [string]$KeyPath
+    )
+    
+    Write-SetupLog " Copying SSH public key to Pi..."
+    
+    $publicKeyPath = "$KeyPath.pub"
+    
+    if (-not (Test-Path $publicKeyPath)) {
+        Write-SetupLog " Public key not found: $publicKeyPath" -Level ERROR
+        return $false
+    }
+    
+    try {
+        # Read public key content
+        $publicKeyContent = Get-Content $publicKeyPath -Raw
+        
+        # Create SSH command to add public key
+        if ($Password) {
+            # Use scp with password (requires sshpass or manual entry)
+            Write-SetupLog " You may be prompted for the Pi password..." -Level INFO
+            $scpCmd = "scp `"$publicKeyPath`" ${Username}@${PiIP}:~/.ssh/authorized_keys"
+            Write-SetupLog " Executing: $scpCmd"
+            Invoke-Expression $scpCmd
+        } else {
+            Write-SetupLog "  No password provided. You'll need to manually copy the public key:" -Level WARNING
+            Write-SetupLog " Public key content:" -Level INFO
+            Write-Host $publicKeyContent -ForegroundColor Yellow
+            Write-SetupLog " Run this on your Pi:" -Level INFO
+            Write-Host "mkdir -p ~/.ssh && echo '$publicKeyContent' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys" -ForegroundColor Yellow
+            return $false
+        }
+        
+        Write-SetupLog " SSH key copied to Pi successfully" -Level SUCCESS
+        return $true
+        
+    } catch {
+        Write-SetupLog " Failed to copy SSH key: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Test-SSHKeyAuth {
+    param(
+        [string]$PiIP,
+        [string]$Username,
+        [string]$KeyPath
+    )
+    
+    Write-SetupLog " Testing SSH key authentication..."
+    
+    try {
+        $sshCmd = "ssh -i `"$KeyPath`" -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${Username}@${PiIP} `"echo 'SSH key authentication successful'`""
+        Write-SetupLog " Testing SSH command: $sshCmd"
+        
+        $result = Invoke-Expression $sshCmd 2>&1
+        
+        if ($result -like "*SSH key authentication successful*") {
+            Write-SetupLog " SSH key authentication working!" -Level SUCCESS
+            return $true
+        } else {
+            Write-SetupLog " SSH key authentication failed" -Level ERROR
+            Write-SetupLog " Output: $result" -Level INFO
+            return $false
+        }
+    } catch {
+        Write-SetupLog " SSH key test failed: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Add-PiToCluster {
+    param(
+        [string]$PiIP,
+        [string]$Username,
+        [string]$KeyPath
+    )
+    
+    Write-SetupLog " Adding Raspberry Pi to EQ12 cluster..."
+    
+    try {
+        $clusterCmd = "python `"$script:WorkspaceRoot\scripts\eq12_raspberry_pi_cluster_manager.py`" --action add-node --ip $PiIP --username $Username --ssh-key `"$KeyPath`""
+        
+        if ($VerboseOutput) {
+            $clusterCmd += " --verbose"
+        }
+        
+        Write-SetupLog " Executing: $clusterCmd"
+        
+        Push-Location "$script:WorkspaceRoot\scripts"
+        $result = Invoke-Expression $clusterCmd 2>&1
+        Pop-Location
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-SetupLog " Pi successfully added to cluster!" -Level SUCCESS
+            Write-SetupLog " Output: $result" -Level INFO
+            return $true
+        } else {
+            Write-SetupLog " Failed to add Pi to cluster" -Level ERROR
+            Write-SetupLog " Output: $result" -Level ERROR
+            return $false
+        }
+    } catch {
+        Write-SetupLog " Cluster addition failed: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Start-ClusterAndTest {
+    Write-SetupLog " Starting cluster and running tests..."
+    
+    try {
+        # Start cluster
+        Push-Location "$script:WorkspaceRoot\scripts"
+        
+        Write-SetupLog " Starting cluster..."
+        $startCmd = "python eq12_raspberry_pi_cluster_manager.py --action start"
+        
+        # Start cluster in background
+        $job = Start-Job -ScriptBlock {
+            param($cmd, $path)
+            Set-Location $path
+            Invoke-Expression $cmd
+        } -ArgumentList $startCmd, (Get-Location)
+        
+        Write-SetupLog " Waiting for cluster to initialize..." -Level INFO
+        Start-Sleep -Seconds 5
+        
+        # Check cluster status
+        Write-SetupLog " Checking cluster status..."
+        $statusCmd = "python eq12_raspberry_pi_cluster_manager.py --action status"
+        $statusResult = Invoke-Expression $statusCmd 2>&1
+        
+        Write-SetupLog " Cluster status:" -Level INFO
+        Write-Host $statusResult -ForegroundColor Cyan
+        
+        # Submit test task
+        Write-SetupLog " Submitting test tasks..."
+        $testCmd = "python eq12_raspberry_pi_cluster_manager.py --action test-task"
+        $testResult = Invoke-Expression $testCmd 2>&1
+        
+        Write-SetupLog " Test results:" -Level INFO
+        Write-Host $testResult -ForegroundColor Cyan
+        
+        # Generate dashboard
+        Write-SetupLog " Generating cluster dashboard..."
+        $dashboardCmd = "python eq12_raspberry_pi_cluster_manager.py --action dashboard"
+        $dashboardResult = Invoke-Expression $dashboardCmd 2>&1
+        
+        if ($dashboardResult -like "*Dashboard saved*") {
+            Write-SetupLog " Dashboard generated successfully!" -Level SUCCESS
+            
+            # Try to open dashboard
+            $dashboardPath = "$script:WorkspaceRoot\dashboard\raspberry_pi_cluster.html"
+            if (Test-Path $dashboardPath) {
+                Write-SetupLog " Opening cluster dashboard..." -Level INFO
+                Start-Process $dashboardPath
+            }
+        }
+        
+        Pop-Location
+        
+        # Stop background job
+        Stop-Job $job -Force
+        Remove-Job $job -Force
+        
+        Write-SetupLog " Cluster setup and testing completed!" -Level SUCCESS
+        return $true
+        
+    } catch {
+        Write-SetupLog " Cluster testing failed: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Show-NextSteps {
+    param([string]$PiIP)
+    
+    Write-Host @"
+
+ EQ12 Raspberry Pi Integration Complete!
+=========================================
+
+Your Raspberry Pi is now integrated with the EQ12 system:
+
+ Pi Address: $PiIP
+ SSH Keys: $script:SSHKeyDir\eq12_pi_key
+ Dashboard: C:\EQ12\dashboard\raspberry_pi_cluster.html
+
+Next Steps:
+1.  Connect Coral USB accelerator to your Pi
+2.  Test Coral detection: ssh pi@$PiIP "python3 -c \"from pycoral.utils import edgetpu; print('Coral devices:', edgetpu.list_edge_tpus())\""
+3.  Use cluster for EQ12 tasks:
+
+   # Submit sports betting analysis
+   python eq12_raspberry_pi_cluster_manager.py --action test-task
+
+   # Monitor cluster status
+   python eq12_raspberry_pi_cluster_manager.py --action status
+
+   # View dashboard
+   Start-Process C:\EQ12\dashboard\raspberry_pi_cluster.html
+
+Benefits:
+ Distributed AI processing with Coral TPU acceleration
+ Real-time sports analytics on edge devices  
+ Parallel workload processing across nodes
+ Low-latency edge computing for time-sensitive decisions
+
+"@ -ForegroundColor Green
+}
+
+# Main execution
+try {
+    Write-Host @"
+ EQ12 Raspberry Pi Integration Setup
+====================================
+"@ -ForegroundColor Green
+
+    Write-SetupLog " Starting Raspberry Pi integration setup..."
+    Write-SetupLog "  Host IP: 192.168.1.144"
+    Write-SetupLog " Target Pi IP: $PiIPAddress"
+
+    # Step 1: Test connectivity
+    if (-not (Test-PiConnectivity -IPAddress $PiIPAddress)) {
+        Write-SetupLog " Cannot connect to Pi. Please check:" -Level ERROR
+        Write-Host @"
+1. Pi is powered on and connected via Ethernet
+2. SSH is enabled on Pi:
+   sudo systemctl enable ssh
+   sudo systemctl start ssh
+3. Pi has correct IP address ($PiIPAddress)
+4. Network connectivity is working
+"@ -ForegroundColor Yellow
+        exit 1
+    }
+
+    # Step 2: Generate SSH keys
+    $keyPath = New-SSHKeyPair
+    if (-not $keyPath) {
+        Write-SetupLog " SSH key generation failed" -Level ERROR
+        exit 1
+    }
+
+    # Step 3: Copy SSH key to Pi
+    if ($PiPassword) {
+        $keyCopySuccess = Copy-SSHKeyToPi -PiIP $PiIPAddress -Username $PiUsername -Password $PiPassword -KeyPath $keyPath
+        if (-not $keyCopySuccess) {
+            Write-SetupLog "  SSH key copy failed, but continuing..." -Level WARNING
+        }
+    } else {
+        Write-SetupLog "  No password provided. SSH key must be manually copied." -Level WARNING
+        Write-SetupLog " Follow instructions in setup guide for manual key copy." -Level INFO
+    }
+
+    # Step 4: Test SSH key authentication
+    if (-not (Test-SSHKeyAuth -PiIP $PiIPAddress -Username $PiUsername -KeyPath $keyPath)) {
+        Write-SetupLog " SSH key authentication failed" -Level ERROR
+        Write-SetupLog " Try manual setup following the guide in C:\EQ12\RASPBERRY_PI_SETUP_GUIDE.md" -Level INFO
+        
+        if (-not $AutoSetup) {
+            $choice = Read-Host "Continue with cluster setup anyway? (y/N)"
+            if ($choice -ne 'y' -and $choice -ne 'Y') {
+                exit 1
+            }
+        }
+    }
+
+    # Step 5: Add Pi to cluster
+    if (-not (Add-PiToCluster -PiIP $PiIPAddress -Username $PiUsername -KeyPath $keyPath)) {
+        Write-SetupLog " Failed to add Pi to cluster" -Level ERROR
+        if (-not $AutoSetup) {
+            $choice = Read-Host "Continue with testing anyway? (y/N)"
+            if ($choice -ne 'y' -and $choice -ne 'Y') {
+                exit 1
+            }
+        }
+    }
+
+    # Step 6: Start cluster and test
+    if (-not (Start-ClusterAndTest)) {
+        Write-SetupLog "  Cluster testing had issues, but setup may still be functional" -Level WARNING
+    }
+
+    # Step 7: Show next steps
+    Show-NextSteps -PiIP $PiIPAddress
+
+    Write-SetupLog " EQ12 Raspberry Pi integration setup completed!" -Level SUCCESS
+
+} catch {
+    Write-SetupLog " Setup failed: $($_.Exception.Message)" -Level ERROR
+    Write-SetupLog " Line: $($_.InvocationInfo.ScriptLineNumber)" -Level ERROR
+    exit 1
+}

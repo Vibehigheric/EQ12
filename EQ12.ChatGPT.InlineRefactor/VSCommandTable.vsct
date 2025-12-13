@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="guidEQ12_Package">
+    <Groups>
+      <Group guid="guidEQ12_CommandSet" id="MyMenuGroup" priority="0x0100">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidEQ12_CommandSet" id="cmdidSendToChatGPT" priority="0x0100" type="Button">
+        <Parent guid="guidEQ12_CommandSet" id="MyMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
+        <Strings>
+          <ButtonText>Send to ChatGPT…</ButtonText>
+          <CommandName>Send to ChatGPT…</CommandName>
+          <ToolTipText>Send selected text to ChatGPT using OpenAI Responses API</ToolTipText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <Symbols>
+    <GuidSymbol name="guidEQ12_Package" value="{44cc9b55-8b1c-4c10-86a1-cc4c6c854c6b}" />
+    <GuidSymbol name="guidEQ12_CommandSet" value="{b4d6f713-2c10-4c20-9b09-17e3f9a66670}">
+      <IDSymbol name="MyMenuGroup" value="0x1020" />
+      <IDSymbol name="cmdidSendToChatGPT" value="0x0100" />
+    </GuidSymbol>
+
+    <GuidSymbol name="guidImages" value="{f2d06495-9ad9-4c5a-8bcd-8e9d0aa6c8d2}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

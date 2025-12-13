@@ -1,0 +1,358 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 Windows 11 Official Download & D: Drive Bootable Creator
+    Buffalo NY 14215 Content Empire - Microsoft Official Integration
+
+.DESCRIPTION
+    Complete Windows 11 bootable creation using official Microsoft downloads
+    Integrates Microsoft's 3 download methods with our D: drive setup
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet("ShowOptions", "MediaCreationTool", "ISODownload", "InstallAssistant", "CreateBootable", "VerifySetup")]
+    [string]$Action = "ShowOptions"
+)
+
+# EQ12 Environment Setup
+$ErrorActionPreference = "Stop"
+$env:EQ12_ASCII_MODE = "ACTIVE"
+
+function Show-MicrosoftDownloadOptions {
+    Write-Host "MICROSOFT WINDOWS 11 DOWNLOAD OPTIONS" -ForegroundColor Cyan
+    Write-Host "=====================================" -ForegroundColor Cyan
+    Write-Host "Current release: Windows 11 2025 Update | Version 25H2" -ForegroundColor Green
+
+    Write-Host ""
+    Write-Host "MICROSOFT OFFERS 3 OFFICIAL METHODS:" -ForegroundColor Yellow
+
+    Write-Host ""
+    Write-Host "METHOD 1: WINDOWS 11 INSTALLATION ASSISTANT" -ForegroundColor Green
+    Write-Host "Purpose: Upgrade current PC to Windows 11"
+    Write-Host "Best for: Direct upgrade of this computer"
+    Write-Host "File: Windows11InstallationAssistant.exe"
+    Write-Host "Note: x64 processors only (not ARM)"
+
+    Write-Host ""
+    Write-Host "METHOD 2: CREATE WINDOWS 11 INSTALLATION MEDIA" -ForegroundColor Green
+    Write-Host "Purpose: Make bootable USB or DVD"
+    Write-Host "Best for: Clean installs and multiple PCs" -ForegroundColor Yellow
+    Write-Host "File: MediaCreationTool11.exe"
+    Write-Host "Note: Creates bootable media automatically"
+
+    Write-Host ""
+    Write-Host "METHOD 3: DOWNLOAD WINDOWS 11 DISK IMAGE (ISO)" -ForegroundColor Green
+    Write-Host "Purpose: Create bootable media or virtual machines"
+    Write-Host "Best for: Advanced users, custom setups" -ForegroundColor Yellow
+    Write-Host "File: Windows 11 ISO (~5GB)"
+    Write-Host "Note: Multi-edition ISO, requires Rufus or similar"
+
+    Write-Host ""
+    Write-Host "FOR D: DRIVE BOOTABLE SETUP:" -ForegroundColor Cyan
+    Write-Host "Best choice: METHOD 2 (Media Creation Tool) - Easiest" -ForegroundColor Green
+    Write-Host "Alternative: METHOD 3 (ISO + Rufus) - More control" -ForegroundColor Yellow
+
+    Write-Host ""
+    Write-Host "RECOMMENDATIONS FOR YOUR SETUP:" -ForegroundColor Yellow
+    Write-Host "1. Method 2: Direct to D: drive (recommended for beginners)"
+    Write-Host "2. Method 3: Download ISO + use Rufus (more options)"
+}
+
+function Start-MediaCreationToolDownload {
+    Write-Host ""
+    Write-Host "MICROSOFT MEDIA CREATION TOOL - EASIEST METHOD" -ForegroundColor Green
+    Write-Host "===============================================" -ForegroundColor Green
+
+    $downloadPath = "$env:USERPROFILE\Downloads\Windows11_Tools"
+    New-Item -Path $downloadPath -ItemType Directory -Force | Out-Null
+
+    Write-Host ""
+    Write-Host "ADVANTAGES OF MEDIA CREATION TOOL:" -ForegroundColor Yellow
+    Write-Host " Official Microsoft tool"
+    Write-Host " Creates bootable USB automatically"
+    Write-Host " No need for separate Rufus"
+    Write-Host " Handles formatting and file copying"
+    Write-Host " Downloads latest Windows 11 2025 Update"
+
+    Write-Host ""
+    Write-Host "DOWNLOAD PROCESS:" -ForegroundColor Cyan
+    Write-Host "1. Opening Microsoft download page..."
+    Start-Process "https://go.microsoft.com/fwlink/?linkid=2156295"
+
+    Write-Host "2. Click 'Download Media Creation Tool Now'"
+    Write-Host "3. Save as: MediaCreationTool11.exe"
+    Write-Host "4. File size: ~20MB"
+    Write-Host "5. Save to: $downloadPath"
+
+    Write-Host ""
+    Write-Host "AFTER DOWNLOAD:" -ForegroundColor Yellow
+    Write-Host "Run: .\eq12_windows11_official.ps1 -Action CreateBootable"
+
+    # Open download folder
+    Start-Process $downloadPath
+}
+
+function Start-ISODownload {
+    Write-Host ""
+    Write-Host "MICROSOFT ISO DOWNLOAD - ADVANCED METHOD" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Green
+
+    $downloadPath = "$env:USERPROFILE\Downloads\Windows11_Tools"
+    New-Item -Path $downloadPath -ItemType Directory -Force | Out-Null
+
+    Write-Host ""
+    Write-Host "ADVANTAGES OF ISO METHOD:" -ForegroundColor Yellow
+    Write-Host " Multi-edition ISO (Home, Pro, Education)"
+    Write-Host " Works with virtual machines"
+    Write-Host " More control over process"
+    Write-Host " Can create multiple bootable drives"
+    Write-Host " Offline installation capability"
+
+    Write-Host ""
+    Write-Host "ISO DOWNLOAD STEPS:" -ForegroundColor Cyan
+    Write-Host "1. Opening Microsoft ISO download page..."
+    Start-Process "https://www.microsoft.com/en-us/software-download/windows11"
+
+    Write-Host "2. Scroll to 'Download Windows 11 Disk Image (ISO)'"
+    Write-Host "3. Select 'Windows 11 (multi-edition ISO)'"
+    Write-Host "4. Choose language: English"
+    Write-Host "5. Select '64-bit Download'"
+    Write-Host "6. File size: ~5GB"
+    Write-Host "7. Save to: $downloadPath"
+
+    Write-Host ""
+    Write-Host "ALSO NEED RUFUS:" -ForegroundColor Yellow
+    Write-Host "Opening Rufus download page..."
+    Start-Process "https://rufus.ie/"
+    Write-Host "Download Rufus portable (rufus.exe)"
+
+    Write-Host ""
+    Write-Host "AFTER BOTH DOWNLOADS:" -ForegroundColor Yellow
+    Write-Host "Run: .\eq12_windows11_official.ps1 -Action CreateBootable"
+
+    # Open download folder
+    Start-Process $downloadPath
+}
+
+function Start-InstallationAssistant {
+    Write-Host ""
+    Write-Host "MICROSOFT INSTALLATION ASSISTANT" -ForegroundColor Green
+    Write-Host "================================" -ForegroundColor Green
+
+    Write-Host ""
+    Write-Host "PURPOSE:" -ForegroundColor Yellow
+    Write-Host " Upgrade THIS computer to Windows 11"
+    Write-Host " Direct installation (not for bootable drives)"
+    Write-Host " Automatic compatibility check"
+
+    Write-Host ""
+    Write-Host "NOT SUITABLE FOR D: DRIVE BOOTABLE CREATION" -ForegroundColor Red
+    Write-Host "This tool upgrades your current PC only"
+    Write-Host "For bootable drives, use Media Creation Tool or ISO"
+
+    Write-Host ""
+    Write-Host "If you want to upgrade THIS computer:"
+    Write-Host "Opening Installation Assistant..."
+    Start-Process "https://go.microsoft.com/fwlink/?linkid=2171764"
+
+    Write-Host ""
+    Write-Host "For D: drive bootable, choose:" -ForegroundColor Yellow
+    Write-Host " MediaCreationTool (easier)"
+    Write-Host " ISODownload (more control)"
+}
+
+function New-BootableDriveOfficial {
+    Write-Host ""
+    Write-Host "CREATING D: DRIVE BOOTABLE WITH OFFICIAL TOOLS" -ForegroundColor Green
+    Write-Host "===============================================" -ForegroundColor Green
+
+    $downloadPath = "$env:USERPROFILE\Downloads\Windows11_Tools"
+
+    # Check what tools are available
+    $mediaCreationTool = Get-ChildItem -Path $downloadPath -Filter "*MediaCreation*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    $rufus = Get-ChildItem -Path $downloadPath -Filter "rufus*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    $iso = Get-ChildItem -Path $downloadPath -Filter "*.iso" -ErrorAction SilentlyContinue | Select-Object -First 1
+
+    Write-Host ""
+    Write-Host "CHECKING AVAILABLE TOOLS:" -ForegroundColor Cyan
+
+    if ($mediaCreationTool) {
+        Write-Host " Media Creation Tool found: $($mediaCreationTool.Name)" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "USING MICROSOFT MEDIA CREATION TOOL (RECOMMENDED)" -ForegroundColor Yellow
+
+        Write-Host ""
+        Write-Host "STEP-BY-STEP INSTRUCTIONS:" -ForegroundColor Cyan
+        Write-Host "1. Right-click and 'Run as Administrator'"
+        Write-Host "2. Accept license terms"
+        Write-Host "3. Select 'Create installation media'"
+        Write-Host "4. Choose language, edition, architecture"
+        Write-Host "5. Select 'USB flash drive'"
+        Write-Host "6. Choose D: drive from list"
+        Write-Host "7. Tool will download and create bootable drive"
+
+        Write-Host ""
+        Write-Host "  WARNINGS:" -ForegroundColor Red
+        Write-Host " D: drive will be completely erased"
+        Write-Host " Process takes 30-60 minutes"
+        Write-Host " Keep USB connected throughout"
+        Write-Host " Requires internet for download"
+
+        Write-Host ""
+        Write-Host "Starting Media Creation Tool..." -ForegroundColor Green
+        Start-Process $mediaCreationTool.FullName -Verb RunAsAdministrator
+
+    } elseif ($rufus -and $iso) {
+        Write-Host " Rufus found: $($rufus.Name)" -ForegroundColor Green
+        Write-Host " Windows ISO found: $($iso.Name)" -ForegroundColor Green
+
+        Write-Host ""
+        Write-Host "USING RUFUS + ISO METHOD" -ForegroundColor Yellow
+
+        Write-Host ""
+        Write-Host "RUFUS CONFIGURATION:" -ForegroundColor Cyan
+        Write-Host "1. Device: Select D: drive"
+        Write-Host "2. Boot selection: SELECT and choose ISO"
+        Write-Host "3. Partition scheme: GPT"
+        Write-Host "4. Target system: UEFI (non CSM)"
+        Write-Host "5. File system: NTFS"
+        Write-Host "6. Volume label: WIN11_RESCUE"
+        Write-Host "7. Click START"
+
+        Write-Host ""
+        Write-Host "Starting Rufus..." -ForegroundColor Green
+        Start-Process $rufus.FullName
+
+    } else {
+        Write-Host " Required tools not found" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "DOWNLOAD FIRST:" -ForegroundColor Yellow
+        Write-Host "Option 1: Media Creation Tool (easiest)"
+        Write-Host "  Run: .\eq12_windows11_official.ps1 -Action MediaCreationTool"
+        Write-Host ""
+        Write-Host "Option 2: ISO + Rufus (advanced)"
+        Write-Host "  Run: .\eq12_windows11_official.ps1 -Action ISODownload"
+        return
+    }
+
+    Write-Host ""
+    Write-Host "AFTER CREATION COMPLETES:" -ForegroundColor Yellow
+    Write-Host "Run: .\eq12_windows11_official.ps1 -Action VerifySetup"
+}
+
+function Test-BootableSetup {
+    Write-Host ""
+    Write-Host "VERIFYING D: DRIVE BOOTABLE SETUP" -ForegroundColor Cyan
+    Write-Host "==================================" -ForegroundColor Cyan
+
+    # Check D: drive status
+    $dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq "D:"}
+
+    if (-not $dDrive) {
+        Write-Host " D: drive not found" -ForegroundColor Red
+        return
+    }
+
+    $sizeGB = [math]::Round($dDrive.Size/1GB, 2)
+    $usedGB = [math]::Round(($dDrive.Size - $dDrive.FreeSpace)/1GB, 2)
+    $freeGB = [math]::Round($dDrive.FreeSpace/1GB, 2)
+
+    Write-Host ""
+    Write-Host "D: DRIVE STATUS:" -ForegroundColor Yellow
+    Write-Host "  Total: $sizeGB GB"
+    Write-Host "  Used: $usedGB GB"
+    Write-Host "  Free: $freeGB GB"
+    Write-Host "  Format: $($dDrive.FileSystem)"
+
+    # Check for Windows files
+    $windowsFiles = @(
+        "D:\setup.exe",
+        "D:\sources\boot.wim",
+        "D:\sources\install.wim"
+    )
+
+    $foundFiles = 0
+    Write-Host ""
+    Write-Host "CHECKING WINDOWS 11 FILES:" -ForegroundColor Cyan
+
+    foreach ($file in $windowsFiles) {
+        if (Test-Path $file) {
+            Write-Host " $file" -ForegroundColor Green
+            $foundFiles++
+        } else {
+            Write-Host " $file" -ForegroundColor Red
+        }
+    }
+
+    Write-Host ""
+    if ($foundFiles -eq $windowsFiles.Count) {
+        Write-Host " SUCCESS! D: DRIVE IS NOW BOOTABLE!" -ForegroundColor Green
+        Write-Host ""
+        Write-Host "WINDOWS 11 RESCUE DRIVE READY" -ForegroundColor Yellow
+        Write-Host " Emergency Windows installation "
+        Write-Host " System recovery operations "
+        Write-Host " Boot problem resolution "
+        Write-Host " Clean Windows 11 installs "
+
+    } else {
+        Write-Host "  SETUP INCOMPLETE" -ForegroundColor Yellow
+        Write-Host "Found $foundFiles of $($windowsFiles.Count) essential files"
+        Write-Host "May need to repeat creation process"
+    }
+
+    Write-Host ""
+    Write-Host "HOW TO USE YOUR BOOTABLE DRIVE:" -ForegroundColor Green
+    Write-Host "1. Insert D: drive into target computer"
+    Write-Host "2. Restart and press F12 (boot menu key)"
+    Write-Host "3. Select USB drive: WIN11_RESCUE"
+    Write-Host "4. Windows 11 setup will start"
+    Write-Host "5. Choose Install Windows or Repair options"
+
+    Write-Host ""
+    Write-Host " D: DRIVE WINDOWS 11 BOOTABLE SETUP COMPLETE!" -ForegroundColor Green
+}
+
+# Main Script Execution
+Write-Host "EQ12 WINDOWS 11 OFFICIAL BOOTABLE CREATOR" -ForegroundColor Cyan
+Write-Host "Buffalo NY 14215 Content Empire" -ForegroundColor Gray
+Write-Host "Microsoft Official Integration - Windows 11 2025 Update" -ForegroundColor Green
+Write-Host ""
+
+# Check D: drive first
+$dDrive = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq "D:"}
+if ($dDrive) {
+    $sizeGB = [math]::Round($dDrive.Size/1GB, 2)
+    Write-Host "D: Drive detected: $sizeGB GB USB drive ready" -ForegroundColor Green
+} else {
+    Write-Host "  D: drive not found - please connect USB drive" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+switch ($Action) {
+    "ShowOptions" {
+        Show-MicrosoftDownloadOptions
+        Write-Host ""
+        Write-Host "CHOOSE YOUR METHOD:" -ForegroundColor Yellow
+        Write-Host " -Action MediaCreationTool (easiest, recommended)"
+        Write-Host " -Action ISODownload (advanced, more control)"
+        Write-Host " -Action InstallAssistant (upgrade current PC only)"
+    }
+    "MediaCreationTool" {
+        Start-MediaCreationToolDownload
+    }
+    "ISODownload" {
+        Start-ISODownload
+    }
+    "InstallAssistant" {
+        Start-InstallationAssistant
+    }
+    "CreateBootable" {
+        New-BootableDriveOfficial
+    }
+    "VerifySetup" {
+        Test-BootableSetup
+    }
+}
+

@@ -1,0 +1,20 @@
+[
+  {
+    "name": "eq12-manager",
+    "ip": "192.168.1.144",
+    "user": "ricoj100",
+    "role": "manager"
+  },
+  {
+    "name": "m70q-worker",
+    "ip": "192.168.1.52",
+    "user": "richj",
+    "role": "worker"
+  },
+  {
+    "name": "pi-worker",
+    "ip": "192.168.1.80",
+    "user": "pi",
+    "role": "worker"
+  }
+]

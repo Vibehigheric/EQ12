@@ -1,0 +1,1 @@
+import{g as t,v as e}from"./chunk-AU7FH3OU.js";var m=async i=>{let a=await e("siteCache",i),o=await t({message:"getPlatform"})==="Shopify"?await t({message:"getPlatformDomain"}):null;return a?.meta&&o&&(a.meta.affiliate_link_current_tab=!1),a};export{m as a};

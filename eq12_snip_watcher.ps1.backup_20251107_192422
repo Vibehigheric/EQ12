@@ -1,0 +1,290 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Snip Watcher
+# PowerShell wrapper for the Python snip watcher
+# Monitors screenshots and routes OCR'd content to EQ12 APIs
+
+[CmdletBinding()]
+param(
+    [switch]$Start,
+    [switch]$Stop,
+    [switch]$Status,
+    [switch]$Stats,
+    [switch]$TestOCR,
+    [string]$TestImage
+)
+
+$ErrorActionPreference = "Stop"
+
+# EQ12 Configuration
+$EQ12_HOME = $env:EQ12_HOME
+if (-not $EQ12_HOME) {
+    $EQ12_HOME = "C:\EQ12"
+}
+
+$SNIP_WATCHER_PY = Join-Path $EQ12_HOME "eq12_snip_watcher.py"
+$SNIP_FOLDER = Join-Path $EQ12_HOME "snips"
+$LOGS_DIR = Join-Path $EQ12_HOME "logs\snip_watcher"
+$PID_FILE = Join-Path $LOGS_DIR "snip_watcher.pid"
+
+# Ensure directories exist
+if (-not (Test-Path $SNIP_FOLDER)) {
+    New-Item -ItemType Directory -Path $SNIP_FOLDER -Force | Out-Null
+}
+if (-not (Test-Path $LOGS_DIR)) {
+    New-Item -ItemType Directory -Path $LOGS_DIR -Force | Out-Null
+}
+
+function Write-EQ12Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "$timestamp | $Level | SnipWatcher | $Message"
+    Write-Host $logMessage
+    Add-Content -Path (Join-Path $LOGS_DIR "snip_watcher_ps.log") -Value $logMessage -Encoding UTF8
+}
+
+function Test-PythonDependencies {
+    Write-EQ12Log "Checking Python dependencies..."
+
+    $dependencies = @(
+        "pytesseract",
+        "watchdog",
+        "pillow",
+        "requests",
+        "aiohttp"
+    )
+
+    $missing = @()
+    foreach ($dep in $dependencies) {
+        try {
+            python -c "import $($dep.Replace('-', '_'))" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                $missing += $dep
+            }
+        } catch {
+            $missing += $dep
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-EQ12Log "Missing dependencies: $($missing -join ', ')" "ERROR"
+        Write-EQ12Log "Install with: pip install $($missing -join ' ')" "INFO"
+        return $false
+    }
+
+    Write-EQ12Log "All Python dependencies available"
+    return $true
+}
+
+function Test-TesseractOCR {
+    Write-EQ12Log "Checking Tesseract OCR..."
+
+    $tesseractPaths = @(
+        "C:\Program Files\Tesseract-OCR\tesseract.exe",
+        "C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+        "C:\Tools\tesseract\tesseract.exe"
+    )
+
+    foreach ($path in $tesseractPaths) {
+        if (Test-Path $path) {
+            Write-EQ12Log "Found Tesseract at: $path"
+            return $true
+        }
+    }
+
+    # Try PATH
+    try {
+        $tesseractCmd = Get-Command tesseract -ErrorAction SilentlyContinue
+        if ($tesseractCmd) {
+            Write-EQ12Log "Found Tesseract in PATH: $($tesseractCmd.Source)"
+            return $true
+        }
+    } catch {
+        # Ignore
+    }
+
+    Write-EQ12Log "Tesseract OCR not found" "ERROR"
+    Write-EQ12Log "Download from: https://github.com/tesseract-ocr/tesseract" "INFO"
+    return $false
+}
+
+function Start-SnipWatcher {
+    Write-EQ12Log "Starting EQ12 Snip Watcher..."
+
+    # Check if already running
+    if (Test-Path $PID_FILE) {
+        $processId = Get-Content $PID_FILE
+        if (Get-Process -Id $processId -ErrorAction SilentlyContinue) {
+            Write-EQ12Log "Snip Watcher already running (PID: $processId)" "WARN"
+            return
+        }
+    }
+
+    # Verify dependencies
+    if (-not (Test-PythonDependencies)) {
+        throw "Missing Python dependencies"
+    }
+
+    if (-not (Test-TesseractOCR)) {
+        throw "Tesseract OCR not available"
+    }
+
+    # Start Python process
+    $processArgs = @{
+        FilePath         = "python"
+        ArgumentList     = $SNIP_WATCHER_PY
+        WorkingDirectory = $EQ12_HOME
+        WindowStyle      = "Hidden"
+        PassThru         = $true
+    }
+
+    $process = Start-Process @processArgs
+
+    # Save PID
+    $process.Id | Out-File $PID_FILE -Encoding ASCII
+
+    Write-EQ12Log "Snip Watcher started (PID: $($process.Id))"
+    Write-EQ12Log "Save screenshots to: $SNIP_FOLDER"
+    Write-EQ12Log "Logs: $LOGS_DIR"
+}
+
+function Stop-SnipWatcher {
+    Write-EQ12Log "Stopping EQ12 Snip Watcher..."
+
+    if (-not (Test-Path $PID_FILE)) {
+        Write-EQ12Log "PID file not found - may not be running" "WARN"
+        return
+    }
+
+    $processId = Get-Content $PID_FILE
+    $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+
+    if ($process) {
+        Stop-Process -Id $processId -Force
+        Write-EQ12Log "Stopped process $processId"
+    } else {
+        Write-EQ12Log "Process $processId not running" "WARN"
+    }
+
+    Remove-Item $PID_FILE -ErrorAction SilentlyContinue
+}
+
+function Get-SnipWatcherStatus {
+    Write-EQ12Log "Checking Snip Watcher status..."
+
+    $isRunning = $false
+    $processId = $null
+
+    if (Test-Path $PID_FILE) {
+        $processId = Get-Content $PID_FILE
+        $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
+        $isRunning = $null -ne $process
+    }
+
+    Write-Host "=== EQ12 Snip Watcher Status ==="
+    Write-Host "Running: $isRunning"
+
+    if ($isRunning) {
+        Write-Host "PID: $processId"
+        Write-Host "CPU: $([math]::Round($process.CPU, 2))s"
+        Write-Host "Memory: $([math]::Round($process.WorkingSet / 1MB, 2))MB"
+    }
+
+    Write-Host "Snip Folder: $SNIP_FOLDER"
+    Write-Host "Logs: $LOGS_DIR"
+
+    # Check folder contents
+    $snipFiles = Get-ChildItem $SNIP_FOLDER -Filter "*.png", "*.jpg", "*.jpeg", "*.gif", "*.bmp" -ErrorAction SilentlyContinue
+    Write-Host "Snip Files: $($snipFiles.Count)"
+
+    # Dependencies
+    Write-Host "Dependencies:"
+    Write-Host "  Python: $(Test-PythonDependencies)"
+    Write-Host "  Tesseract: $(Test-TesseractOCR)"
+}
+
+function Get-SnipWatcherStats {
+    Write-EQ12Log "Getting Snip Watcher stats..."
+
+    # Read from log files
+    $logFile = Join-Path $LOGS_DIR "snip_watcher.log"
+
+    if (-not (Test-Path $logFile)) {
+        Write-Host "No stats available - log file not found"
+        return
+    }
+
+    $logContent = Get-Content $logFile
+    $totalProcessed = ($logContent | Select-String "New snip detected").Count
+    $successfulRoutes = ($logContent | Select-String "Successfully sent snip data").Count
+    $ocrErrors = ($logContent | Select-String "OCR failed").Count
+
+    Write-Host "=== EQ12 Snip Watcher Stats ==="
+    Write-Host "Total Processed: $totalProcessed"
+    Write-Host "Successful Routes: $successfulRoutes"
+    Write-Host "OCR Errors: $ocrErrors"
+
+    if ($totalProcessed -gt 0) {
+        $successRate = [math]::Round(($successfulRoutes / $totalProcessed) * 100, 1)
+        Write-Host "Success Rate: $successRate%"
+    }
+
+    # Recent activity
+    $recent = $logContent | Select-Object -Last 10
+    Write-Host ""
+    Write-Host "Recent Activity:"
+    $recent | ForEach-Object { Write-Host "  $_" }
+}
+
+function Test-OCRWithImage {
+    param([string]$ImagePath)
+
+    if (-not (Test-Path $ImagePath)) {
+        Write-EQ12Log "Image not found: $ImagePath" "ERROR"
+        return
+    }
+
+    Write-EQ12Log "Testing OCR with: $ImagePath"
+
+    # Copy to snip folder to trigger processing
+    $snipFile = Join-Path $SNIP_FOLDER (Split-Path $ImagePath -Leaf)
+    Copy-Item $ImagePath $snipFile
+
+    Write-EQ12Log "Copied to snip folder for processing: $snipFile"
+}
+
+# Main script logic
+try {
+    if ($Start) {
+        Start-SnipWatcher
+    } elseif ($Stop) {
+        Stop-SnipWatcher
+    } elseif ($Status) {
+        Get-SnipWatcherStatus
+    } elseif ($Stats) {
+        Get-SnipWatcherStats
+    } elseif ($TestOCR -and $TestImage) {
+        Test-OCRWithImage -ImagePath $TestImage
+    } else {
+        Write-Host "EQ12 Snip Watcher - Visual Data Capture Pipeline"
+        Write-Host ""
+        Write-Host "Usage:"
+        Write-Host "  .\eq12_snip_watcher.ps1 -Start     # Start the watcher"
+        Write-Host "  .\eq12_snip_watcher.ps1 -Stop      # Stop the watcher"
+        Write-Host "  .\eq12_snip_watcher.ps1 -Status    # Check status"
+        Write-Host "  .\eq12_snip_watcher.ps1 -Stats     # View statistics"
+        Write-Host "  .\eq12_snip_watcher.ps1 -TestOCR -TestImage 'C:\path\to\image.png""
+        Write-Host ""
+        Write-Host "The watcher monitors C:\EQ12\snips for new screenshots and automatically:"
+        Write-Host "  - Extracts text via OCR (Tesseract)"
+        Write-Host "  - Routes content to EQ12 APIs (betting/travel/finance)"
+        Write-Host "  - Logs all activity to C:\EQ12\logs\snip_watcher\"
+        Write-Host ""
+        Write-Host "Dependencies: pytesseract, watchdog, pillow, requests, aiohttp"
+        Write-Host "OCR Engine: Tesseract (https://github.com/tesseract-ocr/tesseract)"
+    }
+} catch {
+    Write-EQ12Log "Error: $($_.Exception.Message)" "ERROR"
+    throw
+}

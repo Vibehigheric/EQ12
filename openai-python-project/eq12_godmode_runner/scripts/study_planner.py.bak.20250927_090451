@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""
+Study Planner Script  
+Creates and manages adaptive learning schedules
+"""
+import json
+import os
+import sys
+from datetime import datetime, timedelta
+
+
+def create_study_plan(action_text):
+    """Create personalized study plan"""
+    print(f"📚 Creating adaptive study plan...")
+    print(f"📋 Action: {action_text}")
+    
+    # Generate study plan
+    plan = {
+        "created": datetime.now().isoformat(),
+        "action": action_text,
+        "schedule": [
+            {
+                "date": (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d"),
+                "topics": ["Review fundamentals", "Practice problems"],
+                "duration": "2 hours"
+            },
+            {
+                "date": (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d"),
+                "topics": ["Advanced concepts", "Mock tests"],
+                "duration": "3 hours"
+            },
+            {
+                "date": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d"), 
+                "topics": ["Review weak areas", "Final prep"],
+                "duration": "4 hours"
+            }
+        ],
+        "spaced_repetition": True,
+        "progress_tracking": True
+    }
+    
+    # Save plan
+    os.makedirs("logs/study_plans", exist_ok=True)
+    filename = f"logs/study_plans/plan_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    
+    with open(filename, "w") as f:
+        json.dump(plan, f, indent=2)
+    
+    print("✅ Study plan created successfully")
+    print(f"📁 Saved to: {filename}")
+    print(f"📅 Next study session: {plan['schedule'][0]['date']}")
+    
+    return 0
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: study_planner.py <action_text>")
+        sys.exit(1)
+    
+    action_text = sys.argv[1]
+    return create_study_plan(action_text)
+
+if __name__ == "__main__":
+    sys.exit(main())

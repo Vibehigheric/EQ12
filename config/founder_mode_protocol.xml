@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<founder_mode_protocol>
+    <definition>
+        "Founder Mode" is a management style characterized by direct intervention, 
+        bypassing intermediate layers, and an obsession with detail. 
+        In the context of EQ12, it means the Master Node directly orchestrates 
+        Worker Nodes without complex middleware.
+    </definition>
+
+    <directives>
+        <directive id="1">NO BUREAUCRACY: Skip approval steps for safe operations.</directive>
+        <directive id="2">DIRECT ACCESS: SSH/PowerShell Remoting directly into nodes.</directive>
+        <directive id="3">SPEED OVER POLISH: Deploy working code, refactor later.</directive>
+        <directive id="4">MICRO-MANAGEMENT: Monitor individual container logs directly.</directive>
+    </directives>
+
+    <execution_strategy>
+        <step>Directly provision Lenovo 10T8 as the "Muscle" node.</step>
+        <step>Force-deploy the 13-product stack via Docker Compose.</step>
+        <step>Stream logs to the Master Dashboard in real-time.</step>
+    </execution_strategy>
+</founder_mode_protocol>

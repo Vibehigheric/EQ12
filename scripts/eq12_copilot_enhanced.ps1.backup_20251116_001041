@@ -1,0 +1,706 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [switch]$RunChecks,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$FixIssues,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$StartBackground,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$TestMode,
+
+    [Parameter(Mandatory = $false)]
+    [string]$LogLevel = "INFO"
+)
+
+<#
+.SYNOPSIS
+EQ12 Enhanced Copilot Integration System with Auto-Checks and Background Scripts
+
+.DESCRIPTION
+Comprehensive Copilot setup for EQ12 including:
+- Auto-installation and configuration of Copilot extensions
+- Background monitoring and health checks
+- Automated issue detection and remediation
+- Content script integration with EQ12 workflows
+- User interface components for Copilot management
+- Integration with EQ12 dashboard and logging systems
+
+.EXAMPLE
+.\eq12_copilot_enhanced.ps1 -RunChecks -FixIssues
+.\eq12_copilot_enhanced.ps1 -StartBackground
+.\eq12_copilot_enhanced.ps1 -TestMode
+
+.NOTES
+Author: EQ12 AI System Enhanced
+Version: 2.0.0 - Full Copilot Integration
+#>
+
+# Enhanced logging and configuration
+$ScriptName = "EQ12CopilotEnhanced"
+$LogDir = "C:\EQ12\logs"
+$ConfigDir = "C:\EQ12\configs"
+$LogFile = Join-Path $LogDir "copilot_enhanced.log"
+$ConfigFile = Join-Path $ConfigDir "copilot_config.json"
+$StatusFile = Join-Path $LogDir "copilot_status.json"
+
+# Ensure directories exist
+@($LogDir, $ConfigDir) | ForEach-Object {
+    if (!(Test-Path $_)) {
+        New-Item -ItemType Directory -Path $_ -Force | Out-Null
+    }
+}
+
+# Enhanced logging function
+function Write-EnhancedLog {
+    param(
+        [string]$Message,
+        [string]$Level = "INFO",
+        [string]$Component = "Main"
+    )
+
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = @{
+        timestamp = $timestamp
+        level     = $Level
+        component = $Component
+        script    = $ScriptName
+        message   = $Message
+        pid       = $PID
+    } | ConvertTo-Json -Compress
+
+    Add-Content -Path $LogFile -Value $logEntry
+
+    $color = switch ($Level) {
+        "ERROR" { "Red" }
+        "WARN" { "Yellow" }
+        "SUCCESS" { "Green" }
+        "DEBUG" { "Gray" }
+        default { "White" }
+    }
+
+    if ($Level -ne "DEBUG" -or $LogLevel -eq "DEBUG") {
+        Write-Host "$timestamp | $Level | $Component | $Message" -ForegroundColor $color
+    }
+}
+
+# Configuration management
+function Initialize-CopilotConfig {
+    $defaultConfig = @{
+        copilot_settings = @{
+            enable_commit_suggestions = $true
+            enable_chat               = $true
+            enable_inline_suggestions = $true
+            auto_check_interval       = 300  # 5 minutes
+            auto_fix_issues           = $true
+        }
+        extensions       = @{
+            required = @(
+                "GitHub.copilot",
+                "GitHub.copilot-chat"
+            )
+            optional = @(
+                "ms-vscode.vscode-json",
+                "ms-python.python",
+                "ms-vscode.powershell"
+            )
+        }
+        monitoring       = @{
+            health_check_enabled       = $true
+            status_reporting           = $true
+            integration_with_dashboard = $true
+        }
+        eq12_integration = @{
+            url_learning_integration   = $true
+            commit_message_enhancement = $true
+            pr_summary_generation      = $true
+            code_analysis_integration  = $true
+        }
+    }
+
+    if (!(Test-Path $ConfigFile)) {
+        $defaultConfig | ConvertTo-Json -Depth 5 | Set-Content $ConfigFile -Encoding UTF8
+        Write-EnhancedLog "Created default Copilot configuration" "INFO" "Config"
+    }
+
+    return Get-Content $ConfigFile -Raw | ConvertFrom-Json
+}
+
+# System status tracking
+function Update-CopilotStatus {
+    param([hashtable]$StatusData)
+
+    $status = @{
+        timestamp            = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        copilot_enabled      = $false
+        extensions_installed = @()
+        vs_code_configured   = $false
+        git_configured       = $false
+        eq12_integration     = $false
+        issues               = @()
+        last_check           = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    }
+
+    # Merge provided status data
+    foreach ($key in $StatusData.Keys) {
+        $status[$key] = $StatusData[$key]
+    }
+
+    $status | ConvertTo-Json -Depth 3 | Set-Content $StatusFile -Encoding UTF8
+    return $status
+}
+
+# Auto-check system
+function Test-CopilotSystem {
+    [CmdletBinding()]
+    param()
+
+    Write-EnhancedLog "Running comprehensive Copilot system check..." "INFO" "AutoCheck"
+
+    $issues = @()
+    $statusData = @{}
+
+    # Check VS Code installation
+    try {
+        $codeVersion = code --version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $statusData.vs_code_installed = $true
+            Write-EnhancedLog "VS Code installed: $(($codeVersion -split '\n')[0])" "SUCCESS" "AutoCheck"
+        } else {
+            $statusData.vs_code_installed = $false
+            $issues += "VS Code not installed"
+            Write-EnhancedLog "VS Code not installed" "ERROR" "AutoCheck"
+        }
+    } catch {
+        $statusData.vs_code_installed = $false
+        $issues += "VS Code not accessible"
+        Write-EnhancedLog "VS Code check failed: $($_.Exception.Message)" "ERROR" "AutoCheck"
+    }
+
+    # Check Copilot extensions
+    if ($statusData.vs_code_installed) {
+        try {
+            $extensions = code --list-extensions 2>$null
+            $copilotExtensions = @("GitHub.copilot", "GitHub.copilot-chat")
+            $installedExtensions = @()
+
+            foreach ($ext in $copilotExtensions) {
+                if ($extensions -contains $ext) {
+                    $installedExtensions += $ext
+                    Write-EnhancedLog "Extension installed: $ext" "SUCCESS" "AutoCheck"
+                } else {
+                    $issues += "Missing extension: $ext"
+                    Write-EnhancedLog "Missing extension: $ext" "WARN" "AutoCheck"
+                }
+            }
+
+            $statusData.extensions_installed = $installedExtensions
+            $statusData.copilot_enabled = ($installedExtensions.Count -eq $copilotExtensions.Count)
+
+        } catch {
+            $issues += "Failed to check extensions"
+            Write-EnhancedLog "Extension check failed: $($_.Exception.Message)" "ERROR" "AutoCheck"
+        }
+    }
+
+    # Check VS Code settings
+    $settingsPath = "${env}APPDATA\Code\User\settings.json"
+    if (Test-Path $settingsPath) {
+        try {
+            $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
+            $commitSuggestionsEnabled = $settings."github.copilot.enableCommitMessageSuggestions"
+
+            if ($commitSuggestionsEnabled -eq $true) {
+                $statusData.vs_code_configured = $true
+                Write-EnhancedLog "VS Code Copilot settings configured correctly" "SUCCESS" "AutoCheck"
+            } else {
+                $statusData.vs_code_configured = $false
+                $issues += "Copilot commit suggestions not enabled in VS Code"
+                Write-EnhancedLog "Copilot commit suggestions not enabled" "WARN" "AutoCheck"
+            }
+        } catch {
+            $issues += "Failed to read VS Code settings"
+            Write-EnhancedLog "Settings check failed: $($_.Exception.Message)" "ERROR" "AutoCheck"
+        }
+    } else {
+        $issues += "VS Code settings.json not found"
+        Write-EnhancedLog "VS Code settings.json not found" "WARN" "AutoCheck"
+    }
+
+    # Check Git configuration
+    try {
+        $gitVersion = git --version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $statusData.git_configured = $true
+            Write-EnhancedLog "Git installed: $gitVersion" "SUCCESS" "AutoCheck"
+
+            # Check Git user configuration
+            $gitUser = git config --get user.name 2>$null
+            $gitEmail = git config --get user.email 2>$null
+
+            if ([string]::IsNullOrEmpty($gitUser) -or [string]::IsNullOrEmpty($gitEmail)) {
+                $issues += "Git user configuration incomplete"
+                Write-EnhancedLog "Git user configuration missing" "WARN" "AutoCheck"
+            }
+        } else {
+            $statusData.git_configured = $false
+            $issues += "Git not installed"
+            Write-EnhancedLog "Git not installed" "ERROR" "AutoCheck"
+        }
+    } catch {
+        $statusData.git_configured = $false
+        $issues += "Git check failed"
+        Write-EnhancedLog "Git check failed: $($_.Exception.Message)" "ERROR" "AutoCheck"
+    }
+
+    # Check EQ12 integration
+    $eq12Files = @(
+        "C:\EQ12\scripts\eq12_url_scanner.py",
+        "C:\EQ12\scripts\eq12_gpt5_manager.py",
+        "C:\EQ12\configs\ai_enhanced_config.json"
+    )
+
+    $eq12Integration = $true
+    foreach ($file in $eq12Files) {
+        if (!(Test-Path $file)) {
+            $eq12Integration = $false
+            $issues += "Missing EQ12 file: $file"
+            Write-EnhancedLog "Missing EQ12 file: $file" "WARN" "AutoCheck"
+        }
+    }
+
+    if ($eq12Integration) {
+        Write-EnhancedLog "EQ12 integration files present" "SUCCESS" "AutoCheck"
+    }
+    $statusData.eq12_integration = $eq12Integration
+
+    # Check API keys and environment
+    $apiKeySet = [bool]${env}OPENAI_API_KEY
+    if ($apiKeySet) {
+        Write-EnhancedLog "OpenAI API key configured" "SUCCESS" "AutoCheck"
+    } else {
+        $issues += "OpenAI API key not set"
+        Write-EnhancedLog "OpenAI API key not configured" "WARN" "AutoCheck"
+    }
+    $statusData.api_keys_configured = $apiKeySet
+
+    $statusData.issues = $issues
+    Update-CopilotStatus -StatusData $statusData
+
+    Write-EnhancedLog "System check completed. Found $($issues.Count) issues." "INFO" "AutoCheck"
+    return @{
+        Status        = $statusData
+        Issues        = $issues
+        OverallHealth = ($issues.Count -eq 0)
+    }
+}
+
+# Auto-fix system
+function Repair-CopilotSystem {
+    [CmdletBinding()]
+    param()
+
+    Write-EnhancedLog "Starting automated Copilot system repair..." "INFO" "AutoFix"
+
+    $checkResult = Test-CopilotSystem
+    $fixedIssues = @()
+    $failedFixes = @()
+
+    foreach ($issue in $checkResult.Issues) {
+        try {
+            switch -Regex ($issue) {
+                "VS Code not installed" {
+                    Write-EnhancedLog "Attempting to install VS Code..." "INFO" "AutoFix"
+                    winget install --id Microsoft.VisualStudioCode -e --source winget --silent
+                    if ($LASTEXITCODE -eq 0) {
+                        $fixedIssues += $issue
+                        Write-EnhancedLog "VS Code installed successfully" "SUCCESS" "AutoFix"
+                    } else {
+                        $failedFixes += $issue
+                        Write-EnhancedLog "Failed to install VS Code" "ERROR" "AutoFix"
+                    }
+                }
+
+                "Missing extension: GitHub.copilot" {
+                    Write-EnhancedLog "Installing GitHub Copilot extension..." "INFO" "AutoFix"
+                    code --install-extension GitHub.copilot --force
+                    if ($LASTEXITCODE -eq 0) {
+                        $fixedIssues += $issue
+                        Write-EnhancedLog "GitHub Copilot extension installed" "SUCCESS" "AutoFix"
+                    } else {
+                        $failedFixes += $issue
+                        Write-EnhancedLog "Failed to install GitHub Copilot extension" "ERROR" "AutoFix"
+                    }
+                }
+
+                "Missing extension: GitHub.copilot-chat" {
+                    Write-EnhancedLog "Installing GitHub Copilot Chat extension..." "INFO" "AutoFix"
+                    code --install-extension GitHub.copilot-chat --force
+                    if ($LASTEXITCODE -eq 0) {
+                        $fixedIssues += $issue
+                        Write-EnhancedLog "GitHub Copilot Chat extension installed" "SUCCESS" "AutoFix"
+                    } else {
+                        $failedFixes += $issue
+                        Write-EnhancedLog "Failed to install GitHub Copilot Chat extension" "ERROR" "AutoFix"
+                    }
+                }
+
+                "Copilot commit suggestions not enabled" {
+                    Write-EnhancedLog "Configuring VS Code Copilot settings..." "INFO" "AutoFix"
+                    $settingsPath = "${env}APPDATA\Code\User\settings.json"
+
+                    $settings = @{}
+                    if (Test-Path $settingsPath) {
+                        try {
+                            $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
+                        } catch {
+                            Write-EnhancedLog "Creating new VS Code settings" "WARN" "AutoFix"
+                        }
+                    }
+
+                    $settings."github.copilot.enableCommitMessageSuggestions" = $true
+                    $settings."github.copilot.enable" = @{"*" = $true }
+                    $settings."editor.inlineSuggest.enabled" = $true
+
+                    $settings | ConvertTo-Json -Depth 5 | Set-Content $settingsPath -Encoding UTF8
+                    $fixedIssues += $issue
+                    Write-EnhancedLog "VS Code Copilot settings configured" "SUCCESS" "AutoFix"
+                }
+
+                "Git not installed" {
+                    Write-EnhancedLog "Attempting to install Git..." "INFO" "AutoFix"
+                    winget install --id Git.Git -e --source winget --silent
+                    if ($LASTEXITCODE -eq 0) {
+                        $fixedIssues += $issue
+                        Write-EnhancedLog "Git installed successfully" "SUCCESS" "AutoFix"
+                    } else {
+                        $failedFixes += $issue
+                        Write-EnhancedLog "Failed to install Git" "ERROR" "AutoFix"
+                    }
+                }
+
+                "Git user configuration incomplete" {
+                    Write-EnhancedLog "Configuring Git user settings..." "INFO" "AutoFix"
+                    $gitUser = Read-Host "Enter Git username (or press Enter for 'EQ12-User')"
+                    $gitEmail = Read-Host "Enter Git email (or press Enter for 'eq12@example.com')"
+
+                    if ([string]::IsNullOrEmpty($gitUser)) { $gitUser = "EQ12-User" }
+                    if ([string]::IsNullOrEmpty($gitEmail)) { $gitEmail = "eq12@example.com" }
+
+                    git config --global user.name $gitUser
+                    git config --global user.email $gitEmail
+
+                    $fixedIssues += $issue
+                    Write-EnhancedLog "Git user configuration completed" "SUCCESS" "AutoFix"
+                }
+
+                default {
+                    Write-EnhancedLog "No automatic fix available for: $issue" "WARN" "AutoFix"
+                    $failedFixes += $issue
+                }
+            }
+        } catch {
+            Write-EnhancedLog "Failed to fix '$issue': $($_.Exception.Message)" "ERROR" "AutoFix"
+            $failedFixes += $issue
+        }
+    }
+
+    Write-EnhancedLog "Repair completed. Fixed: $($fixedIssues.Count), Failed: $($failedFixes.Count)" "INFO" "AutoFix"
+
+    return @{
+        FixedIssues = $fixedIssues
+        FailedFixes = $failedFixes
+        Success     = ($failedFixes.Count -eq 0)
+    }
+}
+
+# Background monitoring service
+function Start-CopilotMonitoring {
+    [CmdletBinding()]
+    param()
+
+    Write-EnhancedLog "Starting Copilot background monitoring..." "INFO" "Monitor"
+
+    $config = Initialize-CopilotConfig
+    $checkInterval = $config.copilot_settings.auto_check_interval
+
+    # Create background job for monitoring
+    $monitoringJob = Start-Job -ScriptBlock {
+        param($LogFile, $StatusFile, $CheckInterval, $AutoFix)
+
+        function Write-JobLog {
+            param([string]$Message, [string]$Level = "INFO")
+            $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            $logEntry = @{
+                timestamp = $timestamp
+                level     = $Level
+                component = "BackgroundMonitor"
+                script    = "CopilotMonitoring"
+                message   = $Message
+                job_id    = ${using}PID
+            } | ConvertTo-Json -Compress
+            Add-Content -Path $LogFile -Value $logEntry
+        }
+
+        Write-JobLog "Background monitoring started with $CheckInterval second intervals"
+
+        while ($true) {
+            try {
+                # Perform health checks
+                Write-JobLog "Performing periodic Copilot health check"
+
+                # Check if VS Code processes are running
+                $vscodeProcesses = Get-Process -Name "Code" -ErrorAction SilentlyContinue
+                $copilotHealthy = $vscodeProcesses.Count -gt 0
+
+                # Update status
+                $status = @{
+                    background_monitoring = $true
+                    vs_code_running       = $copilotHealthy
+                    last_background_check = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                }
+
+                $status | ConvertTo-Json -Depth 2 | Set-Content $StatusFile -Encoding UTF8
+
+                # Auto-fix if enabled and issues detected
+                if ($AutoFix -and !$copilotHealthy) {
+                    Write-JobLog "Health issue detected, triggering auto-fix" "WARN"
+                    # Could trigger repair here
+                }
+
+                Start-Sleep -Seconds $CheckInterval
+
+            } catch {
+                Write-JobLog "Background monitoring error: $($_.Exception.Message)" "ERROR"
+                Start-Sleep -Seconds 30  # Shorter retry interval on error
+            }
+        }
+    } -ArgumentList $LogFile, $StatusFile, $checkInterval, $config.copilot_settings.auto_fix_issues
+
+    # Store job information
+    $jobInfo = @{
+        job_id     = $monitoringJob.Id
+        started_at = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        status     = "running"
+    }
+
+    $jobInfo | ConvertTo-Json | Set-Content "$LogDir\copilot_monitoring_job.json" -Encoding UTF8
+
+    Write-EnhancedLog "Background monitoring started with Job ID: $($monitoringJob.Id)" "SUCCESS" "Monitor"
+    return $monitoringJob
+}
+
+# Test mode with dummy commit
+function Test-CopilotIntegration {
+    [CmdletBinding()]
+    param()
+
+    Write-EnhancedLog "Running Copilot integration test..." "INFO" "Test"
+
+    try {
+        # Create a test repository in temp location
+        $testDir = Join-Path ${env}TEMP "copilot_test_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+        New-Item -ItemType Directory -Path $testDir -Force | Out-Null
+
+        Push-Location $testDir
+
+        # Initialize git repo
+        git init | Out-Null
+
+        # Create test file
+        $testContent = @"
+# EQ12 Copilot Integration Test
+# Generated at: $(Get-Date)
+# This is a test file to verify Copilot commit message suggestions
+
+def test_function():
+    print("Testing Copilot integration with EQ12 system")
+    return True
+
+if __name__ == "__main__":
+    test_function()
+"@
+
+        Set-Content -Path "test_copilot.py" -Value $testContent
+
+        # Stage the file
+        git add test_copilot.py
+
+        Write-EnhancedLog "Test repository created and file staged" "SUCCESS" "Test"
+        Write-EnhancedLog "Test Location: $testDir" "INFO" "Test"
+        Write-EnhancedLog "You can now test Copilot commit suggestions manually" "INFO" "Test"
+        Write-EnhancedLog "Navigate to: $testDir and commit with VS Code" "INFO" "Test"
+
+        # Keep the directory for manual testing
+        Write-Host "`nTo test Copilot commit messages:" -ForegroundColor Yellow
+        Write-Host "1. Open VS Code: code "$testDir"" -ForegroundColor Cyan
+        Write-Host "2. Open Source Control (Ctrl+Shift+G)" -ForegroundColor Cyan
+        Write-Host "3. Click in commit message box" -ForegroundColor Cyan
+        Write-Host "4. Copilot should suggest a commit message" -ForegroundColor Cyan
+        Write-Host "5. Delete test directory when done: Remove-Item "$testDir" -Recurse -Force" -ForegroundColor Cyan
+
+        return @{
+            Success       = $true
+            TestDirectory = $testDir
+            Message       = "Test environment created successfully"
+        }
+
+    } catch {
+        Write-EnhancedLog "Test failed: $($_.Exception.Message)" "ERROR" "Test"
+        return @{
+            Success = $false
+            Error   = $_.Exception.Message
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+# EQ12 Dashboard integration
+function Update-EQ12Dashboard {
+    [CmdletBinding()]
+    param()
+
+    Write-EnhancedLog "Updating EQ12 dashboard with Copilot status..." "INFO" "Dashboard"
+
+    try {
+        $status = Get-Content $StatusFile -Raw | ConvertFrom-Json
+
+        # Create dashboard data
+        $dashboardData = @{
+            copilot_system = @{
+                status           = if ($status.copilot_enabled) { "active" } else { "inactive" }
+                extensions_count = $status.extensions_installed.Count
+                last_check       = $status.last_check
+                issues_count     = $status.issues.Count
+                vs_code_running  = $status.vs_code_running
+                git_configured   = $status.git_configured
+                eq12_integration = $status.eq12_integration
+            }
+            timestamp      = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        }
+
+        # Save to EQ12 data directory for dashboard consumption
+        $dashboardFile = "C:\EQ12\data\copilot_dashboard.json"
+        $dashboardData | ConvertTo-Json -Depth 3 | Set-Content $dashboardFile -Encoding UTF8
+
+        Write-EnhancedLog "Dashboard data updated successfully" "SUCCESS" "Dashboard"
+        return $true
+
+    } catch {
+        Write-EnhancedLog "Failed to update dashboard: $($_.Exception.Message)" "ERROR" "Dashboard"
+        return $false
+    }
+}
+
+# Main execution logic
+function Main-CopilotEnhanced {
+    try {
+        Write-EnhancedLog "EQ12 Enhanced Copilot Integration System started" "INFO" "Main"
+
+        # Initialize configuration
+        $config = Initialize-CopilotConfig
+
+        if ($RunChecks) {
+            Write-EnhancedLog "Running system checks..." "INFO" "Main"
+            $checkResult = Test-CopilotSystem
+
+            Write-Host "`n=== COPILOT SYSTEM STATUS ===" -ForegroundColor Green
+            Write-Host "Overall Health: $(if ($checkResult.OverallHealth) { '✅ HEALTHY' } else { "⚠️ ISSUES DETECTED" })" -ForegroundColor $(if ($checkResult.OverallHealth) { 'Green' } else { 'Yellow' })
+            Write-Host "VS Code Installed: $(if ($checkResult.Status.vs_code_installed) { '✅' } else { "❌" })" -ForegroundColor $(if ($checkResult.Status.vs_code_installed) { 'Green' } else { 'Red' })
+            Write-Host "Copilot Enabled: $(if ($checkResult.Status.copilot_enabled) { '✅' } else { "❌" })" -ForegroundColor $(if ($checkResult.Status.copilot_enabled) { 'Green' } else { 'Red' })
+            Write-Host "Extensions Installed: $($checkResult.Status.extensions_installed.Count)/2" -ForegroundColor Cyan
+            Write-Host "VS Code Configured: $(if ($checkResult.Status.vs_code_configured) { '✅' } else { "❌" })" -ForegroundColor $(if ($checkResult.Status.vs_code_configured) { 'Green' } else { 'Red' })
+            Write-Host "Git Configured: $(if ($checkResult.Status.git_configured) { '✅' } else { "❌" })" -ForegroundColor $(if ($checkResult.Status.git_configured) { 'Green' } else { 'Red' })
+            Write-Host "EQ12 Integration: $(if ($checkResult.Status.eq12_integration) { '✅' } else { "❌" })" -ForegroundColor $(if ($checkResult.Status.eq12_integration) { 'Green' } else { 'Red' })
+
+            if ($checkResult.Issues.Count -gt 0) {
+                Write-Host "`n⚠️ Issues Found:" -ForegroundColor Yellow
+                foreach ($issue in $checkResult.Issues) {
+                    Write-Host "  - $issue" -ForegroundColor Red
+                }
+            }
+        }
+
+        if ($FixIssues) {
+            Write-EnhancedLog "Running automated repairs..." "INFO" "Main"
+            $repairResult = Repair-CopilotSystem
+
+            Write-Host "`n=== REPAIR RESULTS ===" -ForegroundColor Green
+            Write-Host "Fixed Issues: $($repairResult.FixedIssues.Count)" -ForegroundColor Green
+            Write-Host "Failed Fixes: $($repairResult.FailedFixes.Count)" -ForegroundColor Red
+
+            if ($repairResult.FixedIssues.Count -gt 0) {
+                Write-Host "`n✅ Successfully Fixed:" -ForegroundColor Green
+                foreach ($fix in $repairResult.FixedIssues) {
+                    Write-Host "  - $fix" -ForegroundColor Green
+                }
+            }
+
+            if ($repairResult.FailedFixes.Count -gt 0) {
+                Write-Host "`n❌ Failed to Fix:" -ForegroundColor Red
+                foreach ($fail in $repairResult.FailedFixes) {
+                    Write-Host "  - $fail" -ForegroundColor Red
+                }
+            }
+        }
+
+        if ($StartBackground) {
+            Write-EnhancedLog "Starting background monitoring..." "INFO" "Main"
+            $monitorJob = Start-CopilotMonitoring
+            Write-Host "`n🔄 Background monitoring started" -ForegroundColor Green
+            Write-Host "Job ID: $($monitorJob.Id)" -ForegroundColor Cyan
+            Write-Host "To stop: Stop-Job -Id $($monitorJob.Id)" -ForegroundColor Yellow
+        }
+
+        if ($TestMode) {
+            Write-EnhancedLog "Running test mode..." "INFO" "Main"
+            $testResult = Test-CopilotIntegration
+            if ($testResult.Success) {
+                Write-Host "`n🧪 Test environment created successfully!" -ForegroundColor Green
+            } else {
+                Write-Host "`n❌ Test failed: $($testResult.Error)" -ForegroundColor Red
+            }
+        }
+
+        # Always update dashboard
+        Update-EQ12Dashboard | Out-Null
+
+        # Default behavior if no specific action requested
+        if (!$RunChecks -and !$FixIssues -and !$StartBackground -and !$TestMode) {
+            Write-Host "🧠 EQ12 Enhanced Copilot Integration System" -ForegroundColor Magenta
+            Write-Host "=" * 50 -ForegroundColor Gray
+
+            $quickCheck = Test-CopilotSystem
+
+            Write-Host "`n📊 Quick Status:" -ForegroundColor Cyan
+            Write-Host "  Copilot Health: $(if ($quickCheck.OverallHealth) { '✅ Healthy' } else { "⚠️ Issues" })" -ForegroundColor $(if ($quickCheck.OverallHealth) { 'Green' } else { 'Yellow' })
+            Write-Host "  Issues: $($quickCheck.Issues.Count)" -ForegroundColor Cyan
+
+            Write-Host "`n🚀 Available Actions:" -ForegroundColor White
+            Write-Host "  -RunChecks       : Full system health check" -ForegroundColor Gray
+            Write-Host "  -FixIssues       : Automatic issue repair" -ForegroundColor Gray
+            Write-Host "  -StartBackground : Enable monitoring" -ForegroundColor Gray
+            Write-Host "  -TestMode        : Create test environment" -ForegroundColor Gray
+
+            Write-Host "`n💡 Quick Start:" -ForegroundColor Yellow
+            Write-Host "  .\eq12_copilot_enhanced.ps1 -RunChecks -FixIssues" -ForegroundColor Cyan
+        }
+
+        Write-EnhancedLog "EQ12 Enhanced Copilot Integration completed successfully" "SUCCESS" "Main"
+
+    } catch {
+        Write-EnhancedLog "Unexpected error: $($_.Exception.Message)" "ERROR" "Main"
+        Write-Host "❌ System error occurred. Check logs: $LogFile" -ForegroundColor Red
+        exit 1
+    }
+}
+
+# Execute main function
+Main-CopilotEnhanced

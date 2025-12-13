@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+    "EQ12_ENVIRONMENT": "development",
+    "EQ12_VERSION": "2.0.0-azure",
+    "OPENAI_API_KEYS": "[\"sk-your-key-here\"]",
+    "TELEGRAM_BOT_TOKEN": "your_telegram_bot_token_here",
+    "TELEGRAM_CHAT_ID": "your_telegram_chat_id_here"
+  }
+}

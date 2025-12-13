@@ -1,0 +1,146 @@
+{
+    "cookbook_config": {
+        "default_settings": {
+            "verbosity": "medium",
+            "reasoning": "medium",
+            "grammar": null,
+            "freeform": false
+        },
+        "platform_overrides": {
+            "telegram": {
+                "verbosity": "medium",
+                "reasoning": "medium"
+            },
+            "discord": {
+                "verbosity": "high",
+                "reasoning": "medium"
+            },
+            "cli": {
+                "verbosity": "low",
+                "reasoning": "minimal"
+            }
+        },
+        "grammar_definitions": {
+            "postgres": {
+                "description": "PostgreSQL SELECT-only queries with LIMIT and ORDER BY",
+                "syntax": "lark",
+                "definition": "start: \"SELECT\" /.+/ (\"LIMIT\" /[0-9]+/)? (\"ORDER BY\" /.+/)? \";\"?"
+            },
+            "mssql": {
+                "description": "MS SQL SELECT-only queries with TOP and ORDER BY",
+                "syntax": "lark",
+                "definition": "start: \"SELECT\" (\"TOP\" /[0-9]+/)? /.+/ (\"ORDER BY\" /.+/)? \";\"?"
+            },
+            "mysql": {
+                "description": "MySQL SELECT queries with LIMIT",
+                "syntax": "lark",
+                "definition": "start: \"SELECT\" /.+/ (\"LIMIT\" /[0-9]+/)? \";\"?"
+            },
+            "regex_timestamp": {
+                "description": "Strict ISO timestamp YYYY-MM-DD HH:MM:SS format",
+                "syntax": "regex",
+                "definition": "^\\\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\\\d|3[01]) (?:[01]\\\\d|2[0-3]):[0-5]\\\\d:[0-5]\\\\d$"
+            },
+            "regex_email": {
+                "description": "Valid email address format",
+                "syntax": "regex",
+                "definition": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$"
+            },
+            "python": {
+                "description": "Python 3.12+ compatible function definitions",
+                "syntax": "lark",
+                "definition": "start: \"def\" /[a-zA-Z_][a-zA-Z0-9_]*/ \"(\" /.+/ \"):\" /\\s*/ /.+/"
+            },
+            "powershell": {
+                "description": "PowerShell function with CmdletBinding",
+                "syntax": "lark",
+                "definition": "start: \"function\" /[a-zA-Z-]+/ \"{\" /\\s*/ \"[CmdletBinding()]\" /.+/ \"}\""
+            },
+            "bash": {
+                "description": "POSIX-compliant bash function",
+                "syntax": "lark",
+                "definition": "start: /[a-zA-Z_][a-zA-Z0-9_]*/ \"()\" \"{\" /.+/ \"}\""
+            },
+            "json": {
+                "description": "Valid JSON object structure",
+                "syntax": "regex",
+                "definition": "^\\\\{[^{}]*(?:\\\\{[^{}]*\\\\}[^{}]*)*\\\\}$"
+            },
+            "xml": {
+                "description": "Well-formed XML with root element",
+                "syntax": "lark",
+                "definition": "start: \"<\" /[a-zA-Z][a-zA-Z0-9_-]*/ \">\" /.+/ \"</\" /[a-zA-Z][a-zA-Z0-9_-]*/ \">\""
+            },
+            "wireguard": {
+                "description": "WireGuard configuration format",
+                "syntax": "lark",
+                "definition": "start: \"[Interface]\" /\\s+/ \"PrivateKey\" \"=\" /.+/ /\\s+/ \"[Peer]\" /\\s+/ \"PublicKey\" \"=\" /.+/"
+            }
+        },
+        "section_grammar_mappings": {
+            "data": [
+                "postgres",
+                "mssql",
+                "mysql",
+                "json"
+            ],
+            "security": [
+                "wireguard",
+                "regex_email"
+            ],
+            "python": [
+                "python",
+                "json"
+            ],
+            "powershell": [
+                "powershell"
+            ],
+            "bash": [
+                "bash"
+            ],
+            "devops": [
+                "json",
+                "xml"
+            ],
+            "testing": [
+                "python",
+                "json"
+            ]
+        },
+        "performance_settings": {
+            "max_response_length": 4000,
+            "telegram_chunk_size": 3500,
+            "discord_chunk_size": 1900,
+            "reasoning_timeout_seconds": 30,
+            "cache_results": true,
+            "cache_ttl_minutes": 10
+        },
+        "security_settings": {
+            "allowed_grammars": [
+                "postgres",
+                "mssql",
+                "mysql",
+                "python",
+                "powershell",
+                "bash",
+                "json",
+                "xml",
+                "wireguard",
+                "regex_timestamp",
+                "regex_email"
+            ],
+            "blocked_patterns": [
+                "DROP",
+                "DELETE",
+                "TRUNCATE",
+                "ALTER",
+                "CREATE USER",
+                "GRANT",
+                "REVOKE"
+            ],
+            "sanitize_outputs": true,
+            "log_all_queries": true,
+            "require_auth_for_freeform": true
+        }
+    }
+}

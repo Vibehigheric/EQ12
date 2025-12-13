@@ -1,0 +1,14 @@
+{
+  "analysis_type": "pre_game_validation",
+  "ai_response": "\ud83d\udcca Using local intelligence engine. Results may have reduced accuracy until full service is restored.",
+  "boolean_validation": {
+    "parlay_authorized": false,
+    "high_risk_detected": false,
+    "ncaa_week7_ready": false,
+    "emergency_access": false,
+    "decision_score": 0.4,
+    "final_decision": "\ud83d\udd0d MANUAL REVIEW REQUIRED"
+  },
+  "confidence_score": 0.4,
+  "timestamp": "2025-10-04T11:35:17.217133"
+}

@@ -1,0 +1,193 @@
+[CmdletBinding()]
+param(
+    [Parameter(HelpMessage="The Odds API key (or set ODDS_API_KEY environment variable)")]
+    [string]$ApiKey,
+    
+    [Parameter(HelpMessage="Enable verbose logging")]
+    [switch]$Verbose,
+    
+    [Parameter(HelpMessage="Save to logs without printing to console")]
+    [switch]$SaveOnly,
+    
+    [Parameter(HelpMessage="Show help and usage examples")]
+    [switch]$Help
+)
+
+# EQ12 Sports Parlay Analyzer - PowerShell Wrapper
+# Analyzes today's NHL and NBA preseason games for parlay opportunities
+
+function Show-Help {
+    Write-Host @"
+
+🏒🏀 EQ12 SPORTS PARLAY ANALYZER
+=======================================
+
+DESCRIPTION:
+    Analyzes today's NHL and NBA preseason games using The Odds API to create
+    parlay suggestions based on value analysis.
+
+USAGE:
+    .\eq12_sports_parlay_analyzer.ps1 [OPTIONS]
+
+OPTIONS:
+    -ApiKey <string>     The Odds API key (get free key at https://the-odds-api.com)
+    -Verbose             Enable detailed logging
+    -SaveOnly            Save results to logs without console output  
+    -Help                Show this help message
+
+ENVIRONMENT VARIABLES:
+    ODDS_API_KEY         Your Odds API key (recommended method)
+
+EXAMPLES:
+    # Basic usage (requires ODDS_API_KEY environment variable)
+    .\eq12_sports_parlay_analyzer.ps1
+    
+    # With API key parameter
+    .\eq12_sports_parlay_analyzer.ps1 -ApiKey "your_api_key_here"
+    
+    # Verbose mode for debugging
+    .\eq12_sports_parlay_analyzer.ps1 -Verbose
+    
+    # Save to logs only (no console output)
+    .\eq12_sports_parlay_analyzer.ps1 -SaveOnly
+
+FEATURES:
+    ✓ Fetches today's NHL games
+    ✓ Fetches today's NBA preseason games  
+    ✓ Analyzes moneyline, spread, and total bets
+    ✓ Creates 2-leg parlay suggestions
+    ✓ Saves detailed analysis to JSON logs
+    ✓ Confidence scoring for each bet
+
+OUTPUT:
+    - Console display of games and parlays
+    - JSON log files in C:\EQ12\logs\
+    - Detailed analysis for each game
+
+DISCLAIMER:
+    This tool is for educational and analysis purposes only.
+    Please gamble responsibly and within your means.
+
+"@
+}
+
+if ($Help) {
+    Show-Help
+    exit 0
+}
+
+# Check for Python
+try {
+    $pythonVersion = python --version 2>$null
+    if (-not $pythonVersion) {
+        throw "Python not found"
+    }
+    Write-Verbose "Found Python: $pythonVersion"
+} catch {
+    Write-Error @"
+Python is required but not found. Please install Python 3.8+ and ensure it's in your PATH.
+Download from: https://www.python.org/downloads/
+"@
+    exit 1
+}
+
+# Check for required packages
+$requiredPackages = @("requests")
+foreach ($package in $requiredPackages) {
+    try {
+        python -c "import $package" 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Package $package not found"
+        }
+        Write-Verbose "Found package: $package"
+    } catch {
+        Write-Warning "Installing required package: $package"
+        python -m pip install $package --quiet
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to install $package. Please install manually: pip install $package"
+            exit 1
+        }
+    }
+}
+
+# Check for API key
+if (-not $ApiKey) {
+    $ApiKey = $env:ODDS_API_KEY
+}
+
+if (-not $ApiKey) {
+    Write-Warning @"
+No API key provided. You need an API key from The Odds API.
+
+Options:
+1. Set environment variable: `$env:ODDS_API_KEY = "your_key_here"`
+2. Use -ApiKey parameter: .\eq12_sports_parlay_analyzer.ps1 -ApiKey "your_key_here"
+
+Get a free API key at: https://the-odds-api.com/#get-access
+"@
+    exit 1
+}
+
+# Ensure logs directory exists
+$logsDir = "C:\EQ12\logs"
+if (-not (Test-Path $logsDir)) {
+    New-Item -ItemType Directory -Path $logsDir -Force | Out-Null
+    Write-Verbose "Created logs directory: $logsDir"
+}
+
+# Build Python command
+$scriptPath = Join-Path $PSScriptRoot "eq12_sports_parlay_analyzer.py"
+if (-not (Test-Path $scriptPath)) {
+    Write-Error "Script not found: $scriptPath"
+    exit 1
+}
+
+$pythonArgs = @()
+$pythonArgs += "`"$scriptPath`""
+$pythonArgs += "--api-key"
+$pythonArgs += "`"$ApiKey`""
+
+if ($Verbose) {
+    $pythonArgs += "--verbose"
+}
+
+if ($SaveOnly) {
+    $pythonArgs += "--save-only"
+}
+
+# Header
+if (-not $SaveOnly) {
+    Write-Host "`n🏒🏀 EQ12 SPORTS PARLAY ANALYZER" -ForegroundColor Cyan
+    Write-Host "===============================" -ForegroundColor Cyan
+    Write-Host "Date: $(Get-Date -Format 'yyyy-MM-dd')" -ForegroundColor Gray
+    Write-Host "Analyzing today's NHL and NBA preseason games..." -ForegroundColor Gray
+    Write-Host ""
+}
+
+# Run the Python analyzer
+Write-Verbose "Executing: python $($pythonArgs -join ' ')"
+
+try {
+    $process = Start-Process -FilePath "python" -ArgumentList $pythonArgs -Wait -PassThru -NoNewWindow
+    
+    if ($process.ExitCode -eq 0) {
+        if (-not $SaveOnly) {
+            Write-Host "`n✅ Analysis completed successfully!" -ForegroundColor Green
+            Write-Host "📁 Results saved to: $logsDir" -ForegroundColor Gray
+        }
+    } else {
+        Write-Error "Analysis failed with exit code: $($process.ExitCode)"
+        exit $process.ExitCode
+    }
+    
+} catch {
+    Write-Error "Failed to run analysis: $_"
+    exit 1
+}
+
+# Footer
+if (-not $SaveOnly) {
+    Write-Host "`n💡 Reminder: This analysis is for educational purposes only." -ForegroundColor Yellow
+    Write-Host "   Please gamble responsibly and within your means." -ForegroundColor Yellow
+    Write-Host "`n🔄 Run again anytime for updated odds and analysis!" -ForegroundColor Cyan
+}

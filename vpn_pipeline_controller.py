@@ -1,0 +1,507 @@
+#!/usr/bin/env python3
+"""
+EQ12 VPN Pipeline Controller
+Ensures VPN connectivity before running betting operations and provides graceful handling of VPN failures.
+Integrates with PowerShell VPN Guard and provides Python-based pipeline management.
+"""
+
+import json
+import logging
+import signal
+import sqlite3
+import subprocess
+import sys
+import threading
+import time
+from contextlib import contextmanager
+from pathlib import Path
+
+import requests
+
+# Add project root to path
+PROJECT_ROOT = Path("C:/EQ12")
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    handlers=[
+        logging.FileHandler(PROJECT_ROOT / "logs" / "vpn_pipeline_controller.log"),
+        logging.StreamHandler(),
+    ],
+)
+logger = logging.getLogger("EQ12_VPN_Pipeline")
+
+
+class VpnPipelineController:
+    """
+    Controls the EQ12 betting pipeline with VPN dependency management.
+    Ensures all betting operations run only when VPN is active and secure.
+    """
+
+    def __init__(self, config_path: str | None = None):
+        self.project_root = PROJECT_ROOT
+        self.config_path = config_path or self.project_root / "configs" / "vpn_pipeline_config.json"
+        self.db_path = self.project_root / "eq12_bets.db"
+        self.vpn_guard_script = self.project_root / "eq12_vpn_guard.ps1"
+
+        # Load configuration
+        self.config = self._load_config()
+
+        # VPN monitoring
+        self.vpn_active = False
+        self.current_ip = None
+        self.current_region = None
+        self.vpn_session_id = None
+        self.monitoring_active = False
+
+        # Pipeline management
+        self.pipeline_processes = {}
+        self.shutdown_requested = False
+
+        # Register signal handlers
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
+
+    def _load_config(self) -> dict:
+        """Load VPN pipeline configuration"""
+        default_config = {
+            "vpn": {
+                "config_name": "eq12-betting",
+                "required_regions": ["US", "UK", "CA"],
+                "ip_check_services": [
+                    "https://ifconfig.me/ip",
+                    "https://ipinfo.io/ip",
+                    "https://api.ipify.org",
+                ],
+                "reconnect_attempts": 5,
+                "health_check_interval": 30,
+            },
+            "pipeline": {
+                "modules": [
+                    "odds_scraper",
+                    "parlay_builder",
+                    "telegram_bot",
+                    "audit_agent",
+                ],
+                "startup_delay": 10,
+                "graceful_shutdown_timeout": 30,
+                "restart_on_vpn_recovery": True,
+            },
+            "security": {
+                "kill_on_ip_leak": True,
+                "dns_leak_protection": True,
+                "allowed_ip_ranges": [],
+                "security_log_level": "INFO",
+            },
+            "monitoring": {
+                "health_check_endpoints": [],
+                "alert_on_failures": True,
+                "performance_tracking": True,
+            },
+        }
+
+        if self.config_path.exists():
+            try:
+                with open(self.config_path) as f:
+                    loaded_config = json.load(f)
+                    # Merge with defaults
+                    default_config.update(loaded_config)
+            except Exception as e:
+                logger.warning(f"Failed to load config from {self.config_path}: {e}")
+
+        return default_config
+
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals gracefully"""
+        logger.info(f"Received signal {signum} - initiating graceful shutdown")
+        self.shutdown_requested = True
+        self._shutdown_pipeline()
+
+    @contextmanager
+    def _db_connection(self):
+        """Context manager for database connections"""
+        conn = sqlite3.connect(str(self.db_path))
+        conn.row_factory = sqlite3.Row
+        try:
+            yield conn
+        finally:
+            conn.close()
+
+    def _execute_sql(self, query: str, params: tuple = ()) -> list[sqlite3.Row]:
+        """Execute SQL query with error handling"""
+        try:
+            with self._db_connection() as conn:
+                cursor = conn.execute(query, params)
+                conn.commit()
+                return cursor.fetchall()
+        except Exception as e:
+            logger.error(f"Database error: {e}")
+            return []
+
+    def _log_vpn_event(self, event_type: str, **kwargs):
+        """Log VPN event to audit database"""
+        timestamp = int(time.time())
+        session_id = self.vpn_session_id or f"eq12_vpn_{timestamp}"
+
+        query = """
+        INSERT INTO vpn_logs (timestamp, session_id, event_type, vpn_config, ip_address,
+                             region, connection_status, pipeline_status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """
+
+        params = (
+            timestamp,
+            session_id,
+            event_type,
+            self.config["vpn"]["config_name"],
+            kwargs.get("ip_address", self.current_ip),
+            kwargs.get("region", self.current_region),
+            kwargs.get("connection_status", "UNKNOWN"),
+            kwargs.get("pipeline_status", "UNKNOWN"),
+        )
+
+        self._execute_sql(query, params)
+        logger.debug(f"Logged VPN event: {event_type}")
+
+    def check_vpn_status(self) -> tuple[bool, str, str]:
+        """
+        Check current VPN status including IP and region verification.
+        Returns: (is_active, ip_address, region)
+        """
+        try:
+            # Check if PowerShell VPN Guard is running
+            subprocess.run(
+                [
+                    "powershell",
+                    "-Command",
+                    f"Get-Process | Where-Object {{$_.ProcessName -like '*wireguard*' -or $_.CommandLine -like '*{self.vpn_guard_script.name}*'}}",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+            # Get current external IP
+            ip_address = self._get_external_ip()
+            if not ip_address or ip_address == "Unknown":
+                return False, ip_address, "Unknown"
+
+            # Get region information
+            region = self._get_region_info(ip_address)
+
+            # Verify VPN is actually routing traffic (not just connected)
+            if self._verify_vpn_routing(ip_address):
+                self.current_ip = ip_address
+                self.current_region = region
+                return True, ip_address, region
+            return False, ip_address, region
+
+        except Exception as e:
+            logger.error(f"VPN status check failed: {e}")
+            return False, "Unknown", "Unknown"
+
+    def _get_external_ip(self) -> str | None:
+        """Get current external IP address using multiple services"""
+        for service in self.config["vpn"]["ip_check_services"]:
+            try:
+                response = requests.get(service, timeout=10)
+                ip = response.text.strip()
+
+                # Basic IP validation
+                if self._is_valid_ip(ip):
+                    return ip
+
+            except Exception:
+                continue
+
+        return None
+
+    def _is_valid_ip(self, ip: str) -> bool:
+        """Basic IP address validation"""
+        try:
+            parts = ip.split(".")
+            return len(parts) == 4 and all(0 <= int(part) <= 255 for part in parts)
+        except:
+            return False
+
+    def _get_region_info(self, ip: str) -> str:
+        """Get geographic region for IP address"""
+        try:
+            response = requests.get(f"http://ipinfo.io/{ip}/json", timeout=10)
+            data = response.json()
+            return f"{data.get('city', '')}, {data.get('region', '')}, {data.get('country', '')}"
+        except:
+            return "Unknown"
+
+    def _verify_vpn_routing(self, ip: str) -> bool:
+        """Verify traffic is actually routing through VPN"""
+        try:
+            # Check if IP is in allowed ranges or different from baseline
+            if self.config["security"]["allowed_ip_ranges"]:
+                # TODO: Implement IP range checking
+                pass
+
+            # For now, assume VPN is working if we got a valid IP
+            # In production, you'd want more sophisticated verification
+            return ip and ip != "Unknown"
+
+        except Exception as e:
+            logger.error(f"VPN routing verification failed: {e}")
+            return False
+
+    def start_vpn_connection(self) -> bool:
+        """Start VPN connection using PowerShell VPN Guard"""
+        logger.info("Starting VPN connection...")
+
+        try:
+            # Launch PowerShell VPN Guard
+            cmd = [
+                "powershell",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(self.vpn_guard_script),
+                "-VpnConfig",
+                self.config["vpn"]["config_name"],
+                "-MonitorOnly",  # Let Python handle pipeline management
+            ]
+
+            subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+            )
+
+            # Wait for VPN to establish
+            time.sleep(10)
+
+            # Verify connection
+            is_active, ip, region = self.check_vpn_status()
+            if is_active:
+                logger.info(f"VPN connected successfully - IP: {ip}, Region: {region}")
+                self.vpn_active = True
+                self.vpn_session_id = f"eq12_vpn_{int(time.time())}"
+                self._log_vpn_event(
+                    "VPN_CONNECTED",
+                    ip_address=ip,
+                    region=region,
+                    connection_status="ACTIVE",
+                )
+                return True
+            logger.error("VPN connection verification failed")
+            return False
+
+        except Exception as e:
+            logger.error(f"Failed to start VPN: {e}")
+            self._log_vpn_event("VPN_CONNECT_FAILED", connection_status="FAILED")
+            return False
+
+    def start_betting_pipeline(self) -> bool:
+        """Start all betting pipeline modules"""
+        if not self.vpn_active:
+            logger.error("Cannot start pipeline - VPN not active")
+            return False
+
+        logger.info("Starting betting pipeline modules...")
+
+        # Wait for startup delay
+        time.sleep(self.config["pipeline"]["startup_delay"])
+
+        success_count = 0
+        for module in self.config["pipeline"]["modules"]:
+            if self._start_pipeline_module(module):
+                success_count += 1
+
+        pipeline_status = "RUNNING" if success_count > 0 else "FAILED"
+        self._log_vpn_event("PIPELINE_STARTED", pipeline_status=pipeline_status)
+
+        logger.info(
+            f"Pipeline started - {success_count}/{len(self.config['pipeline']['modules'])} modules running"
+        )
+        return success_count > 0
+
+    def _start_pipeline_module(self, module: str) -> bool:
+        """Start individual pipeline module"""
+        try:
+            module_scripts = {
+                "odds_scraper": "odds_parser.py",
+                "parlay_builder": "parlay_builder.py",
+                "telegram_bot": "eq12_telegram_bot.py",
+                "audit_agent": "eq12_audit_agent.py",
+            }
+
+            script_name = module_scripts.get(module)
+            if not script_name:
+                logger.warning(f"Unknown module: {module}")
+                return False
+
+            script_path = self.project_root / script_name
+            if not script_path.exists():
+                logger.warning(f"Module script not found: {script_path}")
+                return False
+
+            # Start module process
+            process = subprocess.Popen(
+                [sys.executable, str(script_path)], cwd=str(self.project_root)
+            )
+
+            self.pipeline_processes[module] = process
+            logger.info(f"Started module: {module} (PID: {process.pid})")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to start module {module}: {e}")
+            return False
+
+    def monitor_vpn_health(self):
+        """Continuous VPN health monitoring"""
+        logger.info("Starting VPN health monitoring...")
+        self.monitoring_active = True
+
+        while self.monitoring_active and not self.shutdown_requested:
+            try:
+                was_active = self.vpn_active
+                is_active, _ip, _region = self.check_vpn_status()
+
+                if was_active and not is_active:
+                    # VPN connection lost
+                    logger.warning("VPN connection lost - taking protective action")
+                    self._handle_vpn_loss()
+
+                elif not was_active and is_active:
+                    # VPN connection restored
+                    logger.info("VPN connection restored")
+                    self._handle_vpn_recovery()
+
+                self.vpn_active = is_active
+
+                # Check pipeline health
+                self._check_pipeline_health()
+
+                time.sleep(self.config["vpn"]["health_check_interval"])
+
+            except Exception as e:
+                logger.error(f"Health monitoring error: {e}")
+                time.sleep(30)  # Back off on errors
+
+    def _handle_vpn_loss(self):
+        """Handle VPN connection loss"""
+        self._log_vpn_event("VPN_CONNECTION_LOST", connection_status="DROPPED")
+
+        if self.config["security"]["kill_on_ip_leak"]:
+            logger.info("Killing pipeline processes due to VPN loss")
+            self._stop_pipeline_modules()
+            self._log_vpn_event("PIPELINE_STOPPED", pipeline_status="KILLED_VPN_LOSS")
+
+    def _handle_vpn_recovery(self):
+        """Handle VPN connection recovery"""
+        self._log_vpn_event("VPN_RECONNECTED", connection_status="ACTIVE")
+
+        if self.config["pipeline"]["restart_on_vpn_recovery"]:
+            logger.info("Restarting pipeline after VPN recovery")
+            time.sleep(5)  # Brief delay before restart
+            self.start_betting_pipeline()
+
+    def _check_pipeline_health(self):
+        """Check health of pipeline modules"""
+        for module, process in list(self.pipeline_processes.items()):
+            if process.poll() is not None:
+                # Process has exited
+                logger.warning(f"Module {module} has exited (return code: {process.returncode})")
+                del self.pipeline_processes[module]
+                self._log_vpn_event("PIPELINE_MODULE_EXITED", pipeline_status=f"{module}_EXITED")
+
+    def _stop_pipeline_modules(self):
+        """Stop all pipeline modules gracefully"""
+        for module, process in self.pipeline_processes.items():
+            try:
+                logger.info(f"Stopping module: {module}")
+                process.terminate()
+
+                # Wait for graceful shutdown
+                try:
+                    process.wait(timeout=self.config["pipeline"]["graceful_shutdown_timeout"])
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"Force killing module: {module}")
+                    process.kill()
+
+            except Exception as e:
+                logger.error(f"Error stopping module {module}: {e}")
+
+        self.pipeline_processes.clear()
+
+    def _shutdown_pipeline(self):
+        """Shutdown entire pipeline"""
+        logger.info("Shutting down EQ12 VPN Pipeline Controller")
+
+        self.monitoring_active = False
+        self._stop_pipeline_modules()
+        self._log_vpn_event("PIPELINE_SHUTDOWN", pipeline_status="SHUTDOWN")
+
+        logger.info("Shutdown complete")
+
+    def run(self):
+        """Main execution loop"""
+        logger.info("Starting EQ12 VPN Pipeline Controller")
+
+        try:
+            # Initialize database schema
+            self._initialize_database()
+
+            # Start VPN connection
+            if not self.start_vpn_connection():
+                logger.error("Failed to establish VPN connection - aborting")
+                return False
+
+            # Start betting pipeline
+            if not self.start_betting_pipeline():
+                logger.error("Failed to start betting pipeline")
+                return False
+
+            # Start monitoring in separate thread
+            monitor_thread = threading.Thread(target=self.monitor_vpn_health, daemon=True)
+            monitor_thread.start()
+
+            # Main loop - keep running until shutdown
+            while not self.shutdown_requested:
+                time.sleep(1)
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Critical error in main loop: {e}")
+            return False
+        finally:
+            self._shutdown_pipeline()
+
+    def _initialize_database(self):
+        """Initialize VPN audit database schema"""
+        schema_file = self.project_root / "database" / "vpn_audit_schema.sql"
+        if schema_file.exists():
+            try:
+                with open(schema_file) as f:
+                    schema_sql = f.read()
+
+                with self._db_connection() as conn:
+                    conn.executescript(schema_sql)
+
+                logger.info("VPN audit database initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize database: {e}")
+
+
+def main():
+    """Main entry point"""
+    config_path = sys.argv[1] if len(sys.argv) > 1 else None
+
+    controller = VpnPipelineController(config_path)
+    success = controller.run()
+
+    sys.exit(0 if success else 1)
+
+
+if __name__ == "__main__":
+    main()

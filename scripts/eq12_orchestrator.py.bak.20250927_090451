@@ -1,0 +1,170 @@
+"""
+EQ12 Orchestrator
+Runs daily tasks: fetch stocks, crypto, odds, summarize with OpenAI, and optionally send Telegram notifications.
+Dry-run friendly: passes --dry to avoid network calls and only simulate outputs.
+Logs JSON to C:\EQ12\logs\orchestrator_{timestamp}.json
+
+Contract:
+- Reads keys from C:\EQ12\keys\openai.txt, telegram.txt, odds.txt (if present)
+- Uses simple pluggable task functions (fetch_stocks, fetch_crypto, fetch_odds)
+- Calls ChatGPT via OpenAI SDK if OPENAI_API_KEY present or file exists
+- Sends Telegram message if token + chat id present
+"""
+
+import os
+import sys
+import json
+import time
+from datetime import datetime
+
+# Minimal optional imports; avoid hard failure when libs are missing
+try:
+    import requests
+except Exception:
+    requests = None
+
+try:
+    import openai
+except Exception:
+    openai = None
+
+LOG_DIR = os.environ.get("EQ12_LOGS", r"C:\EQ12\logs")
+KEYS_DIR = os.path.join(os.path.dirname(__file__), '..', 'keys')
+KEYS_DIR = os.path.abspath(KEYS_DIR)
+
+os.makedirs(LOG_DIR, exist_ok=True)
+
+def _read_key(name) -> bool:
+    path = os.path.join(KEYS_DIR, f"{name}.txt")
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    return os.environ.get(name.upper())
+
+OPENAI_KEY = _read_key('openai')
+TELEGRAM_TOKEN = _read_key('telegram')
+TELEGRAM_CHAT_ID = _read_key('telegram_id')
+ODDS_KEY = _read_key('odds')
+
+
+def fetch_stocks(dry=False) -> bool:
+    # placeholder: returns simulated data
+    if dry or requests is None:
+        return { 'source': 'yfinance-sim', 'timestamp': time.time(), 'signals': [ {'symbol': 'AAPL', 'signal': 'buy', 'score': 0.7} ] }
+    # real implementation could call yfinance
+    return { 'source': 'yfinance', 'timestamp': time.time(), 'signals': [] }
+
+
+def fetch_crypto(dry=False) -> bool:
+    if dry or requests is None:
+        return { 'source': 'coinbase-sim', 'timestamp': time.time(), 'signals': [ {'symbol': 'BTC', 'signal': 'hold', 'score': 0.5} ] }
+    return { 'source': 'coinbase', 'timestamp': time.time(), 'signals': [] }
+
+
+def fetch_odds(dry=False) -> bool:
+    if dry or requests is None or not ODDS_KEY:
+        return { 'source': 'odds-sim', 'timestamp': time.time(), 'events': [ {'sport': 'MLB', 'match': 'NYM@ATL', 'edge': 0.12} ] }
+    # Placeholder for real ODDS API call
+    return { 'source': 'odds', 'timestamp': time.time(), 'events': [] }
+
+
+def summarize_with_openai(prompt, dry=False) -> bool:
+    summary = None
+    if dry or not OPENAI_KEY or openai is None:
+        # deterministic stub
+        summary = {
+            'summary': 'DRY_RUN: Summary would be here.',
+            'model': 'stub',
+            'confidence': 0.5
+        }
+        return summary
+    # Call OpenAI Chat completions (compatibility mode)
+    openai.api_key = OPENAI_KEY
+    try:
+        resp = openai.ChatCompletion.create(
+            model='gpt-4o-mini',
+            messages=[{'role':'user','content':prompt}],
+            max_tokens=600
+        )
+        text = resp.choices[0].message.content
+        summary = {'summary': text, 'model': resp.model if hasattr(resp, 'model') else 'openai', 'confidence': None}
+    except Exception as e:
+        summary = {'summary': f'OPENAI_CALL_FAILED: {e}', 'model': 'error', 'confidence': 0.0}
+    return summary
+
+
+def send_telegram(message) -> bool:
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID or requests is None:
+        return False
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    payload = { 'chat_id': TELEGRAM_CHAT_ID, 'text': message }
+    try:
+        r = requests.post(url, data=payload, timeout=10)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+def run(dry=False) -> bool:
+    ts = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+    out = { 'timestamp': ts, 'tasks': {} }
+
+    out['tasks']['stocks'] = fetch_stocks(dry=dry)
+    out['tasks']['crypto'] = fetch_crypto(dry=dry)
+    out['tasks']['odds'] = fetch_odds(dry=dry)
+
+    prompt = (
+        f"Summarize signals and edges:\nStocks: {json.dumps(out['tasks']['stocks'])}\n" 
+        f"Crypto: {json.dumps(out['tasks']['crypto'])}\nOdds: {json.dumps(out['tasks']['odds'])}\n" 
+        "Provide a concise action plan and confidence scores."
+    )
+
+    out['summary'] = summarize_with_openai(prompt, dry=dry)
+
+    logfile = os.path.join(LOG_DIR, f"orchestrator_{ts}.json")
+    with open(logfile, 'w', encoding='utf-8') as f:
+        json.dump(out, f, indent=2)
+
+    # Optional GPG signing/encryption
+    gpg_recipient = None
+    recip_path = os.path.join(KEYS_DIR, 'gpg_recipient.txt')
+    if os.path.exists(recip_path):
+        with open(recip_path, 'r', encoding='utf-8') as r: gpg_recipient = r.read().strip()
+    if not gpg_recipient:
+        gpg_recipient = os.environ.get('GPG_RECIPIENT')
+
+    if gpg_recipient and not dry:
+        try:
+            # create clearsign and encrypted copy
+            import subprocess
+            asc = logfile + '.asc'
+            subprocess.run(['gpg','--clearsign','--output',asc,logfile], check=True)
+            enc = logfile + '.gpg'
+            subprocess.run(['gpg','--yes','--output',enc,'--encrypt','--recipient',gpg_recipient,logfile], check=True)
+            print(f"Signed and encrypted logs: {asc} {enc}")
+            out['gpg_signed'] = asc
+            out['gpg_encrypted'] = enc
+        except Exception as e:
+            out['gpg_error'] = str(e)
+
+    # send to telegram if configured
+    telegram_ok = False
+    if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
+        msg = f"EQ12 Orchestrator {ts}: {out['summary'].get('summary')[:400]}"
+        telegram_ok = send_telegram(msg)
+        out['telegram_sent'] = telegram_ok
+
+    print(f"Wrote log: {logfile}")
+    if telegram_ok:
+        print('Telegram notification sent.')
+    return out
+
+
+if __name__ == '__main__':
+    dry = '--dry' in sys.argv or '--simulate' in sys.argv
+    if dry:
+        print('Running in dry-run mode (no external API calls)')
+    result = run(dry=dry)
+    # pretty-print summary to stdout
+    print('\nSUMMARY:')
+    print(result['summary'].get('summary'))

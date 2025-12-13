@@ -1,0 +1,347 @@
+{
+  "generated_at": "2025-10-04T15:31:15.867195",
+  "description": "NBA automation triggers for EQ12 systems",
+  "triggers": {
+    "eq12_governance_assistant": [
+      {
+        "event_id": "nba_20251017_preseason",
+        "title": "NBA Preseason Ends",
+        "date": "2025-10-17T00:00:00",
+        "priority": "low",
+        "betting_relevance": false
+      },
+      {
+        "event_id": "nba_20251021_regular_season",
+        "title": "NBA Season Opens",
+        "date": "2025-10-21T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251128_nba_cup",
+        "title": "NBA Cup Group Play Ends",
+        "date": "2025-11-28T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251209_nba_cup",
+        "title": "NBA Cup Quarterfinals",
+        "date": "2025-12-09T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251216_nba_cup",
+        "title": "NBA Cup Championship",
+        "date": "2025-12-16T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251225_regular_season",
+        "title": "Christmas Day Games",
+        "date": "2025-12-25T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260205_regular_season",
+        "title": "Trade Deadline",
+        "date": "2026-02-05T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260213_all_star",
+        "title": "All-Star Weekend",
+        "date": "2026-02-13T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260412_regular_season",
+        "title": "Regular Season Ends",
+        "date": "2026-04-12T00:00:00",
+        "priority": "high",
+        "betting_relevance": false
+      }
+    ],
+    "eq12_mega_parlay_builder": [
+      {
+        "event_id": "nba_20251021_regular_season",
+        "title": "NBA Season Opens",
+        "date": "2025-10-21T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251128_nba_cup",
+        "title": "NBA Cup Group Play Ends",
+        "date": "2025-11-28T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251209_nba_cup",
+        "title": "NBA Cup Quarterfinals",
+        "date": "2025-12-09T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251216_nba_cup",
+        "title": "NBA Cup Championship",
+        "date": "2025-12-16T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251225_regular_season",
+        "title": "Christmas Day Games",
+        "date": "2025-12-25T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260205_regular_season",
+        "title": "Trade Deadline",
+        "date": "2026-02-05T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260213_all_star",
+        "title": "All-Star Weekend",
+        "date": "2026-02-13T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ],
+    "eq12_historical_odds_engine": [
+      {
+        "event_id": "nba_20251021_regular_season",
+        "title": "NBA Season Opens",
+        "date": "2025-10-21T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251128_nba_cup",
+        "title": "NBA Cup Group Play Ends",
+        "date": "2025-11-28T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251209_nba_cup",
+        "title": "NBA Cup Quarterfinals",
+        "date": "2025-12-09T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251216_nba_cup",
+        "title": "NBA Cup Championship",
+        "date": "2025-12-16T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251225_regular_season",
+        "title": "Christmas Day Games",
+        "date": "2025-12-25T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260205_regular_season",
+        "title": "Trade Deadline",
+        "date": "2026-02-05T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260213_all_star",
+        "title": "All-Star Weekend",
+        "date": "2026-02-13T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ],
+    "eq12_enhanced_daily_parlay_system": [
+      {
+        "event_id": "nba_20251021_regular_season",
+        "title": "NBA Season Opens",
+        "date": "2025-10-21T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251128_nba_cup",
+        "title": "NBA Cup Group Play Ends",
+        "date": "2025-11-28T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251209_nba_cup",
+        "title": "NBA Cup Quarterfinals",
+        "date": "2025-12-09T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251216_nba_cup",
+        "title": "NBA Cup Championship",
+        "date": "2025-12-16T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251225_regular_season",
+        "title": "Christmas Day Games",
+        "date": "2025-12-25T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260205_regular_season",
+        "title": "Trade Deadline",
+        "date": "2026-02-05T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20260213_all_star",
+        "title": "All-Star Weekend",
+        "date": "2026-02-13T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ],
+    "eq12_automation_bridge": [
+      {
+        "event_id": "nba_20251021_regular_season",
+        "title": "NBA Season Opens",
+        "date": "2025-10-21T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ],
+    "eq12_godstack_orchestrator": [
+      {
+        "event_id": "nba_20251021_regular_season",
+        "title": "NBA Season Opens",
+        "date": "2025-10-21T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ],
+    "eq12_nba_cup_tracker": [
+      {
+        "event_id": "nba_20251031_nba_cup",
+        "title": "Emirates NBA Cup Begins",
+        "date": "2025-10-31T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251128_nba_cup",
+        "title": "NBA Cup Group Play Ends",
+        "date": "2025-11-28T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251209_nba_cup",
+        "title": "NBA Cup Quarterfinals",
+        "date": "2025-12-09T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      },
+      {
+        "event_id": "nba_20251216_nba_cup",
+        "title": "NBA Cup Championship",
+        "date": "2025-12-16T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ],
+    "eq12_roster_analytics": [
+      {
+        "event_id": "nba_20260205_regular_season",
+        "title": "Trade Deadline",
+        "date": "2026-02-05T00:00:00",
+        "priority": "high",
+        "betting_relevance": true
+      }
+    ]
+  },
+  "schedules": [
+    {
+      "task": "nba_daily_games_check",
+      "system": "eq12_mega_parlay_builder",
+      "frequency": "daily",
+      "time": "14:00",
+      "description": "Check for NBA games starting after 3 PM"
+    },
+    {
+      "task": "nba_cup_monitoring",
+      "system": "eq12_governance_assistant",
+      "frequency": "weekly",
+      "day": "friday",
+      "time": "10:00",
+      "description": "Monitor Emirates NBA Cup progress and betting opportunities"
+    },
+    {
+      "task": "nba_stats_update",
+      "system": "eq12_historical_odds_engine",
+      "frequency": "daily",
+      "time": "08:00",
+      "description": "Update NBA player stats and team analytics"
+    }
+  ]
+}

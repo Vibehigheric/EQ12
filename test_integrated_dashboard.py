@@ -1,0 +1,218 @@
+# test_integrated_dashboard.py
+"""
+Test script for EQ12 Integrated Dashboard System
+Quick verification of all components
+"""
+
+import asyncio
+import json
+from datetime import datetime
+
+import aiohttp
+
+from eq12_helpers import setup_utf8_logging
+
+setup_utf8_logging()
+
+
+async def test_dashboard_endpoints():
+    """Test dashboard system endpoints"""
+
+    print("🧪 Testing EQ12 Integrated Dashboard System")
+    print("=" * 50)
+
+    test_results = {
+        "dashboard_health": False,
+        "api_status": False,
+        "websocket_connection": False,
+        "structured_response": False,
+    }
+
+    async with aiohttp.ClientSession() as session:
+        # Test dashboard health
+        try:
+            async with session.get("http://localhost:3001/health") as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    test_results["dashboard_health"] = True
+                    print("✅ Dashboard health check passed")
+                    print(f"   Status: {data.get('status', 'unknown')}")
+                else:
+                    print(f"❌ Dashboard health check failed: HTTP {resp.status}")
+        except Exception as e:
+            print(f"❌ Dashboard health check failed: {e}")
+
+        # Test API system status
+        try:
+            async with session.get("http://localhost:8082/api/system/status") as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    test_results["api_status"] = True
+                    print("✅ API system status passed")
+                    print(
+                        f"   Overall Status: {data.get('data', {}).get('overall_status', 'unknown')}"
+                    )
+
+                    # Check structured response format
+                    if all(key in data for key in ["status", "timestamp", "request_id"]):
+                        test_results["structured_response"] = True
+                        print("✅ Structured response format validated")
+                else:
+                    print(f"❌ API system status failed: HTTP {resp.status}")
+        except Exception as e:
+            print(f"❌ API system status failed: {e}")
+
+        # Test tunnel status
+        try:
+            async with session.get("http://localhost:8082/api/tunnels/status") as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    print("✅ Tunnel status endpoint accessible")
+                    tunnel_data = data.get("data", {})
+                    print(f"   Tunnel Health: {tunnel_data.get('overall_health', 'unknown')}")
+                else:
+                    print(f"⚠️ Tunnel status returned: HTTP {resp.status}")
+        except Exception as e:
+            print(f"⚠️ Tunnel status failed: {e}")
+
+        # Test observability health
+        try:
+            async with session.get("http://localhost:8082/api/observability/health") as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    print("✅ Observability health check passed")
+                    obs_data = data.get("data", {})
+                    print(f"   Observability Status: {obs_data.get('status', 'unknown')}")
+                else:
+                    print(f"⚠️ Observability health returned: HTTP {resp.status}")
+        except Exception as e:
+            print(f"⚠️ Observability health failed: {e}")
+
+    # Test WebSocket connection
+    try:
+        import websockets
+
+        async with websockets.connect("ws://localhost:3001/ws?user_id=test_user") as websocket:
+            # Send ping
+            await websocket.send(
+                json.dumps({"type": "ping", "timestamp": datetime.utcnow().isoformat()})
+            )
+
+            # Wait for pong
+            response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+            data = json.loads(response)
+
+            if data.get("type") == "pong":
+                test_results["websocket_connection"] = True
+                print("✅ WebSocket connection test passed")
+            else:
+                print(f"❌ WebSocket unexpected response: {data}")
+
+    except ImportError:
+        print("⚠️ WebSocket test skipped (websockets package not installed)")
+        print("   Run: pip install websockets")
+    except Exception as e:
+        print(f"❌ WebSocket connection test failed: {e}")
+
+    # Print test summary
+    print("\n" + "=" * 50)
+    print("🎯 TEST SUMMARY")
+    print("=" * 50)
+
+    passed_tests = sum(test_results.values())
+    total_tests = len(test_results)
+
+    for test_name, result in test_results.items():
+        status = "✅ PASS" if result else "❌ FAIL"
+        print(f"   {test_name.replace('_', ' ').title()}: {status}")
+
+    print(f"\nOverall: {passed_tests}/{total_tests} tests passed")
+
+    if passed_tests >= 3:  # At least 3 core tests should pass
+        print("🎉 System is functional!")
+        return True
+    print("⚠️ System has issues - check logs")
+    return False
+
+
+async def test_parlay_validation():
+    """Test parlay data validation"""
+
+    print("\n🔬 Testing Parlay Validation")
+    print("-" * 30)
+
+    # Valid parlay data
+    valid_parlay = {
+        "parlay_id": "test_parlay_123",
+        "user_id": "test_user",
+        "legs": [
+            {"selection": "Team A ML", "odds": 150, "market": "moneyline"},
+            {"selection": "Over 45.5", "odds": -110, "market": "total"},
+        ],
+        "stake": 25.0,
+        "total_odds": 375,
+        "potential_payout": 93.75,
+        "created_at": datetime.utcnow().isoformat(),
+        "status": "pending",
+    }
+
+    # Test via API
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post("http://localhost:3001/api/parlay", json=valid_parlay) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    print("✅ Parlay creation test passed")
+                    print(f"   Parlay ID: {data.get('parlay_id', 'N/A')}")
+                    print(f"   Total Odds: {data.get('total_odds', 'N/A')}")
+                    return True
+                print(f"❌ Parlay creation failed: HTTP {resp.status}")
+                return False
+        except Exception as e:
+            print(f"❌ Parlay creation failed: {e}")
+            return False
+
+
+async def main():
+    """Main test runner"""
+
+    print("🚀 EQ12 Integrated Dashboard System Test Suite")
+    print("=" * 60)
+    print(f"Test Started: {datetime.utcnow().isoformat()}")
+    print()
+
+    # Wait for system startup
+    print("⏳ Waiting for system startup (10 seconds)...")
+    await asyncio.sleep(10)
+
+    # Run tests
+    endpoint_tests_passed = await test_dashboard_endpoints()
+
+    # Run parlay validation test
+    parlay_test_passed = await test_parlay_validation()
+
+    # Final summary
+    print("\n" + "=" * 60)
+    print("🏁 FINAL TEST RESULTS")
+    print("=" * 60)
+
+    all_tests_passed = endpoint_tests_passed and parlay_test_passed
+
+    if all_tests_passed:
+        print("🎉 ALL TESTS PASSED!")
+        print("✅ EQ12 Integrated Dashboard System is working correctly")
+        print()
+        print("🌐 Access URLs:")
+        print("   📊 Dashboard: http://localhost:3001")
+        print("   🎛️ Integrated UI: http://localhost:8082/api/dashboard")
+        print("   🔌 WebSocket: ws://localhost:3001/ws")
+        print("   🌍 Ngrok Dashboard: http://localhost:4040")
+    else:
+        print("⚠️ Some tests failed - please check the system")
+        print("📁 Check logs in C:\\EQ12\\logs\\ for details")
+
+    print(f"\nTest Completed: {datetime.utcnow().isoformat()}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

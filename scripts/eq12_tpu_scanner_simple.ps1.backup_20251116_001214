@@ -1,0 +1,343 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 Simplified TPU Cluster Scanner
+.DESCRIPTION
+    Simplified, reliable TPU cluster detection and management for EQ12 Pi nodes
+.PARAMETER Action
+    Action: Scan, Test, or Status
+.PARAMETER IP
+    Target Pi IP address (default: 192.168.100.2)
+.PARAMETER Password
+    SSH password for Pi access
+.EXAMPLE
+    .\eq12_tpu_scanner_simple.ps1 -Action Scan -IP "192.168.100.2" -Password "102120sRO1!"
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet("Scan", "Test", "Status")]
+    [string]$Action = "Scan",
+    
+    [string]$IP = "192.168.100.2",
+    [string]$Username = "ricoj100",
+    [string]$Password = "102120sRO1!",
+    [int]$Timeout = 30
+)
+
+# Logging setup
+$LogPath = "C:\EQ12\logs"
+$LogFile = Join-Path $LogPath "tpu_scanner_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+if (-not (Test-Path $LogPath)) { New-Item -Path $LogPath -ItemType Directory -Force }
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "[$Timestamp] [$Level] $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry
+}
+
+function Test-PiConnection {
+    param([string]$TargetIP)
+    
+    Write-Log "Testing connection to Pi at $TargetIP..."
+    
+    # Test ping
+    $PingTest = Test-NetConnection -ComputerName $TargetIP -InformationLevel Quiet
+    if (-not $PingTest) {
+        Write-Log "❌ Ping failed to $TargetIP" "ERROR"
+        return $false
+    }
+    
+    Write-Log "✅ Ping successful to $TargetIP"
+    
+    # Test SSH port
+    $SSHTest = Test-NetConnection -ComputerName $TargetIP -Port 22 -InformationLevel Quiet
+    if (-not $SSHTest) {
+        Write-Log "❌ SSH port 22 not accessible on $TargetIP" "ERROR"
+        return $false
+    }
+    
+    Write-Log "✅ SSH port accessible on $TargetIP"
+    return $true
+}
+
+function Invoke-PiSSHCommand {
+    param([string]$TargetIP, [string]$Command, [string]$Description)
+    
+    Write-Log "SSH Command [$TargetIP]: $Description"
+    
+    try {
+        # Create SSH command using echo for password automation
+        $SSHCommandFull = "echo $Password | ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$Timeout $Username@$TargetIP `"$Command`""
+        
+        Write-Log "Executing: $Command" "DEBUG"
+        $Result = Invoke-Expression $SSHCommandFull 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "✅ SSH command successful" "DEBUG"
+            return $Result
+        }
+        else {
+            Write-Log "⚠️ SSH command returned exit code: $LASTEXITCODE" "WARNING"
+            return $Result
+        }
+    }
+    catch {
+        Write-Log "❌ SSH command failed: $($_.Exception.Message)" "ERROR"
+        return $null
+    }
+}
+
+function Get-PiSystemInfo {
+    param([string]$TargetIP)
+    
+    Write-Log "Gathering Pi system information..."
+    
+    $InfoCommand = @"
+echo "HOSTNAME:`$(hostname)"
+echo "KERNEL:`$(uname -r)"
+echo "ARCH:`$(uname -m)"
+echo "MEMORY:`$(free -m | grep '^Mem:' | awk '{print `$2}')"
+echo "CPU:`$(nproc)"
+echo "TEMP:`$(vcgencmd measure_temp 2>/dev/null | cut -d= -f2 || echo 'N/A')"
+echo "UPTIME:`$(uptime -p | sed 's/up //')"
+"@
+    
+    $Result = Invoke-PiSSHCommand -TargetIP $TargetIP -Command $InfoCommand -Description "System info collection"
+    
+    $SystemInfo = @{}
+    if ($Result) {
+        $Lines = $Result -split "`n"
+        foreach ($Line in $Lines) {
+            if ($Line -match "^([^:]+):(.+)$") {
+                $Key = $Matches[1].Trim()
+                $Value = $Matches[2].Trim()
+                $SystemInfo[$Key] = $Value
+            }
+        }
+    }
+    
+    return $SystemInfo
+}
+
+function Get-PiTPUDevices {
+    param([string]$TargetIP)
+    
+    Write-Log "Scanning for TPU devices on Pi..."
+    
+    $TPUCommand = "lsusb | grep -i 'Google\|Coral' || echo 'NO_TPU_FOUND'"
+    $Result = Invoke-PiSSHCommand -TargetIP $TargetIP -Command $TPUCommand -Description "TPU device scan"
+    
+    $TPUDevices = @()
+    if ($Result -and $Result -ne "NO_TPU_FOUND") {
+        $Lines = $Result -split "`n"
+        foreach ($Line in $Lines) {
+            if ($Line -match "Bus (\d+) Device (\d+): ID ([a-f0-9:]+) (.+)" -and $Line -match "Google|Coral") {
+                $TPUDevices += @{
+                    Bus = $Matches[1]
+                    Device = $Matches[2]
+                    VendorProduct = $Matches[3]
+                    Description = $Matches[4].Trim()
+                }
+            }
+        }
+    }
+    
+    if ($TPUDevices.Count -gt 0) {
+        Write-Log "✅ Found $($TPUDevices.Count) TPU device(s)"
+    }
+    else {
+        Write-Log "⚠️ No TPU devices detected"
+    }
+    
+    return $TPUDevices
+}
+
+function Test-PiTPUPerformance {
+    param([string]$TargetIP)
+    
+    Write-Log "Testing TPU performance on Pi..."
+    
+    $BenchmarkCommand = @"
+cd ~/coral_test 2>/dev/null || (mkdir -p ~/coral_test && cd ~/coral_test)
+if [ ! -f mobilenet_edgetpu.tflite ]; then
+    wget -q https://github.com/google-coral/test_data/raw/master/mobilenet_v1_1.0_224_quant_edgetpu.tflite -O mobilenet_edgetpu.tflite
+    wget -q https://github.com/google-coral/test_data/raw/master/cat.bmp -O cat.bmp
+fi
+
+python3 -c "
+import time
+import sys
+try:
+    from PIL import Image
+    import numpy as np
+    import tflite_runtime.interpreter as tflite
+    
+    interpreter = tflite.Interpreter(
+        model_path='mobilenet_edgetpu.tflite', 
+        experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')]
+    )
+    interpreter.allocate_tensors()
+    
+    input_details = interpreter.get_input_details()
+    image = Image.open('cat.bmp').resize((224,224))
+    input_data = np.expand_dims(image, axis=0)
+    
+    # Quick 3-run benchmark
+    times = []
+    for i in range(3):
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        start = time.time()
+        interpreter.invoke()
+        end = time.time()
+        times.append(end - start)
+    
+    avg_time = sum(times) / len(times)
+    fps = 1 / avg_time
+    print(f'TPU_BENCHMARK_SUCCESS:avg={avg_time:.4f},fps={fps:.2f}')
+    
+except Exception as e:
+    print(f'TPU_BENCHMARK_ERROR:{str(e)}')
+"
+"@
+    
+    $Result = Invoke-PiSSHCommand -TargetIP $TargetIP -Command $BenchmarkCommand -Description "TPU performance test"
+    
+    if ($Result -match "TPU_BENCHMARK_SUCCESS:avg=([0-9.]+),fps=([0-9.]+)") {
+        return @{
+            Status = "Success"
+            AvgTime = [float]$Matches[1]
+            FPS = [float]$Matches[2]
+        }
+    }
+    elseif ($Result -match "TPU_BENCHMARK_ERROR:(.+)") {
+        return @{
+            Status = "Error"
+            Error = $Matches[1]
+        }
+    }
+    
+    return @{ Status = "Unknown"; Error = "No benchmark data" }
+}
+
+function Show-PiStatus {
+    param([hashtable]$SystemInfo, [array]$TPUDevices, [hashtable]$Performance)
+    
+    Write-Host ""
+    Write-Host "🏆 EQ12 PI NODE STATUS" -ForegroundColor Green
+    Write-Host "=" * 40 -ForegroundColor Cyan
+    Write-Host "IP Address:    $IP" -ForegroundColor White
+    Write-Host "Hostname:      $($SystemInfo.HOSTNAME)" -ForegroundColor White
+    Write-Host "Architecture:  $($SystemInfo.ARCH)" -ForegroundColor White
+    Write-Host "Memory:        $($SystemInfo.MEMORY) MB" -ForegroundColor White
+    Write-Host "CPU Cores:     $($SystemInfo.CPU)" -ForegroundColor White
+    Write-Host "Temperature:   $($SystemInfo.TEMP)" -ForegroundColor White
+    Write-Host "Uptime:        $($SystemInfo.UPTIME)" -ForegroundColor White
+    Write-Host ""
+    
+    if ($TPUDevices.Count -gt 0) {
+        Write-Host "🚀 TPU DEVICES ($($TPUDevices.Count))" -ForegroundColor Yellow
+        Write-Host "-" * 40 -ForegroundColor Cyan
+        foreach ($TPU in $TPUDevices) {
+            Write-Host "• $($TPU.Description)" -ForegroundColor Green
+            Write-Host "  Bus: $($TPU.Bus), Device: $($TPU.Device)" -ForegroundColor Gray
+        }
+        Write-Host ""
+        
+        if ($Performance.Status -eq "Success") {
+            Write-Host "⚡ PERFORMANCE" -ForegroundColor Yellow
+            Write-Host "-" * 40 -ForegroundColor Cyan
+            Write-Host "Inference Speed:  $($Performance.FPS) FPS" -ForegroundColor Green
+            Write-Host "Avg Latency:      $($Performance.AvgTime * 1000) ms" -ForegroundColor Green
+        }
+        elseif ($Performance.Status -eq "Error") {
+            Write-Host "❌ TPU PERFORMANCE TEST FAILED" -ForegroundColor Red
+            Write-Host "Error: $($Performance.Error)" -ForegroundColor Yellow
+        }
+    }
+    else {
+        Write-Host "⚠️  NO TPU DEVICES DETECTED" -ForegroundColor Yellow
+        Write-Host "Connect a Coral USB TPU to enable AI acceleration" -ForegroundColor Gray
+    }
+    
+    Write-Host ""
+}
+
+function Save-PiNodeData {
+    param([hashtable]$SystemInfo, [array]$TPUDevices, [hashtable]$Performance)
+    
+    $NodeData = @{
+        Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        IP = $IP
+        SystemInfo = $SystemInfo
+        TPUDevices = $TPUDevices
+        Performance = $Performance
+        HasTPU = ($TPUDevices.Count -gt 0)
+    }
+    
+    $DataFile = Join-Path $LogPath "pi_node_data_$(Get-Date -Format 'yyyyMMdd_HHmmss').json"
+    $NodeData | ConvertTo-Json -Depth 5 | Out-File -FilePath $DataFile -Encoding UTF8
+    
+    Write-Log "Node data saved to: $DataFile"
+}
+
+# Main execution
+Write-Log "🚀 EQ12 TPU Scanner Starting - Action: $Action, Target: $IP"
+
+switch ($Action) {
+    "Scan" {
+        if (-not (Test-PiConnection -TargetIP $IP)) {
+            Write-Log "❌ Cannot connect to Pi at $IP" "ERROR"
+            exit 1
+        }
+        
+        $SystemInfo = Get-PiSystemInfo -TargetIP $IP
+        $TPUDevices = Get-PiTPUDevices -TargetIP $IP
+        
+        Show-PiStatus -SystemInfo $SystemInfo -TPUDevices $TPUDevices -Performance @{}
+        Save-PiNodeData -SystemInfo $SystemInfo -TPUDevices $TPUDevices -Performance @{}
+    }
+    
+    "Test" {
+        if (-not (Test-PiConnection -TargetIP $IP)) {
+            Write-Log "❌ Cannot connect to Pi at $IP" "ERROR"
+            exit 1
+        }
+        
+        $SystemInfo = Get-PiSystemInfo -TargetIP $IP
+        $TPUDevices = Get-PiTPUDevices -TargetIP $IP
+        
+        if ($TPUDevices.Count -gt 0) {
+            $Performance = Test-PiTPUPerformance -TargetIP $IP
+        }
+        else {
+            $Performance = @{ Status = "No TPU"; Error = "No TPU devices found" }
+        }
+        
+        Show-PiStatus -SystemInfo $SystemInfo -TPUDevices $TPUDevices -Performance $Performance
+        Save-PiNodeData -SystemInfo $SystemInfo -TPUDevices $TPUDevices -Performance $Performance
+    }
+    
+    "Status" {
+        # Quick connectivity check only
+        Write-Host "🔍 Quick Pi Status Check" -ForegroundColor Cyan
+        Write-Host ""
+        
+        if (Test-PiConnection -TargetIP $IP) {
+            Write-Host "✅ Pi is online at $IP" -ForegroundColor Green
+            
+            $QuickInfo = Invoke-PiSSHCommand -TargetIP $IP -Command "hostname; uptime" -Description "Quick status"
+            if ($QuickInfo) {
+                Write-Host "📊 $QuickInfo" -ForegroundColor White
+            }
+        }
+        else {
+            Write-Host "❌ Pi is offline or unreachable at $IP" -ForegroundColor Red
+        }
+    }
+}
+
+Write-Log "🏁 EQ12 TPU Scanner Complete"
+Write-Log "Log saved to: $LogFile"

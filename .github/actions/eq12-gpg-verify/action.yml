@@ -1,0 +1,12 @@
+name: EQ12 GPG Verify Last Commit
+description: Show signature of the last commit and fail if not verified
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        git log --show-signature -1 || true
+        if ! git log --show-signature -1 | grep -qi "Good signature"; then
+          echo "::error::Last commit not a good GPG signature."
+          exit 1
+        fi

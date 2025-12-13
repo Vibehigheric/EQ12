@@ -1,0 +1,221 @@
+version: "2"
+authtoken: ${NGROK_AUTHTOKEN}
+region: ${NGROK_REGION:-us}
+log_level: info
+log_format: json
+log: C:\EQ12\logs\ngrok.log
+
+# Web interface configuration
+web_addr: localhost:4040
+inspect_db_size: 50000000  # 50MB inspection database
+
+tunnels:
+  # Core EQ12 Services
+  dashboard:
+    proto: http
+    addr: 8000
+    subdomain: eq12-dashboard
+    auth: "${NGROK_BASIC_AUTH:-dev:eq12dev123}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "dashboard", "stack": "core", "version": "1.0"}'
+    
+  api:
+    proto: http
+    addr: 5000
+    subdomain: eq12-api
+    auth: "${NGROK_BASIC_AUTH:-dev:eq12dev123}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "api", "stack": "core", "version": "1.0"}'
+    
+  # Development & Testing
+  webhook:
+    proto: http
+    addr: 8080
+    subdomain: eq12-webhook
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "webhook", "stack": "development", "purpose": "testing"}'
+    
+  # Monitoring Stack
+  prometheus:
+    proto: http
+    addr: 9090
+    subdomain: eq12-prometheus
+    auth: "${MONITORING_AUTH:-monitor:eq12monitor456}"
+    inspect: false
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "prometheus", "stack": "monitoring", "access": "internal"}'
+    
+  grafana:
+    proto: http
+    addr: 3000
+    subdomain: eq12-grafana
+    auth: "${MONITORING_AUTH:-monitor:eq12monitor456}"
+    inspect: false
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "grafana", "stack": "monitoring", "access": "internal"}'
+    
+  # Business Stack Services
+  betting-api:
+    proto: http
+    addr: 8001
+    subdomain: eq12-betting
+    auth: "${BETTING_STACK_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "betting-api", "stack": "betting", "compliance": "gambling", "sensitive": true}'
+    
+  betting-dashboard:
+    proto: http
+    addr: 8011
+    subdomain: eq12-betting-dash
+    auth: "${BETTING_STACK_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "betting-dashboard", "stack": "betting", "compliance": "gambling", "sensitive": true}'
+    
+  cannabis-compliance:
+    proto: http
+    addr: 8002
+    subdomain: eq12-cannabis
+    auth: "${CANNABIS_STACK_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "cannabis-compliance", "stack": "cannabis", "compliance": "metrc", "sensitive": true}'
+    
+  cannabis-inventory:
+    proto: http
+    addr: 8012
+    subdomain: eq12-cannabis-inv
+    auth: "${CANNABIS_STACK_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "cannabis-inventory", "stack": "cannabis", "compliance": "state-tracking", "sensitive": true}'
+    
+  credit-gateway:
+    proto: http
+    addr: 8003
+    subdomain: eq12-credit
+    auth: "${CREDIT_STACK_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "credit-gateway", "stack": "credit", "compliance": "pci-dss", "sensitive": true}'
+    
+  credit-fraud:
+    proto: http
+    addr: 8013
+    subdomain: eq12-credit-fraud
+    auth: "${CREDIT_STACK_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "credit-fraud", "stack": "credit", "compliance": "pci-dss", "sensitive": true}'
+    
+  # Analytics & Scraping
+  scraper-api:
+    proto: http
+    addr: 8004
+    subdomain: eq12-scraper
+    auth: "${SCRAPER_AUTH:-scraper:eq12scraper789}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "scraper-api", "stack": "analytics", "purpose": "data-collection"}'
+    
+  analytics-dashboard:
+    proto: http
+    addr: 8014
+    subdomain: eq12-analytics
+    auth: "${ANALYTICS_AUTH:-analytics:eq12analytics012}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "analytics-dashboard", "stack": "analytics", "purpose": "reporting"}'
+    
+  # AI/ML Services
+  ai-inference:
+    proto: http
+    addr: 8005
+    subdomain: eq12-ai
+    auth: "${AI_AUTH:-ai:eq12ai345}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "ai-inference", "stack": "ai", "purpose": "ml-serving"}'
+    
+  # E-commerce Services
+  ecommerce-api:
+    proto: http
+    addr: 8006
+    subdomain: eq12-ecommerce
+    auth: "${ECOMMERCE_AUTH:-ecom:eq12ecom678}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "ecommerce-api", "stack": "ecommerce", "purpose": "storefront"}'
+    
+  # Mobile API
+  mobile-api:
+    proto: http
+    addr: 8007
+    subdomain: eq12-mobile
+    auth: "${MOBILE_AUTH:-mobile:eq12mobile901}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "mobile-api", "stack": "mobile", "purpose": "app-backend"}'
+    
+  # Compliance & Governance
+  compliance-api:
+    proto: http
+    addr: 8008
+    subdomain: eq12-compliance
+    auth: "${COMPLIANCE_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "compliance-api", "stack": "governance", "compliance": "multi-regulatory", "sensitive": true}'
+    
+  governance-dashboard:
+    proto: http
+    addr: 8018
+    subdomain: eq12-governance
+    auth: "${GOVERNANCE_AUTH}"
+    inspect: true
+    bind_tls: true
+    schemes: [https]
+    metadata: '{"service": "governance-dashboard", "stack": "governance", "purpose": "oversight"}'
+
+# Security headers for all tunnels
+request_header:
+  add:
+    - "X-EQ12-Environment: development"
+    - "X-EQ12-Tunnel: ngrok"
+    - "X-Frame-Options: DENY"
+    - "X-Content-Type-Options: nosniff"
+    - "X-XSS-Protection: 1; mode=block"
+    - "Strict-Transport-Security: max-age=31536000; includeSubDomains"
+
+response_header:
+  add:
+    - "X-EQ12-Served-By: ngrok-tunnel"
+    - "X-EQ12-Timestamp: ${TIMESTAMP}"
+
+# Circuit breaker for sensitive stacks
+circuit_breaker:
+  trip_duration: 30s
+  recovery_duration: 60s
+  trip_condition: "res.StatusCode >= 500"
+  fallback_url: "https://eq12-maintenance.example.com"

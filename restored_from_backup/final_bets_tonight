@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+"""
+18 USC Section 1030 COMPUTER FRAUD AND ABUSE ACT COMPLIANCE
+
+LEGAL AUTHORIZATION:
+- All computer access is authorized and within scope
+- All API calls use legitimate services with proper authentication
+- All data collection respects privacy and consent requirements
+- All network requests comply with terms of service
+- No unauthorized access or system interference
+
+AUTHORIZED SERVICES:
+- The Odds API (api.the-odds-api.com) - Licensed sports data with API key
+- OpenWeather API (api.openweathermap.org) - Weather data with API key
+- GitHub API (api.github.com) - Code hosting with authentication
+- US Government APIs (archives.gov, govinfo.gov) - Public domain data
+- Telegram Bot API - Authorized bot communications
+
+USER CONSENT: All data collection has explicit user consent
+TERMS COMPLIANCE: All API usage respects provider terms of service
+SCOPE LIMITATION: All access is limited to authorized data and functions
+"""
+EQ12 FINAL BETTING RECOMMENDATIONS - Tonight's Games
+Direct odds extraction and betting analysis
+"""
+
+from datetime import UTC, datetime
+
+from eq12_odds_ingestor import OddsIngestor
+
+def analyze_tonight_final():
+    """Final betting analysis with direct odds display"""
+
+    ingestor = OddsIngestor()
+
+    print("🎯 EQ12 FINAL BETTING RECOMMENDATIONS - TONIGHT")
+    print("=" * 80)
+
+    # Get NCAAF games (our, targets)
+    print("🏈 FETCHING NCAAF GAMES...")
+    ncaaf_result = ingestor.ingest_live_odds("americanfootball_ncaaf", force_refresh=True)
+
+    target_games = [
+        "Missouri State Bears @ Middle Tennessee Blue Raiders",
+        "Liberty Flames @ UTEP Miners",
+    ]
+
+    now = datetime.now(UTC)
+
+    if isinstance(ncaaf_result, dict) and "games" in ncaaf_result:
+        games = ncaaf_result["games"]
+        print(f"Found {len(games)} NCAAF games")
+
+        for game in games:
+            if isinstance(game, dict):
+                home = game.get("home_team", "")
+                away = game.get("away_team", "")
+                game_name = f"{away} @ {home}"
+
+                # Check if this is one of our target games
+                if any(target in game_name for target in, target_games):
+                    commence_time = game.get("commence_time", "")
+
+                    try:
+                        game_time = datetime.fromisoformat(commence_time.replace("Z", "+00:00"))
+                        local_time = game_time.astimezone()
+                        hours_away = (game_time - now).total_seconds() / 3600
+
+                        print(f"\n🎯 TARGET GAME: {game_name}")
+                        print(
+                            f"   ⏰ {local_time.strftime('%I:%M %p ET')} ({hours_away:.1f}h, away)"
+                        )
+
+                        bookmakers = game.get("bookmakers", [])
+                        print(f"   📚 {len(bookmakers)} bookmakers available")
+
+                        # Extract and display odds from each bookmaker
+                        best_odds = {}
+
+                        for i, book in enumerate(bookmakers):
+                            if isinstance(book, dict):
+                                book_name = book.get("key", f"book_{i}")
+                                markets = book.get("markets", [])
+
+                                print(f"\n   📊 {book_name.upper()} ODDS:")
+
+                                for market in markets:
+                                    if isinstance(market, dict):
+                                        market_key = market.get("key", "")
+                                        outcomes = market.get("outcomes", [])
+
+                                        if market_key == "h2h":  # Moneyline
+                                            print("      💰 MONEYLINE:")
+                                            for outcome in outcomes:
+                                                if isinstance(outcome, dict):
+                                                    team = outcome.get("name", "")
+                                                    price = outcome.get("price", 0)
+                                                    print(f"        {team}: {price:+d}")
+
+                                                    # Track best odds
+                                                    if (:
+                                                        team not in best_odds
+                                                        or price > best_odds[team]["price"]
+                                                    ):
+                                                        best_odds[team] = {
+                                                            "price": price,
+                                                            "book": book_name,
+                                                        }
+
+                                        elif market_key == "spreads":  # Point spread
+                                            print("      📏 SPREAD:")
+                                            for outcome in outcomes:
+                                                if isinstance(outcome, dict):
+                                                    team = outcome.get("name", "")
+                                                    price = outcome.get("price", 0)
+                                                    point = outcome.get("point", 0)
+                                                    print(
+                                                        f"        {team} {point:+.1f}: {price:+d}"
+                                                    )
+
+                                        elif market_key == "totals":  # Over/Under
+                                            print("      📊 TOTAL:")
+                                            total_point = None
+                                            for outcome in outcomes:
+                                                if isinstance(outcome, dict):
+                                                    name = outcome.get("name", "")
+                                                    price = outcome.get("price", 0)
+                                                    point = outcome.get("point", 0)
+                                                    if total_point is None:
+                                                        total_point = point
+                                                    print(f"        {name} {point}: {price:+d}")
+
+                        # Show best odds summary
+                        if best_odds:
+                            print("\n   🏆 BEST ODDS SUMMARY:")
+                            for team, odds_info in best_odds.items():
+                                print(
+                                    f"      {team}: {odds_info['price']:+d} ({odds_info['book']})"
+                                )
+
+                        # Generate betting recommendations
+                        print("\n   💡 BETTING RECOMMENDATIONS:")
+
+                        # Find underdog for SGP
+                        teams = list(best_odds.keys())
+                        if len(teams) == 2:
+                            team1_odds = best_odds[teams[0]]["price"]
+                            team2_odds = best_odds[teams[1]]["price"]
+
+                            if team1_odds > 0 and team2_odds < 0:
+                                underdog = teams[0]
+                                favorite = teams[1]
+                                underdog_odds = team1_odds
+                                favorite_odds = team2_odds
+                            elif team2_odds > 0 and team1_odds < 0:
+                                underdog = teams[1]
+                                favorite = teams[0]
+                                underdog_odds = team2_odds
+                                favorite_odds = team1_odds
+                            else:
+                                underdog = teams[0] if team1_odds > team2_odds else teams[1]
+                                underdog_odds = max(team1_odds, team2_odds)
+                                favorite = teams[1] if underdog == teams[0] else teams[0]
+                                favorite_odds = min(team1_odds, team2_odds)
+
+                            print(
+                                f"      🎲 Single Bet: {underdog} ML {underdog_odds:+d} (underdog,
+                                    value)"
+                            )
+                            print(f"      🏠 Safe Bet: {favorite} ML {favorite_odds:+d} (favorite)")
+
+                            # SGP recommendation (assuming over correlation with, underdog)
+                            if underdog_odds > 120:
+                                print(f"      🔥 SGP Opportunity: {underdog} ML + Over")
+                                print(
+                                    "         (Correlation: Underdogs often lead to high-scoring,
+                                        games)"
+                                )
+
+                                # Calculate combined odds (estimate Over at -110)
+                                underdog_decimal = (
+                                    (underdog_odds / 100) + 1
+                                    if underdog_odds > 0:
+                                    else (100 / abs(underdog_odds)) + 1:
+                                )
+                                over_decimal = 1.91  # -110 odds
+                                combined = underdog_decimal * over_decimal
+
+                                print(f"         Combined odds: ~{combined:.1f}x")
+                                print(f"         $25 bet -> ~${combined * 25:.0f}")
+
+                    except Exception as e:
+                        print(f"   ❌ Error processing game time: {e}")
+
+    # Quick NHL analysis
+    print("\n" + "=" * 50)
+    print("🏒 QUICK NHL PICKS (Tonight)")
+    print("=" * 50)
+
+    nhl_result = ingestor.ingest_live_odds("icehockey_nhl", force_refresh=True)
+    if isinstance(nhl_result, dict) and "games" in nhl_result:
+        nhl_games = nhl_result["games"]
+
+        for game in nhl_games[:4]:  # First 4 NHL games
+            if isinstance(game, dict):
+                home = game.get("home_team", "")
+                away = game.get("away_team", "")
+                commence_time = game.get("commence_time", "")
+
+                try:
+                    game_time = datetime.fromisoformat(commence_time.replace("Z", "+00:00"))
+                    hours_away = (game_time - now).total_seconds() / 3600
+
+                    if 0 < hours_away < 8:  # Tonight's games
+                        local_time = game_time.astimezone()
+
+                        # Get first bookmaker odds
+                        bookmakers = game.get("bookmakers", [])
+                        if bookmakers:
+                            book = bookmakers[0]
+                            markets = book.get("markets", [])
+
+                            ml_odds = {}
+                            for market in markets:
+                                if market.get("key") == "h2h":
+                                    for outcome in market.get("outcomes", []):
+                                        team = outcome.get("name", "")
+                                        price = outcome.get("price", 0)
+                                        ml_odds[team] = price
+
+                            print(f"\n🏒 {away} @ {home}")
+                            print(f"   {local_time.strftime('%I:%M %p ET')}")
+                            if home in ml_odds and away in ml_odds:
+                                print(f"   {away}: {ml_odds[away]:+d} | {home}: {ml_odds[home]:+d}")
+
+                                # Quick recommendation
+                                if ml_odds[home] <= -150:
+                                    print(f"   💡 Parlay leg: {home} ML (strong home, favorite)")
+                                elif ml_odds[away] <= -150:
+                                    print(f"   💡 Parlay leg: {away} ML (strong away, favorite)")
+
+                except:
+                    continue
+
+    print("\n" + "=" * 80)
+    print("🎯 TONIGHT'S FINAL RECOMMENDATIONS:")
+    print("🏈 NCAAF: Focus on Missouri State and Liberty games")
+    print("🎲 SGP Strategy: Underdog ML + Over for high-scoring games")
+    print("🏒 NHL: Look for strong favorites (-150+) for parlay legs")
+    print("💰 Bankroll: Use 2-5% per bet, never chase losses")
+    print("✅ All odds are LIVE from real sportsbooks")
+
+if __name__ == "__main__":
+    analyze_tonight_final()

@@ -1,0 +1,263 @@
+{
+  "expert_prompts": {
+    "gitleaks_security": {
+      "title": "GitLeaks Security Remediation Expert",
+      "category": "Security",
+      "description": "Comprehensive secret detection and environment variable migration",
+      "prompt": "You are an expert security auditor and remediation AI. Perform a comprehensive security analysis and automatic remediation:\n\n**SECURITY SCAN AND REMEDIATION:**\n1. Scan ALL files in the workspace for hardcoded credentials, API keys, passwords, tokens, or secrets\n2. Identify patterns: AWS keys (AKIA*), OpenAI keys (sk-*), GitHub tokens (gh*_*), Slack tokens (xox*), etc.\n3. For each secret found:\n   - Replace with secure environment variable references (os.getenv(), process.env., $env:, Environment.GetEnvironmentVariable())\n   - Generate appropriate variable names (AWS_ACCESS_KEY_ID, OPENAI_API_KEY, etc.)\n   - Create .env file with extracted secrets\n   - Add .env patterns to .gitignore\n\n**ADDITIONAL SECURITY MEASURES:**\n4. Add input validation and null checks for environment variables\n5. Implement secure credential loading with fallbacks\n6. Add security headers and middleware where applicable\n7. Review file permissions and access patterns\n8. Generate security audit report with recommendations\n\n**OUTPUT:**\n- Create /logs/security_remediation_report.json with all changes\n- List files modified, secrets found, and environment variables created\n- Provide instructions for secure deployment and key rotation\n\nGoal: Zero hardcoded secrets with production-ready security practices.",
+      "files_to_scan": [
+        "*.py",
+        "*.js",
+        "*.ts",
+        "*.ps1",
+        "*.sh",
+        "*.cs",
+        "*.json",
+        "*.yaml",
+        "*.yml"
+      ],
+      "auto_fix": true
+    },
+    "script_integrity": {
+      "title": "Multi-Language Script Integrity Expert",
+      "category": "Code Quality",
+      "description": "Comprehensive linting, formatting, and error correction",
+      "prompt": "You are an expert multi-language code quality AI. Perform comprehensive script analysis and repair across all languages:\n\n**PYTHON FIXES:**\n1. Fix all syntax errors, missing imports, and undefined variables\n2. Update deprecated functions to modern alternatives (e.g., datetime.utcnow() → datetime.now(timezone.utc))\n3. Add proper type hints and docstrings\n4. Apply Black formatting and fix Flake8/Pylint issues\n5. Add error handling and input validation\n6. Fix security issues flagged by Bandit\n\n**JAVASCRIPT/TYPESCRIPT FIXES:**\n1. Fix ESLint errors and apply Prettier formatting\n2. Add proper TypeScript types and interfaces\n3. Fix async/await patterns and Promise handling\n4. Update deprecated Node.js APIs\n5. Add proper error boundaries and validation\n6. Fix React key props and component lifecycle issues\n\n**POWERSHELL FIXES:**\n1. Fix PSScriptAnalyzer warnings and errors\n2. Add proper CmdletBinding() and parameter validation\n3. Use approved verbs and consistent naming\n4. Add proper error handling with try/catch blocks\n5. Fix scope and variable declaration issues\n\n**BASH FIXES:**\n1. Fix ShellCheck warnings and errors\n2. Add proper error handling with set -e\n3. Quote variables and handle spaces in paths\n4. Use modern bash constructs and avoid deprecated syntax\n\n**OUTPUT:**\n- Generate /logs/script_integrity_report.json with all fixes applied\n- Document performance improvements and security enhancements\n- Provide migration notes for deprecated features\n\nGoal: Production-ready, maintainable code with zero linting errors.",
+      "files_to_scan": [
+        "*.py",
+        "*.js",
+        "*.jsx",
+        "*.ts",
+        "*.tsx",
+        "*.ps1",
+        "*.psm1",
+        "*.sh",
+        "*.bash"
+      ],
+      "auto_fix": true
+    },
+    "context_validation": {
+      "title": "Context Access and Threading Expert",
+      "category": "Runtime Safety",
+      "description": "Fix invalid context access, threading issues, and async problems",
+      "prompt": "You are an expert threading and async programming AI. Fix all context access violations and threading issues:\n\n**THREADING AND CONTEXT FIXES:**\n1. Fix UI thread violations - use proper Invoke/Dispatcher calls for cross-thread UI access\n2. Ensure proper async/await patterns throughout - never mix blocking and async code\n3. Add proper object lifetime management and disposal patterns\n4. Fix race conditions and add appropriate locking mechanisms\n5. Validate Entity Framework context usage - ensure proper scoping and disposal\n\n**ASYNC PROGRAMMING FIXES:**\n6. Fix missing await keywords on async operations\n7. Add proper cancellation token support for long-running operations\n8. Fix deadlock-prone patterns (e.g., .Result on async methods in sync context)\n9. Ensure proper ConfigureAwait(false) usage in library code\n10. Add timeout handling for network operations\n\n**RESOURCE MANAGEMENT:**\n11. Implement proper using statements and IDisposable patterns\n12. Fix memory leaks from event handler subscriptions\n13. Add proper cleanup in finally blocks or using statements\n14. Validate database connection lifecycle and pooling\n\n**OUTPUT:**\n- Create /logs/context_validation_report.json with all threading fixes\n- Document performance improvements from async optimizations\n- Provide best practices guide for future development\n\nGoal: Thread-safe, properly scoped code with no context access violations.",
+      "files_to_scan": [
+        "*.cs",
+        "*.py",
+        "*.js",
+        "*.ts"
+      ],
+      "auto_fix": true
+    },
+    "react_mapping": {
+      "title": "React JSX and Mapping Expert",
+      "category": "Frontend",
+      "description": "Fix nested mapping, implicit keys, and React performance issues",
+      "prompt": "You are an expert React and JSX optimization AI. Fix all mapping, rendering, and performance issues:\n\n**JSX AND MAPPING FIXES:**\n1. Fix nested .map() calls - extract inner maps to separate memoized components\n2. Add explicit, stable keys for ALL JSX lists (key={item.id}, never use array index unless no alternative)\n3. Fix \"implicit keys need to be in line\" - ensure key props are properly formatted and positioned\n4. Refactor nested mapping inside context providers - move context outside mapping functions\n5. Extract complex JSX expressions to separate functions or components\n\n**PERFORMANCE OPTIMIZATIONS:**\n6. Add React.memo() for components that re-render unnecessarily\n7. Optimize context providers to prevent unnecessary re-renders (useMemo for context values)\n8. Fix dependency arrays in useEffect, useMemo, and useCallback\n9. Add proper prop types and TypeScript interfaces\n10. Implement proper error boundaries and fallback UI\n\n**ADVANCED REACT PATTERNS:**\n11. Fix conditional rendering patterns for better performance\n12. Optimize large list rendering with virtualization where appropriate\n13. Add proper form validation and controlled component patterns\n14. Fix state management anti-patterns and prop drilling\n\n**OUTPUT:**\n- Generate /logs/react_optimization_report.json with performance improvements\n- Document component extraction and memoization changes\n- Provide React best practices guide\n\nGoal: Performant, maintainable React code with proper key management and optimized rendering.",
+      "files_to_scan": [
+        "*.jsx",
+        "*.tsx",
+        "*.js",
+        "*.ts"
+      ],
+      "auto_fix": true
+    },
+    "action_resolution": {
+      "title": "Action and Reference Resolution Expert",
+      "category": "Build System",
+      "description": "Fix unresolved actions, missing imports, and build configuration issues",
+      "prompt": "You are an expert build system and dependency resolution AI. Fix all unresolved references and build issues:\n\n**IMPORT AND REFERENCE FIXES:**\n1. Fix all missing imports and namespace references\n2. Resolve \"unable to resolve action\" errors in GitHub Actions, Azure Pipelines, and CI/CD configs\n3. Update deprecated action versions (e.g., actions/checkout@v4 instead of @v1)\n4. Fix project references and dependency paths in solution files\n\n**BUILD CONFIGURATION:**\n5. Align target frameworks across projects (.NET, Node.js versions)\n6. Fix NuGet/npm/pip package version conflicts and security vulnerabilities\n7. Update outdated dependencies to latest stable versions\n8. Fix circular dependencies and project reference issues\n\n**CI/CD AND AUTOMATION:**\n9. Fix YAML syntax and indentation errors\n10. Update runner versions and environment configurations\n11. Add proper secret management in CI/CD pipelines\n12. Fix path issues and cross-platform compatibility\n\n**ENVIRONMENT SETUP:**\n13. Generate proper package.json, requirements.txt, or .csproj configurations\n14. Add missing development dependencies and tooling\n15. Create proper .gitignore patterns for each technology stack\n16. Add VSCode/Visual Studio configuration files for consistent development\n\n**OUTPUT:**\n- Create /logs/action_resolution_report.json with all fixes\n- Document dependency updates and version changes\n- Provide setup instructions for new developers\n\nGoal: Fully buildable, resolvable project with no missing references or build errors.",
+      "files_to_scan": [
+        "*.json",
+        "*.yaml",
+        "*.yml",
+        "*.csproj",
+        "*.sln",
+        "*.py",
+        "*.js",
+        "*.ts",
+        "*.cs"
+      ],
+      "auto_fix": true
+    },
+    "comprehensive_health": {
+      "title": "Comprehensive Workspace Health Expert",
+      "category": "System Health",
+      "description": "Complete workspace analysis and repair across all categories",
+      "prompt": "You are the ultimate code health and repair AI. Perform a comprehensive analysis and fix ALL issues across the entire workspace:\n\n**EXECUTE ALL REPAIR CATEGORIES:**\n1. **Security Audit**: Scan for and remediate all hardcoded secrets, implement proper environment variable usage\n2. **Code Quality**: Fix linting errors, formatting issues, and code smells across all languages\n3. **Threading Safety**: Resolve context access violations, async issues, and resource management problems\n4. **Performance**: Optimize React rendering, database queries, and resource usage\n5. **Build System**: Fix all unresolved references, dependency conflicts, and configuration issues\n\n**ADVANCED ANALYSIS:**\n6. **Architecture Review**: Identify and fix architectural anti-patterns\n7. **Security Hardening**: Add input validation, sanitization, and secure coding practices\n8. **Error Handling**: Implement comprehensive error handling and logging throughout\n9. **Testing**: Add missing test cases and fix broken tests\n10. **Documentation**: Generate proper README, API documentation, and code comments\n\n**PROACTIVE IMPROVEMENTS:**\n11. **Modernization**: Update to latest language features and best practices\n12. **Accessibility**: Fix accessibility issues in UI components\n13. **SEO/Performance**: Optimize web applications for performance and SEO\n14. **Monitoring**: Add health checks, metrics, and observability\n\n**COMPREHENSIVE OUTPUT:**\n- Generate /logs/comprehensive_health_report.json with executive summary\n- Create workspace_improvements.md with detailed improvement guide\n- Provide priority-ordered task list for ongoing maintenance\n- Generate developer onboarding guide\n\nGoal: Production-ready, secure, performant, and maintainable codebase with comprehensive documentation.",
+      "files_to_scan": [
+        "*.*"
+      ],
+      "auto_fix": true
+    }
+  },
+  "vscode_tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "EQ12: Complete Security Scan",
+        "type": "shell",
+        "command": "python",
+        "args": [
+          "${workspaceFolder}/scripts/eq12_gitleaks_guardian.py",
+          "--action",
+          "comprehensive",
+          "--workspace",
+          "${workspaceFolder}",
+          "--verbose"
+        ],
+        "group": {
+          "kind": "test",
+          "isDefault": true
+        },
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: Script Integrity Check",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/scripts/eq12_script_integrity_suite.ps1",
+          "-Action",
+          "All",
+          "-AutoFix",
+          "-GenerateReport"
+        ],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: VS Code Troubleshooter",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}/scripts/eq12_vscode_troubleshooter_simple.ps1",
+          "-Action",
+          "Full",
+          "-Workspace",
+          "${workspaceFolder}"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: Quick Health Check",
+        "type": "shell",
+        "command": "python",
+        "args": [
+          "${workspaceFolder}/scripts/eq12_universal_repair_assistant.py",
+          "--action",
+          "health-check",
+          "--workspace",
+          "${workspaceFolder}"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: Emergency Repair Suite",
+        "dependsOrder": "sequence",
+        "dependsOn": [
+          "EQ12: Complete Security Scan",
+          "EQ12: Script Integrity Check",
+          "EQ12: VS Code Troubleshooter"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": true,
+          "panel": "new"
+        }
+      }
+    ]
+  },
+  "copilot_config": {
+    "copilot": {
+      "enable": true,
+      "suggestions": {
+        "enabled": true,
+        "keyBindings": "tab"
+      },
+      "chat": {
+        "enabled": true,
+        "contextFiles": [
+          "AGENTS.md",
+          "README.md",
+          "package.json",
+          "requirements.txt",
+          ".gitignore"
+        ]
+      }
+    },
+    "eq12": {
+      "prompts": {
+        "security": "Use the EQ12 GitLeaks Guardian prompts for security analysis",
+        "quality": "Apply EQ12 Script Integrity Suite standards for code quality",
+        "performance": "Follow EQ12 optimization patterns for performance improvements",
+        "context": "Implement EQ12 context validation patterns for thread safety"
+      },
+      "standards": {
+        "logging": "Always use structured JSON logging to C:/EQ12/logs",
+        "secrets": "Never hardcode secrets - use environment variables only",
+        "errors": "Implement comprehensive error handling with proper logging",
+        "testing": "Include pytest and Pester tests for all new functionality"
+      }
+    }
+  },
+  "health_status": {
+    "timestamp": "2025-10-11T01:42:02.050382+00:00",
+    "workspace": "C:\\EQ12",
+    "checks": {
+      "git_repo": true,
+      "secrets_safe": false,
+      "scripts_valid": true,
+      "dependencies_ok": true,
+      "config_present": true
+    },
+    "issues": [
+      "Potential secret files found: ['.env', '.eq12_encryption_math_engine.key']"
+    ],
+    "recommendations": [
+      "Run EQ12 GitLeaks Guardian for comprehensive secret scan"
+    ],
+    "health_score": 80.0,
+    "status": "HEALTHY"
+  },
+  "summary": {
+    "prompts_generated": 6,
+    "tasks_created": 5,
+    "health_score": 80.0,
+    "timestamp": "2025-10-11T01:42:02.070126+00:00"
+  }
+}

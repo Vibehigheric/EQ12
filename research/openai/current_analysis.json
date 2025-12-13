@@ -1,0 +1,2157 @@
+{
+  "timestamp": "2025-10-07T03:40:23.602759+00:00",
+  "legacy_usage": [
+    {
+      "file": "scripts\\eq12_ai_guardrails.py",
+      "line": 140,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "scripts\\eq12_chatgpt.py",
+      "line": 150,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "scripts\\eq12_chatgpt.py",
+      "line": 136,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "scripts\\eq12_orchestrator.py",
+      "line": 108,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "scripts\\eq12_orchestrator.py",
+      "line": 106,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 70,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 75,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 473,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 492,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\cli\\_cli.py",
+      "line": 192,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\module_client.py",
+      "line": 4,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_module_client.py",
+      "line": 17,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_module_client.py",
+      "line": 121,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\cli\\_cli.py",
+      "line": 188,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_old_api.py",
+      "line": 17,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_old_api.py",
+      "line": 14,
+      "pattern": "openai\\.Completion\\.create",
+      "match": "openai.Completion.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\module_client.py",
+      "line": 4,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_module_client.py",
+      "line": 17,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_module_client.py",
+      "line": 121,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\cli\\_cli.py",
+      "line": 188,
+      "pattern": "openai\\.api_key\\s*=",
+      "match": "openai.api_key ="
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_old_api.py",
+      "line": 17,
+      "pattern": "openai\\.ChatCompletion\\.create",
+      "match": "openai.ChatCompletion.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_old_api.py",
+      "line": 14,
+      "pattern": "openai\\.Completion\\.create",
+      "match": "openai.Completion.create"
+    }
+  ],
+  "modern_usage": [
+    {
+      "file": "enrichment.py",
+      "line": 11,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "enrichment.py",
+      "line": 34,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "enrichment.py",
+      "line": 32,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_advanced_optimizer.py",
+      "line": 18,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_advanced_optimizer.py",
+      "line": 235,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_advanced_optimizer.py",
+      "line": 305,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_ai_client.py",
+      "line": 21,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_ai_client.py",
+      "line": 1677,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_azure_bootstrap.py",
+      "line": 84,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_azure_bootstrap.py",
+      "line": 87,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_azure_bootstrap.py",
+      "line": 86,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_azure_openai_client.py",
+      "line": 138,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_azure_openai_client.py",
+      "line": 151,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_azure_openai_client.py",
+      "line": 70,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_comprehensive_llm_automation.py",
+      "line": 251,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_comprehensive_llm_automation.py",
+      "line": 224,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_enhanced_openai_sdk.py",
+      "line": 585,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_enhanced_openai_sdk.py",
+      "line": 676,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_enhanced_openai_sdk.py",
+      "line": 864,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_error_boundary.py",
+      "line": 207,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_error_boundary.py",
+      "line": 107,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_helpers.py",
+      "line": 257,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_helpers.py",
+      "line": 132,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_helpers.py",
+      "line": 171,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_llm_router.py",
+      "line": 459,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_llm_router.py",
+      "line": 442,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_model_responses.py",
+      "line": 22,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_model_responses.py",
+      "line": 121,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_client.py",
+      "line": 140,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_client_enhanced.py",
+      "line": 144,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_client_enhanced.py",
+      "line": 113,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_client_enhanced.py",
+      "line": 115,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_enhanced_v2.py",
+      "line": 419,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_enhanced_v2.py",
+      "line": 132,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_enhanced_v2.py",
+      "line": 133,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_optimizer.py",
+      "line": 15,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_openai_optimizer.py",
+      "line": 240,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_optimizer.py",
+      "line": 74,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_security.py",
+      "line": 401,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_security.py",
+      "line": 395,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_setup.py",
+      "line": 160,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_setup.py",
+      "line": 198,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_openai_setup.py",
+      "line": 82,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_openai_setup.py",
+      "line": 83,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_responses_adapter.py",
+      "line": 77,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_responses_adapter.py",
+      "line": 125,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_adapter.py",
+      "line": 175,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_adapter.py",
+      "line": 82,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 447,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 526,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 537,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 639,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 844,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 916,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 106,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_responses_client.py",
+      "line": 716,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_sdk_development_tools.py",
+      "line": 417,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_sdk_development_tools.py",
+      "line": 405,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_sports_betting_analytics_platform.py",
+      "line": 540,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_sports_betting_analytics_platform.py",
+      "line": 420,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_vector_service.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_vector_service.py",
+      "line": 11,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_x_factor_pipeline.py",
+      "line": 168,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_x_factor_pipeline.py",
+      "line": 155,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "setup_api_keys.py",
+      "line": 194,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "setup_api_keys.py",
+      "line": 199,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "setup_api_keys.py",
+      "line": 196,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "test_api_keys.py",
+      "line": 35,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "test_api_keys.py",
+      "line": 60,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "test_api_keys.py",
+      "line": 57,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_godstack2\\enrichment.py",
+      "line": 33,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_godstack2\\enrichment.py",
+      "line": 318,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_godstack2\\enrichment.py",
+      "line": 124,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "eq12_godstack_final\\enrichment.py",
+      "line": 11,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "eq12_godstack_final\\enrichment.py",
+      "line": 34,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "eq12_godstack_final\\enrichment.py",
+      "line": 32,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_commander.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_commander.py",
+      "line": 182,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_commander.py",
+      "line": 58,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "openai-python-project\\__tmp_check_import.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\__tmp_update_imports.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\__tmp_update_imports.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\eq12_enhanced_ai.py",
+      "line": 215,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\eq12_enhanced_ai.py",
+      "line": 376,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\eq12_enhanced_ai.py",
+      "line": 104,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "scripts\\eq12_enhanced_ai.py",
+      "line": 105,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "scripts\\eq12_responses_client.py",
+      "line": 15,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\eq12_responses_client.py",
+      "line": 227,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\eq12_responses_client.py",
+      "line": 280,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\eq12_responses_client.py",
+      "line": 328,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\eq12_responses_client.py",
+      "line": 37,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "scripts\\eq12_url_scanner.py",
+      "line": 36,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\eq12_url_scanner.py",
+      "line": 658,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 112,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 241,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 283,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 288,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 335,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 378,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 493,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 258,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 303,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 336,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 393,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 473,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 492,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 256,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 337,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "scripts\\openai_migration_helper.py",
+      "line": 385,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "build_system\\week2_gpt5_integration\\setup_week2_gpt5.py",
+      "line": 29,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "build_system\\week2_gpt5_integration\\setup_week2_gpt5.py",
+      "line": 170,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\_models.py",
+      "line": 138,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\lib\\streaming\\chat\\_completions.py",
+      "line": 322,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 163,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 150,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 1482,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 1626,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "envs\\godstack\\Lib\\site-packages\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 2958,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_runner\\eq12_godmode_runner.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_runner\\eq12_godmode_runner.py",
+      "line": 112,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_runner\\eq12_godmode_runner.py",
+      "line": 58,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_runner\\eq12_godmode_runner_plus.py",
+      "line": 11,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_runner\\eq12_godmode_runner_plus.py",
+      "line": 455,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "openai-python-project\\eq12_godmode_runner\\eq12_godmode_runner_plus.py",
+      "line": 63,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "openai-python-project\\eq12_prompt_runner\\eq12_prompt_runner.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\eq12_prompt_runner\\eq12_prompt_runner.py",
+      "line": 69,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "openai-python-project\\eq12_prompt_runner\\eq12_prompt_runner.py",
+      "line": 37,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "openai-python-project\\src\\eq12_agent_runner.py",
+      "line": 1,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "openai-python-project\\src\\eq12_agent_runner.py",
+      "line": 38,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "openai-python-project\\src\\eq12_agent_runner.py",
+      "line": 31,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\audio.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\azure.py",
+      "line": 14,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\azure.py",
+      "line": 34,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\azure_ad.py",
+      "line": 28,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\azure_ad.py",
+      "line": 52,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\demo.py",
+      "line": 3,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\demo.py",
+      "line": 10,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\demo.py",
+      "line": 23,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\image_stream.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\parsing.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\parsing_stream.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\parsing_tools.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\parsing_tools_stream.py",
+      "line": 7,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\picture.py",
+      "line": 3,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\streaming.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\uploads.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\conftest.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_client.py",
+      "line": 21,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_client.py",
+      "line": 989,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_client.py",
+      "line": 1960,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_client.py",
+      "line": 565,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_client.py",
+      "line": 1509,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_legacy_response.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_response.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\test_streaming.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\responses\\background.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\responses\\background_streaming.py",
+      "line": 7,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\responses\\streaming.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\responses\\streaming_tools.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\responses\\structured_outputs.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\examples\\responses\\structured_outputs_tools.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\_models.py",
+      "line": 114,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\lib\\streaming\\chat\\_completions.py",
+      "line": 303,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 140,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 127,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 1423,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 1565,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 2861,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_batches.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_completions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_containers.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_conversations.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_embeddings.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_evals.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_files.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_images.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_models.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_moderations.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_responses.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_uploads.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_vector_stores.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\test_videos.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\snapshots.py",
+      "line": 12,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_assistants.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_audio.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_azure.py",
+      "line": 107,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_azure.py",
+      "line": 147,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_azure.py",
+      "line": 178,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_azure.py",
+      "line": 197,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_azure.py",
+      "line": 217,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\test_azure.py",
+      "line": 239,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\audio\\test_speech.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\audio\\test_transcriptions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\audio\\test_translations.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\test_assistants.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\test_chatkit.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\test_threads.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 11,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 27,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 40,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 158,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 172,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 449,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 468,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 481,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 599,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 613,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 890,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\containers\\test_files.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\conversations\\test_items.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\evals\\test_runs.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\fine_tuning\\test_jobs.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\realtime\\test_calls.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\realtime\\test_client_secrets.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\responses\\test_input_items.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\uploads\\test_parts.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\vector_stores\\test_files.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\vector_stores\\test_file_batches.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\chatkit\\test_sessions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\chatkit\\test_threads.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\threads\\test_messages.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\threads\\test_runs.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\beta\\threads\\runs\\test_steps.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\chat\\completions\\test_messages.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\containers\\files\\test_content.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\evals\\runs\\test_output_items.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\fine_tuning\\alpha\\test_graders.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\fine_tuning\\checkpoints\\test_permissions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\api_resources\\fine_tuning\\jobs\\test_checkpoints.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\chat\\test_completions.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\chat\\test_completions.py",
+      "line": 992,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\chat\\test_completions_streaming.py",
+      "line": 20,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\chat\\test_completions_streaming.py",
+      "line": 1026,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\chat\\test_completions_streaming.py",
+      "line": 1076,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "research\\openai\\repos\\openai__openai-python\\tests\\lib\\responses\\test_responses.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\audio.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\azure.py",
+      "line": 14,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\azure.py",
+      "line": 34,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\azure_ad.py",
+      "line": 28,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\azure_ad.py",
+      "line": 52,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\demo.py",
+      "line": 3,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\demo.py",
+      "line": 10,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\demo.py",
+      "line": 23,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\image_stream.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\parsing.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\parsing_stream.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\parsing_tools.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\parsing_tools_stream.py",
+      "line": 7,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\picture.py",
+      "line": 3,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\streaming.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\uploads.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\conftest.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_client.py",
+      "line": 21,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_client.py",
+      "line": 989,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_client.py",
+      "line": 1960,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_client.py",
+      "line": 565,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_client.py",
+      "line": 1509,
+      "pattern": "OpenAI\\(api_key=",
+      "match": "OpenAI(api_key="
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_legacy_response.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_response.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\test_streaming.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\responses\\background.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\responses\\background_streaming.py",
+      "line": 7,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\responses\\streaming.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\responses\\streaming_tools.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\responses\\structured_outputs.py",
+      "line": 6,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\examples\\responses\\structured_outputs_tools.py",
+      "line": 8,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\_models.py",
+      "line": 114,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\lib\\streaming\\chat\\_completions.py",
+      "line": 303,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 140,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 127,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 1423,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 1565,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\src\\openai\\resources\\chat\\completions\\completions.py",
+      "line": 2861,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_batches.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_completions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_containers.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_conversations.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_embeddings.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_evals.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_files.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_images.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_models.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_moderations.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_responses.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_uploads.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\test_vector_stores.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\snapshots.py",
+      "line": 12,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_assistants.py",
+      "line": 5,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_audio.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_azure.py",
+      "line": 107,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_azure.py",
+      "line": 147,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_azure.py",
+      "line": 178,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_azure.py",
+      "line": 197,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_azure.py",
+      "line": 217,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\test_azure.py",
+      "line": 239,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\audio\\test_speech.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\audio\\test_transcriptions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\audio\\test_translations.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\beta\\test_assistants.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\beta\\test_threads.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 11,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 27,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 40,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 158,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 172,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 449,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 468,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 481,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 599,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 613,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\test_completions.py",
+      "line": 890,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\containers\\test_files.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\conversations\\test_items.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\evals\\test_runs.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\fine_tuning\\test_jobs.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\realtime\\test_calls.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\realtime\\test_client_secrets.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\responses\\test_input_items.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\uploads\\test_parts.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\vector_stores\\test_files.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\vector_stores\\test_file_batches.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\beta\\threads\\test_messages.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\beta\\threads\\test_runs.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\beta\\threads\\runs\\test_steps.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\chat\\completions\\test_messages.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\containers\\files\\test_content.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\evals\\runs\\test_output_items.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\fine_tuning\\alpha\\test_graders.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\fine_tuning\\checkpoints\\test_permissions.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\api_resources\\fine_tuning\\jobs\\test_checkpoints.py",
+      "line": 10,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\chat\\test_completions.py",
+      "line": 13,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\chat\\test_completions.py",
+      "line": 992,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\chat\\test_completions_streaming.py",
+      "line": 20,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\chat\\test_completions_streaming.py",
+      "line": 1026,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\chat\\test_completions_streaming.py",
+      "line": 1076,
+      "pattern": "client\\.chat\\.completions\\.create",
+      "match": "client.chat.completions.create"
+    },
+    {
+      "file": "sdk_development\\openai-python\\tests\\lib\\responses\\test_responses.py",
+      "line": 9,
+      "pattern": "from openai import OpenAI",
+      "match": "from openai import OpenAI"
+    }
+  ],
+  "issues_found": [],
+  "migration_ready": true
+}

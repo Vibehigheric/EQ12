@@ -1,0 +1,44 @@
+# EQ12 GODSTACK Auto-Labeler Rules
+
+# Sensitive Stacks
+"⚠ Sensitive: Betting":
+  - "betting/**"
+  - "odds_parser.py"
+  - "parlay_builder.py"
+"⚠ Sensitive: Cannabis":
+  - "cannabis/**"
+"⚠ Sensitive: Credit":
+  - "credit/**"
+
+# Other Stacks
+"Travel":
+  - "travel/**"
+  - "eq12_meta_search/trending_monitor.py"
+"Fleet":
+  - "fleet/**"
+"AliDropship":
+  - "ali/**"
+  - "alidropship/**"
+
+# Governance / Compliance
+"Governance":
+  - ".github/**"
+  - "governance/**"
+  - "GOVERNANCE*"
+  - "COPILOT*"
+"CI/CD":
+  - ".github/workflows/**"
+  - ".devcontainer/**"
+
+# Documentation
+"Docs":
+  - "*.md"
+  - "docs/**"
+  - "README*"
+
+# Core Systems
+"Core":
+  - "enrichment.py"
+  - "badge_check.py"
+  - "compliance_audit.py"
+  - "check_secrets.py"

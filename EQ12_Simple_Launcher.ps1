@@ -1,0 +1,163 @@
+# EQ12 Simple Dynamic Launcher - Working Version
+# Auto-discovers and launches EQ12 programs
+
+param()
+
+$EQ12Root = "C:\EQ12"
+
+function Show-MainMenu {
+    Clear-Host
+    Write-Host ""
+    Write-Host "🚀 EQ12 GODSTACK - DYNAMIC LAUNCHER" -ForegroundColor Cyan
+    Write-Host "====================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    Write-Host "⚡ QUICK LAUNCH:" -ForegroundColor Yellow
+    Write-Host "  1. System Status Check" -ForegroundColor White
+    Write-Host "  2. Start Dashboard" -ForegroundColor White
+    Write-Host "  3. AI Assistant" -ForegroundColor White
+    Write-Host "  4. EQ12 Stack Startup" -ForegroundColor White
+    Write-Host "  5. Chrome Setup" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "📊 SYSTEM:" -ForegroundColor Yellow
+    Write-Host "  10. All Programs" -ForegroundColor White
+    Write-Host "  11. API Configuration" -ForegroundColor White
+    Write-Host "  12. System Stats" -ForegroundColor White
+    Write-Host ""
+
+    Write-Host "  0. Exit" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "====================================" -ForegroundColor Cyan
+}
+
+function Execute-MenuChoice {
+    param([string]$Choice)
+
+    switch ($Choice) {
+        "1" {
+            Write-Host "🔍 Running System Status..." -ForegroundColor Green
+            if (Test-Path "$EQ12Root\scripts\eq12_status.ps1") {
+                & "$EQ12Root\scripts\eq12_status.ps1"
+            } else {
+                Write-Host "Status script not found" -ForegroundColor Red
+            }
+        }
+        "2" {
+            Write-Host "🌐 Starting Dashboard..." -ForegroundColor Green
+            if (Test-Path "$EQ12Root\scripts\build_dashboard.ps1") {
+                & "$EQ12Root\scripts\build_dashboard.ps1"
+            } else {
+                Write-Host "Dashboard script not found" -ForegroundColor Red
+            }
+        }
+        "3" {
+            Write-Host "🤖 Starting AI Assistant..." -ForegroundColor Green
+            if (Test-Path "$EQ12Root\eq12_streaming_assistant.py") {
+                python "$EQ12Root\eq12_streaming_assistant.py"
+            } else {
+                Write-Host "AI Assistant not found" -ForegroundColor Red
+            }
+        }
+        "4" {
+            Write-Host "🚀 Starting EQ12 Stack..." -ForegroundColor Green
+            if (Test-Path "$EQ12Root\eq12_simple_start.ps1") {
+                & "$EQ12Root\eq12_simple_start.ps1"
+            } else {
+                Write-Host "Startup script not found" -ForegroundColor Red
+            }
+        }
+        "5" {
+            Write-Host "🌐 Chrome Setup..." -ForegroundColor Green
+            if (Test-Path "$EQ12Root\chrome_governance_automation.py") {
+                python "$EQ12Root\chrome_governance_automation.py" --setup-profile --verbose
+            } else {
+                Write-Host "Chrome automation not found" -ForegroundColor Red
+            }
+        }
+        "10" {
+            Write-Host ""
+            Write-Host "📋 DISCOVERING PROGRAMS..." -ForegroundColor Green
+            Write-Host ""
+
+            $pyFiles = Get-ChildItem -Path $EQ12Root -Filter "*.py" -Recurse | Where-Object {
+                $_.Name -notmatch "^test_" -and $_.Directory.Name -notmatch "tests"
+            } | Select-Object -First 20
+
+            $psFiles = Get-ChildItem -Path $EQ12Root -Filter "*.ps1" -Recurse | Where-Object {
+                $_.Name -notmatch "^test_" -and $_.Directory.Name -notmatch "tests"
+            } | Select-Object -First 20
+
+            Write-Host "Python Programs:" -ForegroundColor Cyan
+            foreach ($file in $pyFiles) {
+                Write-Host "  • $($file.BaseName)" -ForegroundColor White
+            }
+
+            Write-Host ""
+            Write-Host "PowerShell Programs:" -ForegroundColor Magenta
+            foreach ($file in $psFiles) {
+                Write-Host "  • $($file.BaseName)" -ForegroundColor White
+            }
+
+            Write-Host ""
+            Write-Host "Total: $($pyFiles.Count) Python + $($psFiles.Count) PowerShell = $($pyFiles.Count + $psFiles.Count) programs" -ForegroundColor Yellow
+        }
+        "11" {
+            Write-Host ""
+            Write-Host "🔑 API Configuration..." -ForegroundColor Green
+            if (Test-Path "$EQ12Root\EQ12_API_Config.ps1") {
+                & "$EQ12Root\EQ12_API_Config.ps1"
+            } else {
+                Write-Host "API config script not found" -ForegroundColor Red
+            }
+        }
+        "12" {
+            Write-Host ""
+            Write-Host "📊 SYSTEM STATISTICS:" -ForegroundColor Green
+            Write-Host ""
+
+            $pyCount = (Get-ChildItem -Path $EQ12Root -Filter "*.py" -Recurse | Measure-Object).Count
+            $psCount = (Get-ChildItem -Path $EQ12Root -Filter "*.ps1" -Recurse | Measure-Object).Count
+            $totalFiles = (Get-ChildItem -Path $EQ12Root -Recurse -File | Measure-Object).Count
+
+            Write-Host "Python Files: $pyCount" -ForegroundColor Cyan
+            Write-Host "PowerShell Files: $psCount" -ForegroundColor Magenta
+            Write-Host "Total Files: $totalFiles" -ForegroundColor White
+            Write-Host "Last Scan: $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Gray
+            Write-Host ""
+            Write-Host "🌐 Access Points:" -ForegroundColor Yellow
+            Write-Host "Local Dashboard: http://localhost:3000" -ForegroundColor Cyan
+            Write-Host "Emergency Server: http://localhost:8081" -ForegroundColor Cyan
+        }
+        "0" {
+            Write-Host ""
+            Write-Host "👋 Exiting EQ12 Launcher..." -ForegroundColor Green
+            exit
+        }
+        default {
+            Write-Host "❌ Invalid choice. Please try again." -ForegroundColor Red
+        }
+    }
+}
+
+# Main execution
+Write-Host "🔄 EQ12 Dynamic Launcher Starting..." -ForegroundColor Green
+
+do {
+    Show-MainMenu
+    $choice = Read-Host "Enter your choice"
+
+    Execute-MenuChoice -Choice $choice
+
+    if ($choice -ne "0" -and $choice -notin @("10", "11", "12")) {
+        Write-Host ""
+        Write-Host "Press any key to continue..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    } elseif ($choice -in @("10", "11", "12")) {
+        Write-Host ""
+        Write-Host "Press any key to return to menu..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+} while ($choice -ne "0")
+
+Write-Host "EQ12 Launcher session ended." -ForegroundColor Gray

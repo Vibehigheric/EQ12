@@ -1,0 +1,202 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    Hardcoded "When to Use" Checker for NFL Roster Prevention
+    Simple YES/NO answer for when to use the roster prevention system
+
+.DESCRIPTION
+    Reads hardcoded configuration and tells you exactly when to use roster prevention
+    No thinking required - just run this script and get clear instructions
+
+.PARAMETER Context
+    What you're about to do (SGP, Props, General)
+
+.EXAMPLE
+    .\when_to_use_checker.ps1 -Context SGP
+
+.EXAMPLE
+    .\when_to_use_checker.ps1 -Context Props
+
+.NOTES
+    Hardcoded rules eliminate guesswork about when to use roster prevention
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet('SGP', 'Props', 'General', 'Check')]
+    [string]$Context = 'General'
+)
+
+$ErrorActionPreference = "Stop"
+$ScriptPath = $PSScriptRoot
+
+function Write-StatusMessage {
+    param(
+        [string]$Message,
+        [string]$Level = 'INFO'
+    )
+    
+    $timestamp = Get-Date -Format "HH:mm:ss"
+    
+    switch ($Level) {
+        'SUCCESS' { Write-Host "[$timestamp] $Message" -ForegroundColor Green }
+        'WARNING' { Write-Host "[$timestamp] $Message" -ForegroundColor Yellow }
+        'ERROR' { Write-Host "[$timestamp] $Message" -ForegroundColor Red }
+        'INFO' { Write-Host "[$timestamp] $Message" -ForegroundColor Cyan }
+        default { Write-Host "[$timestamp] $Message" -ForegroundColor White }
+    }
+}
+
+function Get-HardcodedTriggerStatus {
+    param([string]$UserContext)
+    
+    Write-StatusMessage "Checking hardcoded triggers for: $UserContext" -Level INFO
+    
+    try {
+        Push-Location $ScriptPath
+        
+        # Check if Python script exists
+        $checkerScript = "hardcoded_trigger_checker.py"
+        
+        if (-not (Test-Path $checkerScript)) {
+            throw "Trigger checker script not found: $checkerScript"
+        }
+        
+        # Run the Python checker
+        $output = python $checkerScript 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            return @{
+                'Status' = 'SUCCESS'
+                'Output' = $output
+                'ShouldUse' = $true
+            }
+        } else {
+            return @{
+                'Status' = 'ERROR'
+                'Output' = $output
+                'ShouldUse' = $false
+            }
+        }
+        
+    } catch {
+        return @{
+            'Status' = 'ERROR'
+            'Output' = $_.Exception.Message
+            'ShouldUse' = $false
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Show-HardcodedDecision {
+    param([string]$UserContext)
+    
+    Write-Host "`nHARDCODED DECISION ENGINE" -ForegroundColor Cyan
+    Write-Host ("=" * 50) -ForegroundColor Cyan
+    Write-Host "Context: $UserContext" -ForegroundColor White
+    Write-Host "Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor White
+    Write-Host ("=" * 50) -ForegroundColor Cyan
+    
+    # Hardcoded decision logic (simplified)
+    $decision = $false
+    $reason = ""
+    $action = ""
+    
+    switch ($UserContext.ToUpper()) {
+        'SGP' {
+            $decision = $true
+            $reason = "MANDATORY: SGP creation requires roster verification"
+            $action = "Run full prevention system"
+        }
+        'PROPS' {
+            $decision = $true
+            $reason = "MANDATORY: Player props require status verification"
+            $action = "Run quick player check"
+        }
+        'GENERAL' {
+            # Check if it's game day (November 2, 2025)
+            $today = Get-Date -Format "yyyy-MM-dd"
+            if ($today -eq "2025-11-02") {
+                $decision = $true
+                $reason = "GAME DAY: SEA vs WAS requires verification"
+                $action = "Run full prevention system"
+            }
+        }
+        'CHECK' {
+            $decision = $true
+            $reason = "User requested status check"
+            $action = "Show current trigger status"
+        }
+    }
+    
+    # Display decision
+    if ($decision) {
+        Write-Host "DECISION: USE ROSTER PREVENTION" -ForegroundColor Green -BackgroundColor Black
+        Write-Host "REASON: $reason" -ForegroundColor Yellow
+        Write-Host "ACTION: $action" -ForegroundColor Cyan
+        
+        Write-Host "`nCOMMANDS TO RUN:" -ForegroundColor Yellow
+        
+        if ($UserContext.ToUpper() -eq 'SGP' -or $action -like "*full*") {
+            Write-Host "  Option 1: python nfl_roster_prevention_system.py" -ForegroundColor White
+            Write-Host "  Option 2: .\nfl_roster_prevention_simple.ps1 -Action Prevent" -ForegroundColor White
+        } elseif ($UserContext.ToUpper() -eq 'PROPS' -or $action -like "*quick*") {
+            Write-Host "  Command: .\nfl_roster_prevention_simple.ps1 -Action QuickCheck" -ForegroundColor White
+        } else {
+            Write-Host "  Command: .\nfl_roster_prevention_simple.ps1 -Action Prevent" -ForegroundColor White
+        }
+        
+    } else {
+        Write-Host "DECISION: NO ACTION NEEDED" -ForegroundColor Red -BackgroundColor Black
+        Write-Host "REASON: No hardcoded triggers activated" -ForegroundColor Yellow
+        Write-Host "ACTION: Continue without roster prevention" -ForegroundColor Cyan
+    }
+    
+    # Always show problem players warning
+    Write-Host "`nPROBLEM PLAYERS ALERT:" -ForegroundColor Red
+    Write-Host "  NEVER BET ON: DK Metcalf, Terry McLaurin, Tyler Lockett" -ForegroundColor Red
+    Write-Host "  REASON: Confirmed inactive for today's game" -ForegroundColor Yellow
+}
+
+function Show-QuickReference {
+    Write-Host "`nQUICK REFERENCE GUIDE" -ForegroundColor Cyan
+    Write-Host ("=" * 40) -ForegroundColor Cyan
+    
+    Write-Host "`nWHEN TO USE ROSTER PREVENTION:" -ForegroundColor Yellow
+    Write-Host "  ✅ Before creating any SGP" -ForegroundColor Green
+    Write-Host "  ✅ Before betting player props" -ForegroundColor Green
+    Write-Host "  ✅ On game days (like today 2025-11-02)" -ForegroundColor Green
+    Write-Host "  ✅ When betting on problem players" -ForegroundColor Green
+    Write-Host "  ✅ 2 hours before any game" -ForegroundColor Green
+    Write-Host "  ✅ 90 minutes before kickoff" -ForegroundColor Green
+    
+    Write-Host "`nWHEN NOT TO USE:" -ForegroundColor Yellow
+    Write-Host "  ⏸️ General research (no betting)" -ForegroundColor Gray
+    Write-Host "  ⏸️ Betting game totals/spreads only" -ForegroundColor Gray
+    Write-Host "  ⏸️ No games scheduled today" -ForegroundColor Gray
+    
+    Write-Host "`nCOMMANDS:" -ForegroundColor Yellow
+    Write-Host "  Full System: python nfl_roster_prevention_system.py" -ForegroundColor White
+    Write-Host "  Quick Check: .\nfl_roster_prevention_simple.ps1 -Action QuickCheck" -ForegroundColor White
+    Write-Host "  Help: .\nfl_roster_prevention_simple.ps1 -Action Help" -ForegroundColor White
+}
+
+# Main execution
+try {
+    Write-StatusMessage "When to Use Checker Starting" -Level SUCCESS
+    
+    # Show the hardcoded decision
+    Show-HardcodedDecision -UserContext $Context
+    
+    # Show quick reference
+    Show-QuickReference
+    
+    Write-StatusMessage "Decision provided successfully" -Level SUCCESS
+    
+} catch {
+    Write-StatusMessage "Error: $($_.Exception.Message)" -Level ERROR
+    exit 1
+}

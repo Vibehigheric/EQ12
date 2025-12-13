@@ -1,0 +1,76 @@
+{
+  "apis": {
+    "openai": {
+      "free_alternatives": [
+        "groq",
+        "ollama",
+        "huggingface"
+      ],
+      "hidden_flags": [
+        "stream",
+        "logprobs",
+        "top_logprobs"
+      ],
+      "cost_reduction": [
+        "use_cache",
+        "batch_requests"
+      ]
+    },
+    "odds_api": {
+      "free_endpoints": [
+        "/v4/sports",
+        "/v4/odds-outright"
+      ],
+      "free_alternatives": [
+        "openbetting",
+        "sportsdb"
+      ],
+      "rate_limits": "500/month_free"
+    },
+    "weather": {
+      "free_alternatives": [
+        "open-meteo",
+        "weatherapi",
+        "wttr.in"
+      ],
+      "hidden_endpoints": [
+        "/v1/forecast.json?aqi=no"
+      ]
+    },
+    "twitter": {
+      "free_alternatives": [
+        "nitter",
+        "gdelt",
+        "rss_feeds"
+      ],
+      "workarounds": [
+        "public_search",
+        "rss_conversion"
+      ]
+    }
+  },
+  "tools": {
+    "python": {
+      "hidden_flags": [
+        "--dev",
+        "--experimental",
+        "-X"
+      ],
+      "free_acceleration": [
+        "numba",
+        "jax",
+        "cupy"
+      ]
+    },
+    "powershell": {
+      "hidden_cmdlets": [
+        "Get-Random",
+        "Measure-Command"
+      ],
+      "performance_hacks": [
+        "runspace_pools",
+        "jobs"
+      ]
+    }
+  }
+}

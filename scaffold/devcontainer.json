@@ -1,0 +1,30 @@
+{
+  "name": "EQ12 Repo Scaffold",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/gh-cli:1": {},
+    "ghcr.io/devcontainers/features/gpg:1": {},
+    "ghcr.io/devcontainers/features/playwright:1": {}
+  },
+  "postCreateCommand": "pwsh -NoProfile -ExecutionPolicy Bypass -File ./.devcontainer/post_create.ps1",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.powershell",
+        "ms-python.python",
+        "almenon.arepl"
+      ],
+      "settings": {
+        "git.enableCommitSigning": true
+      }
+    }
+  },
+  "workspaceFolder": "/workspaces/repo",
+  "containerEnv": {
+    "GNUPGHOME": "/home/vscode/.gnupg",
+    "EQ12_LOGS": "/workspaces/repo/logs",
+    "PLAYWRIGHT_BROWSERS": "chromium,firefox"
+  }
+}

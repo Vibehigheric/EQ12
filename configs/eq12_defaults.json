@@ -1,0 +1,30 @@
+{
+  "free_mode": true,
+  "dry_run": true,
+  "timezone": "UTC",
+  "logging": {
+    "utf8_console_safe": true,
+    "max_log_mb": 10
+  },
+  "web": {
+    "apache_port": 8080,
+    "api_host": "127.0.0.1",
+    "api_port": 8000
+  },
+  "odds": {
+    "cache_minutes": 5,
+    "live_cache_minutes": 1
+  },
+  "cost_guards": {
+    "daily_budget_usd": 1.0,
+    "per_request_limit_usd": 0.01,
+    "hard_stop_usd": 3.0
+  },
+  "models": {
+    "primary": "gpt-4o-mini",
+    "fallbacks": [
+      "gpt-4o",
+      "gpt-3.5-turbo"
+    ]
+  }
+}

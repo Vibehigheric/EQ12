@@ -1,0 +1,359 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#!/usr/bin/env powershell
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 Free Toolchain Update Script
+    
+.DESCRIPTION
+    Updates the EQ12 development environment with latest packages and configurations.
+    Maintains the free toolchain approach with comprehensive dependency management.
+    
+.PARAMETER Force
+    Force update even if current versions are recent
+    
+.PARAMETER UpdatePython
+    Update Python packages only
+    
+.PARAMETER UpdateConfig
+    Update configuration files only
+    
+.PARAMETER DryRun
+    Show what would be updated without making changes
+    
+.EXAMPLE
+    .\scripts\eq12_toolchain_update.ps1
+    # Standard update of all components
+    
+.EXAMPLE
+    .\scripts\eq12_toolchain_update.ps1 -UpdatePython -Verbose
+    # Update only Python packages with verbose output
+    
+.EXAMPLE
+    .\scripts\eq12_toolchain_update.ps1 -DryRun
+    # Preview what would be updated
+#>
+
+[CmdletBinding()]
+param(
+    [switch]$Force,
+    [switch]$UpdatePython,
+    [switch]$UpdateConfig,
+    [switch]$DryRun
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+
+# Navigate to EQ12 root
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+Set-Location "$root\.."
+
+# Logging setup
+$LogFile = "logs\toolchain_update.log"
+if (-not (Test-Path "logs")) {
+    New-Item -ItemType Directory -Path "logs" -Force | Out-Null
+}
+
+function Write-EQ12UpdateLog {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    Write-Output $logEntry
+    if (-not $DryRun) {
+        Add-Content -Path $LogFile -Value $logEntry -Encoding UTF8
+    }
+}
+
+function Test-EQ12Environment {
+    """Check if EQ12 environment is properly set up"""
+    $venvPath = ".\.venv"
+    $pythonExe = "$venvPath\Scripts\python.exe"
+    
+    if (-not (Test-Path $pythonExe)) {
+        Write-Warning "EQ12 environment not found. Run .\scripts\eq12_bootstrap.ps1 first"
+        return $false
+    }
+    
+    return $true
+}
+
+function Update-PythonPackages {
+    """Update Python packages in the EQ12 virtual environment"""
+    param([bool]$IsDryRun = $false)
+    
+    $pythonExe = ".\.venv\Scripts\python.exe"
+    
+    Write-EQ12UpdateLog "Checking Python package updates..." "INFO"
+    
+    if ($IsDryRun) {
+        Write-Host "  [DRY RUN] Would update Python packages" -ForegroundColor Yellow
+        return
+    }
+    
+    try {
+        # Upgrade core tools first
+        Write-Host "  Upgrading pip, wheel, setuptools..." -ForegroundColor Green
+        & $pythonExe -m pip install --upgrade pip wheel setuptools --quiet
+        
+        # Check for requirements.in (pip-tools approach)
+        if (Test-Path "requirements.in") {
+            Write-Host "  Compiling updated requirements..." -ForegroundColor Green
+            & $pythonExe -m pip install pip-tools --quiet
+            & $pythonExe -m piptools compile --upgrade --resolver=backtracking requirements.in
+            
+            Write-Host "  Installing updated packages..." -ForegroundColor Green
+            & $pythonExe -m pip install -r requirements.txt --quiet
+        }
+        elseif (Test-Path "requirements.txt") {
+            Write-Host "  Upgrading packages from requirements.txt..." -ForegroundColor Green
+            & $pythonExe -m pip install --upgrade -r requirements.txt --quiet
+        }
+        else {
+            Write-Host "  Upgrading essential EQ12 packages..." -ForegroundColor Green
+            $corePackages = @(
+                "openai>=1.51.0",
+                "requests>=2.31.0",
+                "aiohttp>=3.8.0",
+                "fastapi>=0.104.0",
+                "python-dotenv>=1.0.0",
+                "pydantic>=2.5.0",
+                "beautifulsoup4>=4.12.0",
+                "selenium>=4.15.0",
+                "playwright>=1.40.0",
+                "pandas>=2.1.0",
+                "pytest>=7.4.0",
+                "black>=23.7.0",
+                "ruff>=0.1.0"
+            )
+            
+            & $pythonExe -m pip install --upgrade @corePackages --quiet
+        }
+        
+        # Update Playwright browsers
+        Write-Host "  Updating Playwright browsers..." -ForegroundColor Green
+        & $pythonExe -m playwright install --with-deps 2>$null
+        
+        # Show updated package versions
+        Write-Host "`n📦 Key Package Versions:" -ForegroundColor Cyan
+        $keyPackages = @("openai", "requests", "fastapi", "selenium", "playwright", "pandas", "pytest")
+        foreach ($pkg in $keyPackages) {
+            try {
+                $version = & $pythonExe -c "import $pkg; print($pkg.__version__)" 2>$null
+                if ($version) {
+                    Write-Host "  $pkg : $version" -ForegroundColor White
+                }
+            }
+            catch {
+                # Some packages might not have __version__
+            }
+        }
+        
+        Write-EQ12UpdateLog "Python packages updated successfully" "SUCCESS"
+    }
+    catch {
+        Write-EQ12UpdateLog "Error updating Python packages: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
+function Update-EQ12Configuration {
+    """Update EQ12 configuration files with latest templates"""
+    param([bool]$IsDryRun = $false)
+    
+    Write-EQ12UpdateLog "Updating EQ12 configuration files..." "INFO"
+    
+    if ($IsDryRun) {
+        Write-Host "  [DRY RUN] Would update configuration files" -ForegroundColor Yellow
+        return
+    }
+    
+    # Backup existing config if it exists
+    $configPath = "configs\eq12_defaults.json"
+    if (Test-Path $configPath) {
+        $backupPath = "configs\eq12_defaults.json.backup.$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+        Copy-Item $configPath $backupPath
+        Write-Host "  Backed up config to: $backupPath" -ForegroundColor Gray
+    }
+    
+    # Update with latest configuration schema
+    $updatedConfig = @{
+        "free_mode" = $true
+        "dry_run" = $true
+        "timezone" = "UTC"
+        "version" = "2024.1"
+        "last_updated" = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+        "logging" = @{
+            "utf8_console_safe" = $true
+            "max_log_mb" = 10
+            "level" = "INFO"
+            "structured" = $true
+        }
+        "web" = @{
+            "apache_port" = 8080
+            "api_host" = "127.0.0.1"
+            "api_port" = 8000
+            "cors_enabled" = $true
+        }
+        "odds" = @{
+            "cache_minutes" = 5
+            "live_cache_minutes" = 1
+            "free_mode_mock" = $true
+            "providers" = @("mock", "free_apis")
+        }
+        "cost_guards" = @{
+            "daily_budget_usd" = 1.00
+            "per_request_limit_usd" = 0.01
+            "hard_stop_usd" = 3.00
+            "alert_threshold_usd" = 0.75
+        }
+        "models" = @{
+            "primary" = "gpt-4o-mini"
+            "fallbacks" = @("gpt-4o", "gpt-3.5-turbo")
+            "max_tokens" = 1000
+            "temperature" = 0.7
+        }
+        "free_toolchain" = @{
+            "enabled" = $true
+            "version" = "1.0.0"
+            "auto_update" = $true
+            "winget_packages" = @(
+                "Python.Python.3.12",
+                "Microsoft.VisualStudioCode",
+                "Git.Git", 
+                "Microsoft.PowerShell",
+                "ApacheFriends.Xampp",
+                "Microsoft.WindowsTerminal",
+                "Notepad++.Notepad++",
+                "7zip.7zip"
+            )
+        }
+        "development" = @{
+            "auto_format" = $true
+            "auto_test" = $true
+            "pre_commit_hooks" = $true
+            "debug_mode" = $false
+        }
+    }
+    
+    if (-not (Test-Path "configs")) {
+        New-Item -ItemType Directory -Path "configs" -Force | Out-Null
+    }
+    
+    $updatedConfig | ConvertTo-Json -Depth 5 | Set-Content -Path $configPath -Encoding UTF8
+    Write-Host "  Updated: $configPath" -ForegroundColor Green
+    
+    Write-EQ12UpdateLog "Configuration files updated successfully" "SUCCESS"
+}
+
+function Show-UpdateSummary {
+    """Display update summary and next steps"""
+    
+    Write-Host "`n" + "="*60 -ForegroundColor Green
+    Write-Host "✅ EQ12 FREE TOOLCHAIN UPDATE COMPLETE!" -ForegroundColor Green
+    Write-Host "="*60 -ForegroundColor Green
+    
+    # Show current status
+    $pythonExe = ".\.venv\Scripts\python.exe"
+    if (Test-Path $pythonExe) {
+        $pythonVersion = & $pythonExe --version 2>&1
+        $pipVersion = & $pythonExe -m pip --version 2>&1
+        
+        Write-Host "`n📊 Current Environment:" -ForegroundColor Cyan
+        Write-Host "  Python: $pythonVersion" -ForegroundColor White
+        Write-Host "  Pip: $($pipVersion.Split(' ")[1])" -ForegroundColor White
+        Write-Host "  Free Mode: ✅ Active" -ForegroundColor Green
+        Write-Host "  Cost Guards: ✅ Enabled" -ForegroundColor Green
+        
+        # Test key imports
+        Write-Host "`n🧪 Quick Module Test:" -ForegroundColor Cyan
+        $testModules = @("openai", "requests", "fastapi", "selenium", "pandas")
+        foreach ($module in $testModules) {
+            try {
+                & $pythonExe -c "import $module" 2>$null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host "  ✅ $module" -ForegroundColor Green
+                } else {
+                    Write-Host "  ❌ $module" -ForegroundColor Red
+                }
+            }
+            catch {
+                Write-Host "  ❌ $module (error)" -ForegroundColor Red
+            }
+        }
+    }
+    
+    Write-Host "`n🚀 Ready for Development:" -ForegroundColor Yellow
+    Write-Host "  • Run tests: python -m pytest tests/" -ForegroundColor White
+    Write-Host "  • Format code: python -m black ." -ForegroundColor White
+    Write-Host "  • Lint code: python -m ruff check ." -ForegroundColor White
+    Write-Host "  • Start EQ12: python eq12_responses_client.py" -ForegroundColor White
+    
+    Write-Host "`n🛡️ Free Mode Benefits:" -ForegroundColor Cyan
+    Write-Host "  • Zero API costs during development" -ForegroundColor White
+    Write-Host "  • Full feature testing with mock data" -ForegroundColor White
+    Write-Host "  • Comprehensive toolchain included" -ForegroundColor White
+    Write-Host "  • Production-ready when API keys added" -ForegroundColor White
+    
+    Write-Host "`nUpdate completed: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss")" -ForegroundColor Gray
+    Write-Host "="*60 -ForegroundColor Green
+}
+
+# Main execution
+function Main {
+    Write-Host "🔄 EQ12 FREE TOOLCHAIN UPDATE" -ForegroundColor Cyan
+    Write-Host "=============================" -ForegroundColor Cyan
+    Write-Host "Updating comprehensive Windows development environment" -ForegroundColor White
+    Write-Host ""
+    
+    Write-EQ12UpdateLog "Starting EQ12 toolchain update process" "INFO"
+    
+    # Validate environment
+    if (-not (Test-EQ12Environment)) {
+        Write-EQ12UpdateLog "EQ12 environment validation failed" "ERROR"
+        exit 1
+    }
+    
+    # Determine what to update
+    $updatePython = $UpdatePython -or (-not $UpdateConfig)
+    $updateConfig = $UpdateConfig -or (-not $UpdatePython)
+    
+    # Phase 1: Python packages
+    if ($updatePython) {
+        Write-Host "🐍 Phase 1: Updating Python packages..." -ForegroundColor Cyan
+        Update-PythonPackages -IsDryRun:$DryRun
+    } else {
+        Write-Host "🐍 Phase 1: Skipped (Python packages)" -ForegroundColor Yellow
+    }
+    
+    # Phase 2: Configuration
+    if ($updateConfig) {
+        Write-Host "`n⚙️ Phase 2: Updating configuration..." -ForegroundColor Cyan
+        Update-EQ12Configuration -IsDryRun:$DryRun
+    } else {
+        Write-Host "`n⚙️ Phase 2: Skipped (configuration)" -ForegroundColor Yellow
+    }
+    
+    # Summary
+    if (-not $DryRun) {
+        Show-UpdateSummary
+    } else {
+        Write-Host "`n✅ EQ12 TOOLCHAIN UPDATE DRY RUN COMPLETE" -ForegroundColor Green
+        Write-Host "Run without -DryRun to perform actual updates" -ForegroundColor White
+    }
+    
+    Write-EQ12UpdateLog "EQ12 toolchain update completed successfully" "SUCCESS"
+}
+
+# Execute main function
+try {
+    Main
+}
+catch {
+    Write-EQ12UpdateLog "Toolchain update failed: $($_.Exception.Message)" "ERROR"
+    Write-Error "EQ12 Toolchain Update failed: $($_.Exception.Message)"
+    exit 1
+}

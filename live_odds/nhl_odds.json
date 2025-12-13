@@ -1,0 +1,12 @@
+{
+  "sport": "nhl",
+  "markets": [
+    "h2h",
+    "spreads",
+    "totals"
+  ],
+  "last_updated": "2025-10-09T19:29:15.357757",
+  "games_count": 3,
+  "bookmakers_count": 8,
+  "arbitrage_opportunities": 1
+}

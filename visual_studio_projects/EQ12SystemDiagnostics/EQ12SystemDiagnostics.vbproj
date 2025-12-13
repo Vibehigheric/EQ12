@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>EQ12SystemDiagnostics</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <!-- EQ12 Development Auto-Execute Targets -->
+  
+  <Target Name="EQ12DevEnvironmentSetup" BeforeTargets="BeforeBuild">
+    <Message Text="ðŸ”¬ EQ12: Setting up development environment..." Importance="high" />
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;$env:EQ12_DEV_MODE = 'true'; Write-Host 'ðŸ”§ EQ12 development mode enabled' -ForegroundColor Cyan&quot;" />
+  </Target>
+
+  <Target Name="EQ12DevPostBuild" AfterTargets="AfterBuild">
+    <Message Text="ðŸš€ EQ12: Development post-build actions..." Importance="high" />
+    
+    <!-- Auto-run syntax checker -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;if (Test-Path 'C:\EQ12\eq12_syntax_checker.py') { python 'C:\EQ12\eq12_syntax_checker.py'; Write-Host 'âœ… Syntax validation completed' -ForegroundColor Green }&quot;" 
+           ContinueOnError="true" />
+    
+    <!-- Start development services -->
+    <Exec Command="powershell.exe -ExecutionPolicy Bypass -Command &quot;try { if (-not (Get-Process -Name 'python' -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*eq12*' })) { Start-Process -FilePath 'python' -ArgumentList 'C:\EQ12\eq12_bridge.py' -WindowStyle Hidden -PassThru | Out-Null; Write-Host 'ðŸŒ‰ EQ12 bridge service started' -ForegroundColor Green } else { Write-Host 'âœ… EQ12 services already running' -ForegroundColor Green } } catch { Write-Host 'âš ï¸ Could not start EQ12 services' -ForegroundColor Yellow }&quot;" 
+           ContinueOnError="true" />
+  </Target>
+</Project>

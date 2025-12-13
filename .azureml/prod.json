@@ -1,0 +1,11 @@
+{
+  "subscription_id": "REPLACE_WITH_YOUR_SUBSCRIPTION_ID",
+  "resource_group": "eq12-production",
+  "workspace_name": "eq12-ml-prod",
+  "workspace_location": "eastus",
+  "compute_name": "gpu-cluster-prod",
+  "compute_size": "Standard_NC24s_v3",
+  "environment_name": "eq12-prod-env",
+  "registered_model_name": "EQ12BettingOptimizer",
+  "api_base": "https://eq12-ml-prod.eastus.inference.ml.azure.com"
+}

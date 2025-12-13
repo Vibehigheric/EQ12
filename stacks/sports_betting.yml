@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    environment:
+      - POSTGRES_PASSWORD=edgegod_secret
+      - POSTGRES_USER=edgegod
+      - POSTGRES_DB=sports_data
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    networks:
+      - internal-net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  odds-scraper:
+    image: edgegod-scraper:latest
+    build: /opt/edgegod/src
+    command: python /app/ingest.py
+    volumes:
+      - /opt/edgegod/src:/app
+    environment:
+      - DB_HOST=timescaledb
+      - DB_PASS=edgegod_secret
+      - ODDS_API_KEY=${ODDS_API_KEY}
+    networks:
+      - internal-net
+      - proxy-net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  timescaledb_data:
+
+networks:
+  internal-net:
+    external: true
+  proxy-net:
+    external: true

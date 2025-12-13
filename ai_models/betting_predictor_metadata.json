@@ -1,0 +1,17 @@
+{
+  "model_type": "betting_predictor",
+  "training_samples": 4000,
+  "test_samples": 1000,
+  "train_accuracy": 0.972,
+  "test_accuracy": 0.911,
+  "features": [
+    "team_rating",
+    "opponent_rating",
+    "home_advantage",
+    "recent_form",
+    "injury_factor",
+    "weather_impact"
+  ],
+  "trained_at": "2025-11-07T20:20:10.632194",
+  "epochs": 50
+}

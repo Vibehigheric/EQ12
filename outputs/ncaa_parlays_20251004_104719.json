@@ -1,0 +1,238 @@
+{
+  "generated_at": "2025-10-04T10:47:19.998349",
+  "system": "EQ12 NCAA Parlay Builder",
+  "parlays": [
+    {
+      "parlay_id": "NCAA_HC_20251004_104719",
+      "parlay_type": "high-confidence",
+      "legs": [
+        {
+          "game_id": "cb392d95625a9a1bc0c9d38b48e01e04",
+          "sport": "NCAA-FB",
+          "matchup": "Penn State Nittany Lions @ UCLA Bruins",
+          "home_team": "UCLA Bruins",
+          "away_team": "Penn State Nittany Lions",
+          "pick_type": "H2H",
+          "bet": "UCLA Bruins ML",
+          "odds": 1500.0,
+          "confidence": 0.5599999999999999,
+          "kelly_percentage": 0.13266666666666663,
+          "sentiment": 0.7,
+          "weather": "Clear",
+          "edge_percentage": 49.74999999999999,
+          "clv_variance": -0.008848188650539207,
+          "start_time": "2025-10-04T19:30:00Z",
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "UCLA Bruins"
+          }
+        },
+        {
+          "game_id": "6d9c7edbf2884eb46707ebd76ff969d7",
+          "sport": "NCAA-FB",
+          "matchup": "James Madison Dukes @ Georgia State Panthers",
+          "home_team": "Georgia State Panthers",
+          "away_team": "James Madison Dukes",
+          "pick_type": "H2H",
+          "bet": "Georgia State Panthers ML",
+          "odds": 900.0,
+          "confidence": 0.5599999999999999,
+          "kelly_percentage": 0.12777777777777774,
+          "sentiment": 0.7,
+          "weather": "Cloudy",
+          "edge_percentage": 46.0,
+          "clv_variance": 0.021093079917063374,
+          "start_time": "2025-10-04T19:30:00Z",
+          "market_data": {
+            "bookmaker": "Caesars",
+            "market": "h2h",
+            "outcome_name": "Georgia State Panthers"
+          }
+        },
+        {
+          "game_id": "1c2bc1c8623e7527c13a515529541b89",
+          "sport": "NCAA-FB",
+          "matchup": "Minnesota Golden Gophers @ Ohio State Buckeyes",
+          "home_team": "Ohio State Buckeyes",
+          "away_team": "Minnesota Golden Gophers",
+          "pick_type": "H2H",
+          "bet": "Minnesota Golden Gophers ML",
+          "odds": 1500.0,
+          "confidence": 0.525,
+          "kelly_percentage": 0.12333333333333334,
+          "sentiment": 0.65,
+          "weather": "Light Rain",
+          "edge_percentage": 46.25,
+          "clv_variance": 0.047063620728716865,
+          "start_time": "2025-10-04T23:30:00Z",
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Minnesota Golden Gophers"
+          }
+        }
+      ],
+      "combined_odds": 255900.0,
+      "win_probability": 0.16463999999999998,
+      "expected_roi": 42047.84,
+      "clv_vs_open": 0.019769503998413675,
+      "recommended_stake": 20.0,
+      "total_edge": 142.0,
+      "risk_score": 0.30000000000000004,
+      "created_at": "2025-10-04T10:47:19.979394"
+    },
+    {
+      "parlay_id": "NCAA_HP_20251004_104719",
+      "parlay_type": "high-payout",
+      "legs": [
+        {
+          "game_id": "cb392d95625a9a1bc0c9d38b48e01e04",
+          "sport": "NCAA-FB",
+          "matchup": "Penn State Nittany Lions @ UCLA Bruins",
+          "home_team": "UCLA Bruins",
+          "away_team": "Penn State Nittany Lions",
+          "pick_type": "H2H",
+          "bet": "UCLA Bruins ML",
+          "odds": 1500.0,
+          "confidence": 0.5599999999999999,
+          "kelly_percentage": 0.13266666666666663,
+          "sentiment": 0.7,
+          "weather": "Clear",
+          "edge_percentage": 49.74999999999999,
+          "clv_variance": -0.008848188650539207,
+          "start_time": "2025-10-04T19:30:00Z",
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "UCLA Bruins"
+          }
+        },
+        {
+          "game_id": "1c2bc1c8623e7527c13a515529541b89",
+          "sport": "NCAA-FB",
+          "matchup": "Minnesota Golden Gophers @ Ohio State Buckeyes",
+          "home_team": "Ohio State Buckeyes",
+          "away_team": "Minnesota Golden Gophers",
+          "pick_type": "H2H",
+          "bet": "Minnesota Golden Gophers ML",
+          "odds": 1500.0,
+          "confidence": 0.525,
+          "kelly_percentage": 0.12333333333333334,
+          "sentiment": 0.65,
+          "weather": "Light Rain",
+          "edge_percentage": 46.25,
+          "clv_variance": 0.047063620728716865,
+          "start_time": "2025-10-04T23:30:00Z",
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Minnesota Golden Gophers"
+          }
+        },
+        {
+          "game_id": "c9a9afb46bbfe7047e145ad5dfd95593",
+          "sport": "NCAA-FB",
+          "matchup": "Tulsa Golden Hurricane @ Memphis Tigers",
+          "home_team": "Memphis Tigers",
+          "away_team": "Tulsa Golden Hurricane",
+          "pick_type": "H2H",
+          "bet": "Tulsa Golden Hurricane ML",
+          "odds": 1000.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.12075000000000002,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 43.90909090909091,
+          "clv_variance": -0.014184114522757264,
+          "start_time": "2025-10-05T00:00:00Z",
+          "market_data": {
+            "bookmaker": "DraftKings",
+            "market": "h2h",
+            "outcome_name": "Tulsa Golden Hurricane"
+          }
+        },
+        {
+          "game_id": "6d9c7edbf2884eb46707ebd76ff969d7",
+          "sport": "NCAA-FB",
+          "matchup": "James Madison Dukes @ Georgia State Panthers",
+          "home_team": "Georgia State Panthers",
+          "away_team": "James Madison Dukes",
+          "pick_type": "H2H",
+          "bet": "Georgia State Panthers ML",
+          "odds": 900.0,
+          "confidence": 0.5599999999999999,
+          "kelly_percentage": 0.12777777777777774,
+          "sentiment": 0.7,
+          "weather": "Cloudy",
+          "edge_percentage": 46.0,
+          "clv_variance": 0.021093079917063374,
+          "start_time": "2025-10-04T19:30:00Z",
+          "market_data": {
+            "bookmaker": "Caesars",
+            "market": "h2h",
+            "outcome_name": "Georgia State Panthers"
+          }
+        },
+        {
+          "game_id": "8fe4d3c56069de55c950af75be1ef8d2",
+          "sport": "NCAA-FB",
+          "matchup": "Boise State Broncos @ Notre Dame Fighting Irish",
+          "home_team": "Notre Dame Fighting Irish",
+          "away_team": "Boise State Broncos",
+          "pick_type": "H2H",
+          "bet": "Boise State Broncos ML",
+          "odds": 945.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.12006613756613757,
+          "sentiment": 0.6,
+          "weather": "Clear",
+          "edge_percentage": 43.43062200956938,
+          "clv_variance": -0.017541569863098242,
+          "start_time": "2025-10-04T19:30:00Z",
+          "market_data": {
+            "bookmaker": "MyBookie.ag",
+            "market": "h2h",
+            "outcome_name": "Boise State Broncos"
+          }
+        },
+        {
+          "game_id": "32aab37746e32d72605120ee63924aea",
+          "sport": "NCAA-FB",
+          "matchup": "Oklahoma State Cowboys @ Arizona Wildcats",
+          "home_team": "Arizona Wildcats",
+          "away_team": "Oklahoma State Cowboys",
+          "pick_type": "H2H",
+          "bet": "Oklahoma State Cowboys ML",
+          "odds": 880.0,
+          "confidence": 0.5,
+          "kelly_percentage": 0.11079545454545454,
+          "sentiment": 0.6,
+          "weather": "Windy",
+          "edge_percentage": 39.795918367346935,
+          "clv_variance": 0.041407099958841925,
+          "start_time": "2025-10-04T19:00:00Z",
+          "market_data": {
+            "bookmaker": "MyBookie.ag",
+            "market": "h2h",
+            "outcome_name": "Oklahoma State Cowboys"
+          }
+        }
+      ],
+      "combined_odds": 288386460.0,
+      "win_probability": 0.023123687999999996,
+      "expected_roi": 6668460.836833279,
+      "clv_vs_open": 0.011498321261371243,
+      "recommended_stake": 20.0,
+      "total_edge": 269.1356312860072,
+      "risk_score": 0.8999999999999999,
+      "created_at": "2025-10-04T10:47:19.979394"
+    }
+  ],
+  "summary": {
+    "total_parlays": 2,
+    "total_legs": 9,
+    "avg_confidence": 0.09388184399999999,
+    "total_stake": 40.0
+  }
+}

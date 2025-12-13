@@ -1,0 +1,67 @@
+{
+  "name": "eq12-governance-assistant",
+  "version": "1.0.0",
+  "description": "EQ12 Governance Assistant - Mozilla Policy Compliant Extension",
+  "author": "EQ12 Development Team",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EQ12/extension"
+  },
+  "keywords": [
+    "firefox",
+    "webextension",
+    "governance",
+    "security",
+    "compliance",
+    "mozilla"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "web-ext": "^8.2.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.0"
+  },
+  "scripts": {
+    "start": "web-ext run --source-dir=. --verbose",
+    "start:firefox": "web-ext run --source-dir=. --firefox=firefox --verbose",
+    "start:nightly": "web-ext run --source-dir=. --firefox=firefoxdeveloperedition --verbose", 
+    "build": "web-ext build --source-dir=. --artifacts-dir=../builds/web-ext --overwrite-dest --verbose",
+    "lint": "web-ext lint --source-dir=. --verbose && eslint *.js",
+    "sign": "web-ext sign --source-dir=. --artifacts-dir=../builds/signed --verbose",
+    "validate": "npm run lint && npm run build",
+    "clean": "powershell -Command \"Remove-Item -Path '../builds/web-ext/*', '../builds/signed/*' -Force -Recurse -ErrorAction SilentlyContinue\"",
+    "test": "npm run validate",
+    "format": "prettier --write *.js *.json *.html *.css",
+    "lint:js": "eslint *.js",
+    "docs": "web-ext docs",
+    "dev": "npm run start",
+    "watch": "web-ext run --source-dir=. --reload --verbose",
+    "mozilla:submit": "echo 'Ready for Mozilla submission! Run: npm run build && open ../builds/web-ext/'",
+    "pre-submit": "npm run validate && npm run format && echo 'Extension ready for submission!'"
+  },
+  "webExt": {
+    "sourceDir": ".",
+    "artifactsDir": "../builds/web-ext",
+    "build": {
+      "overwriteDest": true
+    },
+    "run": {
+      "browserConsole": true,
+      "startUrl": ["about:debugging#/runtime/this-firefox"],
+      "keepProfileChanges": false
+    },
+    "lint": {
+      "pretty": true,
+      "warningsAsErrors": false
+    }
+  },
+  "mozilla": {
+    "manifestVersion": 2,
+    "strictMinVersion": "89.0",
+    "id": "eq12-governance@example.com",
+    "updateURL": "https://example.com/updates.json"
+  }
+}

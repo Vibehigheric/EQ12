@@ -1,0 +1,467 @@
+name: 🔐 EQ12 OpenAI Security Pipeline
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+    schedule:
+        - cron: "0 */6 * * *" # Every 6 hours
+    workflow_dispatch:
+        inputs:
+            emergency_rotation:
+                description: "Emergency key rotation"
+                type: boolean
+                default: false
+            scan_depth:
+                description: "Security scan depth"
+                type: choice
+                options: ["quick", "standard", "deep"]
+                default: "standard"
+
+# Minimal permissions
+permissions:
+    contents: read
+    security-events: write
+    id-token: write
+    actions: read
+    pull-requests: write
+
+# Cost and concurrency controls
+concurrency:
+    group: eq12-openai-security-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    # Security validation and key protection
+    openai-security-check:
+        name: 🛡️ OpenAI Security Validation
+        runs-on: ubuntu-latest
+        if: ${{ vars.RUN_CI == 'true' && github.event.pull_request.head.repo.fork == false }}
+        outputs:
+            security-status: ${{ steps.security-check.outputs.status }}
+            cost-projection: ${{ steps.cost-analysis.outputs.projection }}
+            key-status: ${{ steps.key-validation.outputs.status }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Full history for secret scanning
+
+            - name: Mask sensitive variables
+              run: |
+                  echo "::add-mask::${{ secrets.OPENAI_API_KEY_DEV }}"
+                  echo "::add-mask::${{ secrets.OPENAI_API_KEY_CI }}"
+                  echo "::add-mask::${{ secrets.OPENAI_API_KEY_PROD }}"
+
+            - name: Advanced secret scanning
+              id: secret-scan
+              run: |
+                  echo "🔍 Scanning for OpenAI API keys in repository..."
+
+                  # Multiple scanning approaches
+                  SECRET_FOUND=false
+
+                  # 1. TruffleHog scan
+                  if command -v trufflehog >/dev/null 2>&1; then
+                    if trufflehog filesystem --json . | grep -i "openai\|sk-" > /dev/null; then
+                      echo "❌ TruffleHog detected potential OpenAI keys"
+                      SECRET_FOUND=true
+                    fi
+                  fi
+
+                  # 2. GitLeaks scan
+                  if command -v gitleaks >/dev/null 2>&1; then
+                    if gitleaks detect --source . --no-git --report-format json | grep -i "openai\|sk-" > /dev/null; then
+                      echo "❌ GitLeaks detected potential OpenAI keys"
+                      SECRET_FOUND=true
+                    fi
+                  fi
+
+                  # 3. Manual pattern search
+                  if grep -r "sk-[A-Za-z0-9]\{20,\}" . --exclude-dir=.git --exclude="*.log" --exclude="*.md" > /dev/null 2>&1; then
+                    echo "❌ Manual scan found OpenAI key patterns"
+                    SECRET_FOUND=true
+                  fi
+
+                  # 4. Check for hardcoded API key variables
+                  if grep -r "OPENAI_API_KEY\s*=\s*['\"]sk-" . --exclude-dir=.git > /dev/null 2>&1; then
+                    echo "❌ Found hardcoded OpenAI API key assignments"
+                    SECRET_FOUND=true
+                  fi
+
+                  if [ "$SECRET_FOUND" = "true" ]; then
+                    echo "status=SECRETS_DETECTED" >> $GITHUB_OUTPUT
+                    echo "::error::🚨 OpenAI API keys detected in repository. Immediate rotation required!"
+                    exit 1
+                  else
+                    echo "✅ No OpenAI API keys found in repository"
+                    echo "status=CLEAN" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Setup Python with security tools
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
+
+            - name: Install security dependencies
+              run: |
+                  pip install --upgrade pip
+                  pip install openai cryptography redis sqlalchemy python-dotenv httpx
+                  pip install -e .
+
+            - name: Validate key security configuration
+              id: key-validation
+              env:
+                  EQ12_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+              run: |
+                  python -c "
+                  import os, sys
+                  sys.path.insert(0, '.')
+                  from eq12_openai_security import EQ12OpenAISecurityManager
+
+                  print('🔑 Validating OpenAI key security configuration...')
+
+                  # Check environment configuration
+                  env = os.getenv('EQ12_ENVIRONMENT', 'dev')
+                  print(f'Environment: {env}')
+
+                  # Initialize security manager (this will validate configuration)
+                  try:
+                      manager = EQ12OpenAISecurityManager(environment=env)
+                      print('✅ Security manager initialized successfully')
+
+                      # Test allowed models
+                      allowed = manager.allowed_models
+                      print(f'✅ Allowed models for {env}: {allowed}')
+
+                      # Test cost limits
+                      limits = manager.cost_limits
+                      multiplier = limits.environment_multipliers.get(env, 0.2)
+                      daily_limit = float(limits.max_cost_per_day) * multiplier
+                      print(f'✅ Daily cost limit for {env}: \${daily_limit:.2f}')
+
+                      print('status=VALID', file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+
+                  except Exception as e:
+                      print(f'❌ Security configuration error: {e}')
+                      print('status=INVALID', file=open(os.environ['GITHUB_OUTPUT'], 'a'))
+                      sys.exit(1)
+                  "
+
+            - name: Cost projection analysis
+              id: cost-analysis
+              if: steps.key-validation.outputs.status == 'VALID'
+              env:
+                  EQ12_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+              run: |
+                  python -c "
+                  import os, sys, asyncio, json
+                  sys.path.insert(0, '.')
+                  from eq12_openai_security import EQ12OpenAISecurityManager
+
+                  async def analyze_costs():
+                      manager = EQ12OpenAISecurityManager(environment=os.getenv('EQ12_ENVIRONMENT', 'dev'))
+
+                      try:
+                          # Get usage report
+                          report = await manager.get_usage_report(days=7)
+                          print(f'📊 Cost Analysis Report:')
+                          print(f'- Total cost (7 days): \${report[\"total_cost\"]:.2f}')
+                          print(f'- Projected monthly: \${report[\"projected_monthly\"]:.2f}')
+                          print(f'- Total requests: {report[\"total_requests\"]}')
+
+                          # Check if we're approaching limits
+                          limits = manager.cost_limits
+                          env_multiplier = limits.environment_multipliers.get(manager.environment, 0.2)
+                          monthly_limit = float(limits.max_cost_per_month) * env_multiplier
+
+                          usage_percent = (report['projected_monthly'] / monthly_limit) * 100 if monthly_limit > 0 else 0
+
+                          status = 'OK'
+                          if usage_percent > 80:
+                              status = 'WARNING'
+                              print(f'⚠️ Usage at {usage_percent:.1f}% of monthly limit')
+                          elif usage_percent > 95:
+                              status = 'CRITICAL'
+                              print(f'🚨 Usage at {usage_percent:.1f}% of monthly limit')
+
+                          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                              f.write(f'projection={json.dumps(report)}\n')
+                              f.write(f'status={status}\n')
+                              f.write(f'usage_percent={usage_percent:.1f}\n')
+
+                      except Exception as e:
+                          print(f'Cost analysis failed: {e}')
+                          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                              f.write('projection={}\n')
+                              f.write('status=ERROR\n')
+                      finally:
+                          manager.cleanup()
+
+                  asyncio.run(analyze_costs())
+                  "
+
+            - name: Security compliance check
+              run: |
+                  echo "🔍 Checking OpenAI security compliance..."
+
+                  # Check for environment variable usage (good)
+                  if grep -r "os\.getenv.*OPENAI" . --include="*.py" > /dev/null; then
+                    echo "✅ Using environment variables for API keys"
+                  else
+                    echo "⚠️ No environment variable usage detected"
+                  fi
+
+                  # Check for secret masking in workflows
+                  if grep -r "add-mask" .github/workflows/ > /dev/null; then
+                    echo "✅ Secret masking implemented in workflows"
+                  else
+                    echo "❌ No secret masking found in workflows"
+                  fi
+
+                  # Check for key validation functions
+                  if grep -r "validate.*api.*key" . --include="*.py" > /dev/null; then
+                    echo "✅ API key validation functions found"
+                  else
+                    echo "⚠️ No API key validation detected"
+                  fi
+
+                  # Check for cost controls
+                  if grep -r "cost.*limit\|budget\|circuit.*breaker" . --include="*.py" > /dev/null; then
+                    echo "✅ Cost control mechanisms found"
+                  else
+                    echo "⚠️ No cost controls detected"
+                  fi
+
+    # Emergency key rotation (manual trigger only)
+    emergency-key-rotation:
+        name: 🚨 Emergency Key Rotation
+        runs-on: ubuntu-latest
+        if: ${{ github.event.inputs.emergency_rotation == 'true' && github.actor != '' }}
+        environment: prod
+        needs: [openai-security-check]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
+
+            - name: Emergency rotation procedure
+              run: |
+                  echo "🚨 EMERGENCY KEY ROTATION INITIATED"
+                  echo "Operator: ${{ github.actor }}"
+                  echo "Timestamp: $(date -u)"
+                  echo "Repository: ${{ github.repository }}"
+
+                  echo "📋 MANUAL STEPS REQUIRED:"
+                  echo "1. 🔑 Generate new API key in OpenAI console"
+                  echo "2. 🗝️ Update key in Azure Key Vault/AWS Secrets Manager"
+                  echo "3. 🔄 Restart all services using the rotated key"
+                  echo "4. 📝 Update incident log with rotation details"
+                  echo "5. 🔍 Run post-rotation security scan"
+
+                  echo "⏰ Key rotation must be completed within 15 minutes"
+                  echo "📧 Security team has been notified"
+
+            - name: Create rotation incident
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const incident = {
+                        title: `🚨 Emergency OpenAI Key Rotation - ${new Date().toISOString()}`,
+                        body: `## Emergency Key Rotation Initiated
+
+                        **Triggered by:** @${{ github.actor }}
+                        **Repository:** ${{ github.repository }}
+                        **Environment:** Production
+                        **Timestamp:** ${new Date().toUTCString()}
+
+                        ### Required Actions
+                        - [ ] Generate new OpenAI API key
+                        - [ ] Update key in secret manager
+                        - [ ] Restart affected services
+                        - [ ] Verify rotation success
+                        - [ ] Update security documentation
+
+                        ### Timeline
+                        - Rotation initiated: ${new Date().toUTCString()}
+                        - Target completion: ${new Date(Date.now() + 15*60*1000).toUTCString()}
+
+                        **This is an automated incident created by EQ12 security pipeline.**`,
+                        labels: ['security', 'incident', 'api-key', 'emergency']
+                      };
+
+                      await github.rest.issues.create({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        title: incident.title,
+                        body: incident.body,
+                        labels: incident.labels
+                      });
+
+    # Cost monitoring and budget alerts
+    cost-monitoring:
+        name: 💰 OpenAI Cost Monitoring
+        runs-on: ubuntu-latest
+        if: ${{ needs.openai-security-check.outputs.key-status == 'VALID' }}
+        needs: [openai-security-check]
+        environment: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.11"
+
+            - name: Install dependencies
+              run: |
+                  pip install --upgrade pip
+                  pip install openai cryptography redis sqlalchemy python-dotenv httpx
+                  pip install -e .
+
+            - name: Generate cost report
+              env:
+                  EQ12_ENVIRONMENT: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+              run: |
+                  python -c "
+                  import os, sys, asyncio, json
+                  sys.path.insert(0, '.')
+                  from eq12_openai_security import EQ12OpenAISecurityManager
+
+                  async def generate_report():
+                      manager = EQ12OpenAISecurityManager(environment=os.getenv('EQ12_ENVIRONMENT', 'dev'))
+
+                      try:
+                          # Generate comprehensive usage report
+                          report = await manager.get_usage_report(days=30)
+
+                          print('## 💰 EQ12 OpenAI Cost Report')
+                          print(f'**Environment:** {manager.environment}')
+                          print(f'**Period:** Last 30 days')
+                          print(f'**Generated:** {datetime.utcnow().isoformat()}')
+                          print()
+
+                          print('### 📊 Usage Summary')
+                          print(f'- **Total Cost:** \${report[\"total_cost\"]:.2f}')
+                          print(f'- **Total Requests:** {report[\"total_requests\"]:,}')
+                          print(f'- **Total Tokens:** {report[\"total_tokens\"]:,}')
+                          print(f'- **Avg Cost/Request:** \${report[\"average_cost_per_request\"]:.4f}')
+                          print(f'- **Projected Monthly:** \${report[\"projected_monthly\"]:.2f}')
+                          print()
+
+                          print('### 🤖 Usage by Model')
+                          for model, stats in report['by_model'].items():
+                              print(f'- **{model}:** \${stats[\"cost\"]:.2f} ({stats[\"requests\"]} requests, {stats[\"tokens\"]:,} tokens)')
+
+                          print()
+                          print('### 🎯 Cost Optimization')
+
+                          # Cost optimization recommendations
+                          total_cost = report['total_cost']
+                          if total_cost > 50:
+                              print('- ⚠️ Consider implementing request caching')
+                              print('- ⚠️ Evaluate using gpt-4o-mini for simpler tasks')
+
+                          if report['projected_monthly'] > 100:
+                              print('- 🚨 Monthly projection exceeds \$100 - implement stricter controls')
+
+                          # Write to GitHub summary
+                          with open(os.environ['GITHUB_STEP_SUMMARY'], 'w') as f:
+                              f.write(f'''## 💰 OpenAI Cost Report - {manager.environment.upper()}
+
+                      | Metric | Value |
+                      |--------|-------|
+                      | Total Cost (30d) | \${report[\"total_cost\"]:.2f} |
+                      | Projected Monthly | \${report[\"projected_monthly\"]:.2f} |
+                      | Total Requests | {report[\"total_requests\"]:,} |
+                      | Avg Cost/Request | \${report[\"average_cost_per_request\"]:.4f} |
+
+                      ### Model Breakdown
+                      ''')
+
+                              for model, stats in report['by_model'].items():
+                                  f.write(f'- **{model}:** \${stats[\"cost\"]:.2f} ({stats[\"requests\"]} requests)\\n')
+
+                      except Exception as e:
+                          print(f'❌ Cost report generation failed: {e}')
+                          sys.exit(1)
+                      finally:
+                          manager.cleanup()
+
+                  import datetime
+                  asyncio.run(generate_report())
+                  "
+
+            - name: Budget alert check
+              if: needs.openai-security-check.outputs.cost-projection != ''
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const projection = ${{ needs.openai-security-check.outputs.cost-projection }};
+                      const usagePercent = parseFloat('${{ needs.openai-security-check.outputs.usage-percent }}' || '0');
+
+                      if (usagePercent > 80) {
+                        const alertLevel = usagePercent > 95 ? '🚨 CRITICAL' : '⚠️ WARNING';
+                        const title = `${alertLevel}: OpenAI Usage at ${usagePercent.toFixed(1)}% of budget`;
+
+                        await github.rest.issues.create({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          title: title,
+                          body: `## OpenAI Budget Alert
+
+                          **Environment:** ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
+                          **Current Usage:** ${usagePercent.toFixed(1)}% of monthly budget
+                          **Projected Monthly Cost:** $${projection.projected_monthly.toFixed(2)}
+
+                          ### Immediate Actions Required
+                          ${usagePercent > 95 ? '- 🚨 Implement emergency cost controls' : '- ⚠️ Review and optimize API usage'}
+                          - 📊 Analyze high-cost operations
+                          - 🔧 Consider model optimization
+                          - 📝 Update cost forecasts
+
+                          **Generated by:** EQ12 Security Pipeline
+                          **Timestamp:** ${new Date().toUTCString()}`,
+                          labels: ['cost-alert', 'openai', 'budget', usagePercent > 95 ? 'critical' : 'warning']
+                        });
+                      }
+
+    # Security summary and reporting
+    security-summary:
+        name: 📋 Security Summary
+        runs-on: ubuntu-latest
+        if: always()
+        needs: [openai-security-check, cost-monitoring]
+        steps:
+            - name: Generate security summary
+              run: |
+                  echo "## 🔐 EQ12 OpenAI Security Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Environment:** ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}" >> $GITHUB_STEP_SUMMARY
+                  echo "**Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+                  echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  echo "### Security Checks" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Secret Scanning:** ${{ needs.openai-security-check.outputs.security-status == 'CLEAN' && '✅ Clean' || '❌ Issues Found' }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Key Validation:** ${{ needs.openai-security-check.outputs.key-status == 'VALID' && '✅ Valid' || '❌ Invalid' }}" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Cost Monitoring:** ${{ needs.cost-monitoring.result == 'success' && '✅ Active' || '⚠️ Issues' }}" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+
+                  echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+                  if [ "${{ needs.openai-security-check.outputs.security-status }}" != "CLEAN" ]; then
+                    echo "- 🚨 **URGENT:** Rotate API keys immediately" >> $GITHUB_STEP_SUMMARY
+                    echo "- 🔍 **Investigate:** Review commit history for leaked keys" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "- ✅ All security checks passed" >> $GITHUB_STEP_SUMMARY
+                    echo "- 📊 Regular monitoring active" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "---" >> $GITHUB_STEP_SUMMARY
+                  echo "*Generated by EQ12 OpenAI Security Pipeline*" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,184 @@
+name: EQ12 Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  EQ12_DEPLOYMENT_MODE: ACTIVE
+  PYTHONDONTWRITEBYTECODE: 1
+
+jobs:
+  deploy-production:
+    name: EQ12 Production Deployment
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Validate EQ12 System Pre-Deployment
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 PRE-DEPLOYMENT VALIDATION ===" -ForegroundColor Green
+
+        # Verify critical files exist
+        $criticalFiles = @(
+          "eq12_no_pycache.py",
+          ".copilot\copilot.yml",
+          "scripts\eq12_pycache_cleanup.ps1"
+        )
+
+        $missing = 0
+        foreach ($file in $criticalFiles) {
+          if (!(Test-Path $file)) {
+            Write-Host "MISSING CRITICAL FILE: $file" -ForegroundColor Red
+            $missing++
+          } else {
+            Write-Host "VERIFIED: $file" -ForegroundColor Green
+          }
+        }
+
+        if ($missing -gt 0) {
+          Write-Host "DEPLOYMENT FAILED: Missing critical files" -ForegroundColor Red
+          exit 1
+        }
+
+    - name: EQ12 ASCII Compliance Check
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 ASCII COMPLIANCE CHECK ===" -ForegroundColor Yellow
+
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1", "*.json", "*.yml" -Recurse -File
+        $violations = 0
+
+        foreach ($file in $files) {
+          if ($file.FullName -like "*\.git\*") { continue }
+
+          $content = Get-Content $file.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+          if (-not $content) { continue }
+
+          # Check for non-ASCII characters
+          for ($i = 0; $i -lt $content.Length; $i++) {
+            if ([int][char]$content[$i] -gt 127) {
+              Write-Host "NON-ASCII VIOLATION: $($file.FullName)" -ForegroundColor Red
+              $violations++
+              break
+            }
+          }
+        }
+
+        if ($violations -gt 0) {
+          Write-Host "DEPLOYMENT BLOCKED: $violations ASCII violations" -ForegroundColor Red
+          exit 1
+        } else {
+          Write-Host "ASCII COMPLIANCE: PASSED" -ForegroundColor Green
+        }
+
+    - name: Deploy EQ12 Core System
+      shell: pwsh
+      run: |
+        Write-Host "=== DEPLOYING EQ12 CORE SYSTEM ===" -ForegroundColor Green
+
+        # Activate no-pycache protection
+        python -c "import sys; sys.dont_write_bytecode = True; from eq12_no_pycache import eq12_import_hook; eq12_import_hook(); print('EQ12 no-pycache protection: ACTIVE')"
+
+        # Clean any existing pycache
+        & powershell -ExecutionPolicy Bypass -File "scripts\eq12_pycache_cleanup.ps1" -Quick
+
+        # Test critical systems
+        if (Test-Path "scripts\eq12_system_status.py") {
+          python "scripts\eq12_system_status.py" --deployment-check
+        }
+
+        Write-Host "EQ12 CORE DEPLOYMENT: COMPLETED" -ForegroundColor Green
+
+    - name: Generate Deployment Report
+      shell: pwsh
+      run: |
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+        $report = @"
+# EQ12 Deployment Report
+Generated: $timestamp
+Branch: $($env:GITHUB_REF_NAME)
+Commit: $($env:GITHUB_SHA)
+
+## Deployment Summary
+- ASCII compliance: VERIFIED
+- Core system: DEPLOYED
+- No-pycache protection: ACTIVE
+- Critical files: VALIDATED
+
+## System Status
+- EQ12 Deployment Mode: ACTIVE
+- Unicode corruption protection: ENABLED
+- Pylance hardening: APPLIED
+
+## Buffalo NY 14215 Content Empire
+EQ12 system successfully deployed to production.
+"@
+
+        Set-Content -Path "eq12_deployment_report.md" -Value $report -Encoding ASCII
+
+    - name: Upload Deployment Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-deployment-report
+        path: eq12_deployment_report.md
+
+  deploy-backup:
+    name: EQ12 Backup Sync
+    runs-on: windows-latest
+    needs: deploy-production
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: Create Deployment Backup
+      shell: pwsh
+      run: |
+        Write-Host "=== CREATING EQ12 DEPLOYMENT BACKUP ===" -ForegroundColor Yellow
+
+        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "eq12_backup_$timestamp"
+
+        # Create backup structure
+        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+
+        # Copy critical directories
+        $criticalDirs = @("scripts", "tests", "configs", ".copilot", ".github")
+
+        foreach ($dir in $criticalDirs) {
+          if (Test-Path $dir) {
+            Copy-Item -Path $dir -Destination "$backupDir\$dir" -Recurse -Force
+            Write-Host "Backed up: $dir" -ForegroundColor Green
+          }
+        }
+
+        # Copy critical files
+        $criticalFiles = @("eq12_no_pycache.py", "AGENTS.md", "*.md")
+
+        foreach ($pattern in $criticalFiles) {
+          Get-ChildItem -Path . -Include $pattern -File | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination "$backupDir\$($_.Name)" -Force
+            Write-Host "Backed up: $($_.Name)" -ForegroundColor Green
+          }
+        }
+
+        Write-Host "EQ12 BACKUP CREATED: $backupDir" -ForegroundColor Green
+
+    - name: Upload Backup Archive
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-deployment-backup
+        path: eq12_backup_*
+        retention-days: 30

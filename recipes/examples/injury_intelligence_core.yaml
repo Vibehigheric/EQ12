@@ -1,0 +1,266 @@
+# EQ12 Injury Intelligence Research Recipe
+# Specialized recipe for injury impact analysis and timeline prediction
+# Version: 1.5
+
+name: "injury_intelligence_core"
+version: "1.5"
+description: "Advanced injury intelligence with impact scoring and SGP integration"
+author: "EQ12 Injury Intelligence Team"
+created_at: "2025-01-03"
+tags: ["injuries", "timeline", "impact_scoring", "sgp", "lineup_analysis"]
+environments: ["production", "development"]
+
+# This is a core recipe that other recipes depend on
+is_core_recipe: true
+
+# === PLANNER CONFIGURATION ===
+planner:
+  classifier: "intent/injury_v2"
+  steps:
+    - "injury_detection_validation" # Confirm injury status and details
+    - "medical_timeline_analysis" # Recovery timeline prediction
+    - "historical_pattern_matching" # Similar injury recovery patterns
+    - "replacement_player_analysis" # Depth chart and replacement impact
+    - "lineup_construction_impact" # Team lineup shuffle analysis
+    - "prop_market_adjustment" # How props should adjust
+    - "sgp_correlation_impact" # SGP leg correlation effects
+    - "long_term_outlook_assessment" # Season-long impact projection
+  max_subqueries: 6
+  parallel_execution: false # Sequential for injury analysis accuracy
+
+# === SPECIALIZED INJURY RETRIEVERS ===
+retrievers:
+  # Official MLB Injury Reports
+  - name: "mlb_official_injury_reports"
+    type: "http"
+    enabled: true
+    priority: 1
+    base_url: "https://www.mlb.com/injury-report"
+    rate_limit:
+      rpm: 60
+      burst: 10
+    extraction:
+      method: "beautifulsoup"
+      selectors:
+        player: ".player-name"
+        status: ".injury-status"
+        injury_type: ".injury-description"
+        timeline: ".expected-return"
+
+  # Team Beat Writers & Insider Reports
+  - name: "beat_writer_network"
+    type: "rss"
+    enabled: true
+    priority: 2
+    feeds:
+      - "https://rss.cnn.com/rss/si_baseball.rss"
+      - "https://www.espn.com/mlb/rss.xml"
+    content_filters:
+      keywords: ["injury", "IL", "disabled list", "day-to-day", "questionable"]
+
+  # Medical & Recovery Database
+  - name: "injury_recovery_database"
+    type: "vector"
+    enabled: true
+    priority: 1
+    index: "qdrant://injury_recovery_patterns"
+    embedding_model: "text-embedding-ada-002"
+    search_params:
+      metric: "cosine"
+      limit: 15
+      score_threshold: 0.80
+
+  # Depth Chart Analysis
+  - name: "depth_chart_api"
+    type: "http"
+    enabled: true
+    priority: 2
+    base_url: "https://api.rotowire.com/depth-charts"
+    rate_limit:
+      rpm: 100
+      burst: 15
+
+  # Social Media Injury Intel (Reporters, Team Accounts)
+  - name: "injury_intel_twitter"
+    type: "http"
+    enabled: true
+    priority: 3
+    base_url: "https://api.twitter.com/2/tweets/search/recent"
+    api_key_env: "TWITTER_API_KEY"
+    params:
+      query: "(injury OR IL OR DTD) (mlb OR baseball) -is:retweet"
+      max_results: 50
+    rate_limit:
+      rpm: 300
+      burst: 50
+
+# === INJURY-SPECIFIC RANKING ===
+ranking:
+  reranker: "crossencoder/nli-deberta-v3-small" # Good for factual claims
+
+  weights:
+    recency: 0.45 # Injury news is extremely time-sensitive
+    authority: 0.35 # Source reliability critical for injury info
+    semantic: 0.15 # Less weight on semantic matching
+    diversity: 0.05 # Less important for injury analysis
+
+  max_results: 15
+
+  # Injury-specific authority scoring
+  authority_multipliers:
+    "mlb.com": 1.0 # Official source
+    "team_official_sites": 0.95 # Team medical staff
+    "beat_writers": 0.85 # Trusted beat reporters
+    "espn.com": 0.80 # Major sports media
+    "rotowire.com": 0.85 # Fantasy/injury specialists
+    "rotoworld.com": 0.85 # Injury tracking specialists
+    "social_media_verified": 0.70 # Verified accounts only
+
+  # Injury report freshness is critical
+  freshness_decay:
+    official_injury_report: 2 # 2 hours max freshness
+    beat_writer_report: 4 # 4 hours for insider info
+    social_media: 1 # Social media decays very fast
+    medical_analysis: 24 # Medical analysis stays relevant longer
+
+# === INJURY INTELLIGENCE SYNTHESIS ===
+synthesis:
+  style: "structured" # Structured format for injury analysis
+  require_citation: true
+  max_tokens: 1600
+  temperature: 0.15 # Very low temperature for factual medical analysis
+
+  sections:
+    - "Injury Status Confirmation" # Current confirmed status
+    - "Medical Timeline Analysis" # Recovery timeline prediction
+    - "Historical Recovery Patterns" # Similar cases and outcomes
+    - "Replacement Player Assessment" # Who steps up and their capability
+    - "Lineup Impact Analysis" # How team adjusts lineup/strategy
+    - "Prop Market Implications" # Specific prop adjustments
+    - "SGP Correlation Effects" # How injury affects SGP construction
+    - "Risk Assessment" # Uncertainty factors and confidence
+    - "Monitoring Recommendations" # What to watch for updates
+
+  # Special injury analysis requirements
+  injury_analysis_rules:
+    always_include_timeline: true # Must provide timeline estimate
+    confidence_intervals: true # Provide confidence ranges
+    replacement_comparison: true # Compare replacement vs injured player
+    historical_context: true # Reference similar past injuries
+
+  # Citation requirements for medical claims
+  medical_citation_rules:
+    min_citations_per_claim: 2 # Medical claims need 2+ sources
+    require_official_source: true # Must include official MLB source
+    timestamp_all_reports: true # All injury reports must be timestamped
+
+# === INJURY ANALYSIS POLICIES ===
+policies:
+  # Only allow trusted medical/sports sources
+  allow_domains:
+    - "mlb.com"
+    - "*.mlb.com" # Team sites
+    - "espn.com"
+    - "theathletic.com"
+    - "rotowire.com"
+    - "rotoworld.com"
+    - "cbssports.com"
+    - "fantasypros.com"
+
+  deny_domains:
+    - "clickbait-sports.com"
+    - "unverified-rumors.net"
+
+  # Injury reports must be very fresh
+  freshness_days: 2 # Only 2 days max for injury intel
+
+  safety: "strict" # Strict fact-checking for medical claims
+
+  # Injury-specific policies
+  injury_policies:
+    never_speculate_medical: true # No medical speculation
+    require_official_confirmation: true # Must have official confirmation
+    disclaimer_uncertainty: true # Always include uncertainty disclaimers
+    no_return_date_guarantees: true # Never guarantee specific return dates
+
+# === INJURY INTELLIGENCE MODELS ===
+models:
+  primary: "gpt-4o" # Use best model for medical analysis
+  fallbacks:
+    - "gpt-4-turbo"
+    - "claude-3-sonnet" # Anthropic good for factual analysis
+
+  # Always use primary model for injury analysis
+  selection_rules:
+    injury_timeline: "gpt-4o"
+    medical_analysis: "gpt-4o"
+    replacement_analysis: "gpt-4o"
+    risk_assessment: "gpt-4o"
+
+  model_settings:
+    "gpt-4o":
+      temperature: 0.1 # Very conservative for medical analysis
+      max_tokens: 1800
+      top_p: 0.85 # Less randomness
+      frequency_penalty: 0.1 # Slight penalty for repetition
+
+# === INJURY TRACKING BUDGETS ===
+budgets:
+  tpm: 40000 # Conservative token usage
+  rpm: 400 # Reasonable request rate
+  cost_usd: 1.50 # Moderate cost per injury analysis
+  max_execution_time_sec: 35 # Quick turnaround for injury intel
+
+# === INJURY DATA CACHING ===
+cache:
+  # Very short caching for injury data
+  doc_ttl_min: 60 # 1 hour max for injury documents
+  answer_ttl_min: 15 # 15 minutes for injury analysis
+
+  # Injury status changes rapidly
+  cache_strategy: "exact_match" # Don't use similarity for injury queries
+  backend: "redis"
+
+# === INJURY INTELLIGENCE OUTPUTS ===
+outputs:
+  format: "structured_json"
+
+  sections:
+    - "InjuryStatus"
+    - "Timeline"
+    - "ReplacementAnalysis"
+    - "LineupImpact"
+    - "PropAdjustments"
+    - "SGPEffects"
+    - "RiskFactors"
+    - "MonitoringPlan"
+    - "Citations"
+
+  # Special injury output fields
+  injury_output_fields:
+    injury_severity_score: true # 1-10 severity scale
+    timeline_confidence: true # Confidence in timeline estimate
+    replacement_dropoff_pct: true # Performance drop percentage
+    lineup_stability_score: true # How much lineup disruption
+
+  # Export for other systems
+  export_formats: ["json", "xml"] # XML for integration systems
+  webhook_integrations:
+    lineup_optimizer: "https://api.eq12.com/lineup-updates"
+    prop_engine: "https://api.eq12.com/prop-adjustments"
+
+# === ENVIRONMENT OVERRIDES ===
+overrides:
+  development:
+    cache:
+      doc_ttl_min: 5 # Very short cache in dev
+      answer_ttl_min: 2
+    budgets:
+      cost_usd: 0.25
+
+  production:
+    policies:
+      require_official_confirmation: true
+      min_source_diversity: 4 # Need multiple sources in production
+    budgets:
+      cost_usd: 3.00 # Higher budget for production injury analysis

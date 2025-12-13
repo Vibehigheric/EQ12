@@ -1,0 +1,204 @@
+name: EQ12 Security & CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Secrets Detection
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+    - name: Check for Hardcoded Secrets
+      run: |
+        echo "🔍 Scanning for hardcoded secrets..."
+
+        # Check for common secret patterns
+        if grep -r "sk-[a-zA-Z0-9]" . --exclude-dir=.git; then
+          echo "❌ OpenAI API key detected!"
+          exit 1
+        fi
+
+        if grep -r "[0-9]*:.*" . --include="*.py" --include="*.ps1" | grep -i token; then
+          echo "❌ Potential bot token detected!"
+          exit 1
+        fi
+
+        if grep -r "AKIA[0-9A-Z]" . --exclude-dir=.git; then
+          echo "❌ AWS access key detected!"
+          exit 1
+        fi
+
+        echo "✅ No hardcoded secrets found"
+
+    - name: Validate .gitignore Coverage
+      run: |
+        echo "🔍 Validating .gitignore security coverage..."
+
+        # Check if critical patterns are ignored
+        required_patterns=(
+          "keys/"
+          "*.key"
+          ".env"
+          "credentials.*"
+          "secrets.*"
+          "logs/"
+        )
+
+        for pattern in "${required_patterns[@]}"; do
+          if ! grep -q "^${pattern}" .gitignore; then
+            echo "❌ Missing .gitignore pattern: ${pattern}"
+            exit 1
+          fi
+        done
+
+        echo "✅ .gitignore security patterns validated"
+
+  code-quality:
+    name: Code Quality & Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest safety bandit
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Lint with flake8
+      run: |
+        # Stop on syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Treat all other issues as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Security Scan with Bandit
+      run: |
+        bandit -r . -f json -o bandit-results.json || true
+        bandit -r . -ll
+
+    - name: Check Dependencies for Vulnerabilities
+      run: |
+        safety check --json --output safety-results.json || true
+        safety check
+
+    - name: Run Tests
+      run: |
+        if [ -d "tests" ]; then
+          pytest tests/ -v --tb=short
+        else
+          echo "No tests directory found"
+        fi
+
+  powershell-security:
+    name: PowerShell Security Scan
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: PSScriptAnalyzer Security Rules
+      shell: pwsh
+      run: |
+        Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
+
+        $results = Invoke-ScriptAnalyzer -Path . -Recurse -IncludeRule @(
+          'PSAvoidUsingPlainTextForPassword',
+          'PSAvoidUsingUserNameAndPasswordParams',
+          'PSAvoidUsingInvokeExpression',
+          'PSUseShouldProcessForStateChangingFunctions',
+          'PSAvoidGlobalVars'
+        ) -Severity @('Error', 'Warning')
+
+        if ($results) {
+          Write-Host "❌ PowerShell security issues found:" -ForegroundColor Red
+          $results | Format-Table -AutoSize
+          exit 1
+        } else {
+          Write-Host "✅ No PowerShell security issues found" -ForegroundColor Green
+        }
+
+  credential-validation:
+    name: Validate Credential Management
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Check Credential Manager
+      run: |
+        echo "🔍 Validating credential management system..."
+
+        # Verify credential manager exists
+        if [ ! -f "eq12_credential_manager.py" ]; then
+          echo "❌ Credential manager not found!"
+          exit 1
+        fi
+
+        # Check that .env is sanitized
+        if grep -q "sk-[a-zA-Z0-9]" .env 2>/dev/null; then
+          echo "❌ Live API keys found in .env file!"
+          exit 1
+        fi
+
+        # Verify keys directory is ignored
+        if ! grep -q "^keys/" .gitignore; then
+          echo "❌ Keys directory not properly ignored!"
+          exit 1
+        fi
+
+        echo "✅ Credential management validated"
+
+  deployment-security:
+    name: Deployment Security Check
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Validate Deployment Readiness
+      run: |
+        echo "🔍 Checking deployment security..."
+
+        # Ensure no test/dev credentials in production files
+        dev_patterns=("dev_secret" "test_" "placeholder" "REPLACE_")
+
+        for pattern in "${dev_patterns[@]}"; do
+          if grep -r "$pattern" . --include="*.py" --include="*.ps1" --exclude-dir=.git | grep -v "test" | grep -v "example"; then
+            echo "❌ Development credentials found in production code!"
+            exit 1
+          fi
+        done
+
+        # Check for proper environment variable usage
+        if ! grep -q "os.environ.get" *.py 2>/dev/null && ! grep -q "\$env:" *.ps1 2>/dev/null; then
+          echo "⚠️ No environment variable usage detected"
+        fi
+
+        echo "✅ Deployment security validated"

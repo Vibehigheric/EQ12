@@ -1,0 +1,180 @@
+# EQ12 GODSTACK Master Patch - Quick Installation Guide
+
+Write-Host "🚀 EQ12 GODSTACK MASTER PATCH INSTALLER" -ForegroundColor Green
+Write-Host "=" * 50 -ForegroundColor Green
+
+# Check if running as Administrator
+if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host "❌ This script requires Administrator privileges for Task Scheduler imports" -ForegroundColor Red
+    Write-Host "Right-click PowerShell and select 'Run as Administrator'" -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host "✅ Running with Administrator privileges" -ForegroundColor Green
+
+# Verify directories exist
+$EQ12Dir = "C:\EQ12"
+$MetaSearchDir = "$EQ12Dir\eq12_meta_search"
+$TasksDir = "$EQ12Dir\tasks"
+
+if (!(Test-Path $EQ12Dir)) {
+    Write-Host "❌ EQ12 directory not found: $EQ12Dir" -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "✅ EQ12 directory found" -ForegroundColor Green
+
+# Check Python installation
+try {
+    $pythonVersion = python --version 2>$null
+    Write-Host "✅ Python found: $pythonVersion" -ForegroundColor Green
+} catch {
+    Write-Host "❌ Python not found in PATH. Please install Python 3.8+" -ForegroundColor Red
+    exit 1
+}
+
+# Install Python dependencies
+Write-Host "`n📦 Installing Python dependencies..." -ForegroundColor Cyan
+Set-Location $MetaSearchDir
+
+$packages = @(
+    "beautifulsoup4",
+    "playwright", 
+    "requests",
+    "fastapi",
+    "uvicorn"
+)
+
+foreach ($package in $packages) {
+    Write-Host "Installing $package..." -ForegroundColor Yellow
+    pip install $package
+}
+
+# Install Playwright browsers
+Write-Host "`n🌐 Installing Playwright browsers..." -ForegroundColor Cyan
+playwright install chromium
+
+# Import Task Scheduler XMLs
+Write-Host "`n⚙️ Importing Task Scheduler XMLs..." -ForegroundColor Cyan
+
+$xmlFiles = @(
+    @{Name="EQ12-MetaSearchChained"; File="MetaSearchChained.xml"},
+    @{Name="EQ12-NewsAggregatorChained"; File="NewsAggregatorChained.xml"},
+    @{Name="EQ12-SwagbucksOffersChained"; File="SwagbucksOffersChained.xml"},
+    @{Name="EQ12-TrendingMonitorChained"; File="TrendingMonitorChained.xml"}
+)
+
+foreach ($xml in $xmlFiles) {
+    $xmlPath = "$TasksDir\$($xml.File)"
+    if (Test-Path $xmlPath) {
+        try {
+            schtasks /create /xml $xmlPath /tn $xml.Name /f | Out-Null
+            Write-Host "✅ Imported: $($xml.Name)" -ForegroundColor Green
+        } catch {
+            Write-Host "⚠️ Failed to import: $($xml.Name)" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "❌ XML file not found: $xmlPath" -ForegroundColor Red
+    }
+}
+
+# Initialize HumanLayer config
+Write-Host "`n🤖 Initializing HumanLayer configuration..." -ForegroundColor Cyan
+python hlayer_wrapper.py --init-config
+
+# Check environment variables
+Write-Host "`n🔑 Checking environment variables..." -ForegroundColor Cyan
+$requiredVars = @(
+    "OPENAI_SERVICE_KEY",
+    "TELEGRAM_BOT_TOKEN", 
+    "TELEGRAM_CHAT_ID",
+    "BING_SEARCH_API_KEY"
+)
+
+$missingVars = @()
+foreach ($var in $requiredVars) {
+    if ([string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($var))) {
+        $missingVars += $var
+    } else {
+        Write-Host "✅ $var configured" -ForegroundColor Green
+    }
+}
+
+if ($missingVars.Count -gt 0) {
+    Write-Host "⚠️ Missing environment variables:" -ForegroundColor Yellow
+    foreach ($var in $missingVars) {
+        Write-Host "   - $var" -ForegroundColor Red
+    }
+    Write-Host "Please configure these in your .env file or system environment" -ForegroundColor Yellow
+}
+
+# Test dashboard
+Write-Host "`n🌐 Testing enhanced dashboard..." -ForegroundColor Cyan
+Set-Location $EQ12Dir
+
+# Start dashboard in background for testing
+$dashboardJob = Start-Job -ScriptBlock {
+    Set-Location "C:\EQ12"
+    python -m uvicorn dashboard:app --port 8001 --timeout-keep-alive 5
+}
+
+Start-Sleep 3
+
+# Test if dashboard responds
+try {
+    $response = Invoke-WebRequest -Uri "http://localhost:8001/" -TimeoutSec 5 -UseBasicParsing
+    Write-Host "✅ Dashboard responding on http://localhost:8001" -ForegroundColor Green
+} catch {
+    Write-Host "⚠️ Dashboard test failed - may need manual configuration" -ForegroundColor Yellow
+}
+
+# Stop test dashboard
+Stop-Job $dashboardJob -Force
+Remove-Job $dashboardJob -Force
+
+# Final status report
+Write-Host "`n" + "=" * 50 -ForegroundColor Green
+Write-Host "🎉 EQ12 GODSTACK MASTER PATCH INSTALLATION COMPLETE!" -ForegroundColor Green
+Write-Host "=" * 50 -ForegroundColor Green
+
+Write-Host "`n📋 QUICK START COMMANDS:" -ForegroundColor Cyan
+Write-Host "1. Test trending monitor:" -ForegroundColor White
+Write-Host "   cd C:\EQ12\eq12_meta_search" -ForegroundColor Gray
+Write-Host "   python trending_monitor.py --telegram" -ForegroundColor Gray
+
+Write-Host "`n2. Start enhanced dashboard:" -ForegroundColor White  
+Write-Host "   cd C:\EQ12" -ForegroundColor Gray
+Write-Host "   uvicorn dashboard:app --reload --port 8000" -ForegroundColor Gray
+
+Write-Host "`n3. Query codebase with HumanLayer:" -ForegroundColor White
+Write-Host "   cd C:\EQ12\eq12_meta_search" -ForegroundColor Gray
+Write-Host "   python hlayer_wrapper.py --query ""Where are Telegram messages sent?""" -ForegroundColor Gray
+
+Write-Host "`n4. Test DevTools agent:" -ForegroundColor White
+Write-Host "   python devtools_agent.py --url https://www.swagbucks.com --action smart-scrape" -ForegroundColor Gray
+
+Write-Host "`n🔧 SCHEDULED TASKS:" -ForegroundColor Cyan
+Write-Host "   - Meta Search + Enrichment: Every 2 hours starting 7:00 AM" -ForegroundColor White
+Write-Host "   - News + Betting Analysis: Hourly starting 8:00 AM" -ForegroundColor White  
+Write-Host "   - Swagbucks + Ali Analysis: Every 4 hours starting 9:00 AM" -ForegroundColor White
+Write-Host "   - Trending Repos + Analysis: Daily at 9:00 AM" -ForegroundColor White
+
+Write-Host "`n📊 DASHBOARD ENDPOINTS:" -ForegroundColor Cyan
+Write-Host "   http://localhost:8000/ - Main dashboard" -ForegroundColor White
+Write-Host "   http://localhost:8000/trending - GitHub trending repos" -ForegroundColor White
+Write-Host "   http://localhost:8000/humanlayer?q=your_question - Codebase queries" -ForegroundColor White
+Write-Host "   http://localhost:8000/health - System health check" -ForegroundColor White
+
+if ($missingVars.Count -gt 0) {
+    Write-Host "`n⚠️ CONFIGURE MISSING ENVIRONMENT VARIABLES TO COMPLETE SETUP" -ForegroundColor Yellow
+} else {
+    Write-Host "`n✅ ALL SYSTEMS READY - EQ12 GODSTACK IS NOW FULLY ENHANCED!" -ForegroundColor Green
+}
+
+Write-Host "`n🚀 The EQ12 ecosystem now features:" -ForegroundColor Magenta
+Write-Host "   ✅ Chained enrichment (raw + GPT analysis)" -ForegroundColor White
+Write-Host "   ✅ GitHub trending intelligence" -ForegroundColor White  
+Write-Host "   ✅ HumanLayer codebase introspection" -ForegroundColor White
+Write-Host "   ✅ DevTools-enhanced browser automation" -ForegroundColor White
+Write-Host "   ✅ Cross-stack intelligence correlation" -ForegroundColor White
+Write-Host "   ✅ Self-maintaining automation pipeline" -ForegroundColor White

@@ -1,0 +1,197 @@
+name: "💡 Governance Improvement Request"
+description: "Propose improvements to EQ12 GODSTACK governance processes, rules, or automation."
+title: "[IMPROVEMENT] "
+labels: ["enhancement", "governance", "process-improvement"]
+assignees:
+  - Vibehigheric
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 💡 Governance Improvement Suggestion
+        
+        Thank you for suggesting improvements to our governance processes! Your input helps make EQ12 GODSTACK more secure, compliant, and efficient.
+
+  - type: dropdown
+    id: improvement_category
+    attributes:
+      label: "Improvement Category"
+      description: "What area of governance does this improvement target?"
+      options:
+        - "🔒 Security Gates & Scanning"
+        - "📋 PR Templates & Process"
+        - "👥 CODEOWNERS & Approvals"
+        - "🏷️ Auto-labeling & Classification"
+        - "📊 GitHub Projects & Tracking"
+        - "🤖 Workflow Automation"
+        - "📖 Documentation & Guides"
+        - "🎯 Compliance & Auditing"
+        - "🔗 Integration & Tools"
+        - "📱 Notifications & Alerts"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_problem
+    attributes:
+      label: "Current Problem/Pain Point"
+      description: "What current issue or inefficiency does this improvement address?"
+      placeholder: |
+        Describe the current problem:
+        - What's currently not working well?
+        - Where do you see friction or inefficiency?
+        - What manual processes could be automated?
+        - What compliance gaps exist?
+      value: |
+        **Current State:**
+        
+        **Problem:** 
+        **Impact:** 
+        **Frequency:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: "Proposed Improvement"
+      description: "Describe your suggested improvement in detail"
+      placeholder: |
+        Detailed proposal:
+        - What specific changes do you suggest?
+        - How would this work in practice?
+        - What new automation/rules/processes?
+        - Integration requirements?
+      value: |
+        **Proposed Solution:**
+        
+        **Implementation:** 
+        **Automation:** 
+        **Integration:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: "Expected Benefits"
+      description: "What benefits would this improvement provide?"
+      placeholder: |
+        Benefits analysis:
+        - How does this improve security/compliance?
+        - What efficiency gains are expected?
+        - How does this reduce manual work?
+        - What risks does it mitigate?
+      value: |
+        **Benefits:**
+        
+        **Security/Compliance:** 
+        **Efficiency:** 
+        **Risk Reduction:** 
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks_considerations
+    attributes:
+      label: "Risks & Considerations"
+      description: "What potential risks, trade-offs, or implementation challenges exist?"
+      placeholder: |
+        Risk assessment:
+        - What could go wrong with this change?
+        - Are there compliance concerns?
+        - Implementation complexity?
+        - Resource requirements?
+        - Compatibility issues?
+      value: |
+        **Potential Risks:**
+        
+        **Implementation Challenges:** 
+        **Resource Requirements:** 
+        **Compatibility:** 
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Suggested Priority"
+      description: "How urgent is this improvement?"
+      options:
+        - "🔴 Critical - Security/compliance risk exists"
+        - "🟡 High - Significant efficiency improvement"
+        - "🟢 Medium - Nice to have improvement"
+        - "🔵 Low - Future consideration"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: implementation_complexity
+    attributes:
+      label: "Implementation Complexity"
+      description: "How complex would this be to implement?"
+      options:
+        - "🟢 Simple - Configuration/documentation change"
+        - "🟡 Moderate - New workflow/template creation"
+        - "🟠 Complex - Multi-system integration required"
+        - "🔴 Very Complex - Major architecture changes"
+        - "❓ Unknown - Needs investigation"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: affected_areas
+    attributes:
+      label: "Affected Areas"
+      description: "Which areas would be impacted by this improvement?"
+      options:
+        - label: "🎰 Betting Stack processes"
+        - label: "🌿 Cannabis Stack processes"
+        - label: "💳 Credit Stack processes"
+        - label: "🔒 Security workflows"
+        - label: "📋 PR/Issue templates"
+        - label: "🤖 GitHub Actions workflows"
+        - label: "📊 Project management"
+        - label: "📖 Documentation"
+        - label: "🔗 External integrations"
+        - label: "👥 Team processes"
+
+  - type: textarea
+    id: examples_references
+    attributes:
+      label: "Examples & References"
+      description: "Provide examples, references, or similar implementations"
+      placeholder: |
+        Supporting information:
+        - Similar solutions you've seen
+        - Reference documentation
+        - Example implementations
+        - Industry best practices
+        - Related GitHub repos/workflows
+
+  - type: checkboxes
+    id: volunteering
+    attributes:
+      label: "Implementation Support"
+      description: "Can you help with implementation?"
+      options:
+        - label: "I can help with design/planning"
+        - label: "I can help with implementation"
+        - label: "I can help with testing/validation"
+        - label: "I can help with documentation"
+        - label: "I'm just suggesting - no implementation support available"
+
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+      label: "Acknowledgments"
+      description: "Please confirm understanding"
+      options:
+        - label: "I understand this suggestion will be reviewed by the governance team"
+          required: true
+        - label: "I confirm this improvement aligns with EQ12 GODSTACK compliance requirements"
+          required: true
+        - label: "I understand implementation timeline depends on priority and complexity"
+          required: true

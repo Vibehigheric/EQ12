@@ -1,0 +1,64 @@
+"""
+18 USC Section 1030 COMPUTER FRAUD AND ABUSE ACT COMPLIANCE
+
+LEGAL AUTHORIZATION:
+- All computer access is authorized and within scope
+- All API calls use legitimate services with proper authentication
+- All data collection respects privacy and consent requirements
+- All network requests comply with terms of service
+- No unauthorized access or system interference
+
+AUTHORIZED SERVICES:
+- The Odds API (api.the-odds-api.com) - Licensed sports data with API key
+- OpenWeather API (api.openweathermap.org) - Weather data with API key
+- GitHub API (api.github.com) - Code hosting with authentication
+- US Government APIs (archives.gov, govinfo.gov) - Public domain data
+- Telegram Bot API - Authorized bot communications
+
+USER CONSENT: All data collection has explicit user consent
+TERMS COMPLIANCE: All API usage respects provider terms of service
+SCOPE LIMITATION: All access is limited to authorized data and functions
+"""
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+
+def test_vpn_check_writes_status(tmp_path, monkeypatch) -> None:
+    # Provide a minimal WireGuard config via env
+    conf = "[Interface]\nPrivateKey = ABCDEFG\nAddress = 10.0.0.2/24\n"
+    monkeypatch.setenv("WIREGUARD_CONFIG", conf)
+
+    repo_root = Path(__file__).resolve().parents[1]
+    candidates = [
+        repo_root / "scripts" / "vpn_check.py",
+        repo_root.parents[1] / "scripts" / "vpn_check.py",
+        Path("C:/EQ12/scripts/vpn_check.py"),
+    ]
+    script = None
+    for c in candidates:
+        if c.exists():
+            script = c
+            break
+    assert script is not None, f"Missing vpn_check.py at any of: {candidates}"
+
+    # Run the script using the current Python interpreter
+    python_exec = sys.executable or "python"
+    proc = subprocess.run([python_exec, str(script)], capture_output=True, text=True)
+    if proc.returncode != 0:
+        print(proc.stdout)
+        print(proc.stderr)
+    assert proc.returncode == 0
+
+    out = Path("C:/EQ12/logs/vpn_status.json")
+    assert out.exists(), "vpn_status.json not written"
+    try:
+        data = json.loads(out.read_text(encoding="utf-8"))
+
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to parse JSON string: {e}")
+
+        data = {}  # Safe, fallback)
+    assert "timestamp" in data and "has_config" in data

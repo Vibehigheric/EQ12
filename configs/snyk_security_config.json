@@ -1,0 +1,254 @@
+{
+  "snyk_security_config": {
+    "version": "1.0.0",
+    "last_updated": "2024-01-15T10:30:00Z",
+    "description": "EQ12 Snyk Security Integration Configuration",
+    
+    "security_scanning": {
+      "enabled": true,
+      "scan_schedule": {
+        "frequency": "daily",
+        "time": "02:00",
+        "timezone": "UTC"
+      },
+      "scan_targets": {
+        "scripts": {
+          "path": "C:/EQ12/scripts",
+          "enabled": true,
+          "scan_types": ["SAST", "SCA", "secrets"]
+        },
+        "tests": {
+          "path": "C:/EQ12/tests", 
+          "enabled": true,
+          "scan_types": ["SAST", "SCA"]
+        },
+        "configs": {
+          "path": "C:/EQ12/configs",
+          "enabled": true,
+          "scan_types": ["secrets", "IaC"]
+        },
+        "dashboard": {
+          "path": "C:/EQ12/dashboard",
+          "enabled": true,
+          "scan_types": ["SAST", "SCA"]
+        }
+      }
+    },
+    
+    "snyk_cli_config": {
+      "installation_methods": [
+        "npm",
+        "scoop", 
+        "standalone_download"
+      ],
+      "authentication": {
+        "token_env_var": "SNYK_TOKEN",
+        "auto_auth": true
+      },
+      "scan_options": {
+        "json_output": true,
+        "all_projects": true,
+        "detection_depth": 4,
+        "timeout": 300
+      }
+    },
+    
+    "vulnerability_management": {
+      "severity_thresholds": {
+        "critical": {
+          "fail_build": true,
+          "max_allowed": 0,
+          "notification_required": true
+        },
+        "high": {
+          "fail_build": false,
+          "max_allowed": 5,
+          "notification_required": true
+        },
+        "medium": {
+          "fail_build": false,
+          "max_allowed": 10,
+          "notification_required": false
+        },
+        "low": {
+          "fail_build": false,
+          "max_allowed": 50,
+          "notification_required": false
+        }
+      },
+      "remediation_priorities": {
+        "critical": {
+          "sla_hours": 24,
+          "auto_fix": true,
+          "escalation_required": true
+        },
+        "high": {
+          "sla_hours": 168,
+          "auto_fix": false,
+          "escalation_required": false
+        },
+        "medium": {
+          "sla_hours": 720,
+          "auto_fix": false,
+          "escalation_required": false
+        }
+      }
+    },
+    
+    "reporting": {
+      "formats": ["json", "html", "pdf"],
+      "output_directory": "C:/EQ12/logs",
+      "retention_days": 90,
+      "email_reports": {
+        "enabled": false,
+        "recipients": [],
+        "schedule": "weekly"
+      },
+      "dashboard_integration": {
+        "enabled": true,
+        "update_frequency": "real_time"
+      }
+    },
+    
+    "integration_points": {
+      "eq12_betting_engine": {
+        "component": "betting_arbitrage_bot",
+        "security_priority": "critical",
+        "special_scans": ["financial_data_protection", "api_security"]
+      },
+      "eq12_chrome_automation": {
+        "component": "chrome_governance_automation", 
+        "security_priority": "high",
+        "special_scans": ["browser_security", "extension_safety"]
+      },
+      "eq12_ai_integration": {
+        "component": "gpt5_dashboard_generator",
+        "security_priority": "high", 
+        "special_scans": ["ai_model_security", "prompt_injection"]
+      },
+      "eq12_unified_system": {
+        "component": "unified_system_enhancement",
+        "security_priority": "critical",
+        "special_scans": ["system_integration", "data_flow_security"]
+      }
+    },
+    
+    "compliance_frameworks": {
+      "applicable_standards": [
+        "OWASP_Top_10",
+        "CWE_Top_25", 
+        "NIST_Cybersecurity_Framework",
+        "GDPR_Data_Protection"
+      ],
+      "custom_rules": {
+        "gambling_industry": {
+          "financial_data_encryption": true,
+          "user_data_protection": true,
+          "audit_trail_requirements": true
+        },
+        "betting_platform": {
+          "odds_manipulation_detection": true,
+          "transaction_integrity": true,
+          "real_time_monitoring": true
+        }
+      }
+    },
+    
+    "security_policies": {
+      "code_review": {
+        "required_for_security_changes": true,
+        "security_reviewer_required": true,
+        "automated_security_checks": true
+      },
+      "dependency_management": {
+        "auto_update_policy": "security_patches_only",
+        "approval_required_for_new_deps": true,
+        "vulnerability_monitoring": true
+      },
+      "secrets_management": {
+        "no_hardcoded_secrets": true,
+        "environment_variable_usage": true,
+        "rotation_policy_days": 90
+      }
+    },
+    
+    "alerting": {
+      "channels": {
+        "slack": {
+          "enabled": false,
+          "webhook_url": "",
+          "critical_only": true
+        },
+        "email": {
+          "enabled": false,
+          "smtp_config": {},
+          "recipients": []
+        },
+        "file_logging": {
+          "enabled": true,
+          "log_file": "C:/EQ12/logs/security_alerts.log",
+          "rotation": true
+        }
+      },
+      "alert_rules": {
+        "new_critical_vulnerability": true,
+        "scan_failure": true,
+        "authentication_issues": true,
+        "compliance_violations": true
+      }
+    },
+    
+    "automation": {
+      "ci_cd_integration": {
+        "enabled": false,
+        "pipeline_stages": ["pre_commit", "build", "deploy"],
+        "fail_on_critical": true
+      },
+      "scheduled_tasks": {
+        "daily_scan": true,
+        "weekly_report": true,
+        "monthly_compliance_check": true
+      },
+      "auto_remediation": {
+        "dependency_updates": false,
+        "configuration_fixes": false,
+        "notification_only": true
+      }
+    },
+    
+    "performance": {
+      "scan_optimization": {
+        "parallel_scanning": true,
+        "incremental_scans": true,
+        "cache_results": true
+      },
+      "resource_limits": {
+        "max_concurrent_scans": 3,
+        "memory_limit_mb": 2048,
+        "timeout_minutes": 30
+      }
+    },
+    
+    "eq12_specific_settings": {
+      "betting_component_priority": {
+        "odds_api_integration": "critical",
+        "payment_processing": "critical", 
+        "user_authentication": "critical",
+        "data_analytics": "high",
+        "ui_components": "medium"
+      },
+      "gambling_compliance": {
+        "audit_logging": true,
+        "data_retention_policies": true,
+        "user_privacy_protection": true,
+        "financial_transaction_security": true
+      },
+      "api_security": {
+        "rate_limiting": true,
+        "input_validation": true,
+        "output_encoding": true,
+        "authentication_mechanisms": ["oauth2", "api_keys"]
+      }
+    }
+  }
+}

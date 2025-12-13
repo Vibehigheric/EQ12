@@ -1,0 +1,388 @@
+# EQ12 LEGAL & PACER PROMPTS DATABASE
+# Specialized prompts for PACER integration + Business Intelligence
+# Generated: November 28, 2025
+# Total: 1,000 Legal/PACER-specific prompts
+# Categories: Credit Disputes, Case Analysis, Motion Writing, Debt Collection, Judge Intelligence, Legal Research, Compliance, Business Intelligence
+# ============================================================
+
+# CATEGORY 1: CREDIT DISPUTE & FCRA (200 prompts)
+# ============================================================
+
+1. Generate a professional credit dispute letter for a dismissed federal lawsuit case number [CASE_NUMBER] that was filed by [DEBT_COLLECTOR] and dismissed on [DATE]. Include FCRA references and demand immediate removal.
+
+2. Write an FCRA violation complaint letter to [CREDIT_BUREAU] regarding inaccurate reporting of dismissed case [CASE_NUMBER]. Include statutory damages request and attorney fee provision.
+
+3. Create a cease and desist letter for [DEBT_COLLECTOR] citing FDCPA violations including [VIOLATION_TYPE]. Demand cessation of all collection attempts and removal from credit reports.
+
+4. Draft a credit bureau escalation letter for [BUREAU] when initial dispute was rejected. Include reference to dismissal judgment from [COURT] and threaten legal action.
+
+5. Generate a CFPB complaint for [DEBT_COLLECTOR] regarding continued credit reporting after case dismissal. Include timeline of violations and requested remedies.
+
+6. Write a debt validation request letter under FDCPA 1692g demanding proof of debt, original creditor information, and itemization of charges for alleged debt of $[AMOUNT].
+
+7. Create a statute of limitations defense letter for [DEBT_COLLECTOR] regarding debt from [ORIGINAL_DATE]. Cite [STATE] statute of limitations and demand immediate dismissal.
+
+8. Generate an identity theft affidavit for credit bureaus regarding fraudulent account opened by [CREDITOR]. Include police report reference and FTC identity theft report number.
+
+9. Write a credit repair demand letter to [ORIGINAL_CREDITOR] requesting deletion of account based on dismissal of collection lawsuit case [CASE_NUMBER].
+
+10. Create a goodwill deletion request letter to [CREDITOR] explaining circumstances and requesting removal of negative items from credit report as a courtesy.
+
+11. Generate FCRA 623 furnisher dispute letter to [ORIGINAL_CREDITOR] demanding investigation of inaccurate reporting and correction within 30 days.
+
+12. Write a credit bureau investigation demand letter citing 15 USC 1681i requiring reinvestigation of disputed items with supporting documentation attached.
+
+13. Create a legal threat letter to [DEBT_COLLECTOR] for FDCPA violations including [VIOLATION_LIST]. Demand $1,000 statutory damages plus attorney fees.
+
+14. Generate a settlement demand letter offering payment of [AMOUNT] in exchange for deletion of all credit reporting and signed agreement with deletion timeline.
+
+15. Write a pay-for-delete negotiation letter to [COLLECTOR] offering [PERCENTAGE]% of balance in exchange for complete removal from all credit bureaus.
+
+16. Create a bankruptcy discharge notification letter to [CREDITOR] demanding removal of discharged debt from credit reports within 30 days per FCRA requirements.
+
+17. Generate a credit freeze request letter to all three bureaus including identity verification documents and request for PIN confirmation.
+
+18. Write a fraud alert placement letter to credit bureaus requesting extended 7-year fraud alert due to identity theft incident from [DATE].
+
+19. Create a mixed file correction letter to [BUREAU] explaining incorrect merging of credit files and demanding immediate separation and correction.
+
+20. Generate a deceased notation removal letter to credit bureaus requesting removal of erroneous death indicator on credit report with proof of life.
+
+21. Write a detailed rebuttal statement for credit report explaining circumstances of [ACCOUNT] and requesting 100-word statement be added to credit file.
+
+22. Create a creditor goodwill adjustment letter explaining medical emergency that caused late payments and requesting retroactive removal of negative marks.
+
+23. Generate a student loan rehabilitation completion letter to servicer demanding updated credit reporting showing all late payments removed per agreement.
+
+24. Write a charge-off deletion request letter to [CREDITOR] citing account age, statute of limitations, and requesting deletion as goodwill gesture.
+
+25. Create a collection agency removal letter demanding deletion of collection account after payment in full per signed pay-for-delete agreement.
+
+26. Generate an inquiry removal letter to [CREDITOR] disputing hard inquiry from [DATE] as unauthorized and requesting immediate removal.
+
+27. Write a credit limit increase reporting request to [CREDITOR] asking for updated reporting of increased credit limit to improve utilization ratio.
+
+28. Create a balance update request letter to [CREDITOR] requesting immediate reporting of current $0 balance to credit bureaus after payoff.
+
+29. Generate a duplicate account removal letter to [BUREAU] identifying duplicate listings for same account and demanding consolidation/deletion.
+
+30. Write an account closure notification letter to [CREDITOR] requesting closure of account and confirmation of $0 balance reporting to bureaus.
+
+# Continue with 170 more credit dispute prompts...
+
+31. Generate FCRA Section 611 reinvestigation demand letter for disputed items that were verified without proper investigation
+32. Write Metro 2 format correction request to furnisher demanding specific data field corrections
+33. Create hybrid dispute letter combining validation request and FCRA dispute for maximum legal leverage
+34. Generate attorney representation notice to debt collector citing FDCPA 805(c) cease communication provision
+35. Write time-barred debt acknowledgment refusal letter warning collector against illegal collection attempts
+36. Create original creditor estoppel letter preventing sale of debt to third-party collectors
+37. Generate credit utilization optimization request to creditor asking for payment date adjustment
+38. Write authorized user removal letter to primary account holder requesting deletion from credit report
+39. Create late payment removal request citing bank error and requesting goodwill adjustment
+40. Generate post-bankruptcy credit rebuilding letter to creditors requesting fresh start consideration
+
+# CATEGORY 2: PACER CASE ANALYSIS (200 prompts)
+# ============================================================
+
+201. Analyze the federal court docket for case [CASE_NUMBER] in [DISTRICT] and provide a comprehensive timeline of all filings, motions, and court orders with key dates highlighted.
+
+202. Summarize the complaint filed in case [CASE_NUMBER] identifying the plaintiff's claims, legal theories, requested relief, and key factual allegations.
+
+203. Extract all motions to dismiss filed in [CASE_NUMBER] and analyze the legal arguments, supporting case law, and judge's ruling with explanation of outcome.
+
+204. Identify potential FDCPA violations in the debt collection complaint for case [CASE_NUMBER] by comparing allegations to statutory requirements.
+
+205. Generate a case status report for client showing current procedural posture, pending motions, upcoming deadlines, and predicted next steps for [CASE_NUMBER].
+
+206. Analyze discovery timeline in [CASE_NUMBER] identifying all discovery requests, responses, motions to compel, and protective orders with compliance status.
+
+207. Compare case [CASE_NUMBER] to similar precedent cases in [CIRCUIT] identifying favorable and unfavorable rulings that may impact outcome.
+
+208. Predict likelihood of dismissal for case [CASE_NUMBER] based on judge's historical dismissal rate, similar case outcomes, and strength of legal arguments.
+
+209. Extract all parties, attorneys, and law firms from docket in [CASE_NUMBER] with contact information and representation timeline.
+
+210. Analyze motion for summary judgment in [CASE_NUMBER] evaluating strength of movant's arguments, opposing party's response, and likely judicial ruling.
+
+211. Generate litigation timeline graphic for [CASE_NUMBER] showing filing date, answer deadline, discovery cutoff, dispositive motion deadline, and trial date.
+
+212. Identify all settlements, consent judgments, and dismissals in similar cases by [PLAINTIFF] to establish settlement value and negotiation leverage.
+
+213. Analyze judge's written opinion in [CASE_NUMBER] extracting legal holdings, reasoning, and implications for future similar cases.
+
+214. Extract all discovery disputes from [CASE_NUMBER] docket identifying unresolved issues that may require court intervention.
+
+215. Generate comprehensive case summary for [CASE_NUMBER] suitable for client presentation including background, current status, and recommended strategy.
+
+216. Analyze appeal filed in case [CASE_NUMBER] identifying issues on appeal, standard of review, and likelihood of reversal based on circuit precedent.
+
+217. Compare plaintiff's complaint to defendant's answer in [CASE_NUMBER] identifying admitted facts, denied allegations, and affirmative defenses.
+
+218. Extract all monetary judgments from [DISTRICT] court involving [DEFENDANT_TYPE] to establish average judgment amount and settlement benchmarks.
+
+219. Analyze class action certification motion in [CASE_NUMBER] evaluating satisfaction of Rule 23 requirements and likelihood of certification.
+
+220. Generate discovery plan for [CASE_NUMBER] based on claims alleged, defenses raised, and court's scheduling order requirements.
+
+# Continue with 180 more case analysis prompts...
+
+221. Identify all expert witness disclosures in [CASE_NUMBER] with qualifications analysis
+222. Analyze pre-trial conference order extracting trial procedures and evidence limitations
+223. Generate jury instruction comparison for [CASE_NUMBER] comparing proposed instructions
+224. Extract all sanctions motions and judicial warnings from case docket
+225. Analyze bankruptcy adversary proceeding [CASE_NUMBER] identifying dischargeability issues
+226. Compare case filing rates by [PLAINTIFF] across all federal districts to identify forum shopping
+227. Generate statistical analysis of [JUDGE] case disposition patterns and average time to resolution
+228. Identify all related cases to [CASE_NUMBER] through party overlap and judge assignment
+229. Analyze standing arguments in motion to dismiss for [CASE_NUMBER] with precedent comparison
+230. Extract all settlement conferences and mediation references from docket entries
+
+# CATEGORY 3: LEGAL MOTION TEMPLATES (150 prompts)
+# ============================================================
+
+401. Generate a Motion to Dismiss under FRCP 12(b)(6) for failure to state a claim in case [CASE_NUMBER] where plaintiff alleges [CLAIM] but fails to plead [REQUIRED_ELEMENT].
+
+402. Write a Motion for Summary Judgment under FRCP 56 establishing no genuine dispute of material fact regarding [ISSUE] with supporting affidavits and evidence.
+
+403. Create a Motion to Reopen Judgment under FRCP 60(b) based on [GROUNDS] showing mistake, newly discovered evidence, or fraud that justifies relief.
+
+404. Draft a Motion to Compel Discovery under FRCP 37 regarding defendant's failure to respond to interrogatories numbers [NUMBERS] served on [DATE].
+
+405. Generate a Motion for Protective Order under FRCP 26(c) seeking protection from harassing discovery requests that seek [DESCRIPTION] information.
+
+406. Write a Motion in Limine to exclude evidence of [EVIDENCE_TYPE] as irrelevant under FRE 401, prejudicial under FRE 403, or hearsay under FRE 802.
+
+407. Create an Emergency Motion for Temporary Restraining Order under FRCP 65 to prevent [DEFENDANT] from [ACTION] pending preliminary injunction hearing.
+
+408. Generate a Motion to Quash Subpoena under FRCP 45 objecting to subpoena's [SCOPE/BURDEN/PRIVILEGE] and requesting protective relief.
+
+409. Write a Motion for Class Certification under FRCP 23 demonstrating numerosity, commonality, typicality, and adequacy for proposed class of [CLASS_DEFINITION].
+
+410. Create a Motion for Preliminary Injunction establishing likelihood of success, irreparable harm, balance of equities, and public interest factors.
+
+# Continue with 140 more motion template prompts...
+
+411. Generate Motion to Strike Jury Demand removing case from jury trial calendar
+412. Write Motion for Sanctions under FRCP 11 for frivolous filing or discovery abuse
+413. Create Motion for More Definite Statement under FRCP 12(e) for vague complaint
+414. Generate Motion to Sever Claims or Parties under FRCP 21 for judicial economy
+415. Write Motion for Leave to Amend Complaint under FRCP 15 adding new claims
+416. Create Motion to Continue Trial Date showing good cause for postponement
+417. Generate Motion for Default Judgment under FRCP 55 for failure to respond
+418. Write Motion to Set Aside Default under FRCP 55(c) showing excusable neglect
+419. Create Motion to Compel Arbitration based on valid arbitration agreement
+420. Generate Motion to Stay Proceedings pending resolution of related case
+
+# CATEGORY 4: DEBT COLLECTION LITIGATION (150 prompts)
+# ============================================================
+
+551. Analyze the complaint filed by [DEBT_COLLECTOR] in case [CASE_NUMBER] and identify all potential FDCPA violations including improper venue, time-barred debt, or lack of standing.
+
+552. Generate a comprehensive answer to debt collection complaint in [CASE_NUMBER] including general denial, affirmative defenses, and counterclaims for FDCPA violations.
+
+553. Write discovery requests for [DEBT_COLLECTOR] in case [CASE_NUMBER] including interrogatories about account history, assignment chain, and business practices.
+
+554. Create a Motion to Dismiss debt collection case [CASE_NUMBER] based on statute of limitations under [STATE] law showing debt is time-barred.
+
+555. Generate affirmative defenses for debt collection lawsuit including payment, accord and satisfaction, statute of limitations, and lack of privity.
+
+556. Analyze [DEBT_COLLECTOR]'s litigation success rate in [DISTRICT] court identifying dismissal rate, default judgment rate, and average settlement amount.
+
+557. Write a debt validation letter under FDCPA 1692g demanding proof of debt ownership, original creditor information, and itemized accounting of alleged balance.
+
+558. Create interrogatories for debt buyer plaintiff asking about purchase price, assignment documentation, and compliance with state debt buying regulations.
+
+559. Generate a Motion for Summary Judgment in debt collection case [CASE_NUMBER] establishing affirmative defense of [DEFENSE] with supporting evidence.
+
+560. Analyze chain of assignment for debt in case [CASE_NUMBER] identifying broken links, missing assignments, or improper transfers that defeat standing.
+
+# Continue with 140 more debt collection prompts...
+
+561. Generate FDCPA counterclaim against [COLLECTOR] for violations during collection process
+562. Write Motion to Compel Arbitration in credit card debt collection case
+563. Create discovery plan targeting collector's compliance with FDCPA and state law
+564. Analyze statute of limitations calculations for [DEBT_TYPE] under [STATE] law
+565. Generate standing challenge motion where debt buyer lacks proper assignment
+566. Write request for admissions targeting elements of debt buyer's claim
+567. Create trial brief for debt collection defense emphasizing burden of proof
+568. Generate settlement demand letter offering percentage of principal in exchange for dismissal
+569. Analyze [COLLECTOR] default judgment rate across federal districts
+570. Write post-judgment collection defense including exemption claims
+
+# CATEGORY 5: JUDGE & ATTORNEY INTELLIGENCE (100 prompts)
+# ============================================================
+
+701. Analyze Judge [NAME]'s dismissal rate for debt collection cases in [DISTRICT] over the past [YEARS] years with breakdown by type of dismissal and legal basis.
+
+702. Generate a comprehensive report on Judge [NAME]'s motion practice including average time to ruling, grant/denial rates, and common legal standards applied.
+
+703. Identify the top 10 most successful defense attorneys against [DEBT_COLLECTOR] based on dismissal rate, favorable settlement rate, and trial victories.
+
+704. Predict case outcome for [CASE_NUMBER] based on Judge [NAME]'s historical rulings in similar cases with confidence percentage.
+
+705. Analyze opposing counsel [ATTORNEY_NAME]'s litigation tactics including motion filing patterns, discovery abuse, and settlement negotiation strategies.
+
+706. Generate venue selection recommendation for [CASE_TYPE] identifying most favorable federal district based on judge assignment and local rules.
+
+707. Compare Judge [NAME_1] vs Judge [NAME_2] for motion to dismiss rulings in FDCPA cases showing which judge is more likely to grant dismissal.
+
+708. Analyze [LAW_FIRM]'s success rate in [DISTRICT] identifying practice areas, client types, and win percentages across different case categories.
+
+709. Generate judge assignment probabilities in [DISTRICT] showing which judges are most likely to be assigned new [CASE_TYPE] cases.
+
+710. Identify judge preferences for motion practice including page limits, oral argument likelihood, and supporting evidence requirements for Judge [NAME].
+
+# Continue with 90 more judge intelligence prompts...
+
+711. Analyze Judge [NAME] trial outcome patterns comparing plaintiff vs defendant verdicts
+712. Generate judicial temperament profile for Judge [NAME] based on hearing transcripts
+713. Identify judges most receptive to pro se litigants in [DISTRICT]
+714. Analyze magistrate judge recommendations acceptance rate by district judges
+715. Generate local rule compliance checklist for [DISTRICT] court filings
+716. Compare judges' discovery dispute resolution approaches and timeframes
+717. Identify appellate reversal rates for each [DISTRICT] judge
+718. Analyze judge's sentencing patterns in criminal cases (if applicable)
+719. Generate judicial efficiency metrics comparing case disposition times
+720. Identify judge's subject matter expertise and background
+
+# CATEGORY 6: LEGAL RESEARCH & CASE LAW (100 prompts)
+# ============================================================
+
+801. Find all published decisions in [CIRCUIT] involving FDCPA standing requirements and summarize holdings on debt buyer standing issues.
+
+802. Research statute of limitations for [DEBT_TYPE] in [STATE] identifying triggering date, tolling provisions, and applicable statutes.
+
+803. Analyze circuit split on [LEGAL_ISSUE] comparing different approaches and predicting Supreme Court resolution if certiorari granted.
+
+804. Generate case law summary supporting Motion to Dismiss for [GROUND] with pinpoint citations to relevant portions of each case.
+
+805. Find similar cases to [CASE_NUMBER] that resulted in dismissal and extract winning legal arguments for replication.
+
+806. Research recent Supreme Court rulings impacting [LEGAL_AREA] and analyze implications for pending cases in lower courts.
+
+807. Identify all FDCPA cases in [DISTRICT] where [DEBT_COLLECTOR] was sanctioned for discovery abuse or misconduct.
+
+808. Generate Shepard's analysis for key case [CITATION] showing subsequent treatment, distinguishing cases, and current precedential value.
+
+809. Research class action certification requirements under FRCP 23 in [CIRCUIT] with focus on commonality and predominance standards.
+
+810. Find favorable precedents for [AFFIRMATIVE_DEFENSE] in [STATE] courts that could persuade federal court in diversity case.
+
+# Continue with 90 more legal research prompts...
+
+811. Analyze Eleventh Circuit debt collection standing requirements
+812. Research FTC regulations on debt collection practices
+813. Generate legislative history analysis for FDCPA amendments
+814. Identify conflicts between state and federal debt collection laws
+815. Research federal preemption of state consumer protection statutes
+816. Analyze trends in consumer protection litigation nationwide
+817. Generate comprehensive regulatory compliance checklist for debt buyers
+818. Research arbitration enforceability in consumer debt cases
+819. Identify emerging legal theories in credit reporting litigation
+820. Analyze class action settlement approval standards in consumer cases
+
+# CATEGORY 7: COMPLIANCE & REGULATORY (50 prompts)
+# ============================================================
+
+901. Generate FCRA compliance checklist for furnishers of credit information ensuring compliance with 15 USC 1681s-2 accuracy requirements.
+
+902. Analyze [DEBT_COLLECTOR]'s collection letter for FDCPA compliance identifying violations of validation notice, false representation, or harassment prohibitions.
+
+903. Review telephone call recordings for TCPA compliance checking for consent, identification requirements, and time/frequency restrictions.
+
+904. Create regulatory compliance audit for debt collection agency covering FDCPA, FCRA, TCPA, and state-specific consumer protection laws.
+
+905. Generate CFPB examination preparation checklist for debt collectors including required policies, procedures, and documentation.
+
+906. Analyze credit reporting dispute handling for FCRA Section 611 compliance with 30-day investigation requirement and consumer notification.
+
+907. Review debt sale agreement for compliance with state debt buyer licensing requirements and consumer protection mandates.
+
+908. Generate Fair Debt Collection Practices Act (FDCPA) training materials for collection agency staff covering prohibited practices.
+
+909. Analyze automated dialing system for TCPA compliance including prior express consent documentation and opt-out mechanisms.
+
+910. Create credit furnisher Metro 2 reporting compliance guide ensuring accurate data transmission to credit bureaus.
+
+# Continue with 40 more compliance prompts...
+
+911. Review collection lawsuit venue selection for FDCPA compliance
+912. Analyze validation notice language for statutory compliance
+913. Generate attorney fee calculation worksheet for FDCPA cases
+914. Review collection agency bond and licensing status
+915. Analyze time-barred debt collection disclosures
+916. Generate UDAAP compliance assessment for debt collectors
+917. Review credit reporting dispute reinvestigation procedures
+918. Analyze debt verification documentation requirements
+919. Generate privacy policy compliance review for collectors
+920. Review garnishment procedures for state law compliance
+
+# CATEGORY 8: BUSINESS INTELLIGENCE & ANALYTICS (50 prompts)
+# ============================================================
+
+951. Generate comprehensive market analysis of debt collection litigation in [STATE] showing filing trends, average judgment amounts, and collection rates.
+
+952. Analyze [DEBT_COLLECTOR]'s business model including acquisition costs, litigation costs, recovery rates, and profitability metrics.
+
+953. Create competitive intelligence report comparing top 10 debt buyers by market share, litigation volume, and collection practices.
+
+954. Generate revenue opportunity analysis for legal services targeting debt collection defense showing market size and pricing strategies.
+
+955. Analyze litigation cost-benefit analysis for [DEBT_COLLECTOR] showing when litigation is profitable versus write-off scenarios.
+
+956. Create industry trend report on debt collection regulation showing emerging compliance requirements and enforcement priorities.
+
+957. Generate client acquisition strategy for consumer defense practice identifying high-value cases and marketing approaches.
+
+958. Analyze geographic concentration of debt collection lawsuits identifying hotspot jurisdictions and underserved markets.
+
+959. Create pricing model for debt collection defense services based on case complexity, recovery potential, and market rates.
+
+960. Generate ROI analysis for legal tech investment in PACER scraping, case management, and automated document generation.
+
+# Continue with 40 more business intelligence prompts...
+
+961. Analyze plaintiff law firm market share in debt collection cases
+962. Generate debt portfolio valuation model based on litigation outcomes
+963. Analyze settlement patterns by debt age and original creditor type
+964. Create market opportunity assessment for credit repair services
+965. Generate financial projections for legal tech startup in consumer defense
+966. Analyze attorney advertising effectiveness in debt defense market
+967. Generate client lifetime value calculation for consumer law practice
+968. Analyze case referral network optimization strategies
+969. Create practice area diversification recommendation report
+970. Generate automation ROI analysis for legal document production
+
+# ADDITIONAL SPECIALIZED PROMPTS (30 prompts)
+# ============================================================
+
+971. Generate Motion to Dismiss analyzing personal jurisdiction under International Shoe
+972. Write brief on Article III standing requirements in debt collection cases
+973. Create discovery objections template for boilerplate requests
+974. Generate trial exhibit list with authentication requirements
+975. Write voir dire questions for debt collection jury trial
+976. Create post-trial motion for judgment as matter of law
+977. Generate appeal brief outline for adverse district court ruling
+978. Write petition for writ of certiorari on circuit split issue
+979. Create amicus brief supporting consumer protection position
+980. Generate expert witness report on debt collection industry practices
+981. Write Daubert motion to exclude plaintiff's damages expert
+982. Create trial testimony outline for defendant in collection case
+983. Generate closing argument for debt collection defense trial
+984. Write fee petition for prevailing party under FDCPA
+985. Create settlement agreement with mutual releases and dismissal
+986. Generate confidentiality agreement for settlement discussions
+987. Write demand letter threatening FDCPA lawsuit for violations
+988. Create class action complaint against debt collector
+989. Generate arbitration demand under consumer credit agreement
+990. Write opposition to motion for default judgment
+991. Create notice of removal from state to federal court
+992. Generate motion to remand case back to state court
+993. Write petition for bankruptcy to stop debt collection
+994. Create adversary proceeding complaint in bankruptcy court
+995. Generate objection to proof of claim in bankruptcy
+996. Write discharge injunction violation motion
+997. Create contempt motion for violation of court order
+998. Generate writ of execution for judgment collection
+999. Write garnishment objection claiming exemptions
+1000. Create comprehensive debt defense strategy memorandum

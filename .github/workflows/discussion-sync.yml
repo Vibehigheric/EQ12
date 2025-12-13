@@ -1,0 +1,406 @@
+name: "Discussion Sync & Governance Integration"
+
+on:
+  workflow_run:
+    workflows: ["Secrets Gate", "Security Scan", "CI All-in-One", "Governance Board Sync"]
+    types:
+      - completed
+  
+  schedule:
+    # Quarterly audit discussion creation
+    - cron: '0 9 1 1,4,7,10 *'  # 9 AM on 1st day of Q1, Q2, Q3, Q4
+  
+  workflow_dispatch:
+    inputs:
+      discussion_type:
+        description: 'Type of discussion to create'
+        required: true
+        default: 'governance'
+        type: choice
+        options:
+        - governance
+        - security
+        - audit
+        - ci-cd
+
+permissions:
+  contents: read
+  discussions: write
+  issues: read
+  pull-requests: read
+
+jobs:
+  sync-governance-discussions:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh -y
+
+      - name: Authenticate GitHub CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "$GITHUB_TOKEN" | gh auth login --with-token
+
+      - name: Create or Update Governance Failure Discussion
+        if: github.event.workflow_run.conclusion == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+          WORKFLOW_URL="${{ github.event.workflow_run.html_url }}"
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          
+          # Determine discussion category based on workflow name
+          CATEGORY="Governance & Compliance"
+          if [[ "$WORKFLOW_NAME" == *"Security"* ]] || [[ "$WORKFLOW_NAME" == *"CodeQL"* ]]; then
+            CATEGORY="Security & Secrets"
+          elif [[ "$WORKFLOW_NAME" == *"CI"* ]] || [[ "$WORKFLOW_NAME" == *"Test"* ]]; then
+            CATEGORY="CI/CD & Actions"
+          fi
+          
+          # Create discussion title with timestamp
+          DISCUSSION_TITLE="🚨 Governance Failure: $WORKFLOW_NAME - $(date '+%Y-%m-%d %H:%M')"
+          
+          # Create discussion body
+          DISCUSSION_BODY="## Governance Workflow Failure Alert
+          
+          **Workflow:** [$WORKFLOW_NAME]($WORKFLOW_URL)
+          **Status:** ❌ $CONCLUSION
+          **Timestamp:** $(date '+%Y-%m-%d %H:%M:%S UTC')
+          **Repository:** ${{ github.repository }}
+          
+          ### Analysis Required
+          
+          This governance workflow has failed and requires immediate attention:
+          
+          1. **Review the workflow logs** - [View Run]($WORKFLOW_URL)
+          2. **Identify root cause** - Check for:
+             - Secret scanning violations
+             - Security vulnerabilities (CodeQL)
+             - Test failures or coverage issues
+             - Compliance gate failures
+          3. **Take corrective action** - Fix issues before merge
+          4. **Update this discussion** - Document resolution steps
+          
+          ### Related PRs
+          
+          $(gh pr list --state open --json number,title,url --jq '.[] | \"- [#\" + (.number | tostring) + \"]\" + .url + \" - \" + .title')
+          
+          ### Next Steps
+          
+          - [ ] Investigate failure cause
+          - [ ] Create fix PR if needed
+          - [ ] Re-run workflow
+          - [ ] Document lessons learned
+          - [ ] Update governance rules if necessary
+          
+          ### Sensitive Stack Alert
+          
+          If this failure involves sensitive business stacks (Betting, Cannabis, Credit), **immediate escalation** is required:
+          - Notify @Vibehigheric via Telegram
+          - Block related PRs until resolution
+          - Review compliance implications
+          
+          ---
+          
+          *This discussion was automatically created by the governance monitoring system.*
+          *For urgent issues, contact: compliance@eq12-godstack.local*"
+          
+          # Check if similar discussion exists (within last 24 hours)
+          EXISTING_DISCUSSION=$(gh api graphql -f query='
+            query($owner: String!, $repo: String!) {
+              repository(owner: $owner, name: $repo) {
+                discussions(first: 20, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  nodes {
+                    title
+                    createdAt
+                    url
+                  }
+                }
+              }
+            }
+          ' -f owner="${{ github.repository_owner }}" -f repo="${{ github.event.repository.name }}" --jq '.data.repository.discussions.nodes[] | select(.title | contains("'"$WORKFLOW_NAME"'")) | select(.createdAt > "'$(date -d '24 hours ago' -Iso)'")')
+          
+          if [[ -z "$EXISTING_DISCUSSION" ]]; then
+            # Create new discussion
+            gh api graphql -f query='
+              mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+                createDiscussion(input: {
+                  repositoryId: $repositoryId
+                  categoryId: $categoryId
+                  title: $title
+                  body: $body
+                }) {
+                  discussion {
+                    url
+                  }
+                }
+              }
+            ' -f repositoryId="${{ github.event.repository.node_id }}" \
+              -f categoryId="$(gh api graphql -f query='query($owner: String!, $repo: String!) { repository(owner: $owner, name: $repo) { discussionCategories(first: 10) { nodes { id name } } } }' -f owner="${{ github.repository_owner }}" -f repo="${{ github.event.repository.name }}" --jq '.data.repository.discussionCategories.nodes[] | select(.name=="'"$CATEGORY"'") | .id')" \
+              -f title="$DISCUSSION_TITLE" \
+              -f body="$DISCUSSION_BODY"
+            
+            echo "✅ Created governance failure discussion: $DISCUSSION_TITLE"
+          else
+            echo "ℹ️ Similar discussion already exists within 24 hours"
+          fi
+
+      - name: Create Quarterly Audit Discussion
+        if: github.event_name == 'schedule'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          QUARTER=$(date '+Q%q %Y')
+          DISCUSSION_TITLE="📊 $QUARTER Compliance Audit Discussion"
+          
+          DISCUSSION_BODY="## Quarterly Compliance Audit - $QUARTER
+          
+          This discussion tracks the quarterly compliance audit for EQ12 GODSTACK.
+          
+          ### Audit Scope
+          
+          - **Security Controls**: Secret scanning, CodeQL, dependency review
+          - **Governance Process**: PR templates, CODEOWNERS, governance gates
+          - **Business Stack Compliance**: Betting, Cannabis, Credit regulations
+          - **Access Controls**: Authentication, authorization, session management
+          - **Workflow Security**: Action verification, SHA pinning, permission scoping
+          
+          ### Audit Checklist
+          
+          #### Security Assessment
+          - [ ] Review secret scanning alerts and resolution
+          - [ ] Analyze CodeQL findings and remediation
+          - [ ] Validate dependency vulnerability management
+          - [ ] Check commit signature verification compliance
+          - [ ] Audit SSH key and PAT management
+          
+          #### Governance Review
+          - [ ] Verify CODEOWNERS effectiveness
+          - [ ] Review PR template usage and compliance
+          - [ ] Analyze governance gate pass/fail rates
+          - [ ] Validate sensitive stack protection measures
+          - [ ] Check workflow modification controls
+          
+          #### Business Stack Compliance
+          - [ ] **Betting Stack**: Responsible gaming compliance review
+          - [ ] **Cannabis Stack**: METRC and state regulation compliance
+          - [ ] **Credit Stack**: PCI DSS and financial regulation compliance
+          - [ ] Document any regulatory changes or updates
+          
+          #### Technical Controls
+          - [ ] Review GitHub Actions workflow security
+          - [ ] Validate third-party action SHA pinning
+          - [ ] Check branch protection rule effectiveness
+          - [ ] Audit repository permission scoping
+          - [ ] Verify backup and disaster recovery procedures
+          
+          ### Metrics to Review
+          
+          - PR governance gate success rates
+          - Security finding resolution times
+          - Sensitive stack change approval rates
+          - Authentication failure incidents
+          - Workflow security violations
+          
+          ### Audit Timeline
+          
+          - **Week 1**: Security and technical controls review
+          - **Week 2**: Governance process assessment
+          - **Week 3**: Business stack compliance validation
+          - **Week 4**: Report compilation and recommendations
+          
+          ### Previous Quarter Actions
+          
+          _(Link to previous quarter's audit discussion and track progress on recommendations)_
+          
+          ---
+          
+          **Audit Lead**: @Vibehigheric
+          **Compliance Contact**: compliance@eq12-godstack.local
+          **Due Date**: $(date -d '+30 days' '+%Y-%m-%d')
+          
+          *This discussion will be pinned for the duration of the audit period.*"
+          
+          # Create quarterly audit discussion
+          gh api graphql -f query='
+            mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+              createDiscussion(input: {
+                repositoryId: $repositoryId
+                categoryId: $categoryId
+                title: $title
+                body: $body
+              }) {
+                discussion {
+                  url
+                  id
+                }
+              }
+            }
+          ' -f repositoryId="${{ github.event.repository.node_id }}" \
+            -f categoryId="$(gh api graphql -f query='query($owner: String!, $repo: String!) { repository(owner: $owner, name: $repo) { discussionCategories(first: 10) { nodes { id name } } } }' -f owner="${{ github.repository_owner }}" -f repo="${{ github.event.repository.name }}" --jq '.data.repository.discussionCategories.nodes[] | select(.name=="Audits & Reviews") | .id')" \
+            -f title="$DISCUSSION_TITLE" \
+            -f body="$DISCUSSION_BODY"
+          
+          echo "✅ Created quarterly audit discussion: $DISCUSSION_TITLE"
+
+      - name: Create Manual Discussion
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISCUSSION_TYPE: ${{ github.event.inputs.discussion_type }}
+        run: |
+          case "$DISCUSSION_TYPE" in
+            "governance")
+              CATEGORY="Governance & Compliance"
+              TITLE="🏛️ Governance Discussion - $(date '+%Y-%m-%d')"
+              BODY="## Governance Discussion Thread
+              
+              This discussion is for governance-related questions, clarifications, and process improvements.
+              
+              ### Topics for Discussion
+              - PR template questions
+              - CODEOWNERS clarifications
+              - Governance gate issues
+              - Process improvement suggestions
+              
+              Please use this space for governance-related discussions."
+              ;;
+            "security")
+              CATEGORY="Security & Secrets"
+              TITLE="🔒 Security Discussion - $(date '+%Y-%m-%d')"
+              BODY="## Security Discussion Thread
+              
+              This discussion is for security-related topics, vulnerabilities, and best practices.
+              
+              ### Security Topics
+              - CodeQL findings discussion
+              - Secret scanning issues
+              - Dependency vulnerabilities
+              - Authentication and access control
+              - Workflow security concerns
+              
+              Please use this space for security-related discussions."
+              ;;
+            "audit")
+              CATEGORY="Audits & Reviews"
+              TITLE="📋 Audit Discussion - $(date '+%Y-%m-%d')"
+              BODY="## Audit Discussion Thread
+              
+              This discussion is for audit-related topics, compliance reviews, and documentation.
+              
+              ### Audit Topics
+              - Compliance findings
+              - Process documentation
+              - Regulatory requirements
+              - Business stack compliance
+              - Audit recommendations
+              
+              Please use this space for audit-related discussions."
+              ;;
+            "ci-cd")
+              CATEGORY="CI/CD & Actions"
+              TITLE="⚙️ CI/CD Discussion - $(date '+%Y-%m-%d')"
+              BODY="## CI/CD Discussion Thread
+              
+              This discussion is for CI/CD pipeline topics, GitHub Actions, and workflow improvements.
+              
+              ### CI/CD Topics
+              - Workflow failures and debugging
+              - GitHub Actions questions
+              - Pipeline optimization
+              - Deployment strategies
+              - Testing and coverage
+              
+              Please use this space for CI/CD-related discussions."
+              ;;
+          esac
+          
+          # Create discussion
+          gh api graphql -f query='
+            mutation($repositoryId: ID!, $categoryId: ID!, $title: String!, $body: String!) {
+              createDiscussion(input: {
+                repositoryId: $repositoryId
+                categoryId: $categoryId
+                title: $title
+                body: $body
+              }) {
+                discussion {
+                  url
+                }
+              }
+            }
+          ' -f repositoryId="${{ github.event.repository.node_id }}" \
+            -f categoryId="$(gh api graphql -f query='query($owner: String!, $repo: String!) { repository(owner: $owner, name: $repo) { discussionCategories(first: 10) { nodes { id name } } } }' -f owner="${{ github.repository_owner }}" -f repo="${{ github.event.repository.name }}" --jq '.data.repository.discussionCategories.nodes[] | select(.name=="'"$CATEGORY"'") | .id')" \
+            -f title="$TITLE" \
+            -f body="$BODY"
+          
+          echo "✅ Created $DISCUSSION_TYPE discussion: $TITLE"
+
+      - name: Update Compliance Bot Integration
+        if: github.event.workflow_run.conclusion == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          # Send Telegram alert with discussion link
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+            MESSAGE="🚨 **EQ12 Governance Alert**
+            
+            Workflow: $WORKFLOW_NAME
+            Status: ❌ Failed
+            Repository: ${{ github.repository }}
+            
+            📋 Discussion created for tracking and resolution.
+            🔗 View in GitHub Discussions
+            
+            Immediate action required for sensitive stacks."
+            
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\": \"${TELEGRAM_CHAT_ID}\", \"text\": \"${MESSAGE}\", \"parse_mode\": \"Markdown\"}"
+            
+            echo "✅ Sent Telegram alert for governance failure"
+          fi
+
+      - name: Label Related Issues and PRs
+        if: github.event.workflow_run.conclusion == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+          
+          # Add governance-discussion label to related PRs
+          gh pr list --state open --json number --jq '.[].number' | while read pr_number; do
+            gh pr edit "$pr_number" --add-label "governance-discussion"
+            echo "Added governance-discussion label to PR #$pr_number"
+          done
+          
+          # Create issue if critical workflow failure
+          if [[ "$WORKFLOW_NAME" == *"Security"* ]] || [[ "$WORKFLOW_NAME" == *"Secrets"* ]]; then
+            gh issue create \
+              --title "🚨 Critical Governance Failure: $WORKFLOW_NAME" \
+              --body "Critical governance workflow has failed. Immediate attention required.
+              
+              See related discussion in GitHub Discussions.
+              
+              This issue will be closed when the governance failure is resolved." \
+              --label "critical,governance,security"
+            
+            echo "✅ Created critical governance failure issue"
+          fi

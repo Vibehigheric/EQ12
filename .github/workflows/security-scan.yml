@@ -1,0 +1,39 @@
+name: "Security Baseline Scan"
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # Required for CodeQL results
+      pull-requests: write     # Allows dependency review comments
+
+    steps:
+      # Checkout repository
+      - uses: actions/checkout@v4
+
+      # === CodeQL Security Analysis ===
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      # === Gitleaks Secret Scan ===
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config: ""
+          args: "--verbose"
+
+      # === Dependency Review ===
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical

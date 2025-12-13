@@ -1,0 +1,17 @@
+{
+  "backup_directory": "C:\\EQ12\\backups\\",
+  "vm": {
+    "ram_mb": 4096,
+    "cpu_count": 2,
+    "hypervisor_preference": ["Hyper-V", "VirtualBox"]
+  },
+  "tests": {
+    "test_commands": [
+      "C:\\EQ12\\eq12-elite-run --dry-run",
+      "C:\\EQ12\\scripts\\dashboard_check.ps1",
+      "C:\\EQ12\\scripts\\check_logs_structure.ps1"
+    ],
+    "retain_vm_logs": true,
+    "vm_logs_path": "C:\\EQ12\\viboot_logs\\"
+  }
+}

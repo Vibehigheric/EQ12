@@ -37,11 +37,11 @@ BeforeAll {
 
     # Configure module variables
     $Global:Thresholds = @{
-        CPUPercent = 85
-        MemoryPercent = 90
-        DiskPercent = 90
+        CPUPercent             = 85
+        MemoryPercent          = 90
+        DiskPercent            = 90
         EventLogErrorsLast5Min = 10
-        CriticalServicesDown = 1
+        CriticalServicesDown   = 1
     }
 
     $Global:CriticalServices = @(
@@ -197,7 +197,8 @@ Describe "Get-ServiceStatus" {
         
         if ($Result.Unhealthy -ge 1) {
             $Result.Status | Should -Be "CRITICAL"
-        } else {
+        }
+        else {
             $Result.Status | Should -Be "OK"
         }
     }
@@ -245,9 +246,9 @@ Describe "Get-EventLogSummary" {
         $Result = Get-EventLogSummary -Minutes 5
         
         $ExpectedTotal = $Result.Summary.System.Errors + 
-                        $Result.Summary.Application.Errors + 
-                        $Result.Summary.System.Critical + 
-                        $Result.Summary.Application.Critical
+        $Result.Summary.Application.Errors + 
+        $Result.Summary.System.Critical + 
+        $Result.Summary.Application.Critical
         
         $Result.TotalErrors | Should -Be $ExpectedTotal
     }
@@ -277,8 +278,8 @@ Describe "Save-Snapshot" {
     It "Should create valid JSON content" {
         $TestData = @{
             Timestamp = (Get-Date).ToUniversalTime().ToString("o")
-            Metrics = @{
-                CPU = 50
+            Metrics   = @{
+                CPU    = 50
                 Memory = 75
             }
         }
@@ -286,8 +287,8 @@ Describe "Save-Snapshot" {
         Save-Snapshot -Data $TestData
 
         $SnapshotFile = Get-ChildItem -Path $Global:TestSnapshotDir -Filter "sentinel_snapshot_*.json" | 
-            Sort-Object LastWriteTime -Descending | 
-            Select-Object -First 1
+        Sort-Object LastWriteTime -Descending | 
+        Select-Object -First 1
 
         $Content = Get-Content -Path $SnapshotFile.FullName -Raw
         { $Content | ConvertFrom-Json } | Should -Not -Throw
@@ -355,16 +356,16 @@ Describe "Integration Tests" {
     It "Should save complete snapshot with all metrics" {
         $SnapshotData = @{
             Timestamp = (Get-Date).ToUniversalTime().ToString("o")
-            Metrics = Get-SystemMetrics
-            Services = Get-ServiceStatus
+            Metrics   = Get-SystemMetrics
+            Services  = Get-ServiceStatus
             EventLogs = Get-EventLogSummary -Minutes 5
         }
 
         Save-Snapshot -Data $SnapshotData
 
         $SnapshotFile = Get-ChildItem -Path $Global:TestSnapshotDir -Filter "sentinel_snapshot_*.json" | 
-            Sort-Object LastWriteTime -Descending | 
-            Select-Object -First 1
+        Sort-Object LastWriteTime -Descending | 
+        Select-Object -First 1
 
         $SnapshotFile | Should -Not -BeNullOrEmpty
         $SnapshotFile.Length | Should -BeGreaterThan 1KB

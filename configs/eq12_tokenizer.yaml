@@ -1,0 +1,119 @@
+# EQ12 Production Tokenizer Configuration
+# Frozen scaling parameters for deterministic Coral TPU inference
+#  NEVER change min/max values without retraining models
+
+sports:
+  dim: 256                    # Fixed output dimension for Coral TPU
+  text_slots: 190            # Text feature hashing slots
+  
+  # Numeric features: scaled to uint8 [0,255] with frozen bounds
+  numeric:
+    # Betting odds and lines
+    - {name: moneyline,      min: -600,  max: 600,   default: 0}
+    - {name: spread,         min: -20,   max: 20,    default: 0}
+    - {name: total,          min: 25,    max: 75,    default: 44.5}
+    - {name: implied_prob,   min: 0.0,   max: 1.0,   default: 0.5}
+    - {name: kelly_frac,     min: 0.0,   max: 0.5,   default: 0.0}
+    
+    # Team performance metrics
+    - {name: pace,           min: 50,    max: 80,    default: 65}
+    - {name: dvoa_off,       min: -30,   max: 30,    default: 0}
+    - {name: dvoa_def,       min: -30,   max: 30,    default: 0}
+    - {name: rating_off,     min: 80,    max: 130,   default: 105}
+    - {name: rating_def,     min: 80,    max: 130,   default: 105}
+    
+    # Environmental factors
+    - {name: temp_f,         min: 0,     max: 110,   default: 68}
+    - {name: wind_mph,       min: 0,     max: 40,    default: 5}
+    - {name: humidity,       min: 0,     max: 100,   default: 50}
+    - {name: rest_days,      min: 0,     max: 14,    default: 6}
+    
+    # Market dynamics
+    - {name: line_age_min,   min: 0,     max: 720,   default: 30}
+    - {name: volume_ratio,   min: 0.0,   max: 10.0,  default: 1.0}
+    - {name: sharp_money,    min: 0.0,   max: 1.0,   default: 0.5}
+    - {name: public_pct,     min: 0.0,   max: 1.0,   default: 0.5}
+    
+    # Player props specific
+    - {name: usage_rate,     min: 0,     max: 40,    default: 20}
+    - {name: minutes_proj,   min: 0,     max: 48,    default: 28}
+    
+  # Categorical features: hash bucketed with one-hot encoding
+  categorical:
+    - {name: team_home,      buckets: 12}   # 32 NBA teams  12 buckets
+    - {name: team_away,      buckets: 12}
+    - {name: market,         buckets: 8}    # ML, SPREAD, TOTAL, TD, HR, etc.
+    - {name: sportsbook,     buckets: 8}    # DK, FD, MGM, etc.
+    - {name: league,         buckets: 6}    # NBA, NFL, NHL, MLB, etc.
+    - {name: game_type,      buckets: 4}    # REG, PLAYOFF, PRESEASON
+    - {name: venue_type,     buckets: 4}    # INDOOR, OUTDOOR, DOME, etc.
+
+crypto:
+  dim: 256                    # Fixed output dimension for Coral TPU  
+  text_slots: 172            # Text feature hashing slots
+  
+  # Numeric features: market data and technical indicators
+  numeric:
+    # Price and volume
+    - {name: price_usd,      min: 0.001, max: 100000, default: 1.0}
+    - {name: volume_24h,     min: 0,     max: 1e12,   default: 1e6}
+    - {name: market_cap,     min: 1e6,   max: 1e12,   default: 1e9}
+    
+    # Technical indicators
+    - {name: rsi_14,         min: 0,     max: 100,    default: 50}
+    - {name: bb_position,    min: 0.0,   max: 1.0,    default: 0.5}
+    - {name: macd_signal,    min: -1000, max: 1000,   default: 0}
+    
+    # Volatility and momentum
+    - {name: vol_1m,         min: 0,     max: 5,      default: 0.5}
+    - {name: vol_5m,         min: 0,     max: 8,      default: 1.0}
+    - {name: vol_1h,         min: 0,     max: 12,     default: 2.0}
+    
+    # Order book and microstructure
+    - {name: ob_imbalance,   min: -1,    max: 1,      default: 0}
+    - {name: spread_bps,     min: 0,     max: 50,     default: 5}
+    - {name: depth_ratio,    min: 0.1,   max: 10.0,   default: 1.0}
+    
+    # Returns (log scale)
+    - {name: ret_1m,         min: -3,    max: 3,      default: 0}
+    - {name: ret_5m,         min: -6,    max: 6,      default: 0}
+    - {name: ret_15m,        min: -10,   max: 10,     default: 0}
+    - {name: ret_1h,         min: -20,   max: 20,     default: 0}
+    - {name: ret_4h,         min: -40,   max: 40,     default: 0}
+    - {name: ret_1d,         min: -80,   max: 80,     default: 0}
+    
+    # Market microstructure signals
+    - {name: liq_prints,     min: 0,     max: 50,     default: 0}
+    - {name: whale_flow,     min: -1e8,  max: 1e8,    default: 0}
+    - {name: funding_rate,   min: -0.01, max: 0.01,   default: 0}
+    
+    # Cross-market signals  
+    - {name: btc_corr,       min: -1.0,  max: 1.0,    default: 0.5}
+    - {name: eth_corr,       min: -1.0,  max: 1.0,    default: 0.3}
+    - {name: fear_greed,     min: 0,     max: 100,    default: 50}
+    
+  # Categorical features
+  categorical:
+    - {name: exchange,       buckets: 8}    # Coinbase, Binance, etc.
+    - {name: base_asset,     buckets: 16}   # BTC, ETH, SOL, etc.
+    - {name: quote_asset,    buckets: 8}    # USD, USDT, BTC, ETH
+    - {name: market_tier,    buckets: 4}    # TIER1, TIER2, TIER3, DEGEN
+    - {name: sector,         buckets: 8}    # L1, DEFI, NFT, MEME, etc.
+    - {name: market_session, buckets: 4}    # ASIA, EUROPE, US, OVERNIGHT
+
+# Global tokenizer settings
+global:
+  max_text_length: 1000      # Truncate text inputs
+  hash_seed: 42              # For reproducible hashing
+  validation_enabled: true   # Validate output tensors
+  
+# Feature importance weights (for monitoring/debugging)
+feature_weights:
+  sports:
+    numeric_weight: 0.4
+    categorical_weight: 0.2
+    text_weight: 0.4
+  crypto:
+    numeric_weight: 0.6
+    categorical_weight: 0.1
+    text_weight: 0.3

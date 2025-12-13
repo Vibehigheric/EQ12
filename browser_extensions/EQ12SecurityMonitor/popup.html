@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 300px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .stat-label {
+            font-weight: bold;
+        }
+        .stat-value {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .btn {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: black;
+        }
+        .premium-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>🔒 EQ12 Security</h2>
+        <p>Advanced Web Protection</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-row">
+            <span class="stat-label">Status:</span>
+            <span class="stat-value" id="protection-status">Active</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Threats Blocked:</span>
+            <span class="stat-value" id="threats-blocked">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Trackers Blocked:</span>
+            <span class="stat-value" id="trackers-blocked">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Sites Scanned:</span>
+            <span class="stat-value" id="sites-scanned">0</span>
+        </div>
+    </div>
+    
+    <div class="buttons">
+        <button class="btn btn-primary" id="toggle-protection">
+            Disable Protection
+        </button>
+        <button class="btn btn-success" id="scan-site">
+            Scan Current Site
+        </button>
+    </div>
+    
+    <div class="premium-notice">
+        <p><strong>🚀 Upgrade to Premium</strong></p>
+        <p>Advanced threat detection, real-time alerts, and detailed security reports</p>
+        <button class="btn btn-warning" id="upgrade-premium">
+            Upgrade Now - $4.99/month
+        </button>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{
+  "scheduler_settings": {
+    "security_scan": {
+      "enabled": true,
+      "time": "00:00",
+      "frequency": "daily",
+      "timeout_minutes": 30
+    },
+    "freelance_automation": {
+      "enabled": true,
+      "frequency": "every_4_hours",
+      "timeout_minutes": 15
+    },
+    "crypto_analysis": {
+      "enabled": true,
+      "frequency": "every_2_hours",
+      "timeout_minutes": 10
+    },
+    "progress_review": {
+      "enabled": true,
+      "time": "18:00",
+      "frequency": "daily",
+      "generate_report": true
+    }
+  },
+  "task_priorities": {
+    "critical": [
+      "coral_accelerator_integration",
+      "cash_app_donation_strategy"
+    ],
+    "high": [
+      "crypto_web3_integration",
+      "fixed_price_projects",
+      "enterprise_consulting"
+    ],
+    "medium": [
+      "security_scan_midnight",
+      "team_training_secure_coding"
+    ],
+    "low": []
+  },
+  "coral_integration": {
+    "enabled": true,
+    "optimize_all_tasks": true,
+    "acceleration_priority": "high"
+  }
+}

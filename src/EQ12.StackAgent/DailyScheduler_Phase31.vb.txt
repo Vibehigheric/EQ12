@@ -1,0 +1,211 @@
+Imports System.Diagnostics
+Imports System.Linq
+
+Namespace EQ12.StackAgent
+
+    ''' <summary>
+    ''' Daily autonomous scheduler - calls BI-Core and executes recommendations
+    ''' Upgraded for Phase 31 self-healing ML integration
+    ''' </summary>
+    Public Class DailyScheduler
+
+        Private ReadOnly _biCore As EQ12.BICore.IBiCoreService
+        Private ReadOnly _logger As Action(Of String)
+        Private ReadOnly _pythonPath As String
+
+        Public Sub New(biCore As EQ12.BICore.IBiCoreService, logger As Action(Of String), Optional pythonPath As String = "python")
+            _biCore = biCore
+            _logger = logger
+            _pythonPath = pythonPath
+        End Sub
+
+        Public Sub RunDailyCycle()
+            _logger("[StackAgent] ========== STARTING DAILY CYCLE ==========")
+            _logger($"[StackAgent] Timestamp: {DateTime.UtcNow:O}")
+
+            Try
+                ' 1. Ask BI-Core for Next Moves
+                Dim recs = _biCore.GenerateDailyNextMoves()
+
+                _logger($"[StackAgent] Received {recs.Count} recommendations from BI-Core")
+
+                ' 2. Execute recommendations in priority order
+                For Each rec In recs.OrderBy(Function(r) r.Priority)
+                    _logger($"[StackAgent] Processing: [{rec.Category}] {rec.Title} (Priority {rec.Priority})")
+
+                    If rec.AutoExecutable Then
+                        ExecuteRecommendation(rec)
+                    Else
+                        _logger($"[StackAgent] Manual action required - logging to dashboard")
+                    End If
+                Next
+
+                _logger("[StackAgent] ========== DAILY CYCLE COMPLETE ==========")
+
+            Catch ex As Exception
+                _logger($"[StackAgent] ERROR in daily cycle: {ex.Message}")
+                _logger($"[StackAgent] Stack trace: {ex.StackTrace}")
+            End Try
+        End Sub
+
+        Private Sub ExecuteRecommendation(rec As EQ12.BICore.NextMoveRecommendation)
+            Select Case rec.Category
+                Case "ML"
+                    HandleMLRecommendation(rec)
+                Case "Sports"
+                    HandleSportsRecommendation(rec)
+                Case "Revenue"
+                    HandleRevenueRecommendation(rec)
+                Case "Infra"
+                    HandleInfraRecommendation(rec)
+                Case Else
+                    _logger($"[StackAgent] Unknown category: {rec.Category}")
+            End Select
+        End Sub
+
+        Private Sub HandleMLRecommendation(rec As EQ12.BICore.NextMoveRecommendation)
+            _logger($"[StackAgent] Handling ML recommendation: {rec.Title}")
+
+            ' Parse actions for ML commands
+            For Each action In rec.SuggestedActions
+                If action.Contains("train_model_production.py") Then
+                    _logger("[StackAgent] Triggering model retraining...")
+                    RunPythonScript("scripts\train_model_production.py", "--config configs\model_moneyline_v1.yaml")
+
+                ElseIf action.Contains("promote_model.py") Then
+                    _logger("[StackAgent] Evaluating model promotion...")
+                    ' Get latest model version (would need to scan models/ directory)
+                    ' For now, skip auto-promotion (requires backtest validation)
+                    _logger("[StackAgent] Model promotion requires manual approval")
+
+                ElseIf action.Contains("drift_monitor.py") Then
+                    _logger("[StackAgent] Running drift monitoring...")
+                    RunPythonScript("scripts\drift_monitor.py", "--model-dir models\champion --threshold 0.15")
+                End If
+            Next
+        End Sub
+
+        Private Sub HandleSportsRecommendation(rec As EQ12.BICore.NextMoveRecommendation)
+            _logger($"[StackAgent] Handling sports recommendation: {rec.Title}")
+
+            For Each action In rec.SuggestedActions
+                If action.Contains("backtester.py") Then
+                    _logger("[StackAgent] Running backtest validation...")
+                    RunPythonScript("scripts\backtester.py", "--days 90 --bankroll 10000")
+
+                ElseIf action.Contains("train_model") Then
+                    _logger("[StackAgent] Triggering model refresh...")
+                    RunPythonScript("scripts\train_model_production.py", "--config configs\model_moneyline_v1.yaml")
+                End If
+            Next
+        End Sub
+
+        Private Sub HandleRevenueRecommendation(rec As EQ12.BICore.NextMoveRecommendation)
+            _logger($"[StackAgent] Handling revenue recommendation: {rec.Title}")
+
+            For Each action In rec.SuggestedActions
+                If action.Contains("analytics_report.py") Then
+                    _logger("[StackAgent] Generating revenue analytics...")
+                    RunPythonScript("scripts\analytics_report.py", "--metric all")
+                End If
+            Next
+        End Sub
+
+        Private Sub HandleInfraRecommendation(rec As EQ12.BICore.NextMoveRecommendation)
+            _logger($"[StackAgent] Handling infrastructure recommendation: {rec.Title}")
+
+            For Each action In rec.SuggestedActions
+                If action.Contains("EQ12_SYSTEM_SCAN.ps1") Then
+                    _logger("[StackAgent] Running system diagnostics...")
+                    RunPowerShellScript("scripts\EQ12_SYSTEM_SCAN.ps1", "-Verbose")
+                End If
+            Next
+        End Sub
+
+        Private Sub RunPythonScript(scriptPath As String, args As String)
+            Dim fullPath = IO.Path.Combine(Environment.CurrentDirectory, scriptPath)
+
+            If Not IO.File.Exists(fullPath) Then
+                _logger($"[StackAgent] Script not found: {fullPath}")
+                Return
+            End If
+
+            Dim psi As New ProcessStartInfo() With {
+                .FileName = _pythonPath,
+                .Arguments = $"""{fullPath}"" {args}",
+                .UseShellExecute = False,
+                .RedirectStandardOutput = True,
+                .RedirectStandardError = True,
+                .CreateNoWindow = True,
+                .WorkingDirectory = Environment.CurrentDirectory
+            }
+
+            _logger($"[StackAgent] Executing: {psi.FileName} {psi.Arguments}")
+
+            Try
+                Using proc = Process.Start(psi)
+                    Dim output = proc.StandardOutput.ReadToEnd()
+                    Dim [error] = proc.StandardError.ReadToEnd()
+                    proc.WaitForExit()
+
+                    If Not String.IsNullOrWhiteSpace(output) Then
+                        _logger($"[StackAgent] Python output: {output.Substring(0, Math.Min(500, output.Length))}")
+                    End If
+
+                    If Not String.IsNullOrWhiteSpace([error]) Then
+                        _logger($"[StackAgent] Python error: {[error]}")
+                    End If
+
+                    _logger($"[StackAgent] Process exited with code: {proc.ExitCode}")
+                End Using
+
+            Catch ex As Exception
+                _logger($"[StackAgent] Failed to run Python script: {ex.Message}")
+            End Try
+        End Sub
+
+        Private Sub RunPowerShellScript(scriptPath As String, args As String)
+            Dim fullPath = IO.Path.Combine(Environment.CurrentDirectory, scriptPath)
+
+            If Not IO.File.Exists(fullPath) Then
+                _logger($"[StackAgent] Script not found: {fullPath}")
+                Return
+            End If
+
+            Dim psi As New ProcessStartInfo() With {
+                .FileName = "powershell.exe",
+                .Arguments = $"-NoProfile -ExecutionPolicy Bypass -File ""{fullPath}"" {args}",
+                .UseShellExecute = False,
+                .RedirectStandardOutput = True,
+                .RedirectStandardError = True,
+                .CreateNoWindow = True,
+                .WorkingDirectory = Environment.CurrentDirectory
+            }
+
+            _logger($"[StackAgent] Executing: {psi.FileName} {psi.Arguments}")
+
+            Try
+                Using proc = Process.Start(psi)
+                    Dim output = proc.StandardOutput.ReadToEnd()
+                    Dim [error] = proc.StandardError.ReadToEnd()
+                    proc.WaitForExit()
+
+                    If Not String.IsNullOrWhiteSpace(output) Then
+                        _logger($"[StackAgent] PowerShell output: {output.Substring(0, Math.Min(500, output.Length))}")
+                    End If
+
+                    If Not String.IsNullOrWhiteSpace([error]) Then
+                        _logger($"[StackAgent] PowerShell error: {[error]}")
+                    End If
+
+                    _logger($"[StackAgent] Process exited with code: {proc.ExitCode}")
+                End Using
+
+            Catch ex As Exception
+                _logger($"[StackAgent] Failed to run PowerShell script: {ex.Message}")
+            End Try
+        End Sub
+
+    End Class
+
+End Namespace

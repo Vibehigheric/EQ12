@@ -1,0 +1,88 @@
+name: "PR Review Reminder"
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Create review checklist issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const prTitle = context.payload.pull_request.title;
+            const prAuthor = context.payload.pull_request.user.login;
+            
+            const issueTitle = `PR Review Checklist for #${prNumber}`;
+            const issueBody = `# ✅ EQ12 GODSTACK PR Review Checklist
+
+This issue is automatically linked to PR **#${prNumber}**: ${prTitle}  
+Before merge, run GitHub Copilot Chat with the prompts in [COPILOT_REVIEW.md](./COPILOT_REVIEW.md).
+
+---
+
+## 🔒 Gates
+- [ ] Secrets Gate – \`check-secrets.yml\`
+- [ ] Security Gate – \`security-scan.yml\`
+- [ ] CI/Test Gate – \`ci-all-in-one.yml\`
+- [ ] Compliance Gate – PR templates + CODEOWNERS
+
+---
+
+## 🧩 Sensitive Modules
+If PR touches:
+- \`betting/\`
+- \`cannabis/\`
+- \`credit/\`
+
+Run Copilot with **Sensitive Module Review** prompts.
+
+---
+
+## 📊 Copilot Review Prompts
+Use Copilot Chat:
+- **General Governance Review**
+- **Sensitive Module Review** (if applicable)
+- **Test & Coverage Review**
+- **Security Review**
+- **Governance Report Prompt**
+
+---
+
+## 👀 Reviewer Action
+- [ ] Copilot review completed
+- [ ] All governance gates green ✅
+- [ ] Sensitive module compliance confirmed (if applicable)
+
+---
+
+🔗 PR: #${prNumber} by @${prAuthor}`;
+            
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: ['governance', 'review-needed'],
+              assignees: ['Vibehigheric']
+            });
+            
+            console.log(`Created review checklist issue: #${issue.data.number}`);
+            
+            // Add comment to PR linking the review issue
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `📋 **Governance Review Checklist Created**\n\nPlease complete the review checklist in issue #${issue.data.number} before merging this PR.\n\n**Next Steps:**\n1. Run Copilot Chat prompts from [COPILOT_REVIEW.md](./COPILOT_REVIEW.md)\n2. Complete all governance gate checks\n3. Mark checklist items complete in #${issue.data.number}`
+            });

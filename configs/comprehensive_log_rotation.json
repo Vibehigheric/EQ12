@@ -1,0 +1,24 @@
+{
+  "global_settings": {
+    "enabled": true,
+    "max_file_size_mb": 10,
+    "compression": true,
+    "archive_after_days": 30
+  },
+  "category_limits": {
+    "sports_betting": 25,
+    "browser_automation": 20,
+    "system_core": 50,
+    "security": 100,
+    "mcp_integration": 15,
+    "code_quality": 10,
+    "vb_debugging": 5,
+    "errors": 25,
+    "miscellaneous": 15
+  },
+  "cleanup_schedule": {
+    "daily_cleanup": true,
+    "weekly_archive": true,
+    "monthly_deep_clean": true
+  }
+}

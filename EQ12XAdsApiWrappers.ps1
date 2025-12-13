@@ -1,0 +1,669 @@
+# EQ12 X Ads API PowerShell Wrappers v3.0
+# Production-ready PowerShell wrappers for X Ads API CLI commands
+
+[CmdletBinding()]
+param()
+
+# ==================================================
+# X ADS CAMPAIGN MANAGEMENT WRAPPERS
+# ==================================================
+
+function Invoke-EQ12XAdsCampaignCreate {
+    <#
+    .SYNOPSIS
+    Create a new X advertising campaign
+
+    .DESCRIPTION
+    Creates a new X Ads campaign with specified budget and targeting options
+
+    .PARAMETER Name
+    Campaign name
+
+    .PARAMETER Budget
+    Daily budget in USD (default: 50)
+
+    .PARAMETER AccountId
+    X Ads account ID (optional, will use first available)
+
+    .PARAMETER Currency
+    Campaign currency (default: USD)
+
+    .PARAMETER StartDate
+    Campaign start date (optional)
+
+    .PARAMETER EndDate
+    Campaign end date (optional)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCampaignCreate -Name "Holiday Sale Campaign" -Budget 100
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCampaignCreate -Name "Product Launch" -Budget 250 -AccountId "18ce54d4x5t" -Currency "USD"
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $false)]
+        [decimal]$Budget = 50,
+
+        [Parameter(Mandatory = $false)]
+        [string]$AccountId,
+
+        [Parameter(Mandatory = $false)]
+        [string]$Currency = "USD",
+
+        [Parameter(Mandatory = $false)]
+        [datetime]$StartDate,
+
+        [Parameter(Mandatory = $false)]
+        [datetime]$EndDate
+    )
+
+    Write-Host "🎯 Creating X Ads campaign: $Name" -ForegroundColor Green
+
+    try {
+        # Build command arguments
+        $args = @("xads-campaign", "create", $Name, "--budget", $Budget.ToString(), "--currency", $Currency)
+
+        if ($AccountId) {
+            $args += @("--account-id", $AccountId)
+        }
+
+        if ($StartDate) {
+            $args += @("--start-date", $StartDate.ToString("yyyy-MM-ddTHH:mm:ssZ"))
+        }
+
+        if ($EndDate) {
+            $args += @("--end-date", $EndDate.ToString("yyyy-MM-ddTHH:mm:ssZ"))
+        }
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Campaign created successfully!" -ForegroundColor Green
+            Write-Output $result
+
+            # Log to EQ12 system
+            $logEntry = @{
+                Timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+                Action    = "xads_campaign_create"
+                Campaign  = $Name
+                Budget    = $Budget
+                Currency  = $Currency
+                Status    = "Success"
+                Result    = $result -join "`n"
+            } | ConvertTo-Json -Depth 3
+
+            $logPath = "C:\EQ12\logs\xads_campaigns_$(Get-Date -Format 'yyyyMMdd').json"
+            Add-Content -Path $logPath -Value $logEntry
+
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to create campaign: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error creating campaign: $_"
+        return $false
+    }
+}
+
+function Invoke-EQ12XAdsCampaignList {
+    <#
+    .SYNOPSIS
+    List X advertising campaigns
+
+    .DESCRIPTION
+    Lists all campaigns for the specified account with optional status filtering
+
+    .PARAMETER AccountId
+    X Ads account ID (optional, will use first available)
+
+    .PARAMETER Status
+    Filter by campaign status (ACTIVE, PAUSED, DELETED, etc.)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCampaignList
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCampaignList -AccountId "18ce54d4x5t" -Status "ACTIVE"
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [string]$AccountId,
+
+        [Parameter(Mandatory = $false)]
+        [string]$Status
+    )
+
+    Write-Host "📋 Listing X Ads campaigns..." -ForegroundColor Cyan
+
+    try {
+        # Build command arguments
+        $args = @("xads-campaign", "list")
+
+        if ($AccountId) {
+            $args += @("--account-id", $AccountId)
+        }
+
+        if ($Status) {
+            $args += @("--status", $Status)
+        }
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output $result
+
+            # Extract campaign count for logging
+            $campaignCount = ($result | Select-String "Found (\d+) campaign" | ForEach-Object { $_.Matches[0].Groups[1].Value })
+
+            Write-Host "✅ Listed $campaignCount campaigns" -ForegroundColor Green
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to list campaigns: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error listing campaigns: $_"
+        return $false
+    }
+}
+
+function Invoke-EQ12XAdsCampaignStats {
+    <#
+    .SYNOPSIS
+    Get X Ads campaign analytics
+
+    .DESCRIPTION
+    Retrieves comprehensive analytics for a specific campaign
+
+    .PARAMETER CampaignId
+    Campaign ID to get stats for
+
+    .PARAMETER AccountId
+    X Ads account ID
+
+    .PARAMETER Days
+    Number of days to analyze (default: 7)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCampaignStats -CampaignId "abc123" -AccountId "18ce54d4x5t"
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCampaignStats -CampaignId "abc123" -AccountId "18ce54d4x5t" -Days 30
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$CampaignId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$AccountId,
+
+        [Parameter(Mandatory = $false)]
+        [int]$Days = 7
+    )
+
+    Write-Host "📊 Getting campaign analytics for $Days days..." -ForegroundColor Cyan
+
+    try {
+        # Build command arguments
+        $args = @("xads-campaign", "stats", "--campaign-id", $CampaignId, "--account-id", $AccountId, "--days", $Days.ToString())
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output $result
+            Write-Host "✅ Analytics retrieved successfully!" -ForegroundColor Green
+
+            # Log analytics request
+            $logEntry = @{
+                Timestamp  = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+                Action     = "xads_campaign_stats"
+                CampaignId = $CampaignId
+                AccountId  = $AccountId
+                Days       = $Days
+                Status     = "Success"
+            } | ConvertTo-Json -Depth 2
+
+            $logPath = "C:\EQ12\logs\xads_analytics_$(Get-Date -Format 'yyyyMMdd').json"
+            Add-Content -Path $logPath -Value $logEntry
+
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to get campaign stats: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error getting campaign stats: $_"
+        return $false
+    }
+}
+
+function Invoke-EQ12XAdsAutoPromote {
+    <#
+    .SYNOPSIS
+    Auto-promote a high-performing tweet
+
+    .DESCRIPTION
+    Automatically creates a campaign to promote a specific tweet
+
+    .PARAMETER TweetId
+    ID of the tweet to promote
+
+    .PARAMETER Budget
+    Daily promotion budget (default: 25)
+
+    .PARAMETER AccountId
+    X Ads account ID (optional, will use first available)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsAutoPromote -TweetId "1234567890" -Budget 50
+
+    .EXAMPLE
+    Invoke-EQ12XAdsAutoPromote -TweetId "1234567890" -Budget 100 -AccountId "18ce54d4x5t"
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$TweetId,
+
+        [Parameter(Mandatory = $false)]
+        [decimal]$Budget = 25,
+
+        [Parameter(Mandatory = $false)]
+        [string]$AccountId
+    )
+
+    Write-Host "🚀 Auto-promoting tweet: $TweetId" -ForegroundColor Yellow
+
+    try {
+        # Build command arguments
+        $args = @("xads-campaign", "auto-promote", "--tweet-id", $TweetId, "--budget", $Budget.ToString())
+
+        if ($AccountId) {
+            $args += @("--account-id", $AccountId)
+        }
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output $result
+            Write-Host "✅ Tweet auto-promoted successfully!" -ForegroundColor Green
+
+            # Log auto-promotion
+            $logEntry = @{
+                Timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+                Action    = "xads_auto_promote"
+                TweetId   = $TweetId
+                Budget    = $Budget
+                Status    = "Success"
+                Result    = $result -join "`n"
+            } | ConvertTo-Json -Depth 3
+
+            $logPath = "C:\EQ12\logs\xads_auto_promotions_$(Get-Date -Format 'yyyyMMdd').json"
+            Add-Content -Path $logPath -Value $logEntry
+
+            # Send notification if Telegram is configured
+            if ($env:TELEGRAM_BOT_TOKEN -and $env:TELEGRAM_CHAT_ID) {
+                $message = "🚀 EQ12 AUTO-PROMOTION`n🐦 Tweet: $TweetId`n💰 Budget: `$$Budget/day`n⏰ $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC"
+                Send-TelegramMessage -Message $message
+            }
+
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to auto-promote tweet: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error auto-promoting tweet: $_"
+        return $false
+    }
+}
+
+# ==================================================
+# X ADS CREATIVE MANAGEMENT WRAPPERS
+# ==================================================
+
+function Invoke-EQ12XAdsCreativeUpload {
+    <#
+    .SYNOPSIS
+    Upload creative media for X Ads
+
+    .DESCRIPTION
+    Uploads images, videos, or other media files for use in X advertising campaigns
+
+    .PARAMETER FilePath
+    Path to the media file to upload
+
+    .PARAMETER AccountId
+    X Ads account ID (optional, will use first available)
+
+    .PARAMETER Name
+    Custom name for the creative (optional)
+
+    .PARAMETER Type
+    Creative type (default: MEDIA)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCreativeUpload -FilePath "C:\Images\banner.jpg"
+
+    .EXAMPLE
+    Invoke-EQ12XAdsCreativeUpload -FilePath "C:\Videos\promo.mp4" -AccountId "18ce54d4x5t" -Name "Holiday Promo Video"
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FilePath,
+
+        [Parameter(Mandatory = $false)]
+        [string]$AccountId,
+
+        [Parameter(Mandatory = $false)]
+        [string]$Name,
+
+        [Parameter(Mandatory = $false)]
+        [string]$Type = "MEDIA"
+    )
+
+    Write-Host "🎨 Uploading creative: $(Split-Path $FilePath -Leaf)" -ForegroundColor Magenta
+
+    try {
+        # Validate file exists
+        if (-not (Test-Path $FilePath)) {
+            Write-Error "❌ File not found: $FilePath"
+            return $false
+        }
+
+        # Build command arguments
+        $args = @("xads-creative", "upload", $FilePath, "--type", $Type)
+
+        if ($AccountId) {
+            $args += @("--account-id", $AccountId)
+        }
+
+        if ($Name) {
+            $args += @("--name", $Name)
+        }
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output $result
+            Write-Host "✅ Creative uploaded successfully!" -ForegroundColor Green
+
+            # Log creative upload
+            $logEntry = @{
+                Timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+                Action    = "xads_creative_upload"
+                FilePath  = $FilePath
+                FileName  = Split-Path $FilePath -Leaf
+                Name      = $Name
+                Type      = $Type
+                Status    = "Success"
+                Result    = $result -join "`n"
+            } | ConvertTo-Json -Depth 3
+
+            $logPath = "C:\EQ12\logs\xads_creatives_$(Get-Date -Format 'yyyyMMdd').json"
+            Add-Content -Path $logPath -Value $logEntry
+
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to upload creative: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error uploading creative: $_"
+        return $false
+    }
+}
+
+function Invoke-EQ12XAdsPromoteTweet {
+    <#
+    .SYNOPSIS
+    Create promoted tweet creative
+
+    .DESCRIPTION
+    Creates a promoted tweet creative from an existing tweet
+
+    .PARAMETER TweetId
+    ID of the tweet to promote
+
+    .PARAMETER AccountId
+    X Ads account ID (optional, will use first available)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsPromoteTweet -TweetId "1234567890"
+
+    .EXAMPLE
+    Invoke-EQ12XAdsPromoteTweet -TweetId "1234567890" -AccountId "18ce54d4x5t"
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$TweetId,
+
+        [Parameter(Mandatory = $false)]
+        [string]$AccountId
+    )
+
+    Write-Host "🐦 Creating promoted tweet for: $TweetId" -ForegroundColor Blue
+
+    try {
+        # Build command arguments
+        $args = @("xads-creative", "promote-tweet", "--tweet-id", $TweetId)
+
+        if ($AccountId) {
+            $args += @("--account-id", $AccountId)
+        }
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output $result
+            Write-Host "✅ Promoted tweet created successfully!" -ForegroundColor Green
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to create promoted tweet: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error creating promoted tweet: $_"
+        return $false
+    }
+}
+
+# ==================================================
+# X ADS REPORTING AND ANALYTICS WRAPPERS
+# ==================================================
+
+function Invoke-EQ12XAdsReport {
+    <#
+    .SYNOPSIS
+    Generate comprehensive X Ads performance report
+
+    .DESCRIPTION
+    Generates a detailed performance report with analytics, insights, and recommendations
+
+    .PARAMETER AccountId
+    X Ads account ID (optional, will use first available)
+
+    .PARAMETER Days
+    Number of days to include in report (default: 30)
+
+    .EXAMPLE
+    Invoke-EQ12XAdsReport
+
+    .EXAMPLE
+    Invoke-EQ12XAdsReport -AccountId "18ce54d4x5t" -Days 60
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [string]$AccountId,
+
+        [Parameter(Mandatory = $false)]
+        [int]$Days = 30
+    )
+
+    Write-Host "📊 Generating EQ12 X Ads performance report for $Days days..." -ForegroundColor Cyan
+
+    try {
+        # Build command arguments
+        $args = @("xads-report", "generate", "--days", $Days.ToString())
+
+        if ($AccountId) {
+            $args += @("--account-id", $AccountId)
+        }
+
+        # Execute CLI command
+        $result = & "eq12.exe" $args 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-Output $result
+            Write-Host "✅ Report generated successfully!" -ForegroundColor Green
+
+            # Extract report URL for easy access
+            $reportUrl = ($result | Select-String "Report URL: (.+)" | ForEach-Object { $_.Matches[0].Groups[1].Value })
+
+            if ($reportUrl) {
+                Write-Host "🔗 Report available at: $reportUrl" -ForegroundColor Yellow
+
+                # Try to open report if it's a local file
+                if (Test-Path $reportUrl) {
+                    $openReport = Read-Host "📖 Open report now? (Y/N)"
+                    if ($openReport -eq "Y" -or $openReport -eq "y") {
+                        Start-Process $reportUrl
+                    }
+                }
+            }
+
+            # Log report generation
+            $logEntry = @{
+                Timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+                Action    = "xads_report_generate"
+                AccountId = $AccountId
+                Days      = $Days
+                ReportUrl = $reportUrl
+                Status    = "Success"
+            } | ConvertTo-Json -Depth 2
+
+            $logPath = "C:\EQ12\logs\xads_reports_$(Get-Date -Format 'yyyyMMdd').json"
+            Add-Content -Path $logPath -Value $logEntry
+
+            return $true
+        }
+        else {
+            Write-Error "❌ Failed to generate report: $($result -join "`n")"
+            return $false
+        }
+    }
+    catch {
+        Write-Error "💥 Error generating report: $_"
+        return $false
+    }
+}
+
+# ==================================================
+# UTILITY FUNCTIONS
+# ==================================================
+
+function Send-TelegramMessage {
+    <#
+    .SYNOPSIS
+    Send notification to Telegram
+
+    .PARAMETER Message
+    Message text to send
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Message
+    )
+
+    try {
+        if ($env:TELEGRAM_BOT_TOKEN -and $env:TELEGRAM_CHAT_ID) {
+            $uri = "https://api.telegram.org/bot$($env:TELEGRAM_BOT_TOKEN)/sendMessage"
+            $body = @{
+                chat_id    = $env:TELEGRAM_CHAT_ID
+                text       = $Message
+                parse_mode = "HTML"
+            } | ConvertTo-Json
+
+            Invoke-RestMethod -Uri $uri -Method Post -Body $body -ContentType "application/json" | Out-Null
+        }
+    }
+    catch {
+        Write-Verbose "Failed to send Telegram notification: $_"
+    }
+}
+
+function Show-EQ12XAdsHelp {
+    <#
+    .SYNOPSIS
+    Display comprehensive help for EQ12 X Ads PowerShell functions
+    #>
+
+    Write-Host "🚀 EQ12 X Ads API PowerShell Functions v3.0" -ForegroundColor Green
+    Write-Host "=============================================" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "🎯 Campaign Management:" -ForegroundColor Yellow
+    Write-Host "  Invoke-EQ12XAdsCampaignCreate    Create new advertising campaign"
+    Write-Host "  Invoke-EQ12XAdsCampaignList      List existing campaigns"
+    Write-Host "  Invoke-EQ12XAdsCampaignStats     Get campaign analytics"
+    Write-Host "  Invoke-EQ12XAdsAutoPromote       Auto-promote high-performing tweets"
+    Write-Host ""
+    Write-Host "🎨 Creative Management:" -ForegroundColor Magenta
+    Write-Host "  Invoke-EQ12XAdsCreativeUpload    Upload media creatives"
+    Write-Host "  Invoke-EQ12XAdsPromoteTweet      Create promoted tweet"
+    Write-Host ""
+    Write-Host "📊 Analytics and Reporting:" -ForegroundColor Cyan
+    Write-Host "  Invoke-EQ12XAdsReport            Generate performance reports"
+    Write-Host ""
+    Write-Host "💡 Usage Examples:" -ForegroundColor White
+    Write-Host '  Invoke-EQ12XAdsCampaignCreate -Name "Holiday Sale" -Budget 100'
+    Write-Host '  Invoke-EQ12XAdsAutoPromote -TweetId "1234567890" -Budget 50'
+    Write-Host '  Invoke-EQ12XAdsCreativeUpload -FilePath "C:\Images\banner.jpg"'
+    Write-Host '  Invoke-EQ12XAdsReport -Days 30'
+    Write-Host ""
+    Write-Host "🔧 Setup:" -ForegroundColor Red
+    Write-Host "  1. Ensure eq12.exe is in your PATH"
+    Write-Host "  2. Run 'eq12 x-oauth setup' to configure API access"
+    Write-Host "  3. Set environment variables for notifications (optional):"
+    Write-Host "     - TELEGRAM_BOT_TOKEN"
+    Write-Host "     - TELEGRAM_CHAT_ID"
+    Write-Host ""
+}
+
+# Export functions for module use
+Export-ModuleMember -Function Invoke-EQ12XAdsCampaignCreate,
+Invoke-EQ12XAdsCampaignList,
+Invoke-EQ12XAdsCampaignStats,
+Invoke-EQ12XAdsAutoPromote,
+Invoke-EQ12XAdsCreativeUpload,
+Invoke-EQ12XAdsPromoteTweet,
+Invoke-EQ12XAdsReport,
+Show-EQ12XAdsHelp

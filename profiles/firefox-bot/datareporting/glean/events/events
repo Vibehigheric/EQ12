@@ -1,0 +1,14 @@
+{"timestamp":868503364,"category":"session_restore","name":"backup_can_be_loaded_session_file","extra":{"loadfail_reason":"N/A","glean_timestamp":"1758339174885","can_load":"true","path_key":"clean"}}
+{"timestamp":868503365,"category":"session_restore","name":"backup_can_be_loaded_session_file","extra":{"can_load":"true","path_key":"clean","glean_timestamp":"1758339174885","loadfail_reason":"N/A"}}
+{"timestamp":868503365,"category":"session_restore","name":"shutdown_success_session_startup","extra":{"glean_timestamp":"1758339174886","shutdown_reason":"N/A","shutdown_ok":"false"}}
+{"timestamp":868503943,"category":"webcompatreporting","name":"reason_dropdown","extra":{"glean_timestamp":"1758339175464","setting":"required"}}
+{"timestamp":868504368,"category":"nimbus_events","name":"startup_database_consistency","extra":{"total_db_count":"38","glean_timestamp":"1758339175888","db_active_count":"38","trigger":"startup","total_store_count":"38","primary":"database","store_active_count":"38"}}
+{"timestamp":868504405,"category":"network.dns","name":"trr_confirmation_context","extra":{"networkID":"G66nO0zjM1A5NdOj8dL0x2isPh8=","time":"1259.616500","glean_timestamp":"1758339175926","results":"+","contextReason":"","trigger":"uri-change","captivePortal":"1","value":"2","attemptCount":"1"}}
+{"timestamp":868504453,"category":"jsonfile","name":"load_autofillprofiles","extra":{"value":"error_notfounderror","glean_timestamp":"1758339175973"}}
+{"timestamp":868504634,"category":"doh","name":"state_enabled","extra":{"value":"null","glean_timestamp":"1758339176155"}}
+{"timestamp":868504634,"category":"doh","name":"evaluate_v2_heuristics","extra":{"value":"enable_doh","canaries":"","captiveState":"not_captive","evaluateReason":"startup","steeredProvider":"","filtering":"","glean_timestamp":"1758339176155","networkID":"bTL3/mCM6hxzaI3knevfS3sNoLklwk7v/9AaLmnzQMw=","enterprise":"","platform":""}}
+{"timestamp":868504671,"category":"network.dns","name":"trr_confirmation_context","extra":{"glean_timestamp":"1758339176192","time":"148.014900","results":"+","value":"2","attemptCount":"1","networkID":"G66nO0zjM1A5NdOj8dL0x2isPh8=","contextReason":"pref-change","captivePortal":"1","trigger":"pref-change"}}
+{"timestamp":868505466,"category":"nimbus_events","name":"is_ready","extra":{"glean_timestamp":"1758339176987"}}
+{"timestamp":868505489,"category":"containers","name":"container_profile_loaded","extra":{"containers":"4","glean_timestamp":"1758339177010"}}
+{"timestamp":868505624,"category":"upgrade_dialog","name":"trigger_reason","extra":{"value":"not-major","glean_timestamp":"1758339177145"}}
+{"timestamp":868548964,"category":"doh","name":"state_shutdown","extra":{"value":"null","glean_timestamp":"1758339220484"}}

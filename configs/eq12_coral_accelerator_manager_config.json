@@ -1,0 +1,50 @@
+{
+    "component_info": {
+        "name": "eq12_coral_accelerator_manager",
+        "type": "ai_model",
+        "script_path": "C:\\EQ12\\scripts\\eq12_coral_accelerator_manager.py",
+        "dependencies": [
+            "numpy",
+            "eq12_"
+        ],
+        "version": "1.0.0"
+    },
+    "runtime_settings": {
+        "enabled": true,
+        "auto_start": true,
+        "restart_on_failure": true,
+        "max_memory_mb": 512,
+        "execution_timeout": 300,
+        "priority": "normal"
+    },
+    "monitoring": {
+        "health_check_enabled": true,
+        "performance_monitoring": true,
+        "error_tracking": true,
+        "metrics_collection": true
+    },
+    "logging": {
+        "log_level": "INFO",
+        "log_file": "C:/EQ12/logs/eq12_coral_accelerator_manager.log",
+        "log_rotation": true,
+        "max_log_size_mb": 100,
+        "backup_count": 5
+    },
+    "security": {
+        "require_authentication": true,
+        "encrypt_data": true,
+        "audit_operations": true,
+        "access_level": "standard"
+    },
+    "model_settings": {
+        "inference_mode": "production",
+        "batch_size": 32,
+        "max_sequence_length": 512,
+        "temperature": 0.7
+    },
+    "optimization": {
+        "use_coral_acceleration": true,
+        "enable_quantization": true,
+        "cache_predictions": true
+    }
+}

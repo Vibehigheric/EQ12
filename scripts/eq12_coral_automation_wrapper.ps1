@@ -1,0 +1,481 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#Requires -Version 5.1
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("CollectOdds", "RunInference", "OptimizeParlays", "SendAlerts", "GenerateReports", "FullPipeline", "Status")]
+    [string]$Action = "Status",
+    
+    [Parameter(Mandatory = $false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$Verbose,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$Force,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$ConfigFile = "",
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$DryRun
+)
+
+# EQ12 Coral Edge TPU Sports Betting AI Automation Wrapper
+# Author: EQ12 Team
+# Date: November 2, 2025
+
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+# Initialize logging
+$LogTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogPath = Join-Path $Workspace "logs"
+$LogFile = Join-Path $LogPath "coral_automation_$LogTimestamp.log"
+
+if (-not (Test-Path $LogPath)) {
+    New-Item -Path $LogPath -ItemType Directory -Force | Out-Null
+}
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "[$Timestamp] [$Level] $Message"
+    Add-Content -Path $LogFile -Value $LogEntry
+    
+    switch ($Level) {
+        "ERROR" { Write-Host $LogEntry -ForegroundColor Red }
+        "WARN" { Write-Host $LogEntry -ForegroundColor Yellow }
+        "SUCCESS" { Write-Host $LogEntry -ForegroundColor Green }
+        default { if ($Verbose) { Write-Host $LogEntry -ForegroundColor White } }
+    }
+}
+
+function Test-Prerequisites {
+    Write-Log "Checking prerequisites for Coral AI system..."
+    
+    $Prerequisites = @{
+        "Python" = @{
+            "Command" = "python --version"
+            "Required" = $true
+        }
+        "PipPackages" = @{
+            "Command" = "python -c `"import tflite_runtime, requests, feedparser`""
+            "Required" = $true
+        }
+        "CoralLibrary" = @{
+            "Command" = "python -c `"from pycoral.adapters import common`""
+            "Required" = $false
+        }
+        "WorkspaceStructure" = @{
+            "Command" = "Test-Path '$Workspace\coral_betting_ai'"
+            "Required" = $true
+        }
+    }
+    
+    $AllGood = $true
+    
+    foreach ($Prerequisite in $Prerequisites.Keys) {
+        $Config = $Prerequisites[$Prerequisite]
+        
+        try {
+            if ($Prerequisite -eq "WorkspaceStructure") {
+                $Result = Invoke-Expression $Config.Command
+            } else {
+                $Result = Invoke-Expression $Config.Command 2>$null
+            }
+            
+            Write-Log " $Prerequisite check passed" "SUCCESS"
+        }
+        catch {
+            if ($Config.Required) {
+                Write-Log " $Prerequisite check failed: $($_.Exception.Message)" "ERROR"
+                $AllGood = $false
+            } else {
+                Write-Log " $Prerequisite check failed (optional): $($_.Exception.Message)" "WARN"
+            }
+        }
+    }
+    
+    return $AllGood
+}
+
+function Invoke-OddsCollection {
+    Write-Log "Starting odds collection process..."
+    
+    $OddsScript = Join-Path $Workspace "scripts\eq12_odds_stream.py"
+    
+    if (-not (Test-Path $OddsScript)) {
+        Write-Log "Odds collection script not found: $OddsScript" "ERROR"
+        return $false
+    }
+    
+    try {
+        $Arguments = @(
+            $OddsScript,
+            "--workspace", $Workspace,
+            "--sports", "americanfootball_nfl", "basketball_nba", "baseball_mlb"
+        )
+        
+        if ($Verbose) { $Arguments += "--verbose" }
+        
+        if ($DryRun) {
+            Write-Log "DRY RUN: Would execute: python $($Arguments -join ' ')"
+            return $true
+        }
+        
+        $Result = & python @Arguments
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Odds collection completed successfully" "SUCCESS"
+            return $true
+        } else {
+            Write-Log "Odds collection failed with exit code: $LASTEXITCODE" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Error during odds collection: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Invoke-CoralInference {
+    Write-Log "Starting Coral Edge TPU inference..."
+    
+    $CoralScript = Join-Path $Workspace "scripts\eq12_coral_betting_ai.py"
+    $LatestOdds = Join-Path $Workspace "coral_betting_ai\feeds\live_odds_latest.json"
+    
+    if (-not (Test-Path $CoralScript)) {
+        Write-Log "Coral AI script not found: $CoralScript" "ERROR"
+        return $false
+    }
+    
+    if (-not (Test-Path $LatestOdds)) {
+        Write-Log "No odds data found for inference: $LatestOdds" "ERROR"
+        return $false
+    }
+    
+    try {
+        $Arguments = @(
+            $CoralScript,
+            "--workspace", $Workspace,
+            "--input", $LatestOdds
+        )
+        
+        if ($Verbose) { $Arguments += "--verbose" }
+        
+        if ($DryRun) {
+            Write-Log "DRY RUN: Would execute: python $($Arguments -join ' ')"
+            return $true
+        }
+        
+        $Result = & python @Arguments
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Coral inference completed successfully" "SUCCESS"
+            return $true
+        } else {
+            Write-Log "Coral inference failed with exit code: $LASTEXITCODE" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Error during Coral inference: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Invoke-ParlayOptimization {
+    Write-Log "Starting parlay optimization..."
+    
+    $ParlayScript = Join-Path $Workspace "scripts\eq12_parlay_optimizer.py"
+    
+    if (-not (Test-Path $ParlayScript)) {
+        Write-Log "Parlay optimizer script not found: $ParlayScript" "ERROR"
+        return $false
+    }
+    
+    try {
+        $Arguments = @(
+            $ParlayScript,
+            "--workspace", $Workspace,
+            "--generate-report"
+        )
+        
+        if ($Verbose) { $Arguments += "--verbose" }
+        
+        if ($DryRun) {
+            Write-Log "DRY RUN: Would execute: python $($Arguments -join ' ')"
+            return $true
+        }
+        
+        $Result = & python @Arguments
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Parlay optimization completed successfully" "SUCCESS"
+            return $true
+        } else {
+            Write-Log "Parlay optimization failed with exit code: $LASTEXITCODE" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Error during parlay optimization: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Invoke-AlertSystem {
+    Write-Log "Checking and sending alerts..."
+    
+    $AlertScript = Join-Path $Workspace "scripts\eq12_tg_alert.py"
+    
+    if (-not (Test-Path $AlertScript)) {
+        Write-Log "Alert script not found: $AlertScript" "ERROR"
+        return $false
+    }
+    
+    try {
+        # Check bet alerts
+        $BetAlertArgs = @(
+            $AlertScript,
+            "--workspace", $Workspace,
+            "--check-bets"
+        )
+        
+        if ($Verbose) { $BetAlertArgs += "--verbose" }
+        
+        if (-not $DryRun) {
+            $Result = & python @BetAlertArgs
+            Write-Log "Bet alerts check completed"
+        }
+        
+        # Check parlay alerts  
+        $ParlayAlertArgs = @(
+            $AlertScript,
+            "--workspace", $Workspace,
+            "--check-parlays"
+        )
+        
+        if ($Verbose) { $ParlayAlertArgs += "--verbose" }
+        
+        if (-not $DryRun) {
+            $Result = & python @ParlayAlertArgs
+            Write-Log "Parlay alerts check completed"
+        }
+        
+        if ($DryRun) {
+            Write-Log "DRY RUN: Would check bet and parlay alerts"
+        }
+        
+        Write-Log "Alert system check completed successfully" "SUCCESS"
+        return $true
+    }
+    catch {
+        Write-Log "Error in alert system: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Invoke-ReportGeneration {
+    Write-Log "Generating reports..."
+    
+    $ReporterScript = Join-Path $Workspace "scripts\eq12_auto_reporter.py"
+    
+    if (-not (Test-Path $ReporterScript)) {
+        Write-Log "Reporter script not found: $ReporterScript" "ERROR"
+        return $false
+    }
+    
+    try {
+        $Arguments = @(
+            $ReporterScript,
+            "--workspace", $Workspace,
+            "--daily-report",
+            "--store-data"
+        )
+        
+        if ($Verbose) { $Arguments += "--verbose" }
+        
+        if ($DryRun) {
+            Write-Log "DRY RUN: Would execute: python $($Arguments -join ' ')"
+            return $true
+        }
+        
+        $Result = & python @Arguments
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Report generation completed successfully" "SUCCESS"
+            return $true
+        } else {
+            Write-Log "Report generation failed with exit code: $LASTEXITCODE" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Error during report generation: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Invoke-SystemStatus {
+    Write-Log "Checking Coral AI system status..."
+    
+    $StatusData = @{
+        "Timestamp" = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+        "Workspace" = $Workspace
+        "Prerequisites" = Test-Prerequisites
+        "FileSystemStatus" = @{}
+        "RecentActivity" = @{}
+    }
+    
+    # Check file system
+    $CoralPath = Join-Path $Workspace "coral_betting_ai"
+    $StatusData.FileSystemStatus.CoralDirectoryExists = Test-Path $CoralPath
+    
+    if ($StatusData.FileSystemStatus.CoralDirectoryExists) {
+        $ModelsPath = Join-Path $CoralPath "models"
+        $FeedsPath = Join-Path $CoralPath "feeds"
+        $ReportsPath = Join-Path $CoralPath "reports"
+        
+        $StatusData.FileSystemStatus.ModelsDirectory = Test-Path $ModelsPath
+        $StatusData.FileSystemStatus.FeedsDirectory = Test-Path $FeedsPath
+        $StatusData.FileSystemStatus.ReportsDirectory = Test-Path $ReportsPath
+        
+        if (Test-Path $ReportsPath) {
+            $CoralResults = Get-ChildItem -Path $ReportsPath -Filter "coral_results_*.json" | Measure-Object
+            $ParlayResults = Get-ChildItem -Path $ReportsPath -Filter "optimized_parlays_*.json" | Measure-Object
+            
+            $StatusData.RecentActivity.CoralResultFiles = $CoralResults.Count
+            $StatusData.RecentActivity.ParlayResultFiles = $ParlayResults.Count
+        }
+    }
+    
+    # Output status
+    Write-Host ""
+    Write-Host " EQ12 Coral Edge TPU Sports Betting AI - System Status" -ForegroundColor Cyan
+    Write-Host "=" * 60 -ForegroundColor Cyan
+    Write-Host ""
+    
+    Write-Host " System Health:" -ForegroundColor Yellow
+    Write-Host "  Prerequisites Check: $(if ($StatusData.Prerequisites) {' PASSED'} else {" FAILED"})" -ForegroundColor $(if ($StatusData.Prerequisites) {'Green'} else {'Red'})
+    Write-Host "  Workspace Path: $Workspace" -ForegroundColor White
+    Write-Host "  Coral Directory: $(if ($StatusData.FileSystemStatus.CoralDirectoryExists) {' EXISTS'} else {" MISSING"})" -ForegroundColor $(if ($StatusData.FileSystemStatus.CoralDirectoryExists) {'Green'} else {'Red'})
+    Write-Host ""
+    
+    Write-Host " File System:" -ForegroundColor Yellow
+    Write-Host "  Models Directory: $(if ($StatusData.FileSystemStatus.ModelsDirectory) {''} else {""})" -ForegroundColor $(if ($StatusData.FileSystemStatus.ModelsDirectory) {'Green'} else {'Red'})
+    Write-Host "  Feeds Directory: $(if ($StatusData.FileSystemStatus.FeedsDirectory) {''} else {""})" -ForegroundColor $(if ($StatusData.FileSystemStatus.FeedsDirectory) {'Green'} else {'Red'})
+    Write-Host "  Reports Directory: $(if ($StatusData.FileSystemStatus.ReportsDirectory) {''} else {""})" -ForegroundColor $(if ($StatusData.FileSystemStatus.ReportsDirectory) {'Green'} else {'Red'})
+    Write-Host ""
+    
+    Write-Host " Recent Activity:" -ForegroundColor Yellow
+    Write-Host "  Coral Result Files: $($StatusData.RecentActivity.CoralResultFiles)" -ForegroundColor White
+    Write-Host "  Parlay Result Files: $($StatusData.RecentActivity.ParlayResultFiles)" -ForegroundColor White
+    Write-Host ""
+    
+    Write-Host " Status Generated: $($StatusData.Timestamp)" -ForegroundColor Gray
+    Write-Host ""
+    
+    # Save status to JSON
+    $StatusFile = Join-Path $Workspace "logs\coral_system_status_$LogTimestamp.json"
+    $StatusData | ConvertTo-Json -Depth 10 | Out-File -FilePath $StatusFile -Encoding UTF8
+    Write-Log "System status saved to: $StatusFile"
+    
+    return $StatusData.Prerequisites
+}
+
+function Invoke-FullPipeline {
+    Write-Log "Starting full Coral AI pipeline..." "SUCCESS"
+    
+    $Steps = @(
+        @{ Name = "Odds Collection"; Function = { Invoke-OddsCollection } },
+        @{ Name = "Coral Inference"; Function = { Invoke-CoralInference } },
+        @{ Name = "Parlay Optimization"; Function = { Invoke-ParlayOptimization } },
+        @{ Name = "Alert System"; Function = { Invoke-AlertSystem } },
+        @{ Name = "Report Generation"; Function = { Invoke-ReportGeneration } }
+    )
+    
+    $SuccessCount = 0
+    $TotalSteps = $Steps.Count
+    
+    foreach ($Step in $Steps) {
+        Write-Log "Executing step: $($Step.Name)..."
+        
+        try {
+            $StepResult = & $Step.Function
+            
+            if ($StepResult) {
+                Write-Log " $($Step.Name) completed successfully" "SUCCESS"
+                $SuccessCount++
+            } else {
+                Write-Log " $($Step.Name) failed" "ERROR"
+            }
+        }
+        catch {
+            Write-Log " $($Step.Name) failed with exception: $($_.Exception.Message)" "ERROR"
+        }
+        
+        # Small delay between steps
+        if (-not $DryRun) {
+            Start-Sleep -Seconds 2
+        }
+    }
+    
+    Write-Log "Full pipeline completed: $SuccessCount/$TotalSteps steps successful" $(if ($SuccessCount -eq $TotalSteps) {"SUCCESS"} else {"WARN"})
+    
+    return ($SuccessCount -eq $TotalSteps)
+}
+
+# Main execution
+Write-Log "Starting EQ12 Coral AI Automation - Action: $Action"
+
+if (-not (Test-Path $Workspace)) {
+    Write-Log "Workspace directory not found: $Workspace" "ERROR"
+    exit 1
+}
+
+$ExecutionResult = $false
+
+try {
+    switch ($Action) {
+        "CollectOdds" {
+            $ExecutionResult = Invoke-OddsCollection
+        }
+        "RunInference" {
+            $ExecutionResult = Invoke-CoralInference
+        }
+        "OptimizeParlays" {
+            $ExecutionResult = Invoke-ParlayOptimization
+        }
+        "SendAlerts" {
+            $ExecutionResult = Invoke-AlertSystem
+        }
+        "GenerateReports" {
+            $ExecutionResult = Invoke-ReportGeneration
+        }
+        "FullPipeline" {
+            $ExecutionResult = Invoke-FullPipeline
+        }
+        "Status" {
+            $ExecutionResult = Invoke-SystemStatus
+        }
+        default {
+            Write-Log "Unknown action: $Action" "ERROR"
+            $ExecutionResult = $false
+        }
+    }
+}
+catch {
+    Write-Log "Unexpected error during execution: $($_.Exception.Message)" "ERROR"
+    $ExecutionResult = $false
+}
+
+$ExitCode = if ($ExecutionResult) { 0 } else { 1 }
+Write-Log "EQ12 Coral AI Automation completed with exit code: $ExitCode" $(if ($ExecutionResult) {"SUCCESS"} else {"ERROR"})
+
+exit $ExitCode

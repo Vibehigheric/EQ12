@@ -1,0 +1,71 @@
+name: Python Bytecode Maintenance
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
+
+permissions:
+  contents: read
+
+jobs:
+  pyc-cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Clean stale .pyc files
+        run: |
+          python cleanup_pyc.py --dry-run --path .
+          
+      - name: Validate Python syntax
+        run: |
+          python -m py_compile scripts/*.py || true
+          python -m py_compile buffalo_stack/*.py || true
+          
+      - name: Optimize bytecode for production
+        run: |
+          python -m compileall -f -q scripts/ buffalo_stack/ || true
+          
+      - name: Check for orphaned bytecode
+        run: |
+          find . -name "*.pyc" -type f | while read pyc_file; do
+            py_file="${pyc_file%.*}.py"
+            if [ ! -f "$py_file" ]; then
+              echo "Orphaned: $pyc_file"
+            fi
+          done
+
+  bytecode-analysis:
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Analyze bytecode quality
+        run: |
+          echo "Analyzing Python bytecode files..."
+          
+          # Count .pyc files
+          pyc_count=$(find . -name "*.pyc" -type f | wc -l)
+          echo "Total .pyc files: $pyc_count"
+          
+          # Check for version mismatches
+          find . -name "*.pyc" -type f | head -10 | xargs file
+          
+          # Report large __pycache__ directories
+          du -sh */__pycache__ 2>/dev/null | sort -hr | head -10 || true

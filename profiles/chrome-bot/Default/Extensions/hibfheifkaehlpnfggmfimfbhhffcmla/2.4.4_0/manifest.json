@@ -1,0 +1,34 @@
+{
+   "action": {
+      "default_icon": "assets/images/icon-48.png",
+      "default_popup": "js/popup.html"
+   },
+   "background": {
+      "service_worker": "js/background.bundle.js"
+   },
+   "content_scripts": [ {
+      "all_frames": false,
+      "css": [ "js/content.styles.css" ],
+      "js": [ "js/contentScript.bundle.js" ],
+      "matches": [ "http://*/*", "https://*/*", "\u003Call_urls>" ]
+   } ],
+   "description": "Design & Collaborate | Marketing made easy | Simplified",
+   "host_permissions": [ "\u003Call_urls>" ],
+   "icons": {
+      "128": "assets/images/icon-128.png",
+      "16": "assets/images/icon-48.png",
+      "32": "assets/images/icon-48.png",
+      "46": "assets/images/icon-48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk2zdPumJlm9iOmZMOyz5Dvc1F2ZGW2OMRUdJXi8XyxC8d7I+mz9YeVZ1dfrS701fsTUPq/dhPf0yFHkQtOijB0oIc6XPHRii659Mf8Vfy7iL+e0xq+mnPN/j7rvEiPF6Ek15bdwBGZhDQ6Yyzyi8iL4fx4nWhkZRLsoFdLoLFNaIgKFwf8MArLawbuFVLzNqxGdHqg37n+3OrM3P1ao+0NiKcWqgaRZDvwWaV4cA8wPxY8BwKLWAkTh+2/QrY3Znds0w3WUuRejC7A2mTits9ksj5dnWCKCRAzxYU3bvOBqdp+7S+SVO7+SLIbep30G7YjsND2DHVkv1W27e/C1WswIDAQAB",
+   "manifest_version": 3,
+   "name": "Simplified Chrome Extension",
+   "options_page": "js/options.html",
+   "permissions": [ "scripting", "activeTab", "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.4.4",
+   "web_accessible_resources": [ {
+      "matches": [  ],
+      "resources": [ "js/content.styles.css", "assets/images/icon-128.png", "assets/images/icon-48.png" ]
+   } ]
+}

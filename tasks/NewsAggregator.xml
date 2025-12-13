@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2025-09-28T08:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+    <Repetition>
+      <Interval>PT1H</Interval>
+      <StopAtDurationEnd>false</StopAtDurationEnd>
+    </Repetition>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <LogonType>Password</LogonType>
+      <RunLevel>LeastPrivilege</RunLevel>
+    </Principal>
+  </Principals>
+  <Actions Context="Author">
+    <Exec>
+      <Command>python</Command>
+      <Arguments>news_aggregator.py --query-file queries_news.txt</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>

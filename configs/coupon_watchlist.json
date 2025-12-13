@@ -1,0 +1,5 @@
+[
+  { "store": "Nike", "type": "sitewide", "min_discount": 10 },
+  { "store": "Amazon", "type": "product", "min_discount": 5 },
+  { "store": "BestBuy", "type": "sitewide", "min_discount": 15 }
+]

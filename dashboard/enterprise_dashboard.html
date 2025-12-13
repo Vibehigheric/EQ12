@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 AI Governance Enterprise Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.j                </div>
+
+                <!-- AI Optimization Controls -->
+                <div class=\" bg-white rounded-lg p-6 card-shadow\">
+                    <div class=\"flex justify-between items-center mb-4\">
+                        < h3 class=\"text-lg font-semibold text-gray-900\">AI Optimization</h3>
+                            < button @click=\"showAISettings = !showAISettings\" class=\"text-blue-600 hover:text-blue-800\">
+                                < i class=\"fas fa-cog\"></i>
+                        </button >
+                    </div >
+
+                        <!-- Current AI Profile -->
+                        <div class=\"mb-4\">
+                            < div class=\"flex items-center justify-between p-3 bg-gray-50 rounded-lg\">
+                                < div >
+                                <span class=\"text-sm font-medium text-gray-900\">Current Profile</span>
+                                    < p class=\"text-xs text-gray-600\" x-text=\"aiSettings.currentProfile.description\"></p>
+                            </div >
+                        <span class=\"px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium\"
+                    x - text=\"aiSettings.currentProfile.name\"></span>
+                        </div >
+                    </div >
+
+                    < !--AI Profile Selector(when settings are shown)-- >
+                        <div x-show=\"showAISettings\" x-collapse class=\"space-y-4\">
+                            < div >
+                            <label class=\"block text-sm font-medium text-gray-700 mb-2\">AI Personality Profile</label>
+                                < select x - model=\"aiSettings.selectedProfile\" @change=\"updateAIProfile()\"
+                    class=\"w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent\">
+                        < template x -for=\"(profile, key) in aiSettings.availableProfiles\" :key=\"key\">
+                            < option : value =\"key\" x-text=\"profile.name\"></option>
+                                </template >
+                            </select >
+                        <p class=\"text-xs text-gray-500 mt-1\" x-text=\"aiSettings.availableProfiles[aiSettings.selectedProfile]?.use_case || ''\"></p>
+                        </div >
+
+                        < !--Advanced Controls-- >
+                        <div class=\"border-t pt-4\">
+                            < div class=\"flex items-center justify-between mb-3\">
+                                < span class=\"text-sm font-medium text-gray-700\">Advanced Controls</span>
+                                    < button @click=\"showAdvanced = !showAdvanced\" class=\"text-xs text-blue-600 hover:text-blue-800\">
+                                        < span x - text=\"showAdvanced ? 'Hide' : 'Show'\"></span>
+                                </button >
+                            </div >
+
+                        <div x-show=\"showAdvanced\" x-collapse class=\"space-y-3\">
+                            < !--Temperature Control-- >
+                                <div>
+                                    <label class=\"block text-xs font-medium text-gray-600 mb-1\">
+                                    Temperature: <span x-text=\"aiSettings.temperature\"></span>
+                                    </label >
+                        <input type=\"range\" x-model=\"aiSettings.temperature\"
+                    min =\"0\" max=\"1\" step=\"0.1\"
+                    class=\"w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer\">
+                        < div class=\"flex justify-between text-xs text-gray-500 mt-1\">
+                            < span > Focused(0.0)</span >
+                                <span>Creative (1.0)</span>
+                                    </div >
+                                </div >
+
+                                < !--Top - P Control-- >
+                        <div>
+                            <label class=\"block text-xs font-medium text-gray-600 mb-1\">
+                            Top-P: <span x-text=\"aiSettings.top_p\"></span>
+                                    </label >
+                        <input type=\"range\" x-model=\"aiSettings.top_p\"
+                    min =\"0.1\" max=\"1\" step=\"0.1\"
+                    class=\"w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer\">
+                        < div class=\"flex justify-between text-xs text-gray-500 mt-1\">
+                            < span > Narrow(0.1)</span >
+                                <span>Broad (1.0)</span>
+                                    </div >
+                                </div >
+
+                                < !--Max Tokens-- >
+                                <div>
+                                    <label class=\"block text-xs font-medium text-gray-600 mb-1\">Max Tokens</label>
+                                    <input type=\"number\" x-model=\"aiSettings.max_tokens\"
+                    min =\"100\" max=\"4000\" step=\"100\"
+                    class=\"w-full p-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent\">
+                                </div >
+                            </div >
+                        </div >
+
+                        < !--Save Button-- >
+                        <div class=\"pt-4 border-t\">
+                            < button @click=\"saveAISettings()\"
+                    class=\"w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium\">
+                                Save AI Settings
+                            </button >
+                        </div >
+                    </div >
+
+                    < !--AI Usage Statistics-- >
+                        <div class=\"mt-4 pt-4 border-t\">
+                            < h4 class=\"text-sm font-medium text-gray-700 mb-2\">Recent AI Usage</h4>
+                                < div class=\"space-y-2\">
+                                    < template x -for=\"(usage, profile) in aiSettings.usageStats\" :key=\"profile\">
+                                        < div class=\"flex items-center justify-between text-xs\">
+                                            < span class=\"text-gray-600\" x-text=\"profile\"></span>
+                                                < div class=\"flex items-center space-x-2\">
+                                                    < span class=\"text-gray-500\" x-text=\"usage.calls + ' calls'\"></span>
+                                                        < span class=\"text-green-600 font-medium\" x-text=\"'$' + usage.cost.toFixed(2)\"></span>
+                                    </div >
+                                </div >
+                            </template >
+                        </div >
+                    </div >
+
+                    < !--AI Recommendations-- >
+                        <div class=\"mt-4 pt-4 border-t\" x-show=\"aiSettings.recommendations.length > 0\">
+                            < h4 class=\"text-sm font-medium text-gray-700 mb-2\">
+                                < i class=\"fas fa-lightbulb text-yellow-500 mr-1\"></i>
+                            Optimization Tips
+                        </h4 >
+                        <div class=\"space-y-1\">
+                            < template x -for=\"recommendation in aiSettings.recommendations.slice(0, 3)\" :key=\"recommendation\">
+                                < p class=\"text-xs text-gray-600\" x-text=\"recommendation\"></p>
+                            </template >
+                        </div >
+                    </div >
+                </div >
+
+                < !--Quick Actions-- >
+                        <div class=\"bg-white rounded-lg p-6 card-shadow\">
+                            < h3 class=\"text-lg font-semibold text-gray-900 mb-4\">Quick Actions</h3>script>
+                                < script src = "https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer ></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .metric-card {
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-indicator.active {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50" x-data="dashboardApp()">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-shield-alt text-2xl text-blue-600 mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">EQ12 AI Governance</span>
+                    </div>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full" x-text="currentTier"></span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute -mt-1 ml-2 px-1 text-xs bg-red-500 text-white rounded-full"
+                            x-show="notifications > 0" x-text="notifications"></span>
+                    </button>
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open"
+                            class="flex items-center space-x-2 text-gray-600 hover:text-gray-800">
+                            <img src="https://via.placeholder.com/32x32" alt="Profile" class="w-8 h-8 rounded-full">
+                            <span x-text="user.company_name"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="gradient-bg rounded-lg p-6 text-white mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold mb-2">Welcome back, <span x-text="user.company_name"></span></h1>
+                    <p class="opacity-90">Your AI governance systems are operating smoothly</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-semibold">Compliance Score</div>
+                    <div class="text-3xl font-bold" x-text="complianceScore + '%'"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">API Calls Today</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.api_calls_today"></p>
+                    </div>
+                    <div class="p-3 bg-blue-100 rounded-full">
+                        <i class="fas fa-chart-line text-blue-600"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        <span class="text-sm text-green-600 font-medium">+12.5%</span>
+                        <span class="text-sm text-gray-500 ml-2">from yesterday</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Compliance Issues</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.compliance_issues"></p>
+                    </div>
+                    <div class="p-3 bg-red-100 rounded-full">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        <span class="text-sm text-red-600 font-medium">2 Critical</span>
+                        <span class="text-sm text-gray-500 ml-2">require attention</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Monthly Usage</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.monthly_usage + '%'"></p>
+                    </div>
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <i class="fas fa-battery-three-quarters text-green-600"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-600 h-2 rounded-full" :style="`width: ${stats.monthly_usage}%`"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-6 card-shadow metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Cost Savings</p>
+                        <p class="text-2xl font-semibold text-gray-900">$<span x-text="stats.cost_savings"></span></p>
+                    </div>
+                    <div class="p-3 bg-purple-100 rounded-full">
+                        <i class="fas fa-piggy-bank text-purple-600"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        <span class="text-sm text-purple-600 font-medium">vs manual auditing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Real-time Governance Activity -->
+                <div class="bg-white rounded-lg p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Real-time Governance Activity</h3>
+                        <div class="flex items-center space-x-2">
+                            <div class="status-indicator active w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">Live</span>
+                        </div>
+                    </div>
+                    <canvas id="activityChart" height="100"></canvas>
+                </div>
+
+                <!-- Compliance Framework Status -->
+                <div class="bg-white rounded-lg p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-6">Compliance Framework Status</h3>
+                    <div class="space-y-4">
+                        <template x-for="framework in complianceFrameworks" :key="framework.name">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center" :class="framework.status === 'compliant' ? 'bg-green-100 text-green-600' :
+                                                framework.status === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                                                'bg-red-100 text-red-600'">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900" x-text="framework.name"></p>
+                                        <p class="text-sm text-gray-600" x-text="framework.description"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium" :class="framework.status === 'compliant' ? 'bg-green-100 text-green-800' :
+                                                 framework.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                                                 'bg-red-100 text-red-800'" x-text="framework.status"></span>
+                                    <span class="text-sm font-medium" x-text="framework.score + '%'"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Recent Audit Trail -->
+                <div class="bg-white rounded-lg p-6 card-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Audit Trail</h3>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All</button>
+                    </div>
+                    <div class="space-y-4">
+                        <template x-for="event in auditTrail.slice(0, 5)" :key="event.id">
+                            <div class="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center" :class="event.type === 'success' ? 'bg-green-100 text-green-600' :
+                                            event.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                                            'bg-red-100 text-red-600'">
+                                    <i :class="event.icon"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900" x-text="event.title"></p>
+                                    <p class="text-sm text-gray-600" x-text="event.description"></p>
+                                    <p class="text-xs text-gray-500 mt-1" x-text="event.timestamp"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Usage & Billing -->
+                <div class="bg-white rounded-lg p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Usage & Billing</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span>API Calls Used</span>
+                                <span x-text="usage.current + ' / ' + usage.limit"></span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full"
+                                    :style="`width: ${(usage.current / usage.limit) * 100}%`"></div>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-gray-600">Current Bill</span>
+                                <span class="text-lg font-semibold">$<span x-text="billing.current"></span></span>
+                            </div>
+                            <button
+                                class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                View Billing Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                            <i class="fas fa-plus-circle text-blue-600"></i>
+                            <span>Run Compliance Check</span>
+                        </button>
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                            <i class="fas fa-download text-green-600"></i>
+                            <span>Generate Report</span>
+                        </button>
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                            <i class="fas fa-cog text-gray-600"></i>
+                            <span>Configure Alerts</span>
+                        </button>
+                        <button class="w-full text-left p-3 hover:bg-gray-50 rounded-lg flex items-center space-x-3">
+                            <i class="fas fa-users text-purple-600"></i>
+                            <span>Manage Team</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="bg-white rounded-lg p-6 card-shadow">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">System Health</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">API Response Time</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-medium">125ms</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Uptime</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-medium">99.99%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Data Processing</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span class="text-sm font-medium">Normal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            function dashboardApp() {
+                return {
+                    user: {
+                        company_name: 'Enterprise Corp',
+                        email: 'admin@enterprise.com'
+                    },
+                    currentTier: 'Enterprise',
+                    notifications: 3,
+                    complianceScore: 94,
+                    stats: {
+                        api_calls_today: 2847,
+                        compliance_issues: 5,
+                        monthly_usage: 67,
+                        cost_savings: '45,230'
+                    },
+                    usage: {
+                        current: 67420,
+                        limit: 100000
+                    },
+                    billing: {
+                        current: 2999
+                    },
+                    complianceFrameworks: [
+                        {
+                            name: 'GDPR',
+                            description: 'General Data Protection Regulation',
+                            status: 'compliant',
+                            score: 96
+                        },
+                        {
+                            name: 'SOX',
+                            description: 'Sarbanes-Oxley Act',
+                            status: 'warning',
+                            score: 89
+                        },
+                        {
+                            name: 'HIPAA',
+                            description: 'Health Insurance Portability',
+                            status: 'compliant',
+                            score: 98
+                        },
+                        {
+                            name: 'PCI DSS',
+                            description: 'Payment Card Industry',
+                            status: 'critical',
+                            score: 72
+                        }
+                    ],
+                    auditTrail: [
+                        {
+                            id: 1,
+                            type: 'success',
+                            icon: 'fas fa-check-circle',
+                            title: 'Compliance check passed',
+                            description: 'GDPR audit completed successfully',
+                            timestamp: '2 minutes ago'
+                        },
+                        {
+                            id: 2,
+                            type: 'warning',
+                            icon: 'fas fa-exclamation-triangle',
+                            title: 'Potential data exposure detected',
+                            description: 'PII found in log files',
+                            timestamp: '15 minutes ago'
+                        },
+                        {
+                            id: 3,
+                            type: 'success',
+                            icon: 'fas fa-shield-alt',
+                            title: 'Security scan completed',
+                            description: 'All AI models passed security review',
+                            timestamp: '1 hour ago'
+                        },
+                        {
+                            id: 4,
+                            type: 'error',
+                            icon: 'fas fa-times-circle',
+                            title: 'API rate limit exceeded',
+                            description: 'Temporary throttling applied',
+                            timestamp: '2 hours ago'
+                        },
+                        {
+                            id: 5,
+                            type: 'success',
+                            icon: 'fas fa-file-alt',
+                            title: 'Monthly report generated',
+                            description: 'Compliance report for October 2024',
+                            timestamp: '1 day ago'
+                        }
+                    ],
+                    init() {
+                        this.initCharts();
+                        this.startRealTimeUpdates();
+                    },
+                    initCharts() {
+                        // Activity Chart
+                        const ctx = document.getElementById('activityChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                                datasets: [{
+                                    label: 'API Calls',
+                                    data: [45, 23, 156, 287, 234, 198, 167],
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                }, {
+                                    label: 'Compliance Checks',
+                                    data: [12, 8, 34, 67, 45, 38, 29],
+                                    borderColor: 'rgb(16, 185, 129)',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        position: 'top'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.05)'
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.05)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    startRealTimeUpdates() {
+                        // Simulate real-time data updates
+                        setInterval(() => {
+                            this.stats.api_calls_today += Math.floor(Math.random() * 10);
+                            this.usage.current += Math.floor(Math.random() * 5);
+
+                            // Randomly add new audit events
+                            if (Math.random() < 0.1) {
+                                this.auditTrail.unshift({
+                                    id: Date.now(),
+                                    type: 'success',
+                                    icon: 'fas fa-check-circle',
+                                    title: 'Real-time compliance check',
+                                    description: 'Automated governance validation passed',
+                                    timestamp: 'Just now'
+                                });
+                                if (this.auditTrail.length > 10) {
+                                    this.auditTrail = this.auditTrail.slice(0, 10);
+                                }
+                            }
+                        }, 5000);
+                    },
+
+                    // AI Optimization Features
+                    showAISettings: false,
+                    showAdvanced: false,
+                    aiSettings: {
+                        selectedProfile: 'balanced',
+                        temperature: 0.5,
+                        top_p: 0.5,
+                        max_tokens: 1500,
+                        currentProfile: {
+                            name: 'Balanced Analysis',
+                            description: 'Natural, comprehensive responses balancing accuracy and creativity'
+                        },
+                        availableProfiles: {
+                            'compliance': {
+                                name: 'Compliance Mode',
+                                description: 'Deterministic, policy-focused responses for governance tasks',
+                                use_case: 'Best for: Policy analysis, regulatory compliance, audit preparations',
+                                temperature: 0.2,
+                                top_p: 0.1
+                            },
+                            'creative': {
+                                name: 'Creative Problem-Solving',
+                                description: 'Innovative, diverse solutions for complex challenges',
+                                use_case: 'Best for: Innovation workshops, problem solving, strategic planning',
+                                temperature: 0.7,
+                                top_p: 0.8
+                            },
+                            'balanced': {
+                                name: 'Balanced Analysis',
+                                description: 'Natural, comprehensive responses balancing accuracy and creativity',
+                                use_case: 'Best for: General analysis, team discussions, regular reporting',
+                                temperature: 0.5,
+                                top_p: 0.5
+                            },
+                            'governance': {
+                                name: 'Governance Analysis',
+                                description: 'Structured analysis for organizational governance decisions',
+                                use_case: 'Best for: Board reporting, policy development, compliance monitoring',
+                                temperature: 0.3,
+                                top_p: 0.3
+                            },
+                            'risk_assessment': {
+                                name: 'Risk Assessment',
+                                description: 'Conservative, evidence-based risk analysis',
+                                use_case: 'Best for: Security audits, financial risk, operational risk analysis',
+                                temperature: 0.1,
+                                top_p: 0.05
+                            },
+                            'code_generation': {
+                                name: 'Code Generation',
+                                description: 'Syntactically correct, conventional code generation',
+                                use_case: 'Best for: Automation scripts, technical documentation, system integration',
+                                temperature: 0.2,
+                                top_p: 0.1
+                            }
+                        },
+                        usageStats: {
+                            'Balanced Analysis': { calls: 145, cost: 14.50 },
+                            'Compliance Mode': { calls: 89, cost: 8.90 },
+                            'Governance Analysis': { calls: 67, cost: 6.70 },
+                            'Risk Assessment': { calls: 34, cost: 3.40 }
+                        },
+                        recommendations: [
+                            'Consider using Compliance Mode for routine policy analysis to reduce costs',
+                            'Risk Assessment profile shows excellent accuracy for security audits',
+                            'Balanced Analysis usage is optimal for your current workflow'
+                        ]
+                    },
+
+                    updateAIProfile() {
+                        const profile = this.aiSettings.availableProfiles[this.aiSettings.selectedProfile];
+                        if (profile) {
+                            this.aiSettings.currentProfile = profile;
+                            this.aiSettings.temperature = profile.temperature;
+                            this.aiSettings.top_p = profile.top_p;
+                            console.log('AI Profile updated:', profile.name);
+                        }
+                    },
+
+                    async saveAISettings() {
+                        try {
+                            // Simulate API call to save AI preferences
+                            const settings = {
+                                profile: this.aiSettings.selectedProfile,
+                                temperature: this.aiSettings.temperature,
+                                top_p: this.aiSettings.top_p,
+                                max_tokens: this.aiSettings.max_tokens
+                            };
+
+                            // In a real implementation, this would be an API call
+                            console.log('Saving AI settings:', settings);
+
+                            // Simulate success
+                            this.showNotification('AI optimization settings saved successfully!', 'success');
+                            this.showAISettings = false;
+
+                        } catch (error) {
+                            console.error('Error saving AI settings:', error);
+                            this.showNotification('Failed to save AI settings. Please try again.', 'error');
+                        }
+                    },
+
+                    showNotification(message, type = 'info') {
+                        // Simple notification system
+                        const notification = document.createElement('div');
+                        notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' :
+                                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                            }`;
+                        notification.textContent = message;
+                        document.body.appendChild(notification);
+
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 3000);
+                    },
+
+                    // Initialize AI settings
+                    init() {
+                        this.initializeChart();
+                        this.startRealTimeUpdates();
+
+                        // Load AI settings from API (simulated)
+                        this.loadAISettings();
+                    },
+
+                    async loadAISettings() {
+                        try {
+                            // Simulate API call to load customer AI preferences
+                            console.log('Loading AI optimization settings...');
+
+                            // In a real implementation, this would fetch from /ai/profiles endpoint
+                            // For now, use default settings
+                            this.updateAIProfile();
+
+                        } catch (error) {
+                            console.error('Error loading AI settings:', error);
+                        }
+                    }
+                }
+            }
+    </script>
+</body>
+
+</html>

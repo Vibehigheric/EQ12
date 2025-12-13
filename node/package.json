@@ -1,0 +1,25 @@
+{
+    "name": "eq12-sports-betting",
+    "version": "1.0.0",
+    "description": "EQ12 Sports Betting Platform - Node.js Services",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js",
+        "pm2": "pm2 start ecosystem.config.js",
+        "pm2:stop": "pm2 stop all",
+        "pm2:restart": "pm2 restart all",
+        "pm2:logs": "pm2 logs"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "morgan": "^1.10.0",
+        "helmet": "^7.0.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "author": "EQ12 Development Team",
+    "license": "MIT"
+}

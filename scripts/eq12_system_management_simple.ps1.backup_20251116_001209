@@ -1,0 +1,204 @@
+﻿#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 System Management PowerShell Wrapper - Simplified Version
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("HealthCheck", "Diagnostics", "AutoRepair", "Monitor", "Report")]
+    [string]$Action = "HealthCheck",
+    
+    [Parameter(Mandatory = $false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$VerboseOutput
+)
+
+# Initialize logging
+$LogTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = Join-Path $Workspace "logs\system_management_ps_$LogTimestamp.log"
+
+function Write-EQ12Log {
+    param(
+        [string]$Message,
+        [ValidateSet("INFO", "WARNING", "ERROR", "SUCCESS")]
+        [string]$Level = "INFO"
+    )
+    
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "[$Timestamp] [$Level] $Message"
+    
+    switch ($Level) {
+        "INFO" { Write-Host $LogEntry -ForegroundColor Cyan }
+        "WARNING" { Write-Host $LogEntry -ForegroundColor Yellow }
+        "ERROR" { Write-Host $LogEntry -ForegroundColor Red }
+        "SUCCESS" { Write-Host $LogEntry -ForegroundColor Green }
+    }
+    
+    try {
+        $LogEntry | Out-File -FilePath $LogFile -Append -Encoding UTF8
+    }
+    catch {
+        Write-Warning "Failed to write to log file: $_"
+    }
+}
+
+function Test-Prerequisites {
+    Write-EQ12Log "🔍 Testing prerequisites..." "INFO"
+    
+    # Test workspace
+    if (-not (Test-Path $Workspace)) {
+        Write-EQ12Log "❌ Workspace not found: $Workspace" "ERROR"
+        return $false
+    }
+    
+    # Test Python
+    try {
+        $PythonVersion = python --version 2>&1
+        if ($PythonVersion -match "Python \d+\.\d+") {
+            Write-EQ12Log "✅ Python detected: $PythonVersion" "SUCCESS"
+        } else {
+            Write-EQ12Log "❌ Python not available" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-EQ12Log "❌ Python not found in PATH" "ERROR"
+        return $false
+    }
+    
+    # Test system manager
+    $SystemManagerPath = Join-Path $Workspace "scripts\eq12_system_manager.py"
+    if (-not (Test-Path $SystemManagerPath)) {
+        Write-EQ12Log "❌ System manager not found: $SystemManagerPath" "ERROR"
+        return $false
+    }
+    
+    Write-EQ12Log "✅ All prerequisites met" "SUCCESS"
+    return $true
+}
+
+function Invoke-SystemManager {
+    param([string]$SystemAction)
+    
+    Write-EQ12Log "🚀 Invoking System Manager: $SystemAction" "INFO"
+    
+    $SystemManagerPath = Join-Path $Workspace "scripts\eq12_system_manager.py"
+    
+    $Arguments = @(
+        $SystemManagerPath,
+        "--workspace", $Workspace,
+        "--action", $SystemAction.ToLower()
+    )
+    
+    if ($VerboseOutput) {
+        $Arguments += "--verbose"
+    }
+    
+    try {
+        $StartTime = Get-Date
+        Write-EQ12Log "Executing: python $($Arguments -join ' ')" "INFO"
+        
+        $Result = & python @Arguments 2>&1
+        $ExitCode = $LASTEXITCODE
+        $Duration = (Get-Date) - $StartTime
+        
+        if ($ExitCode -eq 0) {
+            Write-EQ12Log "✅ Completed successfully in $($Duration.TotalSeconds) seconds" "SUCCESS"
+            if ($Result) {
+                Write-Host $Result
+            }
+        } else {
+            Write-EQ12Log "❌ Failed with exit code $ExitCode" "ERROR"
+            if ($Result) {
+                Write-Host $Result -ForegroundColor Red
+            }
+        }
+        
+        return $ExitCode -eq 0
+        
+    }
+    catch {
+        Write-EQ12Log "❌ Exception: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Get-SystemHealth {
+    Write-EQ12Log "🏥 Getting system health..." "INFO"
+    
+    try {
+        # Get Windows performance counters
+        $CPU = Get-Counter "\Processor(_Total)\% Processor Time" -ErrorAction SilentlyContinue
+        $Memory = Get-CimInstance -ClassName Win32_OperatingSystem
+        $Disk = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DeviceID -eq "C:" }
+        
+        if ($CPU -and $Memory -and $Disk) {
+            $CPUPercent = [math]::Round($CPU.CounterSamples.CookedValue, 1)
+            $MemoryPercent = [math]::Round((($Memory.TotalVisibleMemorySize - $Memory.FreePhysicalMemory) / $Memory.TotalVisibleMemorySize) * 100, 1)
+            $DiskPercent = [math]::Round((($Disk.Size - $Disk.FreeSpace) / $Disk.Size) * 100, 1)
+            
+            Write-EQ12Log "📊 CPU: $CPUPercent%, Memory: $MemoryPercent%, Disk: $DiskPercent%" "INFO"
+            
+            # Health assessment
+            $HealthScore = (100 - $CPUPercent) * 0.3 + (100 - $MemoryPercent) * 0.4 + (100 - $DiskPercent) * 0.3
+            $HealthScore = [math]::Round($HealthScore, 1)
+            
+            if ($HealthScore -gt 70) {
+                Write-EQ12Log "✅ System health: $HealthScore% (Good)" "SUCCESS"
+            } elseif ($HealthScore -gt 50) {
+                Write-EQ12Log "⚠️ System health: $HealthScore% (Warning)" "WARNING"
+            } else {
+                Write-EQ12Log "🚨 System health: $HealthScore% (Critical)" "ERROR"
+            }
+        }
+    }
+    catch {
+        Write-EQ12Log "❌ Failed to get system health: $_" "ERROR"
+    }
+}
+
+# Main execution
+Write-EQ12Log "🌟 Starting EQ12 System Management Wrapper" "INFO"
+Write-EQ12Log "Action: $Action | Workspace: $Workspace" "INFO"
+
+# Test prerequisites
+if (-not (Test-Prerequisites)) {
+    Write-EQ12Log "❌ Prerequisites check failed" "ERROR"
+    exit 1
+}
+
+# Get basic system health
+Get-SystemHealth
+
+# Execute action
+switch ($Action) {
+    "HealthCheck" {
+        $Success = Invoke-SystemManager -SystemAction "health-check"
+    }
+    "Diagnostics" {
+        $Success = Invoke-SystemManager -SystemAction "diagnostics"
+    }
+    "AutoRepair" {
+        Write-EQ12Log "🛠️ Starting auto-repair..." "WARNING"
+        $Success = Invoke-SystemManager -SystemAction "auto-repair"
+    }
+    "Monitor" {
+        Write-EQ12Log "🔄 Monitor mode not supported in simplified wrapper" "WARNING"
+        $Success = $true
+    }
+    "Report" {
+        $Success = Invoke-SystemManager -SystemAction "report"
+    }
+}
+
+if ($Success) {
+    Write-EQ12Log "✅ Operation completed successfully" "SUCCESS"
+    exit 0
+} else {
+    Write-EQ12Log "❌ Operation failed" "ERROR"
+    exit 1
+}

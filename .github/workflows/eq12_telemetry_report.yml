@@ -1,0 +1,377 @@
+name: EQ12 Telemetry & Analytics
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  EQ12_TELEMETRY_MODE: ACTIVE
+  PYTHONDONTWRITEBYTECODE: 1
+
+jobs:
+  system-metrics:
+    name: EQ12 System Metrics Collection
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: EQ12 Repository Analysis
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 REPOSITORY ANALYSIS ===" -ForegroundColor Green
+
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+
+        # Count files by type
+        $pythonFiles = (Get-ChildItem -Path . -Include "*.py" -Recurse -File | Where-Object { $_.FullName -notlike "*\.git\*" }).Count
+        $powershellFiles = (Get-ChildItem -Path . -Include "*.ps1" -Recurse -File | Where-Object { $_.FullName -notlike "*\.git\*" }).Count
+        $jsonFiles = (Get-ChildItem -Path . -Include "*.json" -Recurse -File | Where-Object { $_.FullName -notlike "*\.git\*" }).Count
+        $mdFiles = (Get-ChildItem -Path . -Include "*.md" -Recurse -File | Where-Object { $_.FullName -notlike "*\.git\*" }).Count
+
+        # Calculate total lines of code
+        $totalLines = 0
+        Get-ChildItem -Path . -Include "*.py", "*.ps1" -Recurse -File | Where-Object { $_.FullName -notlike "*\.git\*" } | ForEach-Object {
+          $lines = (Get-Content $_.FullName).Count
+          $totalLines += $lines
+        }
+
+        # Directory sizes
+        $scriptsSize = if (Test-Path "scripts") { (Get-ChildItem -Path "scripts" -Recurse -File | Measure-Object -Property Length -Sum).Sum } else { 0 }
+        $testsSize = if (Test-Path "tests") { (Get-ChildItem -Path "tests" -Recurse -File | Measure-Object -Property Length -Sum).Sum } else { 0 }
+        $logsSize = if (Test-Path "logs") { (Get-ChildItem -Path "logs" -Recurse -File | Measure-Object -Property Length -Sum).Sum } else { 0 }
+        $dataSize = if (Test-Path "data") { (Get-ChildItem -Path "data" -Recurse -File | Measure-Object -Property Length -Sum).Sum } else { 0 }
+
+        $metrics = @{
+          timestamp = $timestamp
+          repository_stats = @{
+            python_files = $pythonFiles
+            powershell_files = $powershellFiles
+            json_files = $jsonFiles
+            markdown_files = $mdFiles
+            total_lines_of_code = $totalLines
+          }
+          directory_sizes = @{
+            scripts_mb = [math]::Round($scriptsSize / 1MB, 2)
+            tests_mb = [math]::Round($testsSize / 1MB, 2)
+            logs_mb = [math]::Round($logsSize / 1MB, 2)
+            data_mb = [math]::Round($dataSize / 1MB, 2)
+          }
+          git_info = @{
+            commit = (git rev-parse HEAD)
+            branch = (git branch --show-current)
+            commit_count = (git rev-list --count HEAD)
+          }
+        } | ConvertTo-Json -Depth 3
+
+        Set-Content -Path "eq12_metrics.json" -Value $metrics -Encoding ASCII
+
+        Write-Host "Repository analysis completed" -ForegroundColor Green
+        Write-Host "  Python files: $pythonFiles" -ForegroundColor Gray
+        Write-Host "  PowerShell files: $powershellFiles" -ForegroundColor Gray
+        Write-Host "  Total lines of code: $totalLines" -ForegroundColor Gray
+
+    - name: EQ12 ASCII Compliance Metrics
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 ASCII COMPLIANCE METRICS ===" -ForegroundColor Yellow
+
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1", "*.json", "*.md" -Recurse -File | Where-Object { $_.FullName -notlike "*\.git\*" }
+
+        $asciiCompliant = 0
+        $nonAsciiFiles = 0
+        $totalChecked = 0
+
+        foreach ($file in $files) {
+          $content = Get-Content $file.FullName -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+          if (-not $content) { continue }
+
+          $totalChecked++
+          $hasNonAscii = $false
+
+          for ($i = 0; $i -lt $content.Length; $i++) {
+            if ([int][char]$content[$i] -gt 127) {
+              $hasNonAscii = $true
+              break
+            }
+          }
+
+          if ($hasNonAscii) {
+            $nonAsciiFiles++
+          } else {
+            $asciiCompliant++
+          }
+        }
+
+        $complianceRate = if ($totalChecked -gt 0) { [math]::Round(($asciiCompliant / $totalChecked) * 100, 2) } else { 100 }
+
+        $asciiMetrics = @{
+          total_files_checked = $totalChecked
+          ascii_compliant_files = $asciiCompliant
+          non_ascii_files = $nonAsciiFiles
+          compliance_percentage = $complianceRate
+          eq12_ascii_mode = "ACTIVE"
+        } | ConvertTo-Json -Depth 2
+
+        Set-Content -Path "eq12_ascii_metrics.json" -Value $asciiMetrics -Encoding ASCII
+
+        Write-Host "ASCII compliance analysis completed" -ForegroundColor Green
+        Write-Host "  Compliance rate: $complianceRate%" -ForegroundColor $(if($complianceRate -eq 100){'Green'}else{'Yellow'})
+
+    - name: EQ12 Pycache Detection Metrics
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 PYCACHE DETECTION METRICS ===" -ForegroundColor Yellow
+
+        $pycacheDirs = Get-ChildItem -Path . -Include "__pycache__" -Recurse -Directory -ErrorAction SilentlyContinue
+        $pycacheFiles = Get-ChildItem -Path . -Include "*.pyc", "*.pyo" -Recurse -File -ErrorAction SilentlyContinue
+
+        $pycacheMetrics = @{
+          pycache_directories_found = $pycacheDirs.Count
+          pycache_files_found = $pycacheFiles.Count
+          no_pycache_system_active = (Test-Path "eq12_no_pycache.py")
+          pythondontwritebytecode_set = ($env:PYTHONDONTWRITEBYTECODE -eq "1")
+        } | ConvertTo-Json -Depth 2
+
+        Set-Content -Path "eq12_pycache_metrics.json" -Value $pycacheMetrics -Encoding ASCII
+
+        Write-Host "Pycache detection completed" -ForegroundColor Green
+        Write-Host "  Pycache directories: $($pycacheDirs.Count)" -ForegroundColor $(if($pycacheDirs.Count -eq 0){'Green'}else{'Red'})
+        Write-Host "  Pycache files: $($pycacheFiles.Count)" -ForegroundColor $(if($pycacheFiles.Count -eq 0){'Green'}else{'Red'})
+
+        # Clean any found pycache
+        if ($pycacheDirs) {
+          $pycacheDirs | ForEach-Object {
+            Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            Write-Host "  Cleaned: $($_.FullName)" -ForegroundColor Yellow
+          }
+        }
+
+  performance-analysis:
+    name: EQ12 Performance Analysis
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: EQ12 Script Performance Test
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 SCRIPT PERFORMANCE TEST ===" -ForegroundColor Green
+
+        $perfResults = @()
+        $testScripts = Get-ChildItem -Path "scripts" -Include "*.py" -File -ErrorAction SilentlyContinue | Select-Object -First 5
+
+        foreach ($script in $testScripts) {
+          Write-Host "Testing performance: $($script.Name)" -ForegroundColor Gray
+
+          $startTime = Get-Date
+
+          try {
+            # Test syntax validation only (safe)
+            $result = python -m py_compile "$($script.FullName)" 2>&1
+            $endTime = Get-Date
+            $duration = ($endTime - $startTime).TotalMilliseconds
+
+            $perfResults += @{
+              script_name = $script.Name
+              compilation_time_ms = [math]::Round($duration, 2)
+              status = "SUCCESS"
+              file_size_bytes = $script.Length
+            }
+
+            Write-Host "  Compilation time: $([math]::Round($duration, 2))ms" -ForegroundColor Green
+          } catch {
+            $endTime = Get-Date
+            $duration = ($endTime - $startTime).TotalMilliseconds
+
+            $perfResults += @{
+              script_name = $script.Name
+              compilation_time_ms = [math]::Round($duration, 2)
+              status = "FAILED"
+              error = $_.Exception.Message
+              file_size_bytes = $script.Length
+            }
+
+            Write-Host "  Compilation failed: $($_.Exception.Message)" -ForegroundColor Red
+          }
+        }
+
+        $performanceReport = @{
+          timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+          test_results = $perfResults
+          total_scripts_tested = $testScripts.Count
+          avg_compilation_time = if ($perfResults.Count -gt 0) { [math]::Round(($perfResults | Measure-Object -Property compilation_time_ms -Average).Average, 2) } else { 0 }
+        } | ConvertTo-Json -Depth 3
+
+        Set-Content -Path "eq12_performance_metrics.json" -Value $performanceReport -Encoding ASCII
+
+        Write-Host "Performance analysis completed" -ForegroundColor Green
+
+    - name: EQ12 GitHub Actions Performance
+      shell: pwsh
+      run: |
+        Write-Host "=== EQ12 GITHUB ACTIONS PERFORMANCE ===" -ForegroundColor Yellow
+
+        $workflowFiles = Get-ChildItem -Path ".github\workflows" -Include "*.yml", "*.yaml" -File -ErrorAction SilentlyContinue
+
+        $workflowMetrics = @{
+          total_workflows = $workflowFiles.Count
+          workflow_files = $workflowFiles.Name
+          eq12_ci_exists = (Test-Path ".github\workflows\eq12_ci.yml")
+          eq12_security_exists = (Test-Path ".github\workflows\eq12_security.yml")
+          eq12_ascii_validation_exists = (Test-Path ".github\workflows\eq12_ascii_validation.yml")
+          eq12_autoformatter_exists = (Test-Path ".github\workflows\eq12_autoformatter.yml")
+          eq12_backup_sync_exists = (Test-Path ".github\workflows\eq12_backup_sync.yml")
+          eq12_telemetry_exists = (Test-Path ".github\workflows\eq12_telemetry_report.yml")
+        } | ConvertTo-Json -Depth 2
+
+        Set-Content -Path "eq12_github_metrics.json" -Value $workflowMetrics -Encoding ASCII
+
+        Write-Host "GitHub Actions performance analysis completed" -ForegroundColor Green
+
+  generate-dashboard:
+    name: EQ12 Telemetry Dashboard
+    runs-on: windows-latest
+    needs: [system-metrics, performance-analysis]
+
+    steps:
+    - name: Checkout EQ12 Repository
+      uses: actions/checkout@v4
+
+    - name: Generate EQ12 Telemetry Dashboard
+      shell: pwsh
+      run: |
+        Write-Host "=== GENERATING EQ12 TELEMETRY DASHBOARD ===" -ForegroundColor Green
+
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+
+        # Load metrics (if they exist from previous jobs)
+        $metrics = if (Test-Path "eq12_metrics.json") { Get-Content "eq12_metrics.json" | ConvertFrom-Json } else { @{} }
+        $asciiMetrics = if (Test-Path "eq12_ascii_metrics.json") { Get-Content "eq12_ascii_metrics.json" | ConvertFrom-Json } else { @{} }
+        $pycacheMetrics = if (Test-Path "eq12_pycache_metrics.json") { Get-Content "eq12_pycache_metrics.json" | ConvertFrom-Json } else { @{} }
+        $perfMetrics = if (Test-Path "eq12_performance_metrics.json") { Get-Content "eq12_performance_metrics.json" | ConvertFrom-Json } else { @{} }
+        $githubMetrics = if (Test-Path "eq12_github_metrics.json") { Get-Content "eq12_github_metrics.json" | ConvertFrom-Json } else { @{} }
+
+        $dashboardHtml = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Telemetry Dashboard - Buffalo NY 14215 Content Empire</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0d1117; color: #c9d1d9; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #21262d; padding-bottom: 20px; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .metric-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; }
+        .metric-title { color: #58a6ff; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        .metric-value { font-size: 24px; font-weight: bold; color: #7ee787; }
+        .metric-label { color: #8b949e; font-size: 14px; margin-top: 5px; }
+        .status-good { color: #7ee787; }
+        .status-warning { color: #f0883e; }
+        .status-error { color: #ff6b6b; }
+        .timestamp { text-align: center; color: #8b949e; margin-top: 30px; }
+        .eq12-brand { color: #58a6ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="eq12-brand">EQ12</span> Telemetry Dashboard</h1>
+            <p>Buffalo NY 14215 Content Empire - System Analytics</p>
+            <p>Generated: $timestamp</p>
+        </div>
+
+        <div class="metric-grid">
+            <div class="metric-card">
+                <div class="metric-title">Repository Overview</div>
+                <div class="metric-value">$($metrics.repository_stats.python_files -join '')</div>
+                <div class="metric-label">Python Files</div>
+                <div class="metric-value">$($metrics.repository_stats.powershell_files -join '')</div>
+                <div class="metric-label">PowerShell Files</div>
+                <div class="metric-value">$($metrics.repository_stats.total_lines_of_code -join '')</div>
+                <div class="metric-label">Total Lines of Code</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">ASCII Compliance</div>
+                <div class="metric-value status-good">$($asciiMetrics.compliance_percentage -join '')%</div>
+                <div class="metric-label">Compliance Rate</div>
+                <div class="metric-value">$($asciiMetrics.ascii_compliant_files -join '')</div>
+                <div class="metric-label">Compliant Files</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Pycache Status</div>
+                <div class="metric-value status-good">$($pycacheMetrics.pycache_directories_found -join '')</div>
+                <div class="metric-label">Pycache Directories</div>
+                <div class="metric-value status-good">ACTIVE</div>
+                <div class="metric-label">No-Pycache Protection</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Performance Metrics</div>
+                <div class="metric-value">$($perfMetrics.avg_compilation_time -join '')ms</div>
+                <div class="metric-label">Avg Compilation Time</div>
+                <div class="metric-value">$($perfMetrics.total_scripts_tested -join '')</div>
+                <div class="metric-label">Scripts Tested</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">GitHub Actions</div>
+                <div class="metric-value">$($githubMetrics.total_workflows -join '')</div>
+                <div class="metric-label">Total Workflows</div>
+                <div class="metric-value status-good">ACTIVE</div>
+                <div class="metric-label">CI/CD Status</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">System Status</div>
+                <div class="metric-value status-good">OPERATIONAL</div>
+                <div class="metric-label">EQ12 System</div>
+                <div class="metric-value status-good">PROTECTED</div>
+                <div class="metric-label">Corruption Immunity</div>
+            </div>
+        </div>
+
+        <div class="timestamp">
+            <p><strong>EQ12 Telemetry Dashboard</strong> | Buffalo NY 14215 Content Empire</p>
+            <p>Last Updated: $timestamp | System Status: OPERATIONAL</p>
+        </div>
+    </div>
+</body>
+</html>
+"@
+
+        Set-Content -Path "eq12_telemetry_dashboard.html" -Value $dashboardHtml -Encoding ASCII
+
+        Write-Host "Telemetry dashboard generated" -ForegroundColor Green
+
+    - name: Upload Telemetry Dashboard
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-telemetry-dashboard
+        path: eq12_telemetry_dashboard.html
+
+    - name: Upload Telemetry Data
+      uses: actions/upload-artifact@v3
+      with:
+        name: eq12-telemetry-data
+        path: eq12_*_metrics.json

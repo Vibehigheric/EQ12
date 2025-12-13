@@ -1,0 +1,5 @@
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Tests\obj\Release\net9.0\EQ12.Tests.vbproj.AssemblyReference.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Tests\obj\Release\net9.0\EQ12.Tests.GeneratedMSBuildEditorConfig.editorconfig
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Tests\obj\Release\net9.0\EQ12.Tests.AssemblyInfoInputs.cache
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Tests\obj\Release\net9.0\EQ12.Tests.AssemblyInfo.vb
+C:\EQ12_BROKEN_20251122_210342\src\EQ12.Tests\obj\Release\net9.0\EQ12.Tests.vbproj.CoreCompileInputs.cache

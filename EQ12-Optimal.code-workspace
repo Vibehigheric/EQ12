@@ -1,0 +1,412 @@
+{
+  "folders": [
+    {
+      "name": "EQ12 Root",
+      "path": "."
+    }
+  ],
+  "settings": {
+    // Python Environment Configuration - CRITICAL FOR PYLANCE STABILITY
+    "python.defaultInterpreterPath": "./.venv/Scripts/python.exe",
+    "python.venvPath": ".",
+    "python.venvFolders": [".venv"],
+    "python.terminal.activateEnvironment": true,
+
+    // Pylance Performance Optimization - PREVENTS MEMORY CRASHES
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.indexing": true,
+    "python.analysis.memoryUsageDisplayLevel": "all",
+    "python.analysis.packageIndexDepths": [
+      {"name": "requests", "depth": 1},
+      {"name": "beautifulsoup4", "depth": 1},
+      {"name": "pandas", "depth": 2},
+      {"name": "numpy", "depth": 1},
+      {"name": "sklearn", "depth": 2}
+    ],
+
+    // CRITICAL: File Exclusions - Prevents Multi-Root Workspace Overload
+    "files.exclude": {
+      "**/envs": true,
+      "**/.venv_new": true,
+      "**/node_modules": true,
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/data": true,
+      "**/.git": true,
+      "**/logs": true,
+      "**/.mypy_cache": true,
+      "**/.coverage": true,
+      "**/htmlcov": true,
+      "**/*.egg-info": true
+    },
+
+    // CRITICAL: Python Analysis Exclusions - Prevents Pylance Overscanning
+    "python.analysis.exclude": [
+      "**/envs/**",
+      "**/.venv_new/**",
+      "**/data/**",
+      "**/logs/**",
+      "**/node_modules/**",
+      "**/__pycache__/**",
+      "**/.pytest_cache/**",
+      "**/.mypy_cache/**"
+    ],
+
+    // Search Performance Optimization
+    "search.exclude": {
+      "**/envs": true,
+      "**/.venv_new": true,
+      "**/data": true,
+      "**/logs": true,
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.git": true,
+      "**/node_modules": true
+    },
+
+    // File Watcher Exclusions - Reduces Background CPU Usage
+    "files.watcherExclude": {
+      "**/envs/**": true,
+      "**/.venv_new/**": true,
+      "**/data/**": true,
+      "**/logs/**": true,
+      "**/__pycache__/**": true,
+      "**/.git/**": true,
+      "**/node_modules/**": true,
+      "**/.pytest_cache/**": true
+    },
+
+    // Testing Configuration
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+      "tests",
+      "--verbose",
+      "--tb=short"
+    ],
+    "python.testing.autoTestDiscoverOnSaveEnabled": false,
+
+    // Code Formatting and Linting
+    "python.formatting.provider": "black",
+    "python.linting.enabled": true,
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": false,
+    "python.linting.lintOnSave": true,
+    "python.linting.flake8Args": [
+      "--max-line-length=100",
+      "--ignore=E203,W503"
+    ],
+
+    // Editor Performance Settings
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.suggestSelection": "first",
+    "editor.quickSuggestions": {
+      "comments": false,
+      "strings": false,
+      "other": true
+    },
+
+    // Terminal Configuration for Windows
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+      "PowerShell": {
+        "source": "PowerShell",
+        "icon": "terminal-powershell",
+        "args": ["-NoProfile"]
+      },
+      "Command Prompt": {
+        "path": ["${env:windir}\\System32\\cmd.exe"],
+        "args": [],
+        "icon": "terminal-cmd"
+      }
+    },
+    "terminal.integrated.env.windows": {
+      "PYTHONPATH": "${workspaceFolder}/scripts"
+    },
+
+    // Git Configuration
+    "git.autofetch": false,
+    "git.confirmSync": false,
+    "git.enableSmartCommit": true,
+    "git.postCommitCommand": "none",
+
+    // IntelliSense Performance Tuning
+    "editor.suggest.maxVisibleSuggestions": 10,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.quickSuggestionsDelay": 100,
+    "editor.suggestOnTriggerCharacters": true,
+
+    // Memory and Performance Optimizations
+    "extensions.autoCheckUpdates": false,
+    "extensions.autoUpdate": false,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+
+    // Explorer Settings - Reduce Clutter
+    "explorer.compactFolders": false,
+    "explorer.sortOrder": "type",
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "*.py": "${capture}.pyc,${capture}.pyo",
+      "requirements.txt": "requirements*.txt,setup.py,pyproject.toml",
+      "README.md": "*.md"
+    },
+
+    // Language-Specific Settings
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter",
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+      },
+      "editor.insertSpaces": true,
+      "editor.tabSize": 4
+    },
+
+    "[json]": {
+      "editor.defaultFormatter": "vscode.json-language-features",
+      "editor.formatOnSave": true,
+      "editor.insertSpaces": true,
+      "editor.tabSize": 2
+    },
+
+    "[markdown]": {
+      "editor.wordWrap": "on",
+      "editor.quickSuggestions": {
+        "comments": "off",
+        "strings": "off",
+        "other": "off"
+      }
+    },
+
+    // PowerShell Configuration
+    "[powershell]": {
+      "editor.defaultFormatter": "ms-vscode.powershell",
+      "editor.formatOnSave": false,
+      "editor.insertSpaces": true,
+      "editor.tabSize": 4
+    },
+
+    // Disable Problematic Extensions for EQ12
+    "jupyter.askForKernelRestart": false,
+    "jupyter.enableCellCodeLens": false,
+    "jupyter.sendSelectionToInteractiveWindow": false,
+
+    // Security Settings
+    "security.workspace.trust.untrustedFiles": "open",
+    "security.workspace.trust.banner": "never",
+    "security.workspace.trust.startupPrompt": "never",
+    "security.workspace.trust.enabled": false
+  },
+
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-python.black-formatter",
+      "ms-python.flake8",
+      "ms-vscode.powershell",
+      "ms-vscode.vscode-json",
+      "github.vscode-github-actions",
+      "ms-vscode.test-adapter-converter"
+    ],
+    "unwantedRecommendations": [
+      "ms-python.pylint",
+      "ms-toolsai.jupyter",
+      "ms-python.isort"
+    ]
+  },
+
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Python: Current File",
+        "type": "python",
+        "request": "launch",
+        "program": "${file}",
+        "console": "integratedTerminal",
+        "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/scripts",
+          "EQ12_DEBUG": "1"
+        },
+        "justMyCode": false
+      },
+      {
+        "name": "Python: EQ12 Master Script",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/eq12_master.py",
+        "console": "integratedTerminal",
+        "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "cwd": "${workspaceFolder}",
+        "args": ["--help"],
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/scripts",
+          "EQ12_DEBUG": "1"
+        },
+        "justMyCode": false
+      },
+      {
+        "name": "Python: HTML Crawler",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/eq12_html_crawler.py",
+        "console": "integratedTerminal",
+        "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "cwd": "${workspaceFolder}",
+        "args": ["--url", "https://html.com", "--action", "crawl"],
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/scripts",
+          "EQ12_DEBUG": "1"
+        },
+        "justMyCode": false
+      },
+      {
+        "name": "PowerShell: Emergency Repair",
+        "type": "PowerShell",
+        "request": "launch",
+        "script": "${workspaceFolder}/scripts/eq12_vscode_pylance_emergency_repair.ps1",
+        "args": ["-Action", "Emergency", "-Force"],
+        "cwd": "${workspaceFolder}",
+        "createTemporaryIntegratedConsole": false
+      },
+      {
+        "name": "Python: Workspace Builder",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/scripts/eq12_clean_workspace_builder.py",
+        "console": "integratedTerminal",
+        "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "cwd": "${workspaceFolder}",
+        "args": ["--workspace", "${workspaceFolder}", "--rebuild"],
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/scripts",
+          "EQ12_DEBUG": "1"
+        },
+        "justMyCode": false
+      }
+    ]
+  },
+
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "EQ12: Emergency Repair",
+        "type": "shell",
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "./scripts/eq12_vscode_pylance_emergency_repair.ps1",
+          "-Action",
+          "Emergency",
+          "-Force"
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: Rebuild Workspace",
+        "type": "shell",
+        "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "args": [
+          "${workspaceFolder}/scripts/eq12_clean_workspace_builder.py",
+          "--workspace",
+          "${workspaceFolder}",
+          "--rebuild",
+          "--verbose"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: Validate Workspace",
+        "type": "shell",
+        "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "args": [
+          "${workspaceFolder}/scripts/eq12_clean_workspace_builder.py",
+          "--workspace",
+          "${workspaceFolder}",
+          "--validate",
+          "--verbose"
+        ],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: Run Tests",
+        "type": "shell",
+        "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "args": [
+          "-m",
+          "pytest",
+          "tests/",
+          "-v",
+          "--tb=short"
+        ],
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "EQ12: HTML Crawler Demo",
+        "type": "shell",
+        "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+        "args": [
+          "${workspaceFolder}/scripts/eq12_html_crawler.py",
+          "--url",
+          "https://html.com",
+          "--action",
+          "crawl",
+          "--verbose"
+        ],
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "new"
+        },
+        "problemMatcher": []
+      }
+    ]
+  }
+}

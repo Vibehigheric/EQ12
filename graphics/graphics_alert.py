@@ -1,0 +1,144 @@
+"""EQ12 graphics_alert: generate simple deal alert images from JSON input.
+
+Creates an image by overlaying text onto a base template using Pillow.
+"""
+
+import argparse
+import json
+import logging
+import os
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
+
+DEFAULT_OUT_DIR_WIN = r"C:\EQ12\graphics\deal_alerts"
+DEFAULT_OUT_DIR_UNIX = "/workspaces/EQ12/graphics/deal_alerts"
+
+
+def ensure_out_dir(path: Path):
+    path.mkdir(parents=True, exist_ok=True)
+
+
+def load_template(template_path: Path) -> Image.Image:
+    return Image.open(template_path).convert("RGBA")
+
+
+def render_text_on_image(
+    img: Image.Image, title: str, subtitle: str, price: str, font_path: str | None = None
+) -> Image.Image:
+    draw = ImageDraw.Draw(img)
+    w, h = img.size
+
+    # Load a reasonable default font
+    try:
+        if font_path and Path(font_path).exists():
+            title_font = ImageFont.truetype(font_path, size=48)
+            sub_font = ImageFont.truetype(font_path, size=32)
+        else:
+            title_font = ImageFont.load_default()
+            sub_font = ImageFont.load_default()
+    except Exception:
+        title_font = ImageFont.load_default()
+        sub_font = ImageFont.load_default()
+
+    # Title: top-left, with margin
+    margin = int(w * 0.04)
+    x = margin
+    y = margin
+    draw.text((x, y), title, font=title_font, fill="white")
+
+    # Subtitle below title
+    try:
+        title_h = title_font.getsize(title)[1]
+    except Exception:
+        title_h = 12
+    y += title_h + 8
+    draw.text((x, y), subtitle, font=sub_font, fill="white")
+
+    # Price: bottom-right
+    price_text = price
+    try:
+        pw, ph = sub_font.getsize(price_text)
+    except Exception:
+        pw, ph = (50, 12)
+    px = w - pw - margin
+    py = h - ph - margin
+    draw.text((px, py), price_text, font=sub_font, fill="yellow")
+
+    return img
+
+
+def generate_graphic(
+    data: dict, template: str | None = None, out_path: str | None = None, font: str | None = None
+) -> str:
+    # Decide template
+    base_dir = Path(__file__).resolve().parent
+    templates_dir = base_dir / "templates"
+    if template:
+        tpl = Path(template)
+    else:
+        # pick first png in templates
+        pngs = list(templates_dir.glob("*.png")) if templates_dir.exists() else []
+        if pngs:
+            tpl = pngs[0]
+        else:
+            # generate a simple background
+            tpl = None
+
+    if out_path:
+        out = Path(out_path)
+    else:
+        out_dir = Path(DEFAULT_OUT_DIR_WIN) if os.name == "nt" else Path(DEFAULT_OUT_DIR_UNIX)
+        ensure_out_dir(out_dir)
+        out = out_dir / f"deal_{data.get('id', 'unknown')}.png"
+
+    if tpl and tpl.exists():
+        try:
+            img = load_template(tpl)
+        except Exception:
+            # If template is unreadable, fall back to a generated background
+            img = Image.new("RGBA", (800, 450), "#333")
+    else:
+        img = Image.new("RGBA", (800, 450), "#333")
+
+    title = data.get("title", "Deal")
+    subtitle = data.get("merchant", "")
+    price = data.get("price", "")
+
+    img = render_text_on_image(img, title, subtitle, price, font_path=font)
+
+    ensure_out_dir(out.parent)
+    img.save(out)
+    return str(out)
+
+
+def main(argv=None) -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("--in", dest="infile", required=True, help="JSON file with deal info")
+    p.add_argument("--template", help="Path to template PNG")
+    p.add_argument("--font", help="Path to TTF font")
+    p.add_argument("--out", help="Output image path")
+    args = p.parse_args(argv)
+
+    logging.basicConfig(level=logging.INFO)
+
+    with open(args.infile, encoding="utf8") as f:
+        try:
+            data = json.load(f)
+
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse JSON from {file_path}: {e}")
+
+            raise
+
+        except FileNotFoundError as e:
+            logging.error(f"JSON file not found: {e}")
+
+            raise
+
+    out = generate_graphic(data, template=args.template, out_path=args.out, font=args.font)
+    logging.info("Wrote graphic: %s", out)
+
+
+if __name__ == "__main__":
+    main()

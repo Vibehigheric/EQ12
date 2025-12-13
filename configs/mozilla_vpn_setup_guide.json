@@ -1,0 +1,49 @@
+{
+  "overview": "Configure Mozilla VPN split tunneling for optimal EQ12 performance",
+  "step_by_step_setup": [
+    {
+      "step": 1,
+      "action": "Open Mozilla VPN application",
+      "details": "Launch Mozilla VPN from Start menu or desktop shortcut"
+    },
+    {
+      "step": 2,
+      "action": "Navigate to Settings",
+      "details": "Click the gear icon or Settings menu"
+    },
+    {
+      "step": 3,
+      "action": "Find App Permissions / Split Tunneling",
+      "details": "Look for 'App-based split tunneling' or 'App permissions'"
+    },
+    {
+      "step": 4,
+      "action": "Configure Python routing",
+      "details": "Add python.exe to VPN routing (for Odds API access)"
+    },
+    {
+      "step": 5,
+      "action": "Configure browser routing",
+      "details": "Route Chrome/Edge through VPN for manual research"
+    }
+  ],
+  "eq12_specific_config": {
+    "route_through_vpn": [
+      "python.exe (for odds API and AI services)",
+      "chrome.exe (for manual betting research)",
+      "msedge.exe (alternative browser)",
+      "powershell.exe (for EQ12 scripts)"
+    ],
+    "route_direct": [
+      "System weather services (automatic)",
+      "Windows Update (automatic)",
+      "Local network traffic (automatic)"
+    ]
+  },
+  "server_recommendations": {
+    "daily_betting": "US East Coast (lowest latency)",
+    "arbitrage_research": "Rotate between UK/EU/US servers",
+    "security_focus": "Switzerland or Netherlands",
+    "performance_focus": "Closest geographic server"
+  }
+}

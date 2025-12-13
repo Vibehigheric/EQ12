@@ -1,0 +1,204 @@
+.button-injection-standard {
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+#x-close-button::before {
+  content: "";
+  display: inline-block;
+  min-height: 10px;
+  min-width: 10px;
+  background-image: var(--x-image);
+}
+
+#x-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  /* Remove default button styles */
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+}
+
+.injection {
+  font-feature-settings: normal;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#secondary-content {
+  background: #FFFFFF;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.15);
+}
+#secondary-content #terms {
+  padding: 5px;
+}
+#secondary-content .full-terms {
+  color: #27798D;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+#secondary-content #individual-terms-container {
+  padding: 5px;
+}
+#secondary-content .special-terms {
+  font-size: 14px;
+  margin: 2px;
+  display: flex;
+  justify-content: space-between;
+}
+#secondary-content .special-terms .title {
+  font-size: 14px;
+  color: #757575;
+}
+#secondary-content .special-terms .open-close button {
+  font-weight: bold;
+  text-align: right;
+  color: #27798D;
+  cursor: pointer;
+}
+#secondary-content .term {
+  margin-top: 3px;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px;
+}
+#secondary-content .term .term-text {
+  color: #333333;
+  flex: 1;
+  max-width: 250px;
+  margin-right: 5px;
+  overflow-wrap: break-word;
+}
+#secondary-content .term .reward {
+  color: #27798D;
+  float: right;
+}
+
+.highlight {
+  font-size: 15px;
+}
+
+.highlight-main {
+  font-size: 35px;
+}
+
+#apply-coupons-container {
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#apply-coupons-container #apply-coupons {
+  text-align: center;
+  background: white;
+  position: relative;
+  color: rgb(153, 153, 153);
+  font-size: 15px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+}
+#apply-coupons-container #apply-coupons #header img {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  width: 100%;
+}
+#apply-coupons-container #apply-coupons #title div, #apply-coupons-container #apply-coupons #result div, #apply-coupons-container #apply-coupons #result img {
+  margin-bottom: 10px;
+}
+#apply-coupons-container #apply-coupons #title {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+#apply-coupons-container #apply-coupons #title #title #testing-codes-desc {
+  font-size: 14px;
+}
+#apply-coupons-container #apply-coupons #progress {
+  height: 30px;
+  border-radius: 18px;
+  width: 90%;
+  margin-left: 5%;
+  padding: 2px;
+}
+#apply-coupons-container #apply-coupons #progress div {
+  height: 100%;
+  transition: width 250ms ease-in;
+  width: 0;
+  border-radius: 18px;
+}
+#apply-coupons-container #apply-coupons #status-text {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+#apply-coupons-container #apply-coupons #status-code, #apply-coupons-container #apply-coupons #continue {
+  width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#apply-coupons-container #apply-coupons #status-code {
+  padding: 10px;
+  font-weight: bold;
+}
+#apply-coupons-container #apply-coupons #status-code:not(.hidden) {
+  display: inline-block;
+}
+#apply-coupons-container #apply-coupons #complete {
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+}
+#apply-coupons-container #apply-coupons #continue {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 15px;
+  padding-left: 30px;
+  padding-right: 30px;
+  border-radius: 5px;
+  display: inline-block;
+  cursor: pointer;
+}
+#apply-coupons-container #apply-coupons #footer {
+  border-top: solid 1px rgb(183, 183, 183);
+  margin-top: 10px;
+  padding: 5px;
+  text-align: left;
+}
+
+.highlight, .highlight-main {
+  color: #67b5d2;
+}
+
+#apply-coupons #progress {
+  border: solid 1px #67b5d2;
+}
+#apply-coupons #progress div {
+  background: #67b5d2;
+}
+#apply-coupons #status-code {
+  border: solid 1px #67b5d2;
+  color: #67b5d2;
+}
+#apply-coupons #continue {
+  background: #7A68D6;
+  color: white;
+}

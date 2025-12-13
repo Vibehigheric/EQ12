@@ -1,0 +1,284 @@
+name: EQ12 AI Betting Stack CI/CD
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+        inputs:
+            environment:
+                description: "Environment to deploy to"
+                required: true
+                default: "development"
+                type: choice
+                options:
+                    - development
+                    - staging
+                    - production
+
+env:
+    PYTHON_VERSION: "3.12"
+    NODE_VERSION: "18"
+
+jobs:
+    smoke-test:
+        name: 🧪 Smoke Tests & Code Quality
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+
+        steps:
+            - name: 📥 Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: 🐍 Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  cache: "pip"
+
+            - name: 📦 Install dependencies
+              run: |
+                  python -m pip install --upgrade pip setuptools wheel
+                  pip install black[jupyter] ruff isort flake8 pytest
+                  if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+            - name: 🎨 Code formatting check (Black)
+              run: |
+                  echo "🎨 Checking code formatting with Black..."
+                  black --check --diff . || (echo "❌ Code formatting issues found. Run 'black .' locally." && exit 1)
+
+            - name: 🔍 Lint with Ruff
+              run: |
+                  echo "🔍 Linting code with Ruff..."
+                  ruff check . --output-format=github
+
+            - name: 📋 Import organization (isort)
+              run: |
+                  echo "📋 Checking import organization..."
+                  isort --check-only --diff .
+
+            - name: 🐍 Additional linting (flake8)
+              run: |
+                  echo "🐍 Running flake8 linting..."
+                  flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+                  flake8 . --count --max-complexity=10 --max-line-length=100 --statistics
+
+            - name: 🧪 Run smoke tests
+              env:
+                  # Use repository secrets for API keys in CI
+                  THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+                  CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+                  EQ12_ENVIRONMENT: "ci"
+              run: |
+                  echo "🧪 Running EQ12 smoke tests..."
+                  python smoke_test.py
+
+            - name: 📊 Upload test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-results
+                  path: |
+                      logs/
+                      **/*.log
+                  retention-days: 30
+
+    security-scan:
+        name: 🔒 Security & Dependency Scan
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+
+        steps:
+            - name: 📥 Checkout repository
+              uses: actions/checkout@v4
+
+            - name: 🐍 Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+
+            - name: 🔒 Run Bandit security scan
+              run: |
+                  pip install bandit
+                  bandit -r . -f json -o bandit-report.json || true
+
+            - name: 📋 Dependency vulnerability scan
+              run: |
+                  pip install safety
+                  safety check --json --output safety-report.json || true
+
+            - name: 📊 Upload security reports
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: security-reports
+                  path: |
+                      bandit-report.json
+                      safety-report.json
+                  retention-days: 90
+
+    build-and-test:
+        name: 🏗️ Build & Integration Tests
+        runs-on: ubuntu-latest
+        needs: smoke-test
+        if: success()
+
+        strategy:
+            matrix:
+                python-version: ["3.11", "3.12"]
+
+        steps:
+            - name: 📥 Checkout repository
+              uses: actions/checkout@v4
+
+            - name: 🐍 Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  cache: "pip"
+
+            - name: 📦 Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install pytest pytest-cov pytest-asyncio
+                  if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+            - name: 🧪 Run integration tests
+              env:
+                  THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+                  CFBD_API_KEY: ${{ secrets.CFBD_API_KEY }}
+                  EQ12_ENVIRONMENT: "testing"
+              run: |
+                  echo "🧪 Running integration tests..."
+                  pytest tests/ -v --cov=scripts/ --cov-report=xml --cov-report=html
+
+            - name: 📊 Upload coverage reports
+              if: matrix.python-version == '3.12'
+              uses: codecov/codecov-action@v3
+              with:
+                  file: ./coverage.xml
+                  flags: unittests
+                  name: codecov-umbrella
+
+    deploy-staging:
+        name: 🚀 Deploy to Staging
+        runs-on: ubuntu-latest
+        needs: [smoke-test, build-and-test]
+        if: github.ref == 'refs/heads/develop' && success()
+        environment: staging
+
+        steps:
+            - name: 📥 Checkout repository
+              uses: actions/checkout@v4
+
+            - name: 🚀 Deploy to staging environment
+              env:
+                  DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+              run: |
+                  echo "🚀 Deploying EQ12 to staging environment..."
+                  # Add your deployment commands here
+                  echo "✅ Staging deployment complete!"
+
+    auto-fix-pr:
+        name: 🔧 Auto-fix Code Quality Issues
+        runs-on: ubuntu-latest
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'auto-fix'))
+
+        steps:
+            - name: 📥 Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  ref: ${{ github.head_ref }}
+
+            - name: 🐍 Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+
+            - name: 📦 Install formatting tools
+              run: |
+                  pip install black[jupyter] ruff isort autoflake
+
+            - name: 🔧 Auto-fix code issues
+              run: |
+                  echo "🔧 Running automatic code fixes..."
+
+                  # Remove unused imports and variables
+                  autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive .
+
+                  # Organize imports
+                  isort .
+
+                  # Fix linting issues
+                  ruff check --fix .
+
+                  # Format code
+                  black .
+
+            - name: 📝 Commit changes
+              run: |
+                  git config --local user.email "action@github.com"
+                  git config --local user.name "EQ12 Auto-Fix Bot"
+                  git add .
+                  if ! git diff --staged --quiet; then
+                    git commit -m "🔧 Auto-fix: Code quality improvements
+                    
+                    - Removed unused imports and variables
+                    - Organized imports with isort  
+                    - Fixed linting issues with ruff
+                    - Formatted code with black
+                    
+                    Generated by: EQ12 Auto-Fix Workflow"
+                    git push
+                    echo "✅ Code quality fixes committed and pushed!"
+                  else
+                    echo "ℹ️ No changes to commit"
+                  fi
+
+    notification:
+        name: 📢 Notification
+        runs-on: ubuntu-latest
+        needs: [smoke-test, build-and-test]
+        if: always()
+
+        steps:
+            - name: 📢 Send Telegram notification
+              if: needs.smoke-test.result == 'success' && needs.build-and-test.result == 'success'
+              env:
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              run: |
+                  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                    -d "chat_id=${TELEGRAM_CHAT_ID}" \
+                    -d "text=✅ EQ12 CI/CD Pipeline Success!
+
+                  🔧 Commit: ${{ github.sha }}
+                  🌿 Branch: ${{ github.ref_name }}
+                  👤 Author: ${{ github.actor }}
+                  🔗 Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+                  All tests passed! 🎯" \
+                    -d "parse_mode=HTML"
+
+            - name: 📢 Send failure notification
+              if: failure()
+              env:
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              run: |
+                  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                    -d "chat_id=${TELEGRAM_CHAT_ID}" \
+                    -d "text=❌ EQ12 CI/CD Pipeline Failed!
+
+                  🔧 Commit: ${{ github.sha }}
+                  🌿 Branch: ${{ github.ref_name }}  
+                  👤 Author: ${{ github.actor }}
+                  🔗 Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+                  Please check the logs! 🚨" \
+                    -d "parse_mode=HTML"

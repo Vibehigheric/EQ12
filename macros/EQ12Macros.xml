@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<JAMSMacros>
+  <!-- EQ12 macros for JAMS automation -->
+  <Macro Name="EQ12LogParameters" Description="Logs all provided parameters as Name/Value pairs">
+      <Script>
+        <![CDATA[
+          foreach (var p in Parameters) {
+            Console.WriteLine($"PARAM:{p.Name}={p.Value}");
+          }
+        ]]>
+      </Script>
+  </Macro>
+
+  <Macro Name="EQ12RetryCommand" Description="Wrap a command in EQ12 Invoke-Eq12Retry retry semantics">
+      <Script>
+        <![CDATA[
+          var cmd = (string)Arguments[0];
+          Console.WriteLine($"RETRY_CMD:{cmd}");
+          // The actual JAMS macro should call the Retry wrapper configured in the environment
+        ]]>
+      </Script>
+  </Macro>
+
+  <Macro Name="EQ12BuildDashboard" Description="Run the EQ12 dashboard builder script">
+      <Script>
+        <![CDATA[
+          Console.WriteLine("BUILD_DASHBOARD: starting");
+          // Call eq12_build_dashboard.ps1 or the repo's dashboard builder here
+        ]]>
+      </Script>
+  </Macro>
+</JAMSMacros>

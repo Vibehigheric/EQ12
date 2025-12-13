@@ -1,0 +1,17 @@
+{
+    "alert_thresholds":  {
+                             "cpu_percent":  85,
+                             "disk_percent":  95,
+                             "memory_percent":  90,
+                             "process_count":  300,
+                             "response_time_ms":  5000
+                         },
+    "auto_healing_enabled":  true,
+    "monitoring_interval_seconds":  60,
+    "deployment_info":  {
+                            "deployment_id":  "RESOURCE_MONITOR_20251107_185008",
+                            "version":  "1.0.0",
+                            "deployed_by":  "Ricoj100",
+                            "deployed_at":  "2025-11-07 18:50:29"
+                        }
+}

@@ -1,0 +1,125 @@
+version: "3.9"
+
+services:
+  godstack:
+    build: .
+    container_name: eq12-godstack
+    restart: unless-stopped
+    ports:
+      - "8000:8000"   # FastAPI dashboard
+    environment:
+      TG_TOKEN: ${TG_TOKEN}
+      TG_CHAT_ID: ${TG_CHAT_ID}
+      OPENAI_SERVICE_KEY: ${OPENAI_SERVICE_KEY}
+      BING_KEY: ${BING_KEY}
+      GOOGLE_KEY: ${GOOGLE_KEY}
+      GOOGLE_CSE_ID: ${GOOGLE_CSE_ID}
+      CODECOV_TOKEN: ${CODECOV_TOKEN}
+      SONAR_TOKEN: ${SONAR_TOKEN}
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./data:/home/appuser/app/data   # persist SQLite DBs & results
+      - ./logs:/home/appuser/app/logs   # persist logs
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: eq12-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: eq12-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: eq12-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    container_name: eq12-jupyter-dataviz
+    restart: unless-stopped
+    ports:
+      - "8889:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=eq12-dataviz-token
+      - GRANT_SUDO=yes
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks
+      - ./data:/home/jovyan/work/data
+      - ./scripts:/home/jovyan/work/scripts
+      - ./logs:/home/jovyan/work/logs
+      - ./.env:/home/jovyan/work/.env:ro
+    user: root
+    working_dir: /home/jovyan/work
+    command: start-notebook.sh --NotebookApp.token='eq12-dataviz-token' --NotebookApp.password='' --NotebookApp.allow_origin='*'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  redis_data:
+  grafana_data:
+  prometheus_data:
+
+networks:
+  default:
+    name: eq12-network

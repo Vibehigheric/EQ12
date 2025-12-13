@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>EQ12 Security - Site Blocked</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f8f9fa;
+        }
+        .warning-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .warning-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .warning-title {
+            color: #dc3545;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .warning-message {
+            color: #666;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .blocked-url {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 20px 0;
+        }
+        .btn {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-container">
+        <div class="warning-icon">🛡️</div>
+        <h1 class="warning-title">Dangerous Site Blocked</h1>
+        <div class="warning-message">
+            EQ12 Security Monitor has blocked access to this website because it has been identified as potentially dangerous.
+        </div>
+        
+        <div class="blocked-url" id="blocked-url">
+            Loading...
+        </div>
+        
+        <div id="threat-info">
+            <p><strong>Threat Type:</strong> <span id="threat-type">Unknown</span></p>
+            <p><strong>Risk Level:</strong> <span style="color: #dc3545;">HIGH</span></p>
+        </div>
+        
+        <div>
+            <button class="btn btn-primary" onclick="goBack()">
+                ← Go Back to Safety
+            </button>
+            <button class="btn btn-secondary" onclick="reportFalsePositive()">
+                Report False Positive
+            </button>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 14px; color: #666;">
+            Protected by EQ12 Security Monitor<br>
+            <a href="#" onclick="learnMore()">Learn more about web security</a>
+        </div>
+    </div>
+    
+    <script>
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const blockedUrl = urlParams.get('blocked');
+        const threatType = urlParams.get('threat');
+        
+        if (blockedUrl) {
+            document.getElementById('blocked-url').textContent = decodeURIComponent(blockedUrl);
+        }
+        
+        if (threatType) {
+            document.getElementById('threat-type').textContent = threatType.toUpperCase();
+        }
+        
+        function goBack() {
+            window.history.back();
+        }
+        
+        function reportFalsePositive() {
+            alert('Thank you for reporting. Our security team will review this site.');
+        }
+        
+        function learnMore() {
+            window.open('https://eq12security.com/web-security-guide', '_blank');
+        }
+    </script>
+</body>
+</html>

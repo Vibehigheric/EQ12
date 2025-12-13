@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Testing Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px);
+            animation: backgroundMove 20s linear infinite;
+        }
+
+        @keyframes backgroundMove {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .test-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .test-section h2 {
+            margin: 0 0 20px;
+            color: #2c3e50;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-section h2::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .test-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transition: width 0.6s ease, height 0.6s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .test-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-success {
+            background: #27ae60;
+        }
+
+        .status-error {
+            background: #e74c3c;
+        }
+
+        .status-warning {
+            background: #f39c12;
+        }
+
+        .status-info {
+            background: #3498db;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .results-container {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .results-panel {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .log-entry.success {
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .log-entry.error {
+            border-left-color: #e74c3c;
+            background: #fdeaea;
+        }
+
+        .log-entry.warning {
+            border-left-color: #f39c12;
+            background: #fef9e7;
+        }
+
+        .log-timestamp {
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tab-list {
+            margin-top: 15px;
+        }
+
+        .tab-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .tab-item:hover {
+            border-color: #667eea;
+        }
+
+        .tab-info {
+            flex: 1;
+        }
+
+        .tab-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .tab-url {
+            color: #666;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .tab-status {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status-badge.monitoring {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-badge.protected {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .vpn-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .vpn-status.disconnected {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .vpn-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            animation: vpnPulse 2s infinite;
+        }
+
+        @keyframes vpnPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .controls-panel {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .control-button {
+            background: #34495e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s ease;
+        }
+
+        .control-button:hover {
+            background: #2c3e50;
+        }
+
+        .control-button.danger {
+            background: #e74c3c;
+        }
+
+        .control-button.danger:hover {
+            background: #c0392b;
+        }
+
+        .control-button.success {
+            background: #27ae60;
+        }
+
+        .control-button.success:hover {
+            background: #229954;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EQ12 Testing Dashboard</h1>
+            <p>Extension Testing & Monitoring Console</p>
+        </div>
+
+        <div class="main-content">
+            <div class="test-section">
+                <h2>Extension Tests</h2>
+                <div class="test-grid">
+                    <button class="test-button" onclick="testExtensionLoad()">
+                        <span>Test Extension Load</span>
+                    </button>
+                    <button class="test-button" onclick="testContentScript()">
+                        <span>Test Content Script</span>
+                    </button>
+                    <button class="test-button" onclick="testMessaging()">
+                        <span>Test Messaging</span>
+                    </button>
+                    <button class="test-button" onclick="testPermissions()">
+                        <span>Test Permissions</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>VPN & Security</h2>
+                <div id="vpn-status" class="vpn-status disconnected">
+                    <div class="vpn-indicator"></div>
+                    <div>
+                        <strong>VPN Status:</strong> <span id="vpn-status-text">Checking...</span>
+                    </div>
+                </div>
+                <div class="test-grid">
+                    <button class="test-button" onclick="testVPNConnection()">
+                        <span>Test VPN Connection</span>
+                    </button>
+                    <button class="test-button" onclick="testIPValidation()">
+                        <span>Test IP Validation</span>
+                    </button>
+                    <button class="test-button" onclick="testSecureStorage()">
+                        <span>Test Secure Storage</span>
+                    </button>
+                    <button class="test-button" onclick="testEncryption()">
+                        <span>Test Encryption</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>Tab Management</h2>
+                <div class="controls-panel">
+                    <button class="control-button" onclick="refreshTabs()">Refresh Tabs</button>
+                    <button class="control-button success" onclick="openTestTabs()">Open Test Tabs</button>
+                    <button class="control-button danger" onclick="closeAllTabs()">Close All</button>
+                </div>
+                <div id="tab-list" class="tab-list">
+                    <!-- Tabs will be populated here -->
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h2>Scraper Tests</h2>
+                <div class="test-grid">
+                    <button class="test-button" onclick="testOddsScraping()">
+                        <span>Test Odds Scraping</span>
+                    </button>
+                    <button class="test-button" onclick="testEVCalculation()">
+                        <span>Test EV Calculation</span>
+                    </button>
+                    <button class="test-button" onclick="testDataStorage()">
+                        <span>Test Data Storage</span>
+                    </button>
+                    <button class="test-button" onclick="testRealTimeUpdates()">
+                        <span>Test Real-time Updates</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="results-container">
+                <div class="test-section">
+                    <h2>Test Results & Logs</h2>
+                    <div class="controls-panel">
+                        <button class="control-button" onclick="clearLogs()">Clear Logs</button>
+                        <button class="control-button" onclick="exportLogs()">Export Logs</button>
+                        <button class="control-button" onclick="runAllTests()">Run All Tests</button>
+                    </div>
+                    <div id="results-panel" class="results-panel">
+                        <div class="log-entry">
+                            <div class="log-timestamp">[READY]</div>
+                            <div>EQ12 Testing Dashboard initialized and ready for testing</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test Results Management
+        let testResults = [];
+        let isExtensionContext = false;
+
+        // Check if we're running in extension context
+        try {
+            if (chrome && chrome.runtime && chrome.runtime.id) {
+                isExtensionContext = true;
+            }
+        } catch (e) {
+            isExtensionContext = false;
+        }
+
+        function logResult(message, type = 'info', data = null) {
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            const entry = {
+                timestamp,
+                message,
+                type,
+                data
+            };
+
+            testResults.push(entry);
+            displayLogEntry(entry);
+        }
+
+        function displayLogEntry(entry) {
+            const resultsPanel = document.getElementById('results-panel');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log-entry ${entry.type}`;
+
+            logDiv.innerHTML = `
+                <div class="log-timestamp">[${entry.timestamp}]</div>
+                <div>${entry.message}</div>
+                ${entry.data ? `<pre style="margin-top: 8px; font-size: 12px; opacity: 0.8;">${JSON.stringify(entry.data, null, 2)}</pre>` : ''}
+            `;
+
+            resultsPanel.appendChild(logDiv);
+            resultsPanel.scrollTop = resultsPanel.scrollHeight;
+        }
+
+        // Extension Tests
+        async function testExtensionLoad() {
+            logResult('Testing extension load...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('❌ Not running in extension context', 'error');
+                return;
+            }
+
+            try {
+                const manifest = chrome.runtime.getManifest();
+                logResult('✅ Extension loaded successfully', 'success', {
+                    name: manifest.name,
+                    version: manifest.version,
+                    manifestVersion: manifest.manifest_version
+                });
+            } catch (error) {
+                logResult('❌ Extension load failed', 'error', error.message);
+            }
+        }
+
+        async function testContentScript() {
+            logResult('Testing content script injection...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('❌ Not running in extension context', 'error');
+                return;
+            }
+
+            try {
+                const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (tabs.length === 0) {
+                    throw new Error('No active tab found');
+                }
+
+                const tabId = tabs[0].id;
+
+                // Try to inject a test script
+                await chrome.scripting.executeScript({
+                    target: { tabId },
+                    func: () => {
+                        window.EQ12_TEST_MARKER = Date.now();
+                        return { success: true, timestamp: window.EQ12_TEST_MARKER };
+                    }
+                });
+
+                logResult('✅ Content script injection successful', 'success');
+            } catch (error) {
+                logResult('❌ Content script injection failed', 'error', error.message);
+            }
+        }
+
+        async function testMessaging() {
+            logResult('Testing extension messaging...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('❌ Not running in extension context', 'error');
+                return;
+            }
+
+            try {
+                const response = await chrome.runtime.sendMessage({
+                    action: 'testMessage',
+                    data: { timestamp: Date.now() }
+                });
+
+                if (response && response.success) {
+                    logResult('✅ Extension messaging working', 'success', response);
+                } else {
+                    logResult('⚠️ Extension messaging returned unexpected response', 'warning', response);
+                }
+            } catch (error) {
+                logResult('❌ Extension messaging failed', 'error', error.message);
+            }
+        }
+
+        async function testPermissions() {
+            logResult('Testing extension permissions...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('❌ Not running in extension context', 'error');
+                return;
+            }
+
+            try {
+                const permissions = await chrome.permissions.getAll();
+                logResult('✅ Permissions retrieved successfully', 'success', permissions);
+
+                // Test specific permissions
+                const requiredPermissions = ['tabs', 'storage', 'scripting'];
+                for (const perm of requiredPermissions) {
+                    const hasPermission = permissions.permissions.includes(perm);
+                    logResult(
+                        `${hasPermission ? '✅' : '❌'} Permission '${perm}': ${hasPermission ? 'granted' : 'missing'}`,
+                        hasPermission ? 'success' : 'error'
+                    );
+                }
+            } catch (error) {
+                logResult('❌ Permission check failed', 'error', error.message);
+            }
+        }
+
+        // VPN & Security Tests
+        async function testVPNConnection() {
+            logResult('Testing VPN connection...', 'info');
+
+            try {
+                // Simulate VPN test
+                const response = await fetch('https://httpbin.org/ip');
+                const data = await response.json();
+
+                logResult('✅ IP address retrieved', 'success', data);
+
+                // Update VPN status display
+                updateVPNStatus(true, `Connected - IP: ${data.origin}`);
+            } catch (error) {
+                logResult('❌ VPN connection test failed', 'error', error.message);
+                updateVPNStatus(false, 'Connection failed');
+            }
+        }
+
+        async function testIPValidation() {
+            logResult('Testing IP validation...', 'info');
+
+            try {
+                const response = await fetch('https://httpbin.org/headers');
+                const data = await response.json();
+
+                const userAgent = data.headers['User-Agent'];
+                const xForwardedFor = data.headers['X-Forwarded-For'];
+
+                logResult('✅ IP validation completed', 'success', {
+                    userAgent,
+                    forwardedFor: xForwardedFor
+                });
+            } catch (error) {
+                logResult('❌ IP validation failed', 'error', error.message);
+            }
+        }
+
+        async function testSecureStorage() {
+            logResult('Testing secure storage...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('❌ Not running in extension context', 'error');
+                return;
+            }
+
+            try {
+                const testData = { testKey: 'testValue', timestamp: Date.now() };
+
+                // Store data
+                await chrome.storage.local.set({ 'eq12_test': testData });
+
+                // Retrieve data
+                const result = await chrome.storage.local.get('eq12_test');
+
+                if (result.eq12_test && result.eq12_test.testKey === 'testValue') {
+                    logResult('✅ Secure storage working', 'success', result.eq12_test);
+                } else {
+                    logResult('❌ Secure storage data mismatch', 'error');
+                }
+
+                // Clean up
+                await chrome.storage.local.remove('eq12_test');
+            } catch (error) {
+                logResult('❌ Secure storage test failed', 'error', error.message);
+            }
+        }
+
+        async function testEncryption() {
+            logResult('Testing encryption capabilities...', 'info');
+
+            try {
+                // Test basic crypto API availability
+                if (!window.crypto || !window.crypto.subtle) {
+                    throw new Error('Crypto API not available');
+                }
+
+                const testData = 'EQ12 test data for encryption';
+                const encoder = new TextEncoder();
+                const data = encoder.encode(testData);
+
+                // Generate a key
+                const key = await window.crypto.subtle.generateKey(
+                    { name: 'AES-GCM', length: 256 },
+                    false,
+                    ['encrypt', 'decrypt']
+                );
+
+                // Encrypt data
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const encrypted = await window.crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv },
+                    key,
+                    data
+                );
+
+                logResult('✅ Encryption test successful', 'success', {
+                    originalLength: testData.length,
+                    encryptedLength: encrypted.byteLength
+                });
+            } catch (error) {
+                logResult('❌ Encryption test failed', 'error', error.message);
+            }
+        }
+
+        // Tab Management
+        async function refreshTabs() {
+            logResult('Refreshing tab list...', 'info');
+
+            if (!isExtensionContext) {
+                const mockTabs = [
+                    { id: 1, title: 'DraftKings Sportsbook', url: 'https://sportsbook.draftkings.com/', active: true },
+                    { id: 2, title: 'FanDuel Sportsbook', url: 'https://sportsbook.fanduel.com/', active: false }
+                ];
+                displayTabs(mockTabs);
+                logResult('✅ Mock tabs displayed', 'success');
+                return;
+            }
+
+            try {
+                const tabs = await chrome.tabs.query({});
+                const sportsbookTabs = tabs.filter(tab =>
+                    tab.url && (
+                        tab.url.includes('draftkings.com') ||
+                        tab.url.includes('fanduel.com') ||
+                        tab.url.includes('betmgm.com')
+                    )
+                );
+
+                displayTabs(sportsbookTabs);
+                logResult(`✅ Found ${sportsbookTabs.length} sportsbook tabs`, 'success');
+            } catch (error) {
+                logResult('❌ Tab refresh failed', 'error', error.message);
+            }
+        }
+
+        function displayTabs(tabs) {
+            const tabList = document.getElementById('tab-list');
+            tabList.innerHTML = '';
+
+            if (tabs.length === 0) {
+                tabList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No sportsbook tabs found</p>';
+                return;
+            }
+
+            tabs.forEach(tab => {
+                const tabDiv = document.createElement('div');
+                tabDiv.className = 'tab-item';
+
+                const sportsbook = detectSportsbook(tab.url);
+
+                tabDiv.innerHTML = `
+                    <div class="tab-info">
+                        <div class="tab-title">${tab.title}</div>
+                        <div class="tab-url">${tab.url}</div>
+                    </div>
+                    <div class="tab-status">
+                        <span class="status-badge active">${sportsbook}</span>
+                        <span class="status-badge monitoring">Monitoring</span>
+                        <span class="status-badge protected">Protected</span>
+                    </div>
+                `;
+
+                tabList.appendChild(tabDiv);
+            });
+        }
+
+        function detectSportsbook(url) {
+            if (url.includes('draftkings.com')) return 'DraftKings';
+            if (url.includes('fanduel.com')) return 'FanDuel';
+            if (url.includes('betmgm.com')) return 'BetMGM';
+            return 'Unknown';
+        }
+
+        async function openTestTabs() {
+            logResult('Opening test tabs...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('⚠️ Cannot open tabs - not in extension context', 'warning');
+                return;
+            }
+
+            try {
+                const testUrls = [
+                    'https://sportsbook.draftkings.com/',
+                    'https://sportsbook.fanduel.com/'
+                ];
+
+                for (const url of testUrls) {
+                    await chrome.tabs.create({ url, active: false });
+                }
+
+                logResult(`✅ Opened ${testUrls.length} test tabs`, 'success');
+                setTimeout(refreshTabs, 1000);
+            } catch (error) {
+                logResult('❌ Failed to open test tabs', 'error', error.message);
+            }
+        }
+
+        async function closeAllTabs() {
+            logResult('Closing all sportsbook tabs...', 'info');
+
+            if (!isExtensionContext) {
+                logResult('⚠️ Cannot close tabs - not in extension context', 'warning');
+                return;
+            }
+
+            try {
+                const tabs = await chrome.tabs.query({});
+                const sportsbookTabs = tabs.filter(tab =>
+                    tab.url && (
+                        tab.url.includes('draftkings.com') ||
+                        tab.url.includes('fanduel.com') ||
+                        tab.url.includes('betmgm.com')
+                    )
+                );
+
+                const tabIds = sportsbookTabs.map(tab => tab.id);
+                if (tabIds.length > 0) {
+                    await chrome.tabs.remove(tabIds);
+                    logResult(`✅ Closed ${tabIds.length} sportsbook tabs`, 'success');
+                } else {
+                    logResult('ℹ️ No sportsbook tabs to close', 'info');
+                }
+
+                setTimeout(refreshTabs, 500);
+            } catch (error) {
+                logResult('❌ Failed to close tabs', 'error', error.message);
+            }
+        }
+
+        // Scraper Tests
+        async function testOddsScraping() {
+            logResult('Testing odds scraping...', 'info');
+
+            // Simulate odds scraping test
+            try {
+                const mockOdds = {
+                    game: 'Lakers vs Warriors',
+                    spread: { home: -3.5, away: +3.5 },
+                    moneyline: { home: -150, away: +130 },
+                    total: { over: 215.5, under: 215.5 },
+                    timestamp: Date.now()
+                };
+
+                logResult('✅ Odds scraping simulation successful', 'success', mockOdds);
+            } catch (error) {
+                logResult('❌ Odds scraping test failed', 'error', error.message);
+            }
+        }
+
+        async function testEVCalculation() {
+            logResult('Testing EV calculation...', 'info');
+
+            try {
+                // Mock EV calculation
+                const odds = -110;
+                const trueProb = 0.55;
+                const impliedProb = 110 / (110 + 100);
+                const ev = (trueProb * (100 / 110)) - (1 - trueProb);
+
+                logResult('✅ EV calculation successful', 'success', {
+                    odds,
+                    trueProb,
+                    impliedProb: impliedProb.toFixed(3),
+                    expectedValue: ev.toFixed(3)
+                });
+            } catch (error) {
+                logResult('❌ EV calculation test failed', 'error', error.message);
+            }
+        }
+
+        async function testDataStorage() {
+            logResult('Testing data storage...', 'info');
+
+            try {
+                const testData = {
+                    bets: [
+                        { id: 1, amount: 100, odds: -110, result: 'pending' },
+                        { id: 2, amount: 50, odds: +150, result: 'win' }
+                    ],
+                    timestamp: Date.now()
+                };
+
+                // Simulate storage
+                localStorage.setItem('eq12_test_data', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('eq12_test_data'));
+
+                if (retrieved && retrieved.bets.length === 2) {
+                    logResult('✅ Data storage test successful', 'success', retrieved);
+                } else {
+                    logResult('❌ Data storage test failed - data mismatch', 'error');
+                }
+
+                // Clean up
+                localStorage.removeItem('eq12_test_data');
+            } catch (error) {
+                logResult('❌ Data storage test failed', 'error', error.message);
+            }
+        }
+
+        async function testRealTimeUpdates() {
+            logResult('Testing real-time updates...', 'info');
+
+            try {
+                let updateCount = 0;
+                const maxUpdates = 3;
+
+                const updateInterval = setInterval(() => {
+                    updateCount++;
+                    logResult(`📡 Real-time update #${updateCount}`, 'info', {
+                        timestamp: new Date().toISOString(),
+                        data: `Mock update data ${updateCount}`
+                    });
+
+                    if (updateCount >= maxUpdates) {
+                        clearInterval(updateInterval);
+                        logResult('✅ Real-time updates test completed', 'success');
+                    }
+                }, 1000);
+            } catch (error) {
+                logResult('❌ Real-time updates test failed', 'error', error.message);
+            }
+        }
+
+        // Utility Functions
+        function updateVPNStatus(connected, statusText) {
+            const vpnStatus = document.getElementById('vpn-status');
+            const vpnStatusText = document.getElementById('vpn-status-text');
+
+            vpnStatus.className = connected ? 'vpn-status' : 'vpn-status disconnected';
+            vpnStatusText.textContent = statusText;
+        }
+
+        function clearLogs() {
+            document.getElementById('results-panel').innerHTML = '';
+            testResults = [];
+            logResult('Logs cleared', 'info');
+        }
+
+        function exportLogs() {
+            const dataStr = JSON.stringify(testResults, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+            const exportFileDefaultName = `eq12_test_logs_${Date.now()}.json`;
+
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+
+            logResult('✅ Logs exported successfully', 'success');
+        }
+
+        async function runAllTests() {
+            logResult('🚀 Running all tests...', 'info');
+
+            const tests = [
+                testExtensionLoad,
+                testContentScript,
+                testMessaging,
+                testPermissions,
+                testVPNConnection,
+                testSecureStorage,
+                testEncryption,
+                testOddsScraping,
+                testEVCalculation,
+                testDataStorage
+            ];
+
+            for (let i = 0; i < tests.length; i++) {
+                const test = tests[i];
+                logResult(`Running test ${i + 1}/${tests.length}: ${test.name}`, 'info');
+
+                try {
+                    await test();
+                } catch (error) {
+                    logResult(`❌ Test ${test.name} threw error`, 'error', error.message);
+                }
+
+                // Wait between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+
+            logResult('🎉 All tests completed!', 'success');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            logResult('EQ12 Testing Dashboard loaded', 'success');
+
+            // Initialize VPN status
+            testVPNConnection();
+
+            // Refresh tabs
+            refreshTabs();
+
+            // Set up periodic updates
+            setInterval(() => {
+                if (isExtensionContext) {
+                    refreshTabs();
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,113 @@
+{
+  "databasePath": "C:\\EQ12\\WindowsDataSentinel\\data\\eq12_sentinel.db",
+  "feeds": [
+    {
+      "name": "SCOTUS Opinions",
+      "type": "rss",
+      "url": "https://www.supremecourt.gov/rss/opinions.xml",
+      "category": "legal",
+      "enabled": true,
+      "pollMinutes": 60,
+      "description": "Supreme Court opinions and orders"
+    },
+    {
+      "name": "CFPB Blog",
+      "type": "rss",
+      "url": "https://www.consumerfinance.gov/about-us/blog/feed/",
+      "category": "credit",
+      "enabled": true,
+      "pollMinutes": 60,
+      "description": "Consumer Financial Protection Bureau updates"
+    },
+    {
+      "name": "ESPN MLB",
+      "type": "rss",
+      "url": "https://www.espn.com/espn/rss/mlb/news",
+      "category": "sports",
+      "enabled": true,
+      "pollMinutes": 30,
+      "description": "MLB news and updates"
+    },
+    {
+      "name": "ESPN NFL",
+      "type": "rss",
+      "url": "https://www.espn.com/espn/rss/nfl/news",
+      "category": "sports",
+      "enabled": true,
+      "pollMinutes": 30,
+      "description": "NFL news and updates"
+    },
+    {
+      "name": "ESPN NBA",
+      "type": "rss",
+      "url": "https://www.espn.com/espn/rss/nba/news",
+      "category": "sports",
+      "enabled": true,
+      "pollMinutes": 30,
+      "description": "NBA news and updates"
+    },
+    {
+      "name": "CourtListener New Opinions",
+      "type": "api-json",
+      "url": "https://www.courtlistener.com/api/rest/v3/opinions/?order_by=-date_created&page_size=20",
+      "category": "legal",
+      "enabled": true,
+      "pollMinutes": 30,
+      "description": "Federal court opinions via CourtListener"
+    },
+    {
+      "name": "OpenWeatherMap Buffalo",
+      "type": "api-json",
+      "url": "https://api.openweathermap.org/data/2.5/weather?q=Buffalo,US&appid=229507bc0f5ea7d23bd26958e023652b",
+      "category": "weather",
+      "enabled": true,
+      "pollMinutes": 15,
+      "description": "Buffalo weather conditions"
+    },
+    {
+      "name": "SEC Edgar Recent Filings",
+      "type": "rss",
+      "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom",
+      "category": "finance",
+      "enabled": true,
+      "pollMinutes": 60,
+      "description": "SEC company filings"
+    },
+    {
+      "name": "IRS Tax Updates",
+      "type": "rss",
+      "url": "https://www.irs.gov/newsroom/irs-newsroom-rss-feeds",
+      "category": "tax",
+      "enabled": false,
+      "pollMinutes": 120,
+      "description": "IRS news and tax updates"
+    },
+    {
+      "name": "FTC Consumer Alerts",
+      "type": "rss",
+      "url": "https://www.consumer.ftc.gov/feeds/articles.xml",
+      "category": "consumer",
+      "enabled": true,
+      "pollMinutes": 60,
+      "description": "FTC consumer protection alerts"
+    },
+    {
+      "name": "CFPB Consumer Complaints Database",
+      "type": "api-json",
+      "url": "https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/?size=20&sort=date_received_desc",
+      "category": "credit",
+      "enabled": false,
+      "pollMinutes": 60,
+      "description": "Consumer complaint records"
+    },
+    {
+      "name": "Buffalo News RSS",
+      "type": "rss",
+      "url": "https://buffalonews.com/search/?f=rss",
+      "category": "local",
+      "enabled": true,
+      "pollMinutes": 30,
+      "description": "Local Buffalo news"
+    }
+  ]
+}

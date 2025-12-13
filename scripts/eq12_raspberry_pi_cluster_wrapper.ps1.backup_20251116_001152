@@ -1,0 +1,455 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet('Discover', 'AddNode', 'Start', 'Stop', 'Status', 'Dashboard', 'TestTask', 'Help')]
+    [string]$Action = 'Status',
+    
+    [Parameter(Mandatory=$false)]
+    [string]$IPAddress = '',
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Username = 'pi',
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Password = '',
+    
+    [Parameter(Mandatory=$false)]
+    [string]$SSHKey = '',
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$GenerateReport
+)
+
+<#
+.SYNOPSIS
+    EQ12 Raspberry Pi Cluster Management Wrapper
+
+.DESCRIPTION
+    PowerShell wrapper for managing EQ12 Raspberry Pi cluster with Coral USB accelerators.
+    Provides easy network discovery, node management, and distributed task processing.
+
+.PARAMETER Action
+    Action to perform: Discover, AddNode, Start, Stop, Status, Dashboard, TestTask, Help
+
+.PARAMETER IPAddress
+    IP address of Raspberry Pi to add (required for AddNode action)
+
+.PARAMETER Username
+    SSH username for Pi connection (default: pi)
+
+.PARAMETER Password
+    SSH password for Pi connection
+
+.PARAMETER SSHKey
+    Path to SSH private key file
+
+.PARAMETER VerboseOutput
+    Enable verbose logging output
+
+.PARAMETER GenerateReport
+    Generate HTML report after action completion
+
+.EXAMPLE
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action Discover
+    Discover Raspberry Pi devices on the network
+
+.EXAMPLE
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action AddNode -IPAddress 192.168.1.100 -Username pi -Password raspberry
+    Add a new Raspberry Pi node to the cluster
+
+.EXAMPLE
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action Start -VerboseOutput
+    Start the cluster with verbose logging
+
+.NOTES
+    File Name: eq12_raspberry_pi_cluster_wrapper.ps1
+    Author: EQ12 System
+    Requires: Python 3.8+, paramiko, psutil, requests
+#>
+
+# Script configuration
+$script:WorkspaceRoot = "C:\EQ12"
+$script:ScriptPath = "$WorkspaceRoot\scripts\eq12_raspberry_pi_cluster_manager.py"
+$script:ConfigPath = "$WorkspaceRoot\configs\raspberry_pi_cluster.json"
+$script:LogPath = "$WorkspaceRoot\logs"
+$script:DashboardPath = "$WorkspaceRoot\dashboard"
+
+# Ensure log directory exists
+if (-not (Test-Path $script:LogPath)) {
+    New-Item -ItemType Directory -Path $script:LogPath -Force | Out-Null
+}
+
+function Write-EQ12Log {
+    param(
+        [string]$Message,
+        [ValidateSet('INFO', 'WARNING', 'ERROR', 'SUCCESS')]
+        [string]$Level = 'INFO'
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "[$timestamp] [$Level] $Message"
+    
+    # Console output with colors
+    switch ($Level) {
+        'SUCCESS' { Write-Host $logMessage -ForegroundColor Green }
+        'WARNING' { Write-Host $logMessage -ForegroundColor Yellow }
+        'ERROR'   { Write-Host $logMessage -ForegroundColor Red }
+        default   { Write-Host $logMessage -ForegroundColor Cyan }
+    }
+    
+    # Log to file
+    $logFile = "$script:LogPath\raspberry_pi_cluster_wrapper_$(Get-Date -Format 'yyyyMMdd').log"
+    Add-Content -Path $logFile -Value $logMessage
+}
+
+function Test-Prerequisites {
+    Write-EQ12Log "🔍 Checking prerequisites..."
+    
+    # Check Python installation
+    try {
+        $pythonVersion = python --version 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-EQ12Log "✅ Python detected: $pythonVersion" -Level SUCCESS
+        } else {
+            throw "Python not found in PATH"
+        }
+    } catch {
+        Write-EQ12Log "❌ Python is not installed or not in PATH" -Level ERROR
+        return $false
+    }
+    
+    # Check cluster manager script
+    if (-not (Test-Path $script:ScriptPath)) {
+        Write-EQ12Log "❌ Cluster manager script not found: $script:ScriptPath" -Level ERROR
+        return $false
+    }
+    
+    # Check Python dependencies
+    Write-EQ12Log "📦 Checking Python dependencies..."
+    $dependencies = @('paramiko', 'psutil', 'requests')
+    
+    foreach ($dep in $dependencies) {
+        try {
+            $checkResult = python -c "import $dep; print('$dep: OK')" 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-EQ12Log "✅ $dep is available" -Level SUCCESS
+            } else {
+                Write-EQ12Log "⚠️  $dep is not installed. Installing..." -Level WARNING
+                python -m pip install $dep
+                if ($LASTEXITCODE -eq 0) {
+                    Write-EQ12Log "✅ Successfully installed $dep" -Level SUCCESS
+                } else {
+                    Write-EQ12Log "❌ Failed to install $dep" -Level ERROR
+                    return $false
+                }
+            }
+        } catch {
+            Write-EQ12Log "❌ Error checking $dep" -Level ERROR
+            return $false
+        }
+    }
+    
+    return $true
+}
+
+function Invoke-ClusterAction {
+    param(
+        [string]$ActionType,
+        [hashtable]$Parameters = @{}
+    )
+    
+    Write-EQ12Log "🚀 Executing cluster action: $ActionType"
+    
+    # Build command arguments
+    $args = @(
+        $script:ScriptPath,
+        '--action', $ActionType.ToLower()
+    )
+    
+    # Add parameters
+    foreach ($key in $Parameters.Keys) {
+        if ($Parameters[$key]) {
+            $args += "--$($key.ToLower())"
+            if ($Parameters[$key] -ne $true) {
+                $args += $Parameters[$key]
+            }
+        }
+    }
+    
+    if ($VerboseOutput) {
+        $args += '--verbose'
+    }
+    
+    Write-EQ12Log "📝 Command: python $($args -join ' ')"
+    
+    try {
+        # Execute Python script
+        $output = & python @args 2>&1
+        $exitCode = $LASTEXITCODE
+        
+        if ($exitCode -eq 0) {
+            Write-EQ12Log "✅ Action completed successfully" -Level SUCCESS
+            
+            # Display output
+            if ($output) {
+                Write-Host "`n📊 Output:" -ForegroundColor Yellow
+                Write-Host $output
+            }
+            
+            return $true
+        } else {
+            Write-EQ12Log "❌ Action failed with exit code: $exitCode" -Level ERROR
+            if ($output) {
+                Write-Host "`n❌ Error Output:" -ForegroundColor Red
+                Write-Host $output
+            }
+            return $false
+        }
+    } catch {
+        Write-EQ12Log "❌ Exception during action execution: $($_.Exception.Message)" -Level ERROR
+        return $false
+    }
+}
+
+function Get-ClusterStatus {
+    Write-EQ12Log "📊 Retrieving cluster status..."
+    
+    $success = Invoke-ClusterAction -ActionType 'Status'
+    
+    if ($success -and (Test-Path $script:ConfigPath)) {
+        try {
+            $config = Get-Content $script:ConfigPath | ConvertFrom-Json
+            
+            Write-Host "`n🍓 Raspberry Pi Cluster Status:" -ForegroundColor Green
+            Write-Host "================================" -ForegroundColor Green
+            
+            if ($config.nodes -and $config.nodes.Count -gt 0) {
+                foreach ($node in $config.nodes) {
+                    $coralStatus = if ($node.coral_connected) { "🔥 Yes" } else { "❌ No" }
+                    $availability = if ($node.available) { "🟢 Online" } else { "🔴 Offline" }
+                    
+                    Write-Host "`n📡 Node: $($node.hostname) ($($node.ip_address))"
+                    Write-Host "   Status: $availability"
+                    Write-Host "   Coral TPU: $coralStatus"
+                    Write-Host "   CPU Cores: $($node.cpu_cores)"
+                    Write-Host "   Memory: $($node.memory_gb)GB"
+                    Write-Host "   Active Tasks: $($node.current_tasks.Count)"
+                    
+                    if ($node.last_heartbeat) {
+                        Write-Host "   Last Heartbeat: $($node.last_heartbeat)"
+                    }
+                }
+            } else {
+                Write-Host "No nodes configured in cluster." -ForegroundColor Yellow
+                Write-Host "Use -Action AddNode to add Raspberry Pi devices." -ForegroundColor Yellow
+            }
+            
+            Write-Host "`n📈 Updated: $($config.updated_at)" -ForegroundColor Gray
+            
+        } catch {
+            Write-EQ12Log "⚠️  Could not parse cluster configuration" -Level WARNING
+        }
+    }
+}
+
+function Show-Help {
+    Write-Host @"
+
+🍓 EQ12 Raspberry Pi Cluster Management
+=====================================
+
+SYNOPSIS:
+    Manage distributed EQ12 processing across Raspberry Pi cluster with Coral TPU acceleration
+
+ACTIONS:
+    Discover    - Scan network for Raspberry Pi devices
+    AddNode     - Add new Pi node to cluster (requires -IPAddress)
+    Start       - Start cluster processing (runs continuously)
+    Stop        - Stop cluster processing
+    Status      - Show cluster status and node information
+    Dashboard   - Generate HTML dashboard report
+    TestTask    - Submit test tasks to cluster
+    Help        - Show this help information
+
+EXAMPLES:
+    
+    # Discover Pi devices on network
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action Discover
+    
+    # Add new Pi node with password authentication
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action AddNode -IPAddress 192.168.1.100 -Password raspberry
+    
+    # Add Pi node with SSH key authentication
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action AddNode -IPAddress 192.168.1.100 -SSHKey "C:\EQ12\ssh_keys\pi_key"
+    
+    # Start cluster with verbose output
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action Start -VerboseOutput
+    
+    # Generate dashboard report
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action Dashboard -GenerateReport
+    
+    # Submit test tasks to verify cluster
+    .\eq12_raspberry_pi_cluster_wrapper.ps1 -Action TestTask
+
+CLUSTER BENEFITS:
+    ⚡ 4x faster inference with distributed Coral TPU processing
+    📊 Real-time sports betting analytics on edge devices
+    🔄 Parallel parlay optimization across multiple nodes
+    📡 Continuous market monitoring with low latency
+    🛡️  Fault-tolerant distributed architecture
+
+NETWORK SETUP:
+    1. Connect Raspberry Pi 5 via Ethernet cable
+    2. Ensure Pi has static IP (192.168.1.100+)
+    3. Connect Coral USB accelerator to Pi
+    4. Run discovery to detect available nodes
+    5. Add nodes to cluster configuration
+    6. Start distributed processing
+
+FILES:
+    Config: $script:ConfigPath
+    Logs:   $script:LogPath
+    Script: $script:ScriptPath
+
+"@ -ForegroundColor Cyan
+}
+
+function New-DashboardReport {
+    Write-EQ12Log "📊 Generating cluster dashboard..."
+    
+    $success = Invoke-ClusterAction -ActionType 'Dashboard'
+    
+    if ($success) {
+        $dashboardFile = "$script:DashboardPath\raspberry_pi_cluster.html"
+        
+        if (Test-Path $dashboardFile) {
+            Write-EQ12Log "✅ Dashboard generated: $dashboardFile" -Level SUCCESS
+            
+            # Open dashboard in browser
+            try {
+                Start-Process $dashboardFile
+                Write-EQ12Log "🌐 Dashboard opened in browser" -Level SUCCESS
+            } catch {
+                Write-EQ12Log "⚠️  Could not open dashboard automatically" -Level WARNING
+                Write-EQ12Log "📁 Manual access: file://$dashboardFile" -Level INFO
+            }
+        }
+    }
+}
+
+function Start-ClusterProcessing {
+    Write-EQ12Log "🚀 Starting EQ12 Raspberry Pi cluster processing..."
+    Write-EQ12Log "⚠️  This will run continuously. Press Ctrl+C to stop." -Level WARNING
+    
+    # Start cluster in background or foreground based on user preference
+    $choice = Read-Host "Start cluster in background? (y/N)"
+    
+    if ($choice -eq 'y' -or $choice -eq 'Y') {
+        # Background processing
+        Write-EQ12Log "🔄 Starting cluster in background..."
+        
+        $job = Start-Job -ScriptBlock {
+            param($scriptPath, $verbose)
+            $args = @($scriptPath, '--action', 'start')
+            if ($verbose) { $args += '--verbose' }
+            & python @args
+        } -ArgumentList $script:ScriptPath, $VerboseOutput
+        
+        Write-EQ12Log "✅ Cluster started as background job (ID: $($job.Id))" -Level SUCCESS
+        Write-EQ12Log "📝 Monitor with: Get-Job $($job.Id) | Receive-Job" -Level INFO
+        
+    } else {
+        # Foreground processing
+        Write-EQ12Log "🔄 Starting cluster in foreground (Ctrl+C to stop)..."
+        Invoke-ClusterAction -ActionType 'Start'
+    }
+}
+
+# Main execution
+try {
+    Write-Host @"
+🍓 EQ12 Raspberry Pi Cluster Manager
+===================================
+"@ -ForegroundColor Green
+
+    # Check prerequisites
+    if (-not (Test-Prerequisites)) {
+        Write-EQ12Log "❌ Prerequisites check failed. Please resolve issues before continuing." -Level ERROR
+        exit 1
+    }
+
+    # Execute requested action
+    switch ($Action) {
+        'Discover' {
+            Write-EQ12Log "🔍 Discovering Raspberry Pi devices..."
+            Invoke-ClusterAction -ActionType 'Discover'
+        }
+        
+        'AddNode' {
+            if (-not $IPAddress) {
+                Write-EQ12Log "❌ IP address is required for AddNode action" -Level ERROR
+                Write-Host "Usage: -Action AddNode -IPAddress 192.168.1.100 [-Username pi] [-Password raspberry]"
+                exit 1
+            }
+            
+            $params = @{
+                'ip' = $IPAddress
+                'username' = $Username
+            }
+            
+            if ($Password) { $params['password'] = $Password }
+            if ($SSHKey) { $params['ssh-key'] = $SSHKey }
+            
+            Write-EQ12Log "➕ Adding Raspberry Pi node: $IPAddress"
+            Invoke-ClusterAction -ActionType 'AddNode' -Parameters $params
+        }
+        
+        'Start' {
+            Start-ClusterProcessing
+        }
+        
+        'Stop' {
+            Write-EQ12Log "🛑 Stopping cluster processing..."
+            Invoke-ClusterAction -ActionType 'Stop'
+        }
+        
+        'Status' {
+            Get-ClusterStatus
+        }
+        
+        'Dashboard' {
+            New-DashboardReport
+        }
+        
+        'TestTask' {
+            Write-EQ12Log "🧪 Submitting test tasks to cluster..."
+            Invoke-ClusterAction -ActionType 'TestTask'
+        }
+        
+        'Help' {
+            Show-Help
+        }
+        
+        default {
+            Write-EQ12Log "❌ Unknown action: $Action" -Level ERROR
+            Show-Help
+            exit 1
+        }
+    }
+    
+    # Generate report if requested
+    if ($GenerateReport -and $Action -ne 'Dashboard') {
+        Write-EQ12Log "📝 Generating cluster report..."
+        New-DashboardReport
+    }
+    
+    Write-EQ12Log "✅ Operation completed successfully" -Level SUCCESS
+    
+} catch {
+    Write-EQ12Log "❌ Unexpected error: $($_.Exception.Message)" -Level ERROR
+    Write-EQ12Log "📍 Stack trace: $($_.ScriptStackTrace)" -Level ERROR
+    exit 1
+}

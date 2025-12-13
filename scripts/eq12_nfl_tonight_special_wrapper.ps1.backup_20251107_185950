@@ -1,0 +1,308 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 NFL Tonight Special: LV vs DEN PowerShell Wrapper
+    Thursday Night Football - Las Vegas Raiders @ Denver Broncos
+
+.DESCRIPTION
+    PowerShell wrapper for tonight's special LV vs DEN NFL system.
+    Features real game data with Thursday Night Football spotlight.
+
+.PARAMETER Action
+    Action to perform: Special, QuickPick, FullAnalysis
+
+.PARAMETER Legs
+    Number of parlay legs (default: 10)
+
+.PARAMETER FocusLVDEN  
+    Force more legs from LV vs DEN game
+
+.PARAMETER VerboseOutput
+    Enable verbose output
+
+.PARAMETER GenerateReport
+    Generate comprehensive HTML report
+
+.EXAMPLE
+    .\eq12_nfl_tonight_special_wrapper.ps1 -Action Special
+    
+.EXAMPLE
+    .\eq12_nfl_tonight_special_wrapper.ps1 -Action FullAnalysis -FocusLVDEN -GenerateReport
+
+.NOTES
+    Created: November 6, 2025
+    Author: EQ12 System Operations Team
+    Purpose: Tonight's LV vs DEN Thursday Night Football special
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet("Special", "QuickPick", "FullAnalysis")]
+    [string]$Action = "Special",
+    
+    [ValidateRange(5, 15)]
+    [int]$Legs = 10,
+    
+    [switch]$FocusLVDEN,
+    
+    [switch]$VerboseOutput,
+    
+    [switch]$GenerateReport
+)
+
+# Enhanced error handling and logging
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+# Workspace paths
+$WorkspaceRoot = "C:\EQ12"
+$ScriptsPath = Join-Path $WorkspaceRoot "scripts"
+$DataPath = Join-Path $WorkspaceRoot "data" 
+$LogsPath = Join-Path $WorkspaceRoot "logs"
+$DashboardPath = Join-Path $WorkspaceRoot "dashboard"
+
+# Ensure directories exist
+@($DataPath, $LogsPath, $DashboardPath) | ForEach-Object {
+    if (-not (Test-Path $_)) {
+        New-Item -Path $_ -ItemType Directory -Force | Out-Null
+    }
+}
+
+# Logging setup
+$LogFile = Join-Path $LogsPath "nfl_tonight_wrapper_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+function Write-LogMessage {
+    param([string]$Message, [string]$Level = "INFO")
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "$Timestamp - $Level - $Message"
+    Write-Host $LogEntry
+    Add-Content -Path $LogFile -Value $LogEntry
+}
+
+function Invoke-TonightSpecialSystem {
+    param([int]$TargetLegs)
+    
+    Write-LogMessage "Starting NFL Tonight Special: LV vs DEN system"
+    Write-LogMessage "Target Legs: $TargetLegs"
+    
+    $PythonScript = Join-Path $ScriptsPath "eq12_nfl_tonight_lv_den_special.py"
+    
+    if (-not (Test-Path $PythonScript)) {
+        throw "Tonight Special script not found: $PythonScript"
+    }
+    
+    # Execute Python script
+    try {
+        $Result = & python $PythonScript
+        if ($LASTEXITCODE -ne 0) {
+            throw "Python script execution failed with exit code: $LASTEXITCODE"
+        }
+        
+        Write-LogMessage "Tonight Special system executed successfully"
+        return $Result
+    }
+    catch {
+        Write-LogMessage "Failed to execute Tonight Special: $($_.Exception.Message)" "ERROR"
+        throw
+    }
+}
+
+function Get-TonightSpecialReport {
+    Write-LogMessage "Generating tonight special report"
+    
+    # Find latest tonight special data file
+    $LatestParlay = Get-ChildItem -Path $DataPath -Filter "nfl_tonight_special_*.json" | 
+                   Sort-Object LastWriteTime -Descending | 
+                   Select-Object -First 1
+    
+    if (-not $LatestParlay) {
+        Write-LogMessage "No tonight special data found" "WARN"
+        return $null
+    }
+    
+    $ParlayData = Get-Content $LatestParlay.FullName | ConvertFrom-Json
+    
+    $Report = @{
+        Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        ParlayFile = $LatestParlay.Name
+        FeaturedGame = $ParlayData.featured_game
+        GameTime = $ParlayData.game_time
+        Network = $ParlayData.network
+        FeaturedLegs = $ParlayData.featured_legs_count
+        TotalLegs = $ParlayData.leg_count
+        TotalOdds = $ParlayData.odds.total_decimal_odds
+        PotentialPayout = $ParlayData.odds.potential_payout
+        GameStorylines = $ParlayData.game_storylines
+    }
+    
+    Write-LogMessage "Tonight special report generated"
+    return $Report
+}
+
+function New-TonightSpecialHTMLReport {
+    param($SpecialReport)
+    
+    Write-LogMessage "Generating Tonight Special HTML report"
+    
+    $ReportFile = Join-Path $DashboardPath "nfl_tonight_special_report_$(Get-Date -Format 'yyyyMMdd_HHmmss').html"
+    
+    $HtmlContent = @"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 NFL Tonight Special - LV vs DEN</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; 
+               background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; }
+        .container { max-width: 1200px; margin: 0 auto; background: rgba(255,255,255,0.1); 
+                     border-radius: 15px; padding: 30px; backdrop-filter: blur(10px); }
+        .header { text-align: center; border-bottom: 3px solid #e74c3c; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #e74c3c; margin: 0; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .featured-game { background: linear-gradient(45deg, #e74c3c, #c0392b); 
+                        border-radius: 15px; padding: 25px; margin: 20px 0; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 30px 0; }
+        .stat-card { background: rgba(52, 73, 94, 0.8); border-left: 5px solid #e74c3c; 
+                     padding: 20px; border-radius: 10px; backdrop-filter: blur(5px); }
+        .stat-card h3 { margin: 0 0 10px 0; color: #ecf0f1; }
+        .stat-value { font-size: 2em; font-weight: bold; color: #e74c3c; }
+        .storylines { background: rgba(46, 204, 113, 0.2); border: 1px solid #27ae60; 
+                      border-radius: 10px; padding: 20px; margin: 20px 0; }
+        .storylines h3 { color: #27ae60; margin-top: 0; }
+        .storylines ul { color: #ecf0f1; }
+        .tnf-badge { background: #f39c12; color: #2c3e50; padding: 15px 25px; 
+                     border-radius: 25px; display: inline-block; margin: 10px 0; font-weight: bold; }
+        .timestamp { text-align: center; color: #bdc3c7; margin-top: 30px; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EQ12 NFL Tonight Special Report</h1>
+            <p>Thursday Night Football Parlay Intelligence</p>
+        </div>
+        
+        <div class="featured-game">
+            <h2>$($SpecialReport.FeaturedGame)</h2>
+            <div class="tnf-badge">THURSDAY NIGHT FOOTBALL</div>
+            <p><strong>Game Time:</strong> $($SpecialReport.GameTime)</p>
+            <p><strong>Network:</strong> $($SpecialReport.Network)</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Featured LV vs DEN Legs</h3>
+                <div class="stat-value">$($SpecialReport.FeaturedLegs)</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Parlay Legs</h3>
+                <div class="stat-value">$($SpecialReport.TotalLegs)</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Odds</h3>
+                <div class="stat-value">${SpecialReport.TotalOdds}x</div>
+            </div>
+            <div class="stat-card">
+                <h3>Potential Payout</h3>
+                <div class="stat-value">$($SpecialReport.PotentialPayout)</div>
+            </div>
+        </div>
+        
+        <div class="storylines">
+            <h3>Tonight's Game Storylines</h3>
+            <ul>
+"@
+
+    # Add storylines
+    foreach ($storyline in $SpecialReport.GameStorylines) {
+        $HtmlContent += "<li>$storyline</li>`n"
+    }
+
+    $HtmlContent += @"
+            </ul>
+        </div>
+        
+        <div class="tnf-badge">
+            AFC WEST SHOWDOWN - Division Implications on the Line!
+        </div>
+        
+        <div class="timestamp">
+            Generated: $($SpecialReport.Timestamp) | File: $($SpecialReport.ParlayFile)
+        </div>
+    </div>
+</body>
+</html>
+"@
+    
+    Set-Content -Path $ReportFile -Value $HtmlContent -Encoding UTF8
+    Write-LogMessage "HTML report saved: $ReportFile"
+    
+    return $ReportFile
+}
+
+# Main execution
+try {
+    Write-Host "EQ12 NFL TONIGHT SPECIAL: LV vs DEN WRAPPER" -ForegroundColor Red
+    Write-Host "Thursday Night Football - Raiders @ Broncos!" -ForegroundColor Yellow
+    Write-Host ("=" * 70) -ForegroundColor Cyan
+    
+    Write-LogMessage "Starting NFL Tonight Special Wrapper"
+    Write-LogMessage "Action: $Action | Legs: $Legs | Focus LV vs DEN: $FocusLVDEN | Report: $GenerateReport"
+    
+    switch ($Action) {
+        "Special" {
+            Write-Host "Running Tonight Special: LV vs DEN..." -ForegroundColor Red
+            $Result = Invoke-TonightSpecialSystem -TargetLegs $Legs
+            Write-Host $Result
+        }
+        
+        "QuickPick" {
+            Write-Host "Quick Tonight Special Pick..." -ForegroundColor Yellow
+            $Result = Invoke-TonightSpecialSystem -TargetLegs $Legs
+            $SpecialReport = Get-TonightSpecialReport
+            
+            if ($SpecialReport) {
+                Write-Host "`nTonight Special Summary:" -ForegroundColor Cyan
+                Write-Host "Featured Game: $($SpecialReport.FeaturedGame)" -ForegroundColor Red
+                Write-Host "Game Time: $($SpecialReport.GameTime)" -ForegroundColor Yellow
+                Write-Host "Network: $($SpecialReport.Network)" -ForegroundColor Green
+                Write-Host "Featured Legs: $($SpecialReport.FeaturedLegs)" -ForegroundColor Magenta
+                Write-Host "Total Odds: $($SpecialReport.TotalOdds)x" -ForegroundColor Green
+                Write-Host "Potential Payout: $($SpecialReport.PotentialPayout)" -ForegroundColor Green
+            }
+        }
+        
+        "FullAnalysis" {
+            Write-Host "Full Tonight Special Analysis..." -ForegroundColor Magenta
+            $Result = Invoke-TonightSpecialSystem -TargetLegs $Legs
+            $SpecialReport = Get-TonightSpecialReport
+            
+            if ($SpecialReport -and $GenerateReport) {
+                $ReportFile = New-TonightSpecialHTMLReport -SpecialReport $SpecialReport
+                Write-Host "`nFull Tonight Special report generated: $ReportFile" -ForegroundColor Green
+                
+                # Open report in default browser
+                if (Test-Path $ReportFile) {
+                    Start-Process $ReportFile
+                    Write-Host "Report opened in default browser" -ForegroundColor Cyan
+                }
+            }
+        }
+    }
+    
+    Write-Host "`n" + ("=" * 70) -ForegroundColor Cyan
+    Write-Host "TONIGHT SPECIAL: LV vs DEN system operational!" -ForegroundColor Red
+    Write-Host "THURSDAY NIGHT FOOTBALL: Raiders @ Broncos featured!" -ForegroundColor Yellow  
+    Write-Host "AFC WEST SHOWDOWN: Division implications analyzed!" -ForegroundColor Green
+    Write-Host ("=" * 70) -ForegroundColor Cyan
+    
+    Write-LogMessage "Tonight Special Wrapper completed successfully"
+    
+} catch {
+    Write-Host "Tonight Special Wrapper failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-LogMessage "Error: $($_.Exception.Message)" "ERROR"
+    exit 1
+}
+
+Write-Host "`nTonight Special Wrapper execution completed!" -ForegroundColor Green

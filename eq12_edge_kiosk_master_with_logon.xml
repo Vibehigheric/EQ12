@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>EQ12 Master Edge Kiosk Rotation Task (Parlay AM, Deals Noon, Sales PM, Cleanup Night + Logon Recovery)</Description>
+    <Author>EQ12 Automation</Author>
+  </RegistrationInfo>
+  <Triggers>
+    <!-- Morning Parlay 8AM -->
+    <CalendarTrigger>
+      <StartBoundary>2025-09-29T08:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay>
+    </CalendarTrigger>
+    <!-- Afternoon Deals 12PM -->
+    <CalendarTrigger>
+      <StartBoundary>2025-09-29T12:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay>
+    </CalendarTrigger>
+    <!-- Evening Sales 6PM -->
+    <CalendarTrigger>
+      <StartBoundary>2025-09-29T18:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay>
+    </CalendarTrigger>
+    <!-- Nightly Cleanup 11:59PM -->
+    <CalendarTrigger>
+      <StartBoundary>2025-09-29T23:59:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay><DaysInterval>1</DaysInterval></ScheduleByDay>
+    </CalendarTrigger>
+    <!-- Logon Recovery -->
+    <LogonTrigger>
+      <Enabled>true</Enabled>
+    </LogonTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+  </Settings>
+  <Actions Context="Author">
+    <!-- Morning Parlay -->
+    <Exec><Command>taskkill</Command><Arguments>/IM msedge.exe /F</Arguments></Exec>
+    <Exec><Command>"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"</Command>
+      <Arguments>--kiosk https://xxxx.ngrok-free.app/tv/parlay --edge-kiosk-type=fullscreen --profile-directory="EQ12_Kiosk"</Arguments></Exec>
+
+    <!-- Afternoon Deals -->
+    <Exec><Command>taskkill</Command><Arguments>/IM msedge.exe /F</Arguments></Exec>
+    <Exec><Command>"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"</Command>
+      <Arguments>--kiosk https://xxxx.ngrok-free.app/tv/deals --edge-kiosk-type=fullscreen --profile-directory="EQ12_Kiosk"</Arguments></Exec>
+
+    <!-- Evening Sales -->
+    <Exec><Command>taskkill</Command><Arguments>/IM msedge.exe /F</Arguments></Exec>
+    <Exec><Command>"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"</Command>
+      <Arguments>--kiosk https://xxxx.ngrok-free.app/tv/sales --edge-kiosk-type=fullscreen --profile-directory="EQ12_Kiosk"</Arguments></Exec>
+
+    <!-- Nightly Cleanup -->
+    <Exec><Command>taskkill</Command><Arguments>/IM msedge.exe /F</Arguments></Exec>
+
+    <!-- Logon Recovery: defaults to Parlay (can be adjusted with conditions if needed) -->
+    <Exec><Command>"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"</Command>
+      <Arguments>--kiosk https://xxxx.ngrok-free.app/tv/parlay --edge-kiosk-type=fullscreen --profile-directory="EQ12_Kiosk"</Arguments></Exec>
+  </Actions>
+</Task>

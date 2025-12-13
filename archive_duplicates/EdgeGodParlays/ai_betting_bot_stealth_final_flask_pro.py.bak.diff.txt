@@ -1,0 +1,93 @@
+--- C:\EQ12\EdgeGodParlays\ai_betting_bot_stealth_final_flask_pro.py
++++ C:\EQ12\EdgeGodParlays\ai_betting_bot_stealth_final_flask_pro.py.bak
+@@ -12,63 +12,47 @@
+ }
+ 
+ # Replace chatgpt() call site inside webhook to prepend context/guardrails
+-$code = $code -replace '(elif text.startswith\("/"\):)([\s\S]*?)return "OK", 200', @'    elif text == "/context_mlb":
+-        ctx, games, roster_map = build_mlb_context()
+-        tg_send(" TODAYS MLB\n" + ctx, chat_id)
+-
+-    elif text == "/context_wnba":
+-        ctx, _ = build_wnba_context()
+-        tg_send(" TODAYS WNBA\n" + ctx, chat_id)
+-
+-    elif text == "/debug_guard":
+-        sample = ("MLB guard: MLB only (today). Reject colleges/soccer/other leagues. No duplicate teams.\n"
+-                  "WNBA guard: WNBA only (today). Points props only.\n"
+-                  "UFC guard: UFC only. Method of Victory on active card.\n"
+-                  "BOXING guard: sanctioned bouts only; compubox & line-drift reasoning.")
+-        tg_send(" Current guardrails:\n" + sample, chat_id)
+-
++$code = $code -replace '(elif text.startswith\("/"\):)([\s\S]*?)return "OK", 200', @'
+ elif text.startswith("/"):
+     key = text[1:]
+     instruction = LOGIC.get(key, None)
+ 
+-    # sport-specific context and guardrails (with rosters when MLB)
++    # Build sport-specific context and guardrails
+     sport, ctx = context_for_command(key)
+     guard = ""
+-    roster_note = ""
+     if sport == "mlb":
+-        guard = ("RULES: MLB only (today). Use only listed MLB teams/players. "
+-                 "Reject colleges/soccer/other leagues. No duplicate teams in same ticket.\n")
+-        # enrich with roster names
+-        ctx_mlb, games_mlb, roster_map = build_mlb_context()
+-        ctx = ctx_mlb
+-        if roster_map:
+-            roster_note = "\nROSTER SHORTLISTS:\n" + "\n".join(
+-                [f"- {team}: {', '.join(names)}" for team, names in roster_map.items() if names]
+-            )
++        guard = (
++            "RULES: Only use MLB teams/players from TODAY. "
++            "Reject colleges/soccer/hypotheticals. No NBA/NCAA/NHL. "
++            "If player uncertain, pick from listed MLB games only.\n"
++        )
+     elif sport == "wnba":
+-        guard = ("RULES: WNBA only (today). Points props only. "
+-                 "No NBA/NCAA/mens teams.\n")
+-        ctx_wnba, _ = build_wnba_context()
+-        ctx = ctx_wnba
++        guard = (
++            "RULES: Only use WNBA teams/players from TODAY. "
++            "No NBA, NCAA, or men’s teams. Keep props strictly POINTS-only.\n"
++        )
+     elif sport == "ufc":
+-        guard = ("RULES: UFC only. Method of Victory (KO/TKO/SUB/DEC) with short rationale. "
+-                 "Use active card only.\n")
++        guard = (
++            "RULES: Only UFC fighters on active/scheduled cards. "
++            "Picks must be Method of Victory (KO/TKO/SUB/DEC) with short rationale.\n"
++        )
+     elif sport == "boxing":
+-        guard = ("RULES: Boxing only. Prefer decision/distance/KO props with compubox trends.\n")
++        guard = (
++            "RULES: Only sanctioned boxing bouts; prefer distance/decision or KO props with compubox trends.\n"
++        )
+ 
+     if instruction:
+         prompt = (
+             f"{instruction}\n\n"
+             f"{guard}"
+-            f"{ctx}"
+-            f"{roster_note}\n"
++            f"{ctx}\n"
+             "Constrain picks exclusively to the teams/fighters above. "
+             "If no valid games today, say so briefly."
+         )
+         ans = chatgpt(prompt, chat_id)
+-        tg_send(f" *{key.upper()}*\n{ans}", chat_id)
++        tg_send(f"📊 *{key.upper()}*\n{ans}", chat_id)
+     else:
+-        tg_send(" Unknown command. Try /commands.", chat_id)
++        tg_send("⚠️ Unknown command. Try /commands.", chat_id)
+     return "OK", 200
+ '@
+ 
+@@ -89,5 +73,3 @@
+ # Wait and show health + current commands
+ Start-Sleep -Seconds 4
+ Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5005/health | Select-Object -ExpandProperty Content
+-
+-

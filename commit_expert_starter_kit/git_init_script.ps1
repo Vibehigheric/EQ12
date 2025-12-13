@@ -49,7 +49,8 @@ if ($currentDir.Path -ne $repoRoot) {
     if ($response -eq 'y') {
         Set-Location $repoRoot
         Write-Host "✅ Changed to $repoRoot" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "❌ Aborted. Run from $repoRoot" -ForegroundColor Red
         exit 1
     }
@@ -81,7 +82,8 @@ try {
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ Git repository initialized" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "❌ Git init failed: $initOutput" -ForegroundColor Red
         exit 1
     }
@@ -115,7 +117,8 @@ if (-not $gitUserName -or -not $gitUserEmail) {
         git config user.email $userEmail
         Write-Host "✅ Set user.email = $userEmail" -ForegroundColor Green
     }
-} else {
+}
+else {
     Write-Host "✅ Git user already configured: $gitUserName <$gitUserEmail>" -ForegroundColor Green
 }
 
@@ -354,7 +357,8 @@ if (-not $SkipInitialCommit) {
     if ($commitGpgSign -eq "true") {
         Write-Host "✅ GPG signing enabled, creating signed commit..." -ForegroundColor Green
         $commitResult = git commit -S -m "chore: initialize Git repository with security-first .gitignore" 2>&1
-    } else {
+    }
+    else {
         Write-Host "⚠️ GPG signing not enabled (run gpg_setup_guide.md to configure)" -ForegroundColor Yellow
         $commitResult = git commit -m "chore: initialize Git repository with security-first .gitignore" 2>&1
     }
@@ -365,10 +369,12 @@ if (-not $SkipInitialCommit) {
         # Show commit details
         $commitHash = git rev-parse --short HEAD
         Write-Host "   Commit: $commitHash" -ForegroundColor Cyan
-    } else {
+    }
+    else {
         Write-Host "⚠️ Commit failed (may be no changes): $commitResult" -ForegroundColor Yellow
     }
-} else {
+}
+else {
     Write-Host ""
     Write-Host "[5/6] Skipping initial commit (use -SkipInitialCommit)" -ForegroundColor Yellow
 }
@@ -392,7 +398,8 @@ if ($RemoteUrl) {
             git remote set-url $RemoteName $RemoteUrl
             Write-Host "✅ Updated remote '$RemoteName' to: $RemoteUrl" -ForegroundColor Green
         }
-    } else {
+    }
+    else {
         git remote add $RemoteName $RemoteUrl
         Write-Host "✅ Added remote '$RemoteName': $RemoteUrl" -ForegroundColor Green
     }
@@ -400,7 +407,8 @@ if ($RemoteUrl) {
     Write-Host ""
     Write-Host "To push to remote, run:" -ForegroundColor Cyan
     Write-Host "  git push -u $RemoteName main" -ForegroundColor White
-} else {
+}
+else {
     Write-Host "⏭️ No remote URL provided (use -RemoteUrl parameter to add)" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "To add remote later, run:" -ForegroundColor Cyan

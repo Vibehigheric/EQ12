@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "max_files": 25,
+  "max_file_size_mb": 5,
+  "rotation_interval": "daily",
+  "compression": true,
+  "archive_after_days": 30
+}

@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-10-07T03:40:19.874473+00:00",
+  "summary": {
+    "repos_discovered": 18,
+    "patterns_harvested": 0,
+    "migration_issues": 8928,
+    "risk_breakdown": {
+      "low": 238,
+      "medium": 131,
+      "high": 8559
+    }
+  },
+  "repos": [
+    {
+      "name": "InfoGAN",
+      "language": "Python",
+      "updated_at": "2025-10-07T02:44:03Z",
+      "license": "UNKNOWN"
+    },
+    {
+      "name": "vime",
+      "language": "Python",
+      "updated_at": "2025-10-07T02:47:56Z",
+      "license": "UNKNOWN"
+    },
+    {
+      "name": "improved-gan",
+      "language": "Python",
+      "updated_at": "2025-10-07T02:42:41Z",
+      "license": "UNKNOWN"
+    },
+    {
+      "name": "iaf",
+      "language": "Python",
+      "updated_at": "2025-10-07T02:47:39Z",
+      "license": "MIT"
+    },
+    {
+      "name": "neural-gpu",
+      "language": "Python",
+      "updated_at": "2025-10-07T02:52:03Z",
+      "license": "UNKNOWN"
+    },
+    {
+      "name": "universe-starter-agent",
+      "language": "Python",
+      "updated_at": "2025-10-07T02:44:02Z",
+      "license": "MIT"
+    }
+  ],
+  "pattern_areas": [],
+  "next_steps": [
+    "Review migration_plan.json for specific file changes",
+    "Start with low-risk migrations first",
+    "Add comprehensive tests for each migration",
+    "Run security audit after each change"
+  ]
+}

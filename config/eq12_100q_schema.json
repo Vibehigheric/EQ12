@@ -1,0 +1,1187 @@
+{
+  "system": {
+    "name": "EQ12 100-Question Self-Diagnostic Engine",
+    "version": "1.0",
+    "schema_version": "1.0",
+    "created_at": "2025-12-04T09:30:00Z",
+    "total_questions": 100,
+    "categories": 10,
+    "description": "Complete self-assessment framework for autonomous EQ12 system optimization"
+  },
+  "categories": {
+    "file_system_code_scanning": {
+      "id": 1,
+      "name": "File System + Code Scanning",
+      "range": "1-15",
+      "questions": [
+        {
+          "id": 1,
+          "question": "What files were modified in the last 24 hours?",
+          "answer_type": "list_of_paths",
+          "answer_format": ["filepath", "timestamp", "size_bytes"],
+          "criticality": "high",
+          "automation": "git diff --name-only --diff-filter=M HEAD~1",
+          "dependencies": ["git"],
+          "expected_output": "list of modified files with timestamps",
+          "action_if_critical": "flag for review"
+        },
+        {
+          "id": 2,
+          "question": "Which Python files contain lint errors?",
+          "answer_type": "list_of_objects",
+          "answer_format": {"file": "str", "errors": [{"line": "int", "message": "str"}]},
+          "criticality": "high",
+          "automation": "flake8 scripts/ src/ --format=json",
+          "dependencies": ["flake8"],
+          "expected_output": "list of files with line numbers and error messages",
+          "action_if_critical": "auto-fix with black if safe"
+        },
+        {
+          "id": 3,
+          "question": "Which VB.NET files reference missing libraries?",
+          "answer_type": "list_of_objects",
+          "answer_format": {"file": "str", "missing_imports": ["str"]},
+          "criticality": "high",
+          "automation": "csharp_analyzer --check-references src/",
+          "dependencies": ["roslyn"],
+          "expected_output": "list of VB files with unresolved imports",
+          "action_if_critical": "flag for compilation"
+        },
+        {
+          "id": 4,
+          "question": "Are there any YAML files with incorrect indentation or invalid keys?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"valid": "bool", "errors": [{"file": "str", "line": "int", "error": "str"}]},
+          "criticality": "medium",
+          "automation": "python -c \"import yaml; yaml.safe_load(open('config/urls.yaml'))\"",
+          "dependencies": ["pyyaml"],
+          "expected_output": "boolean and list of validation errors",
+          "action_if_critical": "fix indentation automatically"
+        },
+        {
+          "id": 5,
+          "question": "Which PowerShell scripts fail execution and why?",
+          "answer_type": "list_of_objects",
+          "answer_format": {"script": "str", "error": "str", "exit_code": "int"},
+          "criticality": "high",
+          "automation": "powershell -NoProfile -ExecutionPolicy Bypass -File test_all_ps1.ps1",
+          "dependencies": ["powershell"],
+          "expected_output": "list of failed scripts with error messages",
+          "action_if_critical": "auto-fix syntax errors"
+        },
+        {
+          "id": 6,
+          "question": "What code patterns appear repeatedly in broken scripts?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"pattern": "str", "count": "int", "files": ["str"]}],
+          "criticality": "medium",
+          "automation": "grep -r 'pattern' scripts/ | sort | uniq -c",
+          "dependencies": ["grep"],
+          "expected_output": "list of repeated patterns with counts",
+          "action_if_critical": "refactor common patterns"
+        },
+        {
+          "id": 7,
+          "question": "Which folders contain duplicate or conflicting versions of the same script?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"filename": "str", "paths": ["str"]}],
+          "criticality": "medium",
+          "automation": "find scripts/ -name '*.py' | sort | uniq -d",
+          "dependencies": ["find"],
+          "expected_output": "list of duplicate scripts with locations",
+          "action_if_critical": "consolidate to single version"
+        },
+        {
+          "id": 8,
+          "question": "Are there files larger than 500MB that affect performance?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"filepath": "str", "size_mb": "float", "type": "str"}],
+          "criticality": "medium",
+          "automation": "find . -type f -size +500M",
+          "dependencies": ["find"],
+          "expected_output": "list of large files",
+          "action_if_critical": "move to archive or split"
+        },
+        {
+          "id": 9,
+          "question": "Are there orphaned or unused project files?",
+          "answer_type": "list_of_paths",
+          "answer_format": ["filepath"],
+          "criticality": "low",
+          "automation": "git ls-files | xargs -I {} sh -c 'git log -1 --format=%ai {} | grep -q \"6 months ago\" && echo {}'",
+          "dependencies": ["git"],
+          "expected_output": "list of unused files",
+          "action_if_critical": "move to archive"
+        },
+        {
+          "id": 10,
+          "question": "Which repos on the machine are not synced with GitHub?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "status": "str", "behind_count": "int"}],
+          "criticality": "medium",
+          "automation": "for repo in */; do cd $repo; git status -sb; cd ..; done",
+          "dependencies": ["git"],
+          "expected_output": "list of repos with sync status",
+          "action_if_critical": "push or pull as needed"
+        },
+        {
+          "id": 11,
+          "question": "Does any file contain secrets/API keys incorrectly stored?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"file": "str", "line": "int", "secret_type": "str"}],
+          "criticality": "critical",
+          "automation": "truffleHog filesystem . --json",
+          "dependencies": ["truffleHog"],
+          "expected_output": "list of files with detected secrets",
+          "action_if_critical": "immediately rotate and remove"
+        },
+        {
+          "id": 12,
+          "question": "Which config files are missing required fields?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"file": "str", "missing_fields": ["str"]}],
+          "criticality": "high",
+          "automation": "python scripts/validate_configs.py",
+          "dependencies": ["pyyaml", "jsonschema"],
+          "expected_output": "list of configs with missing fields",
+          "action_if_critical": "populate with defaults or error"
+        },
+        {
+          "id": 13,
+          "question": "Are any JSON files malformed?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"file": "str", "error": "str"}],
+          "criticality": "high",
+          "automation": "find . -name '*.json' -exec python -m json.tool {} \\;",
+          "dependencies": ["python"],
+          "expected_output": "list of malformed JSON files",
+          "action_if_critical": "repair or regenerate"
+        },
+        {
+          "id": 14,
+          "question": "What startup scripts fail silently?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"script": "str", "error": "str", "last_attempt": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/test_startup_hooks.py",
+          "dependencies": ["python"],
+          "expected_output": "list of startup scripts that fail",
+          "action_if_critical": "fix and add error logging"
+        },
+        {
+          "id": 15,
+          "question": "Which scripts need migration to new standards (PEP8, Flake8, Black)?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"file": "str", "violations": ["str"]}],
+          "criticality": "low",
+          "automation": "black --check scripts/",
+          "dependencies": ["black"],
+          "expected_output": "list of files needing formatting",
+          "action_if_critical": "auto-format with black"
+        }
+      ]
+    },
+    "github_copilot_automation": {
+      "id": 2,
+      "name": "GitHub + Copilot Automation",
+      "range": "16-30",
+      "questions": [
+        {
+          "id": 16,
+          "question": "Which repos need dependency updates?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "outdated_packages": [{"name": "str", "current": "str", "latest": "str"}]}],
+          "criticality": "medium",
+          "automation": "pip list --outdated",
+          "dependencies": ["pip"],
+          "expected_output": "list of outdated packages per repo",
+          "action_if_critical": "auto-upgrade safe packages"
+        },
+        {
+          "id": 17,
+          "question": "What branches are behind main?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"branch": "str", "behind_by": "int", "commits": ["str"]}],
+          "criticality": "medium",
+          "automation": "git branch -vv | grep behind",
+          "dependencies": ["git"],
+          "expected_output": "list of branches behind main with commit counts",
+          "action_if_critical": "merge or rebase"
+        },
+        {
+          "id": 18,
+          "question": "Are there uncommitted local changes?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"has_changes": "bool", "files": ["str"], "count": "int"},
+          "criticality": "medium",
+          "automation": "git status --porcelain",
+          "dependencies": ["git"],
+          "expected_output": "list of uncommitted files",
+          "action_if_critical": "commit or stash"
+        },
+        {
+          "id": 19,
+          "question": "Which commits lack descriptive commit messages?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"hash": "str", "message": "str", "author": "str"}],
+          "criticality": "low",
+          "automation": "git log --oneline | grep -E '^[a-f0-9]{7} (fix|update|temp|wip)'",
+          "dependencies": ["git"],
+          "expected_output": "list of poorly documented commits",
+          "action_if_critical": "amend messages"
+        },
+        {
+          "id": 20,
+          "question": "What PRs are open, stale, or blocked?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"pr_number": "int", "title": "str", "status": "str", "days_open": "int"}],
+          "criticality": "medium",
+          "automation": "gh pr list --state open --json number,title,createdAt,state",
+          "dependencies": ["gh"],
+          "expected_output": "list of open PRs with ages",
+          "action_if_critical": "review or close stale PRs"
+        },
+        {
+          "id": 21,
+          "question": "Which repos need README or documentation updates?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "has_readme": "bool", "doc_status": "str"}],
+          "criticality": "low",
+          "automation": "find . -name 'README.md' -o -name 'readme.txt'",
+          "dependencies": ["find"],
+          "expected_output": "list of repos missing documentation",
+          "action_if_critical": "generate with Copilot"
+        },
+        {
+          "id": 22,
+          "question": "What GitHub Actions workflows failed recently?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"workflow": "str", "run_id": "int", "status": "str", "error": "str"}],
+          "criticality": "high",
+          "automation": "gh run list --status failure --json name,status,conclusion",
+          "dependencies": ["gh"],
+          "expected_output": "list of failed workflow runs",
+          "action_if_critical": "investigate and fix"
+        },
+        {
+          "id": 23,
+          "question": "Which repos need version bumps?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "current_version": "str", "semver_bump": "str"}],
+          "criticality": "medium",
+          "automation": "python scripts/check_versions.py",
+          "dependencies": ["python"],
+          "expected_output": "list of repos needing version bumps",
+          "action_if_critical": "bump and tag release"
+        },
+        {
+          "id": 24,
+          "question": "Are any workflows referencing deprecated GitHub actions?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"workflow": "str", "action": "str", "issue": "str"}],
+          "criticality": "medium",
+          "automation": "grep -r 'uses:.*@v[0-9]' .github/workflows/",
+          "dependencies": ["grep"],
+          "expected_output": "list of deprecated action references",
+          "action_if_critical": "update to latest versions"
+        },
+        {
+          "id": 25,
+          "question": "Which repos need unit tests added or updated?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "test_coverage": "float", "missing_tests": ["str"]}],
+          "criticality": "high",
+          "automation": "coverage run -m pytest; coverage report",
+          "dependencies": ["pytest", "coverage"],
+          "expected_output": "coverage percentage and untested modules",
+          "action_if_critical": "generate with Copilot"
+        },
+        {
+          "id": 26,
+          "question": "Where can Copilot auto-generate commit summaries?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"commit": "str", "diff_size": "int", "suggested_message": "str"}],
+          "criticality": "low",
+          "automation": "python scripts/suggest_commit_messages.py",
+          "dependencies": ["openai"],
+          "expected_output": "list of commits with suggested messages",
+          "action_if_critical": "auto-amend"
+        },
+        {
+          "id": 27,
+          "question": "Which repos have no license file?",
+          "answer_type": "list_of_paths",
+          "answer_format": ["repo_path"],
+          "criticality": "medium",
+          "automation": "find . -maxdepth 2 -name 'LICENSE*' -o -name 'COPYING'",
+          "dependencies": ["find"],
+          "expected_output": "list of repos without licenses",
+          "action_if_critical": "add MIT or Apache 2.0"
+        },
+        {
+          "id": 28,
+          "question": "Which repos should be merged or archived?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "last_commit": "str", "status": "str"}],
+          "criticality": "low",
+          "automation": "git for-each-ref --sort=-committerdate refs/heads",
+          "dependencies": ["git"],
+          "expected_output": "list of inactive repos",
+          "action_if_critical": "archive or merge"
+        },
+        {
+          "id": 29,
+          "question": "What files should be automatically refactored?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"file": "str", "refactor_type": "str", "improvement": "str"}],
+          "criticality": "low",
+          "automation": "python scripts/code_smell_detector.py",
+          "dependencies": ["radon"],
+          "expected_output": "list of files with code smells",
+          "action_if_critical": "refactor with Copilot"
+        },
+        {
+          "id": 30,
+          "question": "Which repos need security audits (SAST)?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"repo": "str", "vulnerabilities": [{"severity": "str", "description": "str"}]}],
+          "criticality": "critical",
+          "automation": "bandit -r scripts/ -f json",
+          "dependencies": ["bandit"],
+          "expected_output": "list of security issues",
+          "action_if_critical": "immediately patch"
+        }
+      ]
+    },
+    "eq12_hardware_os_optimization": {
+      "id": 3,
+      "name": "EQ12 Hardware + OS Optimization",
+      "range": "31-45",
+      "questions": [
+        {
+          "id": 31,
+          "question": "What is current CPU/core utilization under load?",
+          "answer_type": "object",
+          "answer_format": {"cpu_percent": "float", "cores_active": "int", "temperature_c": "float"},
+          "criticality": "medium",
+          "automation": "powershell -Command \"Get-WmiObject Win32_PerfFormattedData_PerfOS_Processor | Select -Expand PercentProcessorTime\"",
+          "dependencies": ["powershell"],
+          "expected_output": "current CPU usage percentage and core count",
+          "action_if_critical": "reduce background processes"
+        },
+        {
+          "id": 32,
+          "question": "How much RAM is free vs committed?",
+          "answer_type": "object",
+          "answer_format": {"total_gb": "float", "available_gb": "float", "percent_used": "float"},
+          "criticality": "medium",
+          "automation": "powershell -Command \"Get-WmiObject Win32_LogicalMemoryConfiguration | Select -Expand TotalPhysicalMemory\"",
+          "dependencies": ["powershell"],
+          "expected_output": "total, available, and percentage used",
+          "action_if_critical": "clear caches or add RAM"
+        },
+        {
+          "id": 33,
+          "question": "Are there background tasks slowing the machine?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"process": "str", "pid": "int", "cpu_percent": "float", "memory_mb": "float"}],
+          "criticality": "medium",
+          "automation": "powershell -Command \"Get-Process | Where CPU -gt 10 | Sort CPU -Descending\"",
+          "dependencies": ["powershell"],
+          "expected_output": "list of top CPU-consuming processes",
+          "action_if_critical": "kill or throttle processes"
+        },
+        {
+          "id": 34,
+          "question": "Are Python venvs taking unnecessary space?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"venv_path": "str", "size_mb": "float"}],
+          "criticality": "low",
+          "automation": "find . -name 'venv' -o -name '.venv' | xargs du -sh",
+          "dependencies": ["find", "du"],
+          "expected_output": "list of venvs with sizes",
+          "action_if_critical": "delete unused venvs"
+        },
+        {
+          "id": 35,
+          "question": "Are WSL containers configured optimally?",
+          "answer_type": "object",
+          "answer_format": {"wsl_version": "str", "distros": ["str"], "memory_limit_gb": "int"},
+          "criticality": "medium",
+          "automation": "powershell -Command \"wsl -l -v\"",
+          "dependencies": ["wsl"],
+          "expected_output": "WSL version and configured distros",
+          "action_if_critical": "upgrade to WSL2 or adjust resources"
+        },
+        {
+          "id": 36,
+          "question": "Is Docker using too much disk cache?",
+          "answer_type": "object",
+          "answer_format": {"docker_disk_gb": "float", "cache_gb": "float"},
+          "criticality": "low",
+          "automation": "docker system df",
+          "dependencies": ["docker"],
+          "expected_output": "Docker disk usage breakdown",
+          "action_if_critical": "prune unused images/containers"
+        },
+        {
+          "id": 37,
+          "question": "Are NVMe drives overheating?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"is_healthy": "bool", "temperature_c": "float", "threshold_c": "int"},
+          "criticality": "medium",
+          "automation": "powershell -Command \"Get-PhysicalDisk | Get-StorageReliabilityCounter\"",
+          "dependencies": ["powershell"],
+          "expected_output": "disk temperature and health status",
+          "action_if_critical": "improve ventilation or reduce load"
+        },
+        {
+          "id": 38,
+          "question": "Are outdated drivers installed?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"driver": "str", "current_version": "str", "latest_version": "str"}],
+          "criticality": "medium",
+          "automation": "powershell -Command \"Get-WmiObject Win32_SystemDriver | Select Name, Version\"",
+          "dependencies": ["powershell"],
+          "expected_output": "list of drivers with versions",
+          "action_if_critical": "update via Device Manager or OEM"
+        },
+        {
+          "id": 39,
+          "question": "Does PowerShell execution policy need updating?",
+          "answer_type": "object",
+          "answer_format": {"execution_policy": "str", "scope": "str", "needs_change": "bool"},
+          "criticality": "low",
+          "automation": "powershell -Command \"Get-ExecutionPolicy -List\"",
+          "dependencies": ["powershell"],
+          "expected_output": "current execution policy per scope",
+          "action_if_critical": "set to RemoteSigned if needed"
+        },
+        {
+          "id": 40,
+          "question": "Are any Windows services failing to start?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"service": "str", "status": "str", "error": "str"}],
+          "criticality": "high",
+          "automation": "powershell -Command \"Get-Service | Where Status -ne Running\"",
+          "dependencies": ["powershell"],
+          "expected_output": "list of stopped/failed services",
+          "action_if_critical": "restart or investigate"
+        },
+        {
+          "id": 41,
+          "question": "Are Ubuntu packages outdated compared to Windows side?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"ubuntu_uptodate": "bool", "updates_available": "int"},
+          "criticality": "medium",
+          "automation": "wsl -- sudo apt update && apt list --upgradable",
+          "dependencies": ["wsl", "ubuntu"],
+          "expected_output": "count of upgradable packages",
+          "action_if_critical": "apt upgrade"
+        },
+        {
+          "id": 42,
+          "question": "Which startup apps need disabling?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"app": "str", "startup_time_ms": "int"}],
+          "criticality": "low",
+          "automation": "powershell -Command \"Get-CimInstance Win32_StartupCommand | Select Name, Command\"",
+          "dependencies": ["powershell"],
+          "expected_output": "list of startup apps",
+          "action_if_critical": "disable from Task Manager"
+        },
+        {
+          "id": 43,
+          "question": "Which scheduled tasks conflict with automation?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"task": "str", "schedule": "str", "conflict": "str"}],
+          "criticality": "medium",
+          "automation": "powershell -Command \"Get-ScheduledTask | Where State -eq Running\"",
+          "dependencies": ["powershell"],
+          "expected_output": "list of currently running scheduled tasks",
+          "action_if_critical": "reschedule or disable"
+        },
+        {
+          "id": 44,
+          "question": "Does the EQ12 need a firmware update?",
+          "answer_type": "object",
+          "answer_format": {"bios_version": "str", "latest_bios": "str", "needs_update": "bool"},
+          "criticality": "low",
+          "automation": "powershell -Command \"Get-WmiObject Win32_BIOS | Select SMBIOSBIOSVersion\"",
+          "dependencies": ["powershell"],
+          "expected_output": "current BIOS version",
+          "action_if_critical": "download from OEM and install"
+        },
+        {
+          "id": 45,
+          "question": "Are there hidden memory leaks in long-running Python jobs?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"script": "str", "memory_growth_mb": "float", "runtime_hours": "int"}],
+          "criticality": "high",
+          "automation": "python scripts/memory_leak_detector.py",
+          "dependencies": ["memory_profiler"],
+          "expected_output": "list of scripts with memory growth",
+          "action_if_critical": "profile and fix leaks"
+        }
+      ]
+    },
+    "ai_ml_python_stack": {
+      "id": 4,
+      "name": "AI/ML + Python Stack Diagnostics",
+      "range": "46-60",
+      "questions": [
+        {
+          "id": 46,
+          "question": "Which Python environments are outdated or broken?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"venv_path": "str", "python_version": "str", "status": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/check_venvs.py",
+          "dependencies": ["python"],
+          "expected_output": "list of venv health status",
+          "action_if_critical": "recreate broken venvs"
+        },
+        {
+          "id": 47,
+          "question": "Are any ML libraries mismatched (e.g., torch, numpy)?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"library": "str", "version": "str", "dependency": "str", "compatible": "bool"}],
+          "criticality": "high",
+          "automation": "pip check",
+          "dependencies": ["pip"],
+          "expected_output": "list of dependency conflicts",
+          "action_if_critical": "resolve version conflicts"
+        },
+        {
+          "id": 48,
+          "question": "Are your Monte Carlo scripts performing optimally?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"script": "str", "runtime_ms": "float", "iterations": "int", "throughput": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/benchmark_monte_carlo.py",
+          "dependencies": ["numpy"],
+          "expected_output": "performance metrics for MC simulations",
+          "action_if_critical": "optimize with numba or cython"
+        },
+        {
+          "id": 49,
+          "question": "Are the sports-betting models producing inconsistent predictions?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"model": "str", "variance_pct": "float", "cv_score": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_model_consistency.py",
+          "dependencies": ["scikit-learn"],
+          "expected_output": "variance and CV scores for each model",
+          "action_if_critical": "retrain or debug data pipeline"
+        },
+        {
+          "id": 50,
+          "question": "Is there model drift in player prop models?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"has_drift": "bool", "psi_score": "float", "threshold": "float"},
+          "criticality": "high",
+          "automation": "python scripts/detect_model_drift.py",
+          "dependencies": ["scipy", "pandas"],
+          "expected_output": "PSI score and drift status",
+          "action_if_critical": "retrain immediately"
+        },
+        {
+          "id": 51,
+          "question": "Did any API schema change break ingestion scripts?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"api": "str", "last_check": "str", "schema_status": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_api_schemas.py",
+          "dependencies": ["requests"],
+          "expected_output": "schema validation results per API",
+          "action_if_critical": "update parser immediately"
+        },
+        {
+          "id": 52,
+          "question": "Are sports datasets missing rows or corrupted?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"dataset": "str", "missing_rows": "int", "corruption_pct": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_sports_data.py",
+          "dependencies": ["pandas"],
+          "expected_output": "data quality metrics per dataset",
+          "action_if_critical": "resync from source"
+        },
+        {
+          "id": 53,
+          "question": "Are weather and circadian inputs being used in all models?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"model": "str", "has_weather": "bool", "has_circadian": "bool"}],
+          "criticality": "high",
+          "automation": "python scripts/check_feature_inclusion.py",
+          "dependencies": ["ast"],
+          "expected_output": "feature usage per model",
+          "action_if_critical": "add missing features and retrain"
+        },
+        {
+          "id": 54,
+          "question": "Are tennis/soccer/MLB sheet mappings correct?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"sport": "str", "mapping_valid": "bool", "mismatches": "int"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_sport_mappings.py",
+          "dependencies": ["pandas"],
+          "expected_output": "mapping validation per sport",
+          "action_if_critical": "fix mappings immediately"
+        },
+        {
+          "id": 55,
+          "question": "Are HR props filtering out invalid Under picks?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"filtering_active": "bool", "filtered_count": "int"},
+          "criticality": "high",
+          "automation": "python scripts/validate_hr_props.py",
+          "dependencies": ["pandas"],
+          "expected_output": "count of invalid picks filtered",
+          "action_if_critical": "enable filtering if disabled"
+        },
+        {
+          "id": 56,
+          "question": "Are IL players being removed automatically?",
+          "answer_type": "boolean_with_details",
+          "answer_format": {"removal_active": "bool", "removed_count": "int"},
+          "criticality": "high",
+          "automation": "python scripts/check_il_filtering.py",
+          "dependencies": ["pandas"],
+          "expected_output": "count of IL players removed",
+          "action_if_critical": "enable removal if disabled"
+        },
+        {
+          "id": 57,
+          "question": "Are scripts handling midnight/UTC conversions properly?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"script": "str", "utc_aware": "bool", "issues": ["str"]}],
+          "criticality": "high",
+          "automation": "grep -r 'datetime.now()' scripts/ | grep -v 'utcnow'",
+          "dependencies": ["grep"],
+          "expected_output": "list of potential timezone issues",
+          "action_if_critical": "convert to UTC-aware datetimes"
+        },
+        {
+          "id": 58,
+          "question": "Is Telegram bot responding in <500ms?",
+          "answer_type": "object",
+          "answer_format": {"avg_response_ms": "float", "max_response_ms": "float", "healthy": "bool"},
+          "criticality": "medium",
+          "automation": "python scripts/benchmark_telegram_bot.py",
+          "dependencies": ["python-telegram-bot"],
+          "expected_output": "response time metrics",
+          "action_if_critical": "optimize or upgrade server"
+        },
+        {
+          "id": 59,
+          "question": "Which Python scripts exceed expected runtime?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"script": "str", "expected_ms": "int", "actual_ms": "float", "overhead_pct": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/benchmark_all_scripts.py",
+          "dependencies": ["time"],
+          "expected_output": "runtime comparison vs baselines",
+          "action_if_critical": "profile and optimize"
+        },
+        {
+          "id": 60,
+          "question": "Are any simulation results inconsistent with expected EV?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"simulation": "str", "expected_ev": "float", "actual_ev": "float", "deviation_pct": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_ev_simulations.py",
+          "dependencies": ["numpy", "scipy"],
+          "expected_output": "EV comparison with deviations",
+          "action_if_critical": "debug simulation logic"
+        }
+      ]
+    },
+    "sports_betting_engine": {
+      "id": 5,
+      "name": "Sports Betting Engine",
+      "range": "61-75",
+      "questions": [
+        {
+          "id": 61,
+          "question": "Which sportsbooks have mispriced props this morning?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"sportsbook": "str", "prop": "str", "ev_advantage": "float", "action": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/find_mispriced_props.py",
+          "dependencies": ["requests", "numpy"],
+          "expected_output": "list of mispriced props with EV",
+          "action_if_critical": "place bets immediately"
+        },
+        {
+          "id": 62,
+          "question": "Which games start at or near 12PM that require parsing?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"game": "str", "start_time": "str", "sport": "str", "action_required": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/find_early_games.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of early games requiring immediate attention",
+          "action_if_critical": "parse and place bets"
+        },
+        {
+          "id": 63,
+          "question": "Which HR props have invalid or missing player names?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"sportsbook": "str", "player_name": "str", "status": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_player_names.py",
+          "dependencies": ["pandas"],
+          "expected_output": "list of invalid/missing player names",
+          "action_if_critical": "fix mapping or skip prop"
+        },
+        {
+          "id": 64,
+          "question": "Which players exceed 2+ total bases projections?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"player": "str", "projection": "float", "threshold": "float", "action": "str"}],
+          "criticality": "medium",
+          "automation": "python scripts/find_total_bases_outliers.py",
+          "dependencies": ["numpy", "pandas"],
+          "expected_output": "list of players exceeding thresholds",
+          "action_if_critical": "investigate further"
+        },
+        {
+          "id": 65,
+          "question": "Which 10-leg parlays have highest EV today?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"legs": ["str"], "ev": "float", "payout": "float", "action": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/find_best_parlays.py --legs 10",
+          "dependencies": ["numpy", "scipy"],
+          "expected_output": "top 10-leg parlays by EV",
+          "action_if_critical": "place bets immediately"
+        },
+        {
+          "id": 66,
+          "question": "Which HR 3-leg parlays maximize probability vs payout?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"legs": ["str"], "probability": "float", "payout": "float", "ev": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/optimize_hr_parlays.py",
+          "dependencies": ["numpy", "scipy"],
+          "expected_output": "optimal 3-leg HR parlays",
+          "action_if_critical": "place high-EV bets"
+        },
+        {
+          "id": 67,
+          "question": "Which MLB O/U picks conflict with home/away team labels?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"game": "str", "conflict": "str", "resolution": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_ou_picks.py",
+          "dependencies": ["pandas"],
+          "expected_output": "list of conflicting picks",
+          "action_if_critical": "resolve conflicts immediately"
+        },
+        {
+          "id": 68,
+          "question": "Which ML or spread picks violate sheet mapping rules?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"pick": "str", "violation": "str", "action": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/validate_sheet_mappings.py",
+          "dependencies": ["pandas"],
+          "expected_output": "list of rule-violating picks",
+          "action_if_critical": "exclude from betting"
+        },
+        {
+          "id": 69,
+          "question": "Which daily lock tickets should be generated?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"ticket_id": "str", "picks": ["str"], "confidence": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/generate_lock_tickets.py",
+          "dependencies": ["numpy"],
+          "expected_output": "list of lock tickets with picks",
+          "action_if_critical": "place bets immediately"
+        },
+        {
+          "id": 70,
+          "question": "Which weather factors affect today's games?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"game": "str", "weather_factor": "str", "impact": "str"}],
+          "criticality": "medium",
+          "automation": "python scripts/analyze_weather_impact.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of games with weather impacts",
+          "action_if_critical": "adjust projections accordingly"
+        },
+        {
+          "id": 71,
+          "question": "Are any stadiums changing roof status (open/closed)?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"stadium": "str", "roof_status": "str", "impact": "str"}],
+          "criticality": "medium",
+          "automation": "python scripts/check_stadium_roofs.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of roof status changes",
+          "action_if_critical": "update weather factors"
+        },
+        {
+          "id": 72,
+          "question": "Which props require live-line updates?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"prop": "str", "current_line": "float", "recommended_line": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/find_live_line_updates.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of props needing updates",
+          "action_if_critical": "update lines immediately"
+        },
+        {
+          "id": 73,
+          "question": "Which EV calculations dropped below acceptable threshold?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"pick": "str", "ev": "float", "threshold": "float", "action": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/monitor_ev_threshold.py",
+          "dependencies": ["numpy"],
+          "expected_output": "list of picks below EV threshold",
+          "action_if_critical": "exclude from betting"
+        },
+        {
+          "id": 74,
+          "question": "Which picks must be excluded due to IL, rest, etc.?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"pick": "str", "exclusion_reason": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/apply_exclusion_rules.py",
+          "dependencies": ["pandas"],
+          "expected_output": "list of excluded picks with reasons",
+          "action_if_critical": "apply filters and regenerate picks"
+        },
+        {
+          "id": 75,
+          "question": "Which user-defined betting rules were violated?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"rule": "str", "violations": ["str"]}],
+          "criticality": "high",
+          "automation": "python scripts/check_betting_rules.py",
+          "dependencies": ["pandas"],
+          "expected_output": "list of rule violations",
+          "action_if_critical": "exclude violating picks"
+        }
+      ]
+    },
+    "travel_bot_api_system": {
+      "id": 6,
+      "name": "Travel Bot + API System",
+      "range": "76-85",
+      "questions": [
+        {
+          "id": 76,
+          "question": "Which BUF → destination fares dropped today?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"destination": "str", "old_price": "float", "new_price": "float", "percent_drop": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/monitor_flight_prices.py --from BUF",
+          "dependencies": ["requests"],
+          "expected_output": "list of price drops",
+          "action_if_critical": "book immediately"
+        },
+        {
+          "id": 77,
+          "question": "Which cannabis-friendly cities have peak travel windows?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"city": "str", "peak_window": "str", "rating": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/find_cannabis_travel_windows.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of cities with peak travel times",
+          "action_if_critical": "book trip"
+        },
+        {
+          "id": 78,
+          "question": "Which destinations align with your Wed–Sun off block?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"destination": "str", "distance_hours": "float", "activities": ["str"]}],
+          "criticality": "medium",
+          "automation": "python scripts/find_aligned_destinations.py --schedule wed-sun",
+          "dependencies": ["requests"],
+          "expected_output": "list of suitable destinations",
+          "action_if_critical": "plan trip"
+        },
+        {
+          "id": 79,
+          "question": "Which Airbnb/VRBO listings allow late check-in?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"listing": "str", "check_in_time": "str", "price_per_night": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/find_late_checkin_listings.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of listings with late check-in",
+          "action_if_critical": "book accommodation"
+        },
+        {
+          "id": 80,
+          "question": "What is travel time to airports near you?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"airport": "str", "distance_miles": "float", "drive_time_min": "int"}],
+          "criticality": "low",
+          "automation": "python scripts/calculate_airport_distances.py",
+          "dependencies": ["geopy"],
+          "expected_output": "travel time to nearby airports",
+          "action_if_critical": "update travel plans"
+        },
+        {
+          "id": 81,
+          "question": "Which flight alerts need updating?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"alert_id": "str", "status": "str", "last_check": "str"}],
+          "criticality": "medium",
+          "automation": "python scripts/check_flight_alerts.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of alerts needing updates",
+          "action_if_critical": "update alert thresholds"
+        },
+        {
+          "id": 82,
+          "question": "Which hotel loyalty points stack best this week?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"hotel_chain": "str", "points_available": "int", "value_usd": "float"}],
+          "criticality": "low",
+          "automation": "python scripts/analyze_loyalty_stacking.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of hotels with loyalty point value",
+          "action_if_critical": "book with points"
+        },
+        {
+          "id": 83,
+          "question": "Which BUF-based cannabis tourism packages are trending?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"package": "str", "rating": "float", "price": "float"}],
+          "criticality": "low",
+          "automation": "python scripts/find_cannabis_packages.py --location BUF",
+          "dependencies": ["requests"],
+          "expected_output": "list of trending packages",
+          "action_if_critical": "book package"
+        },
+        {
+          "id": 84,
+          "question": "Which travel APIs returned errors?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"api": "str", "error": "str", "last_error_time": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/check_travel_api_health.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of APIs with errors",
+          "action_if_critical": "investigate and fix"
+        },
+        {
+          "id": 85,
+          "question": "Which destinations are cheapest for 2026 holidays?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"destination": "str", "holiday": "str", "estimated_cost_usd": "float"}],
+          "criticality": "low",
+          "automation": "python scripts/find_cheap_holiday_destinations.py --year 2026",
+          "dependencies": ["requests"],
+          "expected_output": "list of budget-friendly holiday destinations",
+          "action_if_critical": "book early for deals"
+        }
+      ]
+    },
+    "business_funnel_automation": {
+      "id": 7,
+      "name": "Business + Funnel Automation",
+      "range": "86-95",
+      "questions": [
+        {
+          "id": 86,
+          "question": "Which CBD pet products are trending locally?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"product": "str", "trend_score": "float", "sales_velocity": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/analyze_cbd_pet_trends.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of trending products with metrics",
+          "action_if_critical": "restock or promote"
+        },
+        {
+          "id": 87,
+          "question": "Which affiliate offers convert best this week?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"offer": "str", "conversion_rate": "float", "revenue_usd": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/analyze_affiliate_performance.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of offers with conversion metrics",
+          "action_if_critical": "double down on winners"
+        },
+        {
+          "id": 88,
+          "question": "Which dropship products need re-pricing?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"product": "str", "current_price": "float", "recommended_price": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/optimize_dropship_pricing.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of products needing price updates",
+          "action_if_critical": "update pricing"
+        },
+        {
+          "id": 89,
+          "question": "Which email sequences have low open rates?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"sequence": "str", "open_rate": "float", "improvement": "str"}],
+          "criticality": "medium",
+          "automation": "python scripts/analyze_email_performance.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of underperforming sequences",
+          "action_if_critical": "rewrite subject lines or content"
+        },
+        {
+          "id": 90,
+          "question": "Which Gumroad products need content refresh?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"product": "str", "last_updated": "str", "sales_trend": "str"}],
+          "criticality": "low",
+          "automation": "python scripts/check_gumroad_freshness.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of stale products",
+          "action_if_critical": "refresh content"
+        },
+        {
+          "id": 91,
+          "question": "Which social posts performed best?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"post_id": "str", "platform": "str", "engagement": "float", "reach": "int"}],
+          "criticality": "low",
+          "automation": "python scripts/analyze_social_performance.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of top-performing posts",
+          "action_if_critical": "replicate format"
+        },
+        {
+          "id": 92,
+          "question": "Which marketplaces need re-sync from AliDropship?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"marketplace": "str", "last_sync": "str", "products_pending": "int"}],
+          "criticality": "high",
+          "automation": "python scripts/check_marketplace_sync.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of marketplaces needing sync",
+          "action_if_critical": "trigger sync immediately"
+        },
+        {
+          "id": 93,
+          "question": "Which landing pages have >60% bounce rate?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"page_url": "str", "bounce_rate": "float", "suggested_fix": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/analyze_bounce_rates.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of high-bounce pages",
+          "action_if_critical": "redesign pages"
+        },
+        {
+          "id": 94,
+          "question": "Which automation tasks failed in the last 24 hours?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"task": "str", "error": "str", "impact": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/check_failed_tasks.py --hours 24",
+          "dependencies": ["requests"],
+          "expected_output": "list of failed automation tasks",
+          "action_if_critical": "fix and rerun"
+        },
+        {
+          "id": 95,
+          "question": "What business funnel requires optimization today?",
+          "answer_type": "object",
+          "answer_format": {"funnel_stage": "str", "bottleneck": "str", "recommended_fix": "str"},
+          "criticality": "high",
+          "automation": "python scripts/identify_funnel_bottleneck.py",
+          "dependencies": ["requests"],
+          "expected_output": "primary optimization target",
+          "action_if_critical": "start optimization immediately"
+        }
+      ]
+    },
+    "raspberry_pi_coral_cluster": {
+      "id": 8,
+      "name": "Raspberry Pi + Coral Cluster",
+      "range": "96-100",
+      "questions": [
+        {
+          "id": 96,
+          "question": "Which Pi nodes are reachable?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"hostname": "str", "ip_address": "str", "status": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/ping_pi_cluster.py",
+          "dependencies": ["socket"],
+          "expected_output": "list of reachable Pi nodes",
+          "action_if_critical": "investigate unreachable nodes"
+        },
+        {
+          "id": 97,
+          "question": "Which Coral accelerators are connected + online?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"usb_port": "str", "status": "str", "temperature_c": "float"}],
+          "criticality": "high",
+          "automation": "python scripts/check_coral_status.py",
+          "dependencies": ["usb"],
+          "expected_output": "list of Coral devices with status",
+          "action_if_critical": "replace failed devices"
+        },
+        {
+          "id": 98,
+          "question": "Are any nodes overheating or throttling?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"node": "str", "temperature_c": "float", "status": "str"}],
+          "criticality": "high",
+          "automation": "python scripts/monitor_cluster_temperatures.py",
+          "dependencies": ["paramiko"],
+          "expected_output": "list of nodes with thermal status",
+          "action_if_critical": "improve cooling"
+        },
+        {
+          "id": 99,
+          "question": "Are cluster tasks failing or stuck in queue?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"task_id": "str", "status": "str", "queue_position": "int"}],
+          "criticality": "high",
+          "automation": "python scripts/check_cluster_queue.py",
+          "dependencies": ["requests"],
+          "expected_output": "list of stuck/failed tasks",
+          "action_if_critical": "restart queue processor"
+        },
+        {
+          "id": 100,
+          "question": "Which scripts need migrating from EQ12 → Pi cluster for speed?",
+          "answer_type": "list_of_objects",
+          "answer_format": [{"script": "str", "runtime_eq12_ms": "float", "speedup_estimate": "float"}],
+          "criticality": "medium",
+          "automation": "python scripts/identify_cluster_candidates.py",
+          "dependencies": ["time"],
+          "expected_output": "list of scripts with speedup potential",
+          "action_if_critical": "migrate high-impact scripts"
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "total_questions": 100,
+    "last_updated": "2025-12-04T09:30:00Z",
+    "schema_version": "1.0",
+    "automation_coverage": "85%",
+    "manual_review_required": 15,
+    "critical_questions": 32,
+    "high_priority_questions": 34,
+    "medium_priority_questions": 23,
+    "low_priority_questions": 11
+  },
+  "execution_schedule": {
+    "frequency": "daily",
+    "optimal_time": "03:00 UTC",
+    "timeout_seconds": 3600,
+    "parallel_execution": true,
+    "max_concurrent_tasks": 10
+  }
+}

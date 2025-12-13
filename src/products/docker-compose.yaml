@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Original Top 3
+  retail_engine:
+    build: ./retail_engine
+    restart: always
+  betting_brain:
+    build: ./betting_brain
+    restart: always
+  content_factory:
+    build: ./content_factory
+    restart: always
+
+  # New 10 Portfolio
+  tradetech:
+    build: ./tradetech
+    ports: ["8001:8001"]
+    restart: always
+  caredesk:
+    build: ./caredesk
+    restart: always
+  eduflow:
+    build: ./eduflow
+    restart: always
+  mechview:
+    build: ./mechview
+    restart: always
+  listing_ai:
+    build: ./listing_ai
+    restart: always
+  kitchen_brain:
+    build: ./kitchen_brain
+    restart: always
+  caseflow:
+    build: ./caseflow
+    restart: always
+  sitepilot:
+    build: ./sitepilot
+    restart: always
+  lawfusion:
+    build: ./lawfusion
+    restart: always
+  assetguard:
+    build: ./assetguard
+    restart: always

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)microsoft.codeanalysis.publicapianalyzers\3.3.4\buildTransitive\Microsoft.CodeAnalysis.PublicApiAnalyzers.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codeanalysis.publicapianalyzers\3.3.4\buildTransitive\Microsoft.CodeAnalysis.PublicApiAnalyzers.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codeanalysis.bannedapianalyzers\3.3.4\buildTransitive\Microsoft.CodeAnalysis.BannedApiAnalyzers.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codeanalysis.bannedapianalyzers\3.3.4\buildTransitive\Microsoft.CodeAnalysis.BannedApiAnalyzers.targets')" />
+    <Import Project="$(NuGetPackageRoot)roslyn.diagnostics.analyzers\3.3.4\buildTransitive\Roslyn.Diagnostics.Analyzers.targets" Condition="Exists('$(NuGetPackageRoot)roslyn.diagnostics.analyzers\3.3.4\buildTransitive\Roslyn.Diagnostics.Analyzers.targets')" />
+  </ImportGroup>
+</Project>

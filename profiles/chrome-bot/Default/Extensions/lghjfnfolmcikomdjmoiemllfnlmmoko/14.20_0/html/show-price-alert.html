@@ -1,0 +1,85 @@
+<div id="show-price-alert">
+  <div class="pa-header">
+    <div class="pa-logo"><img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg"></div>
+    <div class="pa-close-icon"><i class="material-icons pa-close">close</i></div>
+  </div>
+  <div id="price-alert-content">
+    <div class="pricealertSteps paStep0">
+      <div class="iframe-body">
+        <iframe id="pa-frame" style="width:380px; border-radius: 2px; min-height:520px; height:520px; display:none;" scrolling="no"></iframe>
+      </div>
+    </div>
+    <div class="pricealertSteps paStep1">
+      <h3 class="pa-title">Price Alerts</h3>
+      <img class="pa_product_image" src="chrome-extension://{{ extension_id }}/images/loading_bar.gif">
+      <article>
+        <h3 class="pa-title title_step1">Price Alert enabled for this Item</h3>
+        <div class="pa_card">
+          <div class="pa-options">
+            <div>Active for: </div>
+            <div>
+              <select name="validdays" id="validdays">
+                  <option value="30">30 Days</option>
+                  <option value="60">60 Days</option>
+                  <option value="90" selected="selected">90 Days</option>
+                  <option value="180">180 Days</option>
+              </select>
+            </div>
+          </div>
+          <div class="pa-options alertAtBox">
+            <div>Alert me at: </div>
+            <div>
+              <select name="notify" id="notify">
+              </select>
+            </div>
+          </div>
+        </div><!--card_t-->
+        <div class="closePriceAlert">
+          <a href="javascript:void(0);">
+            <img src="chrome-extension://{{ extension_id }}/images/icon_tag_white.svg">
+            Continue Shopping
+          </a>
+        </div>
+      </article>
+    </div>
+    <div class="pricealertSteps paStep2">
+      <h3 class="pa-title">Price Alerts</h3>
+      <h3 class="pa-title pa_red_strip">Price Alert enabled for this Item</h3>
+      <img class="pa_product_image" src="chrome-extension://{{ extension_id }}/images/loading_bar.gif">
+      <article>
+        <h2 class="product_title">title</h2>
+        <div class="showTags"></div>
+        <div id="addTags" class="pa-add-tags">+Add Tags</div>
+        <div id="tagAddContainer" style="display:none;" class="pa-add-tags">
+          <input type="text" id="tagInput" maxlength="20" class="tagInput">
+          <button type="button">Add</button>
+        </div>
+        <div class="pa_card">
+          <div class="pa-options">
+            <div>Active for: </div>
+            <div id="validity">
+              90 days
+            </div>
+          </div>
+          <div class="pa-options alertAtBox">
+            <div>Alert me at: </div>
+            <div id="notifyAt">
+              5% off($100)
+            </div>
+          </div>
+        </div><!--card_t-->
+        <div class="closePriceAlert">
+          <a href="javascript:void(0);">
+            <img src="chrome-extension://{{ extension_id }}/images/icon_tag_white.svg">
+            Continue Shopping
+          </a>
+        </div>
+        <div class="pa_footer_links">
+          <a id="viewAlert" href="javascript:void(0);">View My Price Alerts</a>
+          <a id="removeAlert" href="javascript:void(0);">Remove Price Alert</a>
+        </div>
+      </article>
+    </div>
+  </div>
+  <div id="pa-loading" style="display:none;"><img src="chrome-extension://{{ extension_id }}/images/loading_bar.gif" ></div>
+</div>

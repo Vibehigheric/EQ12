@@ -1,0 +1,15 @@
+{
+  "build_time": "2025-10-09T03:35:02.181649",
+  "browsers": [
+    "chrome",
+    "firefox",
+    "edge",
+    "safari"
+  ],
+  "compatibility_notes": {
+    "chrome": "Manifest V3, service workers, chrome.* namespace",
+    "firefox": "Manifest V2, browser.* namespace, promises",
+    "edge": "Chromium-based, follows Chrome patterns",
+    "safari": "Requires native app wrapper for distribution"
+  }
+}

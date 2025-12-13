@@ -1,0 +1,198 @@
+# EdgeFinder Docker Compose Configuration
+# Provides secure, isolated development and production environments
+
+version: '3.8'
+
+services:
+  # Main EdgeFinder application service
+  edgefinder:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: edgefinder:latest
+    container_name: edgefinder-app
+    restart: unless-stopped
+    
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    read_only: true
+    
+    # Network configuration
+    networks:
+      - edgefinder-network
+    
+    # Environment variables
+    environment:
+      - EDGEFINDER_CONFIG_PATH=/config/edgefinder-config.yaml
+      - EDGEFINDER_OUTPUT_DIR=/data/output
+      - EDGEFINDER_DOWNLOADS_DIR=/data/downloads
+      - EDGEFINDER_LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+      - PYTHONUNBUFFERED=1
+    
+    # Volumes for persistent data
+    volumes:
+      - edgefinder-data:/data
+      - edgefinder-config:/config
+      - edgefinder-logs:/logs
+      - /tmp:/tmp:rw  # Writable temp directory
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Default command (can be overridden)
+    command: ["search", "--help"]
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import edgefinder; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development service with additional tools
+  edgefinder-dev:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    image: edgefinder:dev
+    container_name: edgefinder-dev
+    profiles: ["dev"]  # Only start with --profile dev
+    
+    # Development configuration
+    environment:
+      - EDGEFINDER_DEBUG=true
+      - EDGEFINDER_LOG_LEVEL=DEBUG
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
+    
+    volumes:
+      - .:/app:rw  # Mount source code for development
+      - edgefinder-dev-data:/data
+      - edgefinder-dev-config:/config
+      - edgefinder-dev-logs:/logs
+    
+    networks:
+      - edgefinder-network
+    
+    # Interactive development
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
+
+  # Security scanner service
+  security-scanner:
+    image: edgefinder:latest
+    container_name: edgefinder-security
+    profiles: ["security"]  # Only start with --profile security
+    
+    environment:
+      - EDGEFINDER_CONFIG_PATH=/config/security-config.yaml
+    
+    volumes:
+      - edgefinder-data:/data:ro  # Read-only access to data
+      - edgefinder-security-config:/config
+      - edgefinder-security-logs:/logs
+    
+    networks:
+      - edgefinder-network
+    
+    # Run security scans
+    command: ["analyze", "--security-scan", "--input", "/data/search_results.json"]
+
+  # EQ12 Dashboard integration service
+  eq12-dashboard:
+    image: nginx:alpine
+    container_name: edgefinder-dashboard
+    profiles: ["dashboard"]  # Only start with --profile dashboard
+    
+    ports:
+      - "8080:80"
+    
+    volumes:
+      - edgefinder-data:/usr/share/nginx/html/data:ro
+      - ./dashboard:/usr/share/nginx/html:ro
+    
+    networks:
+      - edgefinder-network
+    
+    # Security configuration
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    read_only: true
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+# Named volumes for data persistence
+volumes:
+  edgefinder-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data
+  
+  edgefinder-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./configs
+  
+  edgefinder-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./logs
+  
+  # Development volumes
+  edgefinder-dev-data:
+    driver: local
+  edgefinder-dev-config:
+    driver: local
+  edgefinder-dev-logs:
+    driver: local
+  
+  # Security volumes
+  edgefinder-security-config:
+    driver: local
+  edgefinder-security-logs:
+    driver: local
+
+# Isolated network
+networks:
+  edgefinder-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

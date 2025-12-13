@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""
+EQ12 PowerShell Wrapper for Comprehensive System Monitoring
+Runs all EQ12 system scans with Telegram notifications until 5:30 PM
+
+Created: November 5, 2025
+Author: EQ12 System Operations Team
+Purpose: PowerShell wrapper for comprehensive monitoring automation
+"""
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [string]$Action = "Monitor",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$EndTime = "17:30",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$GenerateReport
+)
+
+# EQ12 PowerShell Framework
+$ErrorActionPreference = "Continue"
+$global:EQ12_WORKSPACE = $Workspace
+$global:EQ12_LOGS = Join-Path $Workspace "logs"
+
+function Write-EQ12Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logMessage = "[$timestamp] [$Level] $Message"
+    Write-Host $logMessage -ForegroundColor $(if($Level -eq "ERROR"){"Red"} elseif($Level -eq "WARN"){"Yellow"} else{"Green"})
+    
+    if ($GenerateReport) {
+        $logFile = Join-Path $global:EQ12_LOGS "eq12_monitor_wrapper_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+        Add-Content -Path $logFile -Value $logMessage -Encoding UTF8
+    }
+}
+
+function Start-EQ12MonitoringSystem {
+    param([string]$EndTime)
+    
+    Write-EQ12Log "🚀 STARTING EQ12 COMPREHENSIVE MONITORING SYSTEM" "INFO"
+    Write-EQ12Log "📅 Start Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" "INFO"
+    Write-EQ12Log "⏰ End Time: $EndTime" "INFO"
+    Write-EQ12Log "📁 Workspace: $global:EQ12_WORKSPACE" "INFO"
+    
+    # Check Python availability
+    try {
+        $pythonVersion = python --version 2>&1
+        Write-EQ12Log "🐍 Python: $pythonVersion" "INFO"
+    } catch {
+        Write-EQ12Log "❌ Python not found in PATH" "ERROR"
+        return $false
+    }
+    
+    # Check main monitoring script
+    $monitorScript = Join-Path $global:EQ12_WORKSPACE "scripts\eq12_comprehensive_monitor.py"
+    if (-not (Test-Path $monitorScript)) {
+        Write-EQ12Log "❌ Monitor script not found: $monitorScript" "ERROR"
+        return $false
+    }
+    
+    # Build Python command
+    $pythonArgs = @(
+        $monitorScript,
+        "--workspace", $global:EQ12_WORKSPACE,
+        "--end-time", $EndTime
+    )
+    
+    if ($VerboseOutput) {
+        $pythonArgs += "--verbose"
+    }
+    
+    Write-EQ12Log "🔧 Starting comprehensive monitoring..." "INFO"
+    Write-EQ12Log "Command: python $($pythonArgs -join ' ')" "INFO"
+    
+    try {
+        # Start the monitoring process
+        $process = Start-Process -FilePath "python" -ArgumentList $pythonArgs -WorkingDirectory $global:EQ12_WORKSPACE -PassThru -WindowStyle Normal
+        
+        Write-EQ12Log "✅ Monitoring process started (PID: $($process.Id))" "INFO"
+        Write-EQ12Log "📋 Process will run until $EndTime with continuous scans" "INFO"
+        Write-EQ12Log "🔄 All EQ12 systems being monitored with Telegram notifications" "INFO"
+        
+        # Wait for process to complete
+        $process.WaitForExit()
+        
+        $exitCode = $process.ExitCode
+        if ($exitCode -eq 0) {
+            Write-EQ12Log "✅ Monitoring completed successfully" "INFO"
+        } else {
+            Write-EQ12Log "⚠️ Monitoring completed with warnings (Exit Code: $exitCode)" "WARN"
+        }
+        
+        return $exitCode -eq 0
+        
+    } catch {
+        Write-EQ12Log "❌ Error starting monitoring: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Start-EQ12EmergencyScans {
+    Write-EQ12Log "🚨 STARTING EMERGENCY EQ12 SYSTEM SCANS" "INFO"
+    
+    $emergencyScripts = @(
+        @{Name="NBA Intelligence"; Script="eq12_bulletproof_intelligence_suite.py"; Args=@("--workspace", $global:EQ12_WORKSPACE)},
+        @{Name="Security Guardian"; Script="eq12_gitleaks_guardian.py"; Args=@("--action", "comprehensive", "--workspace", $global:EQ12_WORKSPACE, "--verbose")},
+        @{Name="Universal Repair"; Script="eq12_universal_repair_assistant.py"; Args=@("--action", "health-check", "--workspace", $global:EQ12_WORKSPACE)},
+        @{Name="Script Integrity"; Script="eq12_script_integrity_suite.ps1"; Args=@("-Action", "All", "-AutoFix"); Shell="PowerShell"}
+    )
+    
+    $successCount = 0
+    $totalScripts = $emergencyScripts.Count
+    
+    foreach ($scriptInfo in $emergencyScripts) {
+        Write-EQ12Log "🔧 Running $($scriptInfo.Name)..." "INFO"
+        
+        try {
+            $scriptPath = Join-Path $global:EQ12_WORKSPACE "scripts\$($scriptInfo.Script)"
+            
+            if ($scriptInfo.Shell -eq "PowerShell") {
+                $result = powershell -ExecutionPolicy Bypass -File $scriptPath @($scriptInfo.Args)
+            } else {
+                $result = python $scriptPath @($scriptInfo.Args)
+            }
+            
+            Write-EQ12Log "✅ $($scriptInfo.Name) completed" "INFO"
+            $successCount++
+            
+        } catch {
+            Write-EQ12Log "❌ $($scriptInfo.Name) failed: $($_.Exception.Message)" "ERROR"
+        }
+        
+        Start-Sleep -Seconds 2
+    }
+    
+    Write-EQ12Log "📊 Emergency Scans Complete: $successCount/$totalScripts successful" "INFO"
+    return $successCount -eq $totalScripts
+}
+
+function Test-EQ12MonitoringSetup {
+    Write-EQ12Log "🧪 TESTING EQ12 MONITORING SETUP" "INFO"
+    
+    $requirements = @(
+        @{Name="Python"; Test={python --version}},
+        @{Name="Scripts Directory"; Test={Test-Path (Join-Path $global:EQ12_WORKSPACE "scripts")}},
+        @{Name="Logs Directory"; Test={Test-Path $global:EQ12_LOGS}},
+        @{Name="Monitor Script"; Test={Test-Path (Join-Path $global:EQ12_WORKSPACE "scripts\eq12_comprehensive_monitor.py")}}
+    )
+    
+    $allGood = $true
+    foreach ($req in $requirements) {
+        try {
+            $result = & $req.Test
+            if ($result) {
+                Write-EQ12Log "✅ $($req.Name): OK" "INFO"
+            } else {
+                Write-EQ12Log "❌ $($req.Name): FAILED" "ERROR"
+                $allGood = $false
+            }
+        } catch {
+            Write-EQ12Log "❌ $($req.Name): ERROR - $($_.Exception.Message)" "ERROR"
+            $allGood = $false
+        }
+    }
+    
+    return $allGood
+}
+
+# Main execution
+try {
+    Write-EQ12Log "=" * 80 "INFO"
+    Write-EQ12Log "🔧 EQ12 COMPREHENSIVE MONITORING WRAPPER" "INFO"
+    Write-EQ12Log "=" * 80 "INFO"
+    
+    switch ($Action.ToUpper()) {
+        "MONITOR" {
+            if (Test-EQ12MonitoringSetup) {
+                $success = Start-EQ12MonitoringSystem -EndTime $EndTime
+                exit $(if($success) {0} else {1})
+            } else {
+                Write-EQ12Log "❌ Setup validation failed" "ERROR"
+                exit 1
+            }
+        }
+        
+        "EMERGENCY" {
+            $success = Start-EQ12EmergencyScans
+            exit $(if($success) {0} else {1})
+        }
+        
+        "TEST" {
+            $success = Test-EQ12MonitoringSetup
+            exit $(if($success) {0} else {1})
+        }
+        
+        default {
+            Write-EQ12Log "❌ Unknown action: $Action" "ERROR"
+            Write-EQ12Log "Valid actions: Monitor, Emergency, Test" "INFO"
+            exit 1
+        }
+    }
+    
+} catch {
+    Write-EQ12Log "❌ Wrapper execution failed: $($_.Exception.Message)" "ERROR"
+    exit 1
+}

@@ -1,0 +1,108 @@
+{
+    "folders": [
+        {
+            "name": "EQ12 Root",
+            "path": "."
+        },
+        {
+            "name": "Scripts",
+            "path": "./scripts"
+        },
+        {
+            "name": "Tests",
+            "path": "./tests"
+        },
+        {
+            "name": "Configs",
+            "path": "./configs"
+        },
+        {
+            "name": "Logs",
+            "path": "./logs"
+        },
+        {
+            "name": "Dashboard",
+            "path": "./dashboard"
+        },
+        {
+            "name": "Data",
+            "path": "./data"
+        }
+    ],
+    "settings": {
+        "files.defaultLanguage": "python",
+        "explorer.sortOrder": "type",
+        "explorer.fileNesting.enabled": true,
+        "explorer.fileNesting.expand": false,
+        "explorer.fileNesting.patterns": {
+            "*.py": "${capture}.ipynb,${capture}_test.py,${capture}.ps1,${capture}.md",
+            "*.ps1": "${capture}.py,${capture}_test.ps1,${capture}.xml,${capture}.md",
+            "*.json": "${capture}.schema.json,${capture}.example.json",
+            "requirements.txt": "requirements-*.txt",
+            "docker-compose.yml": "docker-compose.*.yml,Dockerfile*,.dockerignore",
+            "README.md": "README_*.md,CHANGELOG.md,CONTRIBUTING.md"
+        },
+        "azureTerraform.checkTerraformCmd": false,
+        "powershell.cwd": "EQ12 Root",
+        "java.compile.nullAnalysis.mode": "automatic"
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.vscode-pylance",
+            "ms-python.debugpy",
+            "github.copilot",
+            "github.copilot-chat",
+            "ms-vscode.powershell",
+            "ms-toolsai.jupyter"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "EQ12: Initialize Workspace",
+                "type": "shell",
+                "command": "powershell",
+                "args": [
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    "Write-Host 'EQ12 GODSTACK Workspace Initialized' -ForegroundColor Green; Get-Location; Get-ChildItem -Directory | Format-Table Name,LastWriteTime"
+                ],
+                "group": "build",
+                "presentation": {
+                    "echo": true,
+                    "reveal": "always",
+                    "focus": false,
+                    "panel": "shared"
+                },
+                "options": {
+                    "cwd": "${workspaceFolder}"
+                },
+                "problemMatcher": []
+            }
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "EQ12: Quick Start",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${workspaceFolder}/firefox_governance_automation.py",
+                "args": [
+                    "--test-only"
+                ],
+                "console": "integratedTerminal",
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "EQ12_ROOT": "${workspaceFolder}",
+                    "PYTHONPATH": "${workspaceFolder}"
+                }
+            }
+        ]
+    }
+}

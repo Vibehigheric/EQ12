@@ -1,0 +1,450 @@
+name: "Publish Packages"
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      package_type:
+        description: 'Package type to publish'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - container
+        - python
+        - npm
+        - all
+      force_publish:
+        description: 'Force publish even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write  # For package signing
+  security-events: write  # For security scanning results
+
+env:
+  REGISTRY: ghcr.io
+  REGISTRY_USER: ${{ github.actor }}
+  REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      containers: ${{ steps.changes.outputs.containers }}
+      python: ${{ steps.changes.outputs.python }}
+      npm: ${{ steps.changes.outputs.npm }}
+      publish_containers: ${{ steps.determine.outputs.publish_containers }}
+      publish_python: ${{ steps.determine.outputs.publish_python }}
+      publish_npm: ${{ steps.determine.outputs.publish_npm }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for change detection
+
+      - name: Detect package changes
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            containers:
+              - 'containers/**'
+              - 'docker/**'
+              - 'Dockerfile*'
+            python:
+              - 'packages/python/**'
+              - 'src/**/*.py'
+              - 'setup.py'
+              - 'pyproject.toml'
+            npm:
+              - 'packages/npm/**'
+              - 'src/**/*.js'
+              - 'src/**/*.ts'
+              - 'package.json'
+
+      - name: Determine what to publish
+        id: determine
+        env:
+          PACKAGE_TYPE: ${{ github.event.inputs.package_type || 'all' }}
+          FORCE_PUBLISH: ${{ github.event.inputs.force_publish || 'false' }}
+        run: |
+          # Determine which packages to publish based on changes and inputs
+          PUBLISH_CONTAINERS="false"
+          PUBLISH_PYTHON="false"
+          PUBLISH_NPM="false"
+          
+          if [[ "$FORCE_PUBLISH" == "true" ]] || [[ "$PACKAGE_TYPE" == "all" ]]; then
+            if [[ "${{ steps.changes.outputs.containers }}" == "true" ]] || [[ "$FORCE_PUBLISH" == "true" ]] && [[ "$PACKAGE_TYPE" =~ (all|container) ]]; then
+              PUBLISH_CONTAINERS="true"
+            fi
+            if [[ "${{ steps.changes.outputs.python }}" == "true" ]] || [[ "$FORCE_PUBLISH" == "true" ]] && [[ "$PACKAGE_TYPE" =~ (all|python) ]]; then
+              PUBLISH_PYTHON="true"
+            fi
+            if [[ "${{ steps.changes.outputs.npm }}" == "true" ]] || [[ "$FORCE_PUBLISH" == "true" ]] && [[ "$PACKAGE_TYPE" =~ (all|npm) ]]; then
+              PUBLISH_NPM="true"
+            fi
+          elif [[ "$PACKAGE_TYPE" == "container" ]] && [[ "${{ steps.changes.outputs.containers }}" == "true" || "$FORCE_PUBLISH" == "true" ]]; then
+            PUBLISH_CONTAINERS="true"
+          elif [[ "$PACKAGE_TYPE" == "python" ]] && [[ "${{ steps.changes.outputs.python }}" == "true" || "$FORCE_PUBLISH" == "true" ]]; then
+            PUBLISH_PYTHON="true"
+          elif [[ "$PACKAGE_TYPE" == "npm" ]] && [[ "${{ steps.changes.outputs.npm }}" == "true" || "$FORCE_PUBLISH" == "true" ]]; then
+            PUBLISH_NPM="true"
+          fi
+          
+          echo "publish_containers=$PUBLISH_CONTAINERS" >> $GITHUB_OUTPUT
+          echo "publish_python=$PUBLISH_PYTHON" >> $GITHUB_OUTPUT
+          echo "publish_npm=$PUBLISH_NPM" >> $GITHUB_OUTPUT
+          
+          echo "📦 Package publishing plan:"
+          echo "  Containers: $PUBLISH_CONTAINERS"
+          echo "  Python: $PUBLISH_PYTHON"
+          echo "  NPM: $PUBLISH_NPM"
+
+  publish-containers:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.publish_containers == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # Core Infrastructure
+          - name: eq12-base
+            context: ./containers/base
+            dockerfile: Dockerfile
+            stack: infrastructure
+          - name: eq12-python-base
+            context: ./containers/python-base
+            dockerfile: Dockerfile
+            stack: infrastructure
+          
+          # Business Stack Images
+          - name: eq12-betting-core
+            context: ./containers/betting
+            dockerfile: Dockerfile
+            stack: betting
+            sensitive: true
+          - name: eq12-cannabis-compliance
+            context: ./containers/cannabis
+            dockerfile: Dockerfile
+            stack: cannabis
+            sensitive: true
+          - name: eq12-credit-security
+            context: ./containers/credit
+            dockerfile: Dockerfile
+            stack: credit
+            sensitive: true
+          
+          # Utility Services
+          - name: eq12-scraper
+            context: ./containers/scraper
+            dockerfile: Dockerfile
+            stack: analytics
+          - name: eq12-api-gateway
+            context: ./containers/gateway
+            dockerfile: Dockerfile
+            stack: infrastructure
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=compliance-approved,enable=${{ matrix.sensitive == 'true' }}
+
+      - name: Check if context exists
+        id: context-check
+        run: |
+          if [[ -d "${{ matrix.context }}" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Context directory ${{ matrix.context }} does not exist, skipping..."
+          fi
+
+      - name: Build and push container image
+        if: steps.context-check.outputs.exists == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.context }}/${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUSINESS_STACK=${{ matrix.stack }}
+
+      - name: Run security scan
+        if: steps.context-check.outputs.exists == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.name }}:${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload security scan results
+        if: steps.context-check.outputs.exists == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Sign container image
+        if: steps.context-check.outputs.exists == 'true'
+        run: |
+          # Install cosign for image signing
+          curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
+          
+          # Sign the image
+          cosign sign --yes ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
+
+      - name: Notify sensitive stack publication
+        if: steps.context-check.outputs.exists == 'true' && matrix.sensitive == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            MESSAGE="🚨 **Sensitive Stack Package Published**
+            
+            Package: ${{ matrix.name }}
+            Stack: ${{ matrix.stack }}
+            Version: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            
+            ⚠️ Compliance review required before deployment to production."
+            
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\": \"${TELEGRAM_CHAT_ID}\", \"text\": \"${MESSAGE}\", \"parse_mode\": \"Markdown\"}"
+          fi
+
+  publish-python:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.publish_python == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - name: eq12-scraping-toolkit
+            path: packages/python/scraping
+            stack: analytics
+          - name: eq12-ai-models
+            path: packages/python/ai
+            stack: ai
+          - name: eq12-betting-core
+            path: packages/python/betting
+            stack: betting
+            sensitive: true
+          - name: eq12-cannabis-compliance
+            path: packages/python/cannabis
+            stack: cannabis
+            sensitive: true
+          - name: eq12-payment-security
+            path: packages/python/credit
+            stack: credit
+            sensitive: true
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine setuptools wheel
+
+      - name: Check if package exists
+        id: package-check
+        run: |
+          if [[ -d "${{ matrix.package.path }}" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Package directory ${{ matrix.package.path }} does not exist, skipping..."
+          fi
+
+      - name: Build Python package
+        if: steps.package-check.outputs.exists == 'true'
+        working-directory: ${{ matrix.package.path }}
+        run: |
+          python -m build
+
+      - name: Security scan Python package
+        if: steps.package-check.outputs.exists == 'true'
+        working-directory: ${{ matrix.package.path }}
+        run: |
+          pip install safety bandit
+          # Scan for known vulnerabilities
+          safety check --json --output safety-report.json || true
+          # Static analysis for security issues
+          bandit -r . -f json -o bandit-report.json || true
+
+      - name: Publish to GitHub Packages
+        if: steps.package-check.outputs.exists == 'true'
+        working-directory: ${{ matrix.package.path }}
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+        run: |
+          # Configure for GitHub Packages
+          echo "index-url = https://pypi.org/simple" > ~/.pip/pip.conf
+          echo "extra-index-url = https://pypi.org/simple" >> ~/.pip/pip.conf
+          
+          # Upload to GitHub Packages
+          python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+
+  publish-npm:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.publish_npm == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - name: "@eq12/frontend-components"
+            path: packages/npm/components
+            stack: frontend
+          - name: "@eq12/api-client"
+            path: packages/npm/api-client
+            stack: frontend
+          - name: "@eq12/betting-widgets"
+            path: packages/npm/betting
+            stack: betting
+            sensitive: true
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@${{ github.repository_owner }}'
+
+      - name: Check if package exists
+        id: package-check
+        run: |
+          if [[ -d "${{ matrix.package.path }}" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Package directory ${{ matrix.package.path }} does not exist, skipping..."
+          fi
+
+      - name: Install dependencies and build
+        if: steps.package-check.outputs.exists == 'true'
+        working-directory: ${{ matrix.package.path }}
+        run: |
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Security audit
+        if: steps.package-check.outputs.exists == 'true'
+        working-directory: ${{ matrix.package.path }}
+        run: |
+          npm audit --audit-level=moderate
+
+      - name: Publish to GitHub Packages
+        if: steps.package-check.outputs.exists == 'true'
+        working-directory: ${{ matrix.package.path }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm publish
+
+  notify-completion:
+    needs: [detect-changes, publish-containers, publish-python, publish-npm]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          if [[ "${{ needs.publish-containers.result }}" == "failure" ]] || [[ "${{ needs.publish-python.result }}" == "failure" ]] || [[ "${{ needs.publish-npm.result }}" == "failure" ]]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+          elif [[ "${{ needs.publish-containers.result }}" == "success" ]] || [[ "${{ needs.publish-python.result }}" == "success" ]] || [[ "${{ needs.publish-npm.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=skipped" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create package publication summary
+        run: |
+          echo "## 📦 Package Publication Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package Type | Status | Published |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|--------|-----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Containers | ${{ needs.publish-containers.result || 'skipped' }} | ${{ needs.detect-changes.outputs.publish_containers }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Python | ${{ needs.publish-python.result || 'skipped' }} | ${{ needs.detect-changes.outputs.publish_python }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NPM | ${{ needs.publish-npm.result || 'skipped' }} | ${{ needs.detect-changes.outputs.publish_npm }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "📅 **Published**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Send notification
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+            STATUS_EMOJI="✅"
+            if [[ "${{ steps.status.outputs.status }}" == "failure" ]]; then
+              STATUS_EMOJI="❌"
+            elif [[ "${{ steps.status.outputs.status }}" == "skipped" ]]; then
+              STATUS_EMOJI="⏭️"
+            fi
+            
+            MESSAGE="${STATUS_EMOJI} **EQ12 Package Publication**
+            
+            Status: ${{ steps.status.outputs.status }}
+            Containers: ${{ needs.detect-changes.outputs.publish_containers }}
+            Python: ${{ needs.detect-changes.outputs.publish_python }}
+            NPM: ${{ needs.detect-changes.outputs.publish_npm }}
+            
+            📊 View details in GitHub Actions"
+            
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "{\"chat_id\": \"${TELEGRAM_CHAT_ID}\", \"text\": \"${MESSAGE}\", \"parse_mode\": \"Markdown\"}"
+          fi

@@ -1,0 +1,24 @@
+# EQ12 Memory Optimization Config
+# Place in C:\Users\[Username]\.wslconfig
+
+[wsl2]
+# Memory limit (prevent vmmemWSL from consuming 2GB+)
+memory=1GB
+
+# Swap limit  
+swap=512MB
+
+# CPU limit
+processors=2
+
+# Disable GUI applications to save memory
+guiApplications=false
+
+# Network settings
+networkingMode=mirrored
+
+# Kernel settings
+kernelCommandLine=cgroup_no_v1=memory
+
+# Disable nested virtualization
+nestedVirtualization=false

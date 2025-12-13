@@ -1,0 +1,19 @@
+{
+  "memory": {
+    "virtual_memory": 34111381504,
+    "optimization": "Enable memory compression and caching"
+  },
+  "cpu": {
+    "cpu_count": 12,
+    "optimization": "Enable CPU performance mode"
+  },
+  "disk": {
+    "disk_usage": 515092754432,
+    "optimization": "Enable SSD optimization and caching"
+  },
+  "coral_specific": {
+    "usb_optimization": "Enable USB 3.0 performance mode",
+    "power_management": "Disable USB power saving",
+    "thermal_management": "Monitor Coral TPU temperature"
+  }
+}

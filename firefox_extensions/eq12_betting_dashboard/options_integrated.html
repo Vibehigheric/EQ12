@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>EQ12 Settings & Configuration</title>
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, .7);
+            padding: 32px;
+            border-radius: 12px;
+            border: 1px solid #374151;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            color: #10b981;
+            margin: 0 0 8px 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: rgba(15, 23, 42, .5);
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .section h3 {
+            margin-top: 0;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label {
+            display: block;
+            margin: 16px 0 4px 0;
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            background: #1e293b;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, .1);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, .3);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, .1);
+            border: 1px solid #10b981;
+            color: #10b981;
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, .1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .status.info {
+            background: rgba(59, 130, 246, .1);
+            border: 1px solid #3b82f6;
+            color: #60a5fa;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .advanced-section {
+            border-left-color: #f59e0b;
+        }
+
+        .advanced-section h3 {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 EQ12 Configuration</h1>
+            <div class="subtitle">Advanced Betting Dashboard Settings</div>
+        </div>
+
+        <!-- API Configuration -->
+        <div class="section">
+            <h3>🔗 API Configuration</h3>
+
+            <label>API Base URL</label>
+            <input id="apiBase" type="text" placeholder="http://localhost:8000 or https://yourid.ngrok.io" />
+            <div class="help-text">Your EQ12 backend server URL. Use ngrok for external access.</div>
+
+            <label>API Key (X-API-Key header)</label>
+            <input id="apiKey" type="password" placeholder="Enter your API key (optional)" />
+            <div class="help-text">Optional authentication key for secure API access.</div>
+
+            <button id="testConnection">🔍 Test Connection</button>
+        </div>
+
+        <!-- Parlay Configuration -->
+        <div class="section">
+            <h3>🎟️ Parlay Generation</h3>
+
+            <label>Expected Value Threshold</label>
+            <input id="evThreshold" type="number" step="0.1" min="0" max="10" placeholder="0.5" />
+            <div class="help-text">Minimum EV for parlay notifications (dollars per bet).</div>
+
+            <label>Auto-Refresh Interval (seconds)</label>
+            <input id="autoRefreshInterval" type="number" min="0" max="3600" placeholder="60" />
+            <div class="help-text">How often to refresh parlay data. Set to 0 to disable.</div>
+
+            <div class="checkbox-group">
+                <input id="enableNotifications" type="checkbox" />
+                <label for="enableNotifications">Enable high-EV parlay notifications</label>
+            </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div class="section">
+            <h3>🛡️ Privacy & Security</h3>
+
+            <label>Privacy Protection Level</label>
+            <select id="privacyLevel">
+                <option value="minimal">Minimal - Basic protection only</option>
+                <option value="balanced">Balanced - Recommended default</option>
+                <option value="strict">Strict - Maximum protection</option>
+                <option value="custom">Custom - Manual configuration</option>
+            </select>
+
+            <div class="checkbox-group">
+                <input id="vpnRequired" type="checkbox" />
+                <label for="vpnRequired">Require VPN for betting sites</label>
+            </div>
+            <div class="help-text">Block access to sportsbooks when VPN is disconnected.</div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="section advanced-section">
+            <h3>⚙️ Advanced Configuration</h3>
+
+            <label>Debug Level</label>
+            <select id="debugLevel">
+                <option value="error">Error - Errors only</option>
+                <option value="warn">Warn - Warnings and errors</option>
+                <option value="info">Info - General information</option>
+                <option value="debug">Debug - Detailed logging</option>
+            </select>
+
+            <label>Custom CSS Injection</label>
+            <textarea id="customCSS" rows="4" placeholder="Enter custom CSS for sportsbook sites..."></textarea>
+            <div class="help-text">Custom CSS to inject into betting sites for enhanced UI.</div>
+
+            <div class="checkbox-group">
+                <input id="developerMode" type="checkbox" />
+                <label for="developerMode">Enable developer mode features</label>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button id="save">💾 Save Settings</button>
+            <button id="reset">🔄 Reset to Defaults</button>
+            <button id="export">📤 Export Config</button>
+            <button id="import">📥 Import Config</button>
+        </div>
+
+        <!-- Hidden file input for import -->
+        <input id="importFile" type="file" accept=".json" style="display: none;" />
+
+        <!-- Status Display -->
+        <pre id="status" class="status" style="display: none;"></pre>
+    </div>
+
+    <script type="module" src="options.js"></script>
+</body>
+
+</html>

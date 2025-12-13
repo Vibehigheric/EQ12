@@ -1,0 +1,117 @@
+# EQ12 MLB Playoff SGP Templates
+# Professional betting templates optimized for sharp playoff pricing
+
+templates:
+  ace_domination:
+    name: "Ace Domination"
+    description: "SP Ks Over + Opp Team Total Under + Opp Hits Under"
+    legs:
+      - type: pitcher_k_over
+        required: true
+        correlation_penalty: 0.00
+      - type: opp_team_total_under
+        required: true
+        correlation_penalty: -0.03
+      - type: opp_hits_under
+        required: false
+        correlation_penalty: -0.02
+    max_legs: 3
+    confidence_base: 7
+    playoff_adjustment: -0.05
+    risk_factors:
+      - "Starter scratch risk"
+      - "Weather sensitivity"
+
+  power_stack:
+    name: "Power Stack"
+    description: "Slugger TB Over + HR + Team Total Over + Opp SP Outs Under"
+    legs:
+      - type: batter_tb_over
+        required: true
+        correlation_penalty: 0.00
+      - type: batter_hr
+        required: false
+        correlation_penalty: 0.01
+      - type: team_total_over
+        required: true
+        correlation_penalty: 0.00
+      - type: opp_sp_outs_under
+        required: false
+        correlation_penalty: -0.04
+    max_legs: 4
+    confidence_base: 6
+    playoff_adjustment: -0.08
+    risk_factors:
+      - "Wind direction dependency"
+      - "Bullpen leverage changes"
+
+  small_ball_stack:
+    name: "Small Ball Stack"
+    description: "Leadoff H+R+RBI Over + Team Total Over + Speed elements"
+    legs:
+      - type: leadoff_hrbi_over
+        required: true
+        correlation_penalty: 0.00
+      - type: team_total_over
+        required: true
+        correlation_penalty: 0.01
+      - type: team_hits_over
+        required: false
+        correlation_penalty: 0.01
+    max_legs: 3
+    confidence_base: 6
+    playoff_adjustment: -0.03
+    risk_factors:
+      - "Lineup order changes"
+      - "Situational hitting variance"
+
+  unders_script:
+    name: "Pitchers Duel"
+    description: "Both SP Outs Over + Game Total Under + Key Batter TB Under"
+    legs:
+      - type: home_sp_outs_over
+        required: true
+        correlation_penalty: 0.00
+      - type: away_sp_outs_over
+        required: true
+        correlation_penalty: 0.00
+      - type: game_total_under
+        required: true
+        correlation_penalty: -0.02
+      - type: key_batter_tb_under
+        required: false
+        correlation_penalty: -0.01
+    max_legs: 4
+    confidence_base: 8
+    playoff_adjustment: 0.00
+    risk_factors:
+      - "Both starter health"
+      - "Bullpen readiness"
+
+# Risk Management
+playoff_constraints:
+  max_legs_per_sgp: 4 # Tighter than regular season
+  max_daily_sgps: 5 # Limit exposure
+  max_bet_percentage: 1.5 # % of bankroll per SGP
+  required_confidence: 6 # Minimum confidence to bet
+
+# Correlation Matrix (penalties applied to odds)
+correlations:
+  negative:
+    pitcher_vs_opposing_batters: -0.05
+    sp_outs_vs_opp_team_total: -0.08
+    sp_ks_vs_opp_batter_props: -0.04
+
+  positive:
+    within_team_offense: 0.01
+    batter_tb_and_hr: 0.02
+
+# Weather Adjustments
+weather_factors:
+  wind_in_10mph_plus:
+    hr_props: -0.03
+    tb_props: -0.02
+  dome_games:
+    consistency_bonus: 0.01
+  rain_30pct_plus:
+    total_variance: 0.05

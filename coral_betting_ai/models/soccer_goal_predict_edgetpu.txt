@@ -1,0 +1,18 @@
+# SOCCER_GOAL_PREDICT Model Placeholder
+        
+This is a placeholder for the soccer_goal_predict Edge TPU model.
+
+To create this model:
+1. Train your TensorFlow model for soccer_goal_predict
+2. Convert to TensorFlow Lite: 
+   converter = tf.lite.TFLiteConverter.from_saved_model(model_path)
+   converter.optimizations = [tf.lite.Optimize.DEFAULT]
+   tflite_model = converter.convert()
+   
+3. Compile for Edge TPU:
+   edgetpu_compiler soccer_goal_predict.tflite
+   
+4. Place the resulting soccer_goal_predict_edgetpu.tflite file here
+
+Expected input shape: [1, input_size]
+Expected output shape: [1, num_classes]

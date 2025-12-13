@@ -1,0 +1,32 @@
+name: Governance Board
+description: >
+  Governance pipeline board for EQ12 GODSTACK.
+  Tracks PRs and their linked review issues against governance gates.
+
+# Project type: Kanban
+# Requires GitHub Projects (beta) enabled in repo/org.
+type: board
+
+columns:
+  - name: 🚧 Needs Copilot Review
+    description: New PRs or issues linked by pr-review-reminder.yml
+  - name: 🔍 In Governance Review
+    description: Copilot review in progress (review-needed label)
+  - name: ✅ Ready for Merge
+    description: All gates passed, approvals given
+  - name: ⏳ Blocked
+    description: Missing secrets, failing CI, or compliance violations
+
+automation:
+  - event: pull_request.opened
+    action: move
+    column: "🚧 Needs Copilot Review"
+  - event: issues.opened
+    labels: ["review-needed"]
+    action: move
+    column: "🚧 Needs Copilot Review"
+  - event: pull_request.review_requested
+    action: move
+    column: "🔍 In Governance Review"
+  - event: pull_request.closed
+    action: archive

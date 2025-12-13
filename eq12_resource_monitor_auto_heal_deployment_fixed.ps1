@@ -1,0 +1,557 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Resource Monitor & Auto-Heal Deployment Script
+# Comprehensive deployment and management of monitoring and healing systems
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Deploy", "Start", "Stop", "Status", "Report", "Test")]
+    [string]$Action = "Deploy",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$WorkspacePath = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [int]$MonitoringInterval = 60,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseLogging,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$AutoStart,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$CreateScheduledTask,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$Emergency
+)
+
+# Script metadata
+$ScriptName = "EQ12 Resource Monitor & Auto-Heal Deployment"
+$ScriptVersion = "1.0.0"
+$ScriptAuthor = "EQ12 Quantum Development Team"
+$DeploymentId = "RESOURCE_MONITOR_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+
+# Setup logging
+$LogsDir = Join-Path $WorkspacePath "logs"
+$LogFile = Join-Path $LogsDir "resource_monitor_deployment_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+
+if (-not (Test-Path $LogsDir)) {
+    New-Item -ItemType Directory -Path $LogsDir -Force | Out-Null
+}
+
+function Write-Log {
+    param(
+        [string]$Message,
+        [ValidateSet("INFO", "WARNING", "ERROR", "SUCCESS")]
+        [string]$Level = "INFO"
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    
+    # Color coding for console output
+    switch ($Level) {
+        "INFO"    { Write-Host $logEntry -ForegroundColor White }
+        "WARNING" { Write-Host $logEntry -ForegroundColor Yellow }
+        "ERROR"   { Write-Host $logEntry -ForegroundColor Red }
+        "SUCCESS" { Write-Host $logEntry -ForegroundColor Green }
+    }
+    
+    # Write to log file
+    Add-Content -Path $LogFile -Value $logEntry
+}
+
+function Test-Prerequisites {
+    Write-Log "Checking deployment prerequisites..." "INFO"
+    
+    $allMet = $true
+    
+    # Check Python
+    try {
+        $pythonVersion = python --version 2>&1
+        if ($pythonVersion -match "Python") {
+            Write-Log "Python available: $pythonVersion" "SUCCESS"
+        } else {
+            Write-Log "Python not found" "ERROR"
+            $allMet = $false
+        }
+    }
+    catch {
+        Write-Log "Python not accessible" "ERROR"
+        $allMet = $false
+    }
+    
+    # Check PowerShell version
+    if ($PSVersionTable.PSVersion.Major -ge 5) {
+        Write-Log "PowerShell $($PSVersionTable.PSVersion) available" "SUCCESS"
+    }
+    else {
+        Write-Log "PowerShell 5.0 or higher required" "ERROR"
+        $allMet = $false
+    }
+    
+    # Check EQ12 workspace
+    if (Test-Path $WorkspacePath) {
+        Write-Log "EQ12 workspace found: $WorkspacePath" "SUCCESS"
+    }
+    else {
+        Write-Log "EQ12 workspace not found: $WorkspacePath" "ERROR"
+        $allMet = $false
+    }
+    
+    # Check required scripts
+    $requiredScripts = @(
+        "eq12_resource_monitor_wrapper.py",
+        "eq12_self_healing_orchestrator.py"
+    )
+    
+    foreach ($script in $requiredScripts) {
+        $scriptPath = Join-Path $WorkspacePath $script
+        if (Test-Path $scriptPath) {
+            Write-Log "Found: $script" "SUCCESS"
+        }
+        else {
+            Write-Log "Missing: $script" "WARNING"
+        }
+    }
+    
+    return $allMet
+}
+
+function Deploy-MonitoringSystem {
+    Write-Log "Deploying EQ12 Resource Monitoring System..." "INFO"
+    
+    try {
+        # Install Python dependencies
+        Write-Log "Installing Python dependencies..." "INFO"
+        
+        $requirements = @(
+            "psutil",
+            "aiohttp"
+        )
+        
+        foreach ($package in $requirements) {
+            try {
+                $installOutput = python -m pip install $package --quiet 2>&1
+                Write-Log "Installed: $package" "SUCCESS"
+            }
+            catch {
+                Write-Log "Failed to install: $package" "WARNING"
+            }
+        }
+        
+        # Create monitoring configuration
+        $configsDir = Join-Path $WorkspacePath "configs"
+        if (-not (Test-Path $configsDir)) {
+            New-Item -ItemType Directory -Path $configsDir -Force | Out-Null
+        }
+        
+        $configPath = Join-Path $configsDir "resource_monitor_config.json"
+        $monitoringConfig = @{
+            monitoring_interval_seconds = $MonitoringInterval
+            alert_thresholds = @{
+                cpu_percent = 85.0
+                memory_percent = 90.0
+                disk_percent = 95.0
+                process_count = 300
+                response_time_ms = 5000
+            }
+            auto_healing_enabled = $true
+            deployment_info = @{
+                deployment_id = $DeploymentId
+                deployed_at = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+                deployed_by = $env:USERNAME
+                version = $ScriptVersion
+            }
+        }
+        
+        $monitoringConfig | ConvertTo-Json -Depth 5 | Set-Content -Path $configPath -Encoding UTF8
+        Write-Log "Configuration saved: $configPath" "SUCCESS"
+        
+        # Test resource monitor
+        Write-Log "Testing resource monitor..." "INFO"
+        $testResult = Test-ResourceMonitor
+        
+        if ($testResult) {
+            Write-Log "Resource monitor test passed" "SUCCESS"
+        }
+        else {
+            Write-Log "Resource monitor test failed" "ERROR"
+        }
+        
+        # Create scheduled task if requested
+        if ($CreateScheduledTask) {
+            Create-MonitoringScheduledTask
+        }
+        
+        # Auto-start if requested
+        if ($AutoStart) {
+            Start-MonitoringSystem
+        }
+        
+        Write-Log "Resource monitoring system deployed successfully!" "SUCCESS"
+        return $true
+        
+    }
+    catch {
+        Write-Log "Deployment failed: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Test-ResourceMonitor {
+    Write-Log "Testing resource monitor functionality..." "INFO"
+    
+    try {
+        $monitorScript = Join-Path $WorkspacePath "eq12_resource_monitor_wrapper.py"
+        
+        if (-not (Test-Path $monitorScript)) {
+            Write-Log "Resource monitor script not found" "ERROR"
+            return $false
+        }
+        
+        # Test status check
+        $statusResult = python $monitorScript --action status --workspace $WorkspacePath 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Resource monitor status check passed" "SUCCESS"
+            return $true
+        }
+        else {
+            Write-Log "Resource monitor test failed" "ERROR"
+            Write-Log "Error output: $statusResult" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Resource monitor test exception: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Start-MonitoringSystem {
+    Write-Log "Starting resource monitoring system..." "INFO"
+    
+    try {
+        $monitorScript = Join-Path $WorkspacePath "eq12_resource_monitor_wrapper.py"
+        
+        # Start monitoring in background
+        $arguments = @(
+            $monitorScript,
+            "--action", "monitor",
+            "--workspace", $WorkspacePath,
+            "--interval", $MonitoringInterval
+        )
+        
+        if ($VerboseLogging) {
+            $arguments += "--verbose"
+        }
+        
+        # Start as background job
+        $job = Start-Job -ScriptBlock {
+            param($args)
+            & python @args
+        } -ArgumentList $arguments -Name "EQ12_ResourceMonitor"
+        
+        Start-Sleep -Seconds 3
+        
+        if ($job.State -eq "Running") {
+            Write-Log "Resource monitor started successfully (Job ID: $($job.Id))" "SUCCESS"
+            Write-Log "Monitor running with interval: $MonitoringInterval seconds" "INFO"
+            return $true
+        }
+        else {
+            Write-Log "Failed to start resource monitor" "ERROR"
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Error starting monitoring system: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Stop-MonitoringSystem {
+    Write-Log "Stopping resource monitoring system..." "INFO"
+    
+    try {
+        # Stop background jobs
+        $monitorJobs = Get-Job -Name "EQ12_ResourceMonitor" -ErrorAction SilentlyContinue
+        
+        if ($monitorJobs) {
+            $monitorJobs | Stop-Job
+            $monitorJobs | Remove-Job
+            Write-Log "Resource monitor jobs stopped" "SUCCESS"
+        }
+        else {
+            Write-Log "No running resource monitor jobs found" "INFO"
+        }
+        
+        return $true
+    }
+    catch {
+        Write-Log "Error stopping monitoring system: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Get-MonitoringStatus {
+    Write-Log "Checking resource monitoring status..." "INFO"
+    
+    # Check background jobs
+    $monitorJobs = Get-Job -Name "EQ12_ResourceMonitor" -ErrorAction SilentlyContinue
+    
+    if ($monitorJobs) {
+        Write-Log "Background monitor job(s) found:" "SUCCESS"
+        $monitorJobs | ForEach-Object {
+            Write-Log "   Job ID: $($_.Id), State: $($_.State)" "INFO"
+        }
+    }
+    else {
+        Write-Log "No background monitor jobs running" "INFO"
+    }
+    
+    # Check recent logs
+    $recentLogs = Get-ChildItem -Path $LogsDir -Filter "*resource_monitor*" -ErrorAction SilentlyContinue | 
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 5
+    
+    if ($recentLogs) {
+        Write-Log "Recent monitor logs:" "INFO"
+        $recentLogs | ForEach-Object {
+            Write-Log "   $($_.Name) ($(Get-Date $_.LastWriteTime -Format 'HH:mm:ss'))" "INFO"
+        }
+    }
+    
+    # Run quick status check
+    try {
+        $monitorScript = Join-Path $WorkspacePath "eq12_resource_monitor_wrapper.py"
+        if (Test-Path $monitorScript) {
+            $statusResult = python $monitorScript --action status --workspace $WorkspacePath 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Log "Current system status:" "SUCCESS"
+                $statusLines = $statusResult -split "`n"
+                foreach ($line in $statusLines) {
+                    if ($line.Trim() -ne "") {
+                        Write-Log "   $line" "INFO"
+                    }
+                }
+            }
+        }
+    }
+    catch {
+        Write-Log "Could not retrieve current status" "WARNING"
+    }
+}
+
+function Generate-MonitoringReport {
+    Write-Log "Generating comprehensive monitoring report..." "INFO"
+    
+    try {
+        $monitorScript = Join-Path $WorkspacePath "eq12_resource_monitor_wrapper.py"
+        
+        if (-not (Test-Path $monitorScript)) {
+            Write-Log "Resource monitor script not found" "ERROR"
+            return
+        }
+        
+        # Generate report
+        $reportResult = python $monitorScript --action report --workspace $WorkspacePath 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Monitoring report generated successfully" "SUCCESS"
+            
+            # Display report summary
+            $reportLines = $reportResult -split "`n"
+            foreach ($line in $reportLines) {
+                if ($line.Trim() -ne "") {
+                    Write-Log "   $line" "INFO"
+                }
+            }
+            
+            # Find and display report file
+            $reportFiles = Get-ChildItem -Path $LogsDir -Filter "*health_report*" -ErrorAction SilentlyContinue | 
+                          Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            
+            if ($reportFiles) {
+                Write-Log "Report saved: $($reportFiles.Name)" "SUCCESS"
+            }
+        }
+        else {
+            Write-Log "Failed to generate monitoring report" "ERROR"
+        }
+    }
+    catch {
+        Write-Log "Error generating report: $($_.Exception.Message)" "ERROR"
+    }
+}
+
+function Create-MonitoringScheduledTask {
+    Write-Log "Creating scheduled task for monitoring..." "INFO"
+    
+    try {
+        $taskName = "EQ12_ResourceMonitor"
+        $taskDescription = "EQ12 Resource Monitor - Continuous system health monitoring"
+        
+        # Remove existing task if it exists
+        $existingTask = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+        if ($existingTask) {
+            Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+            Write-Log "Removed existing scheduled task" "SUCCESS"
+        }
+        
+        # Create action
+        $monitorScript = Join-Path $WorkspacePath "eq12_resource_monitor_wrapper.py"
+        $arguments = "--action monitor --workspace `"$WorkspacePath`" --interval $MonitoringInterval"
+        
+        $action = New-ScheduledTaskAction -Execute "python" -Argument "`"$monitorScript`" $arguments"
+        
+        # Create trigger (run every hour)
+        $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 60)
+        
+        # Create settings
+        $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+        
+        # Register task
+        Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Description $taskDescription -User $env:USERNAME -RunLevel Highest
+        
+        Write-Log "Scheduled task created: $taskName" "SUCCESS"
+        Write-Log "Task will run every hour" "INFO"
+        
+        return $true
+    }
+    catch {
+        Write-Log "Failed to create scheduled task: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Invoke-EmergencyHealing {
+    Write-Log "EMERGENCY MODE: Triggering immediate auto-healing..." "ERROR"
+    
+    try {
+        # Stop monitoring first to prevent conflicts
+        Stop-MonitoringSystem
+        
+        # Run self-healing orchestrator
+        $healScript = Join-Path $WorkspacePath "eq12_self_healing_orchestrator.py"
+        
+        if (Test-Path $healScript) {
+            Write-Log "Running self-healing orchestrator..." "INFO"
+            
+            $healResult = python $healScript --emergency-mode --workspace $WorkspacePath --verbose 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Log "Emergency healing completed successfully" "SUCCESS"
+            }
+            else {
+                Write-Log "Emergency healing failed" "ERROR"
+                Write-Log "Output: $healResult" "ERROR"
+            }
+        }
+        
+        # Run universal repair assistant
+        $repairScript = Join-Path $WorkspacePath "scripts\eq12_universal_repair_assistant.py"
+        
+        if (Test-Path $repairScript) {
+            Write-Log "Running universal repair assistant..." "INFO"
+            
+            $repairResult = python $repairScript --action emergency-repair --workspace $WorkspacePath --verbose 2>&1
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Log "Universal repair completed successfully" "SUCCESS"
+            }
+            else {
+                Write-Log "Universal repair had issues" "WARNING"
+            }
+        }
+        
+        # Restart monitoring
+        Write-Log "Restarting monitoring after emergency healing..." "INFO"
+        Start-MonitoringSystem
+        
+    }
+    catch {
+        Write-Log "Emergency healing failed: $($_.Exception.Message)" "ERROR"
+    }
+}
+
+# Main execution logic
+function Main {
+    Write-Log "$ScriptName v$ScriptVersion" "INFO"
+    Write-Log "Deployment ID: $DeploymentId" "INFO"
+    Write-Log "Action: $Action" "INFO"
+    Write-Log "Workspace: $WorkspacePath" "INFO"
+    
+    if ($Emergency) {
+        Invoke-EmergencyHealing
+        return
+    }
+    
+    # Check prerequisites for most actions
+    if ($Action -in @("Deploy", "Start", "Test")) {
+        if (-not (Test-Prerequisites)) {
+            Write-Log "Prerequisites not met. Aborting $Action." "ERROR"
+            return
+        }
+    }
+    
+    switch ($Action) {
+        "Deploy" {
+            $success = Deploy-MonitoringSystem
+            if ($success) {
+                Write-Log "Deployment completed successfully!" "SUCCESS"
+            }
+            else {
+                Write-Log "Deployment failed!" "ERROR"
+            }
+        }
+        
+        "Start" {
+            $success = Start-MonitoringSystem
+            if ($success) {
+                Write-Log "Monitoring system started!" "SUCCESS"
+            }
+            else {
+                Write-Log "Failed to start monitoring system!" "ERROR"
+            }
+        }
+        
+        "Stop" {
+            $success = Stop-MonitoringSystem
+            if ($success) {
+                Write-Log "Monitoring system stopped!" "SUCCESS"
+            }
+            else {
+                Write-Log "Failed to stop monitoring system!" "ERROR"
+            }
+        }
+        
+        "Status" {
+            Get-MonitoringStatus
+        }
+        
+        "Report" {
+            Generate-MonitoringReport
+        }
+        
+        "Test" {
+            $success = Test-ResourceMonitor
+            if ($success) {
+                Write-Log "All tests passed!" "SUCCESS"
+            }
+            else {
+                Write-Log "Some tests failed!" "ERROR"
+            }
+        }
+    }
+    
+    Write-Log "Deployment log saved: $LogFile" "INFO"
+}
+
+# Execute main function
+Main

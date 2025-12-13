@@ -1,0 +1,78 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\EQ12_BROKEN_20251122_210342\\EQ12.ChatGPT.InlineRefactor\\EQ12.ChatGPT.InlineRefactor.csproj": {}
+  },
+  "projects": {
+    "C:\\EQ12_BROKEN_20251122_210342\\EQ12.ChatGPT.InlineRefactor\\EQ12.ChatGPT.InlineRefactor.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\EQ12_BROKEN_20251122_210342\\EQ12.ChatGPT.InlineRefactor\\EQ12.ChatGPT.InlineRefactor.csproj",
+        "projectName": "EQ12.ChatGPT.InlineRefactor",
+        "projectPath": "C:\\EQ12_BROKEN_20251122_210342\\EQ12.ChatGPT.InlineRefactor\\EQ12.ChatGPT.InlineRefactor.csproj",
+        "packagesPath": "C:\\Users\\Ricoj100\\.nuget\\packages\\",
+        "outputPath": "C:\\EQ12_BROKEN_20251122_210342\\EQ12.ChatGPT.InlineRefactor\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\EQ12_BROKEN_20251122_210342\\EQ12.ChatGPT.InlineRefactor\\NuGet.Config",
+          "C:\\Users\\Ricoj100\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net472"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net472": {
+            "targetAlias": "net472",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net472": {
+          "targetAlias": "net472",
+          "dependencies": {
+            "Community.VisualStudio.Toolkit": {
+              "target": "Package",
+              "version": "[17.0.76.309, )"
+            },
+            "Microsoft.VSSDK.BuildTools": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[17.9.3168, )"
+            },
+            "Microsoft.VisualStudio.SDK": {
+              "target": "Package",
+              "version": "[17.10.40171, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,209 @@
+# EQ12 NCAA PARLAY AUTOMATION WRAPPER
+# ===================================
+# PowerShell-integrated NCAA parlay automation for daily operations.
+
+[CmdletBinding()]
+param(
+    [Parameter()]
+    [string]$Action = "generate",
+    
+    [Parameter()]
+    [string]$ParlayType = "both",
+    
+    [Parameter()]
+    [switch]$VerboseOutput,
+    
+    [Parameter()]
+    [switch]$ExportJSON,
+    
+    [Parameter()]
+    [switch]$SaveToDatabase,
+    
+    [Parameter()]
+    [string]$OutputPath = "outputs"
+)
+
+# EQ12 System Integration
+$ErrorActionPreference = "Stop"
+$EQ12Root = "C:\EQ12"
+$StartTime = Get-Date
+
+Write-Host "🏈 EQ12 NCAA PARLAY BUILDER - PowerShell Integration" -ForegroundColor Green
+Write-Host ("=" * 60) -ForegroundColor DarkGray
+
+try {
+    # Verify Python environment
+    $PythonPath = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $PythonPath) {
+        throw "Python not found in PATH. Please install Python 3.12+"
+    }
+    
+    # Verify EQ12 NCAA parlay builder exists
+    $BuilderPath = Join-Path $EQ12Root "eq12_ncaa_parlay_builder.py"
+    if (-not (Test-Path $BuilderPath)) {
+        throw "NCAA Parlay Builder not found at: $BuilderPath"
+    }
+    
+    # Set up environment variables
+    Write-Verbose "Setting up environment variables..."
+    
+    # Check for API keys
+    $OddsApiKey = [Environment]::GetEnvironmentVariable("ODDS_API_KEY")
+    $OpenAIApiKey = [Environment]::GetEnvironmentVariable("OPENAI_API_KEY")
+    
+    if (-not $OddsApiKey) {
+        Write-Warning "⚠️ ODDS_API_KEY not set. Using demo data."
+    }
+    
+    if (-not $OpenAIApiKey) {
+        Write-Warning "⚠️ OPENAI_API_KEY not set. Using mock sentiment analysis."
+        # Set the hardcoded key for this session
+        $env:OPENAI_API_KEY = "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"
+    }
+    
+    # Ensure output directory exists
+    if (-not (Test-Path $OutputPath)) {
+        New-Item -ItemType Directory -Path $OutputPath -Force | Out-Null
+        Write-Verbose "Created output directory: $OutputPath"
+    }
+    
+    # Execute NCAA parlay generation
+    switch ($Action.ToLower()) {
+        "generate" {
+            Write-Host "🎯 Generating NCAA parlays..." -ForegroundColor Yellow
+            
+            $PythonArgs = @($BuilderPath)
+            if ($VerboseOutput) { $PythonArgs += "--verbose" }
+            
+            & python $PythonArgs
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ NCAA parlays generated successfully!" -ForegroundColor Green
+                
+                # Show latest outputs
+                $LatestFiles = Get-ChildItem -Path "outputs" -Filter "ncaa_parlays_*.json" | 
+                              Sort-Object LastWriteTime -Descending | 
+                              Select-Object -First 3
+                
+                if ($LatestFiles) {
+                    Write-Host "`n📂 Latest Parlay Files:" -ForegroundColor Cyan
+                    $LatestFiles | ForEach-Object {
+                        Write-Host "   📄 $($_.Name) ($(Get-Date $_.LastWriteTime -Format 'MM/dd HH:mm'))" -ForegroundColor White
+                    }
+                }
+            } else {
+                throw "NCAA parlay generation failed with exit code: $LASTEXITCODE"
+            }
+        }
+        
+        "status" {
+            Write-Host "📊 NCAA Parlay System Status" -ForegroundColor Yellow
+            
+            # Check database
+            $DbPath = Join-Path $EQ12Root "database\sports_betting.db"
+            if (Test-Path $DbPath) {
+                $DbSize = (Get-Item $DbPath).Length / 1KB
+                Write-Host "✅ Database: $DbPath ($([math]::Round($DbSize, 1)) KB)" -ForegroundColor Green
+            } else {
+                Write-Host "❌ Database not found" -ForegroundColor Red
+            }
+            
+            # Check recent outputs
+            if (Test-Path "outputs") {
+                $RecentOutputs = Get-ChildItem -Path "outputs" -Filter "ncaa_parlays_*.json" |
+                                Sort-Object LastWriteTime -Descending |
+                                Select-Object -First 5
+                
+                Write-Host "`n📈 Recent Parlays ($($RecentOutputs.Count)):" -ForegroundColor Cyan
+                $RecentOutputs | ForEach-Object {
+                    Write-Host "   📄 $($_.Name) ($(Get-Date $_.LastWriteTime -Format 'MM/dd/yyyy HH:mm'))" -ForegroundColor White
+                }
+            } else {
+                Write-Host "📂 No outputs directory found" -ForegroundColor Yellow
+            }
+            
+            # Check logs
+            $LogPath = Join-Path $EQ12Root "logs"
+            if (Test-Path $LogPath) {
+                $RecentLogs = Get-ChildItem -Path $LogPath -Filter "*ncaa_parlays*.log" |
+                             Sort-Object LastWriteTime -Descending |
+                             Select-Object -First 3
+                
+                if ($RecentLogs) {
+                    Write-Host "`n📋 Recent Logs ($($RecentLogs.Count)):" -ForegroundColor Cyan
+                    $RecentLogs | ForEach-Object {
+                        Write-Host "   📄 $($_.Name) ($(Get-Date $_.LastWriteTime -Format 'MM/dd HH:mm'))" -ForegroundColor White
+                    }
+                }
+            }
+        }
+        
+        "test" {
+            Write-Host "🧪 Testing NCAA Parlay System..." -ForegroundColor Yellow
+            
+            # Test Python imports
+            $TestScript = @"
+try:
+    import asyncio
+    import json
+    from eq12_ncaa_parlay_builder import EQ12NCAAParleyBuilder
+    print('✅ All imports successful')
+    
+    # Quick builder initialization test
+    builder = EQ12NCAAParleyBuilder()
+    print('✅ NCAA Parlay Builder initialized')
+    
+    print('✅ Test completed successfully')
+except Exception as e:
+    print(f'❌ Test failed: {e}')
+    exit(1)
+"@
+            
+            $TestScript | & python -c "exec(__import__('sys').stdin.read())"
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ NCAA Parlay System test passed!" -ForegroundColor Green
+            } else {
+                Write-Host "❌ NCAA Parlay System test failed!" -ForegroundColor Red
+            }
+        }
+        
+        "demo" {
+            Write-Host "🎮 Running NCAA Parlay Demo..." -ForegroundColor Yellow
+            
+            # Run with demo data
+            $env:ODDS_API_KEY = "demo_key"  # Force demo mode
+            
+            & python $BuilderPath
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ Demo completed successfully!" -ForegroundColor Green
+                Write-Host "📊 Check 'outputs' folder for generated demo parlays" -ForegroundColor Cyan
+            }
+        }
+        
+        default {
+            Write-Host "❌ Unknown action: $Action" -ForegroundColor Red
+            Write-Host "Available actions: generate, status, test, demo" -ForegroundColor Yellow
+            exit 1
+        }
+    }
+    
+    # Performance summary
+    Write-Host "`n⚡ Performance Summary:" -ForegroundColor Magenta
+    Write-Host "   🕒 Execution Time: $((Get-Date) - $StartTime)" -ForegroundColor White
+    Write-Host "   🎯 Action: $Action" -ForegroundColor White
+    Write-Host "   📂 Output Path: $OutputPath" -ForegroundColor White
+    
+} catch {
+    Write-Error "❌ EQ12 NCAA Parlay operation failed: $($_.Exception.Message)"
+    Write-Host "`nTroubleshooting:" -ForegroundColor Yellow
+    Write-Host "1. Verify Python 3.12+ is installed" -ForegroundColor White
+    Write-Host "2. Check ODDS_API_KEY environment variable" -ForegroundColor White
+    Write-Host "3. Ensure eq12_ncaa_parlay_builder.py exists" -ForegroundColor White
+    Write-Host "4. Check logs in: $EQ12Root\logs" -ForegroundColor White
+    exit 1
+}
+
+# Success message
+Write-Host "`n🎉 EQ12 NCAA Parlay Builder operation completed successfully!" -ForegroundColor Green

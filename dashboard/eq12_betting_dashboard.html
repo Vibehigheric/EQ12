@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 GODSTACK - Professional Betting Analysis Dashboard</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --eq12-primary: #1e3d59;
+            --eq12-secondary: #f5c842;
+            --eq12-success: #28a745;
+            --eq12-danger: #dc3545;
+            --eq12-warning: #ffc107;
+            --eq12-info: #17a2b8;
+            --eq12-dark: #2c3e50;
+            --eq12-light: #f8f9fa;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--eq12-dark) 0%, var(--eq12-primary) 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: rgba(30, 61, 89, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--eq12-secondary);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--eq12-secondary) !important;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            background: rgba(245, 200, 66, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--eq12-primary), var(--eq12-info));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, var(--eq12-info), var(--eq12-primary));
+            transform: scale(1.05);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, var(--eq12-success), #20c997);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, var(--eq12-warning), var(--eq12-secondary));
+            border: none;
+            border-radius: 25px;
+            color: var(--eq12-dark);
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .table {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background: rgba(30, 61, 89, 0.7);
+            border: none;
+            font-weight: bold;
+            color: var(--eq12-secondary);
+        }
+        
+        .table td {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .roi-positive {
+            color: var(--eq12-success);
+        }
+        
+        .roi-negative {
+            color: var(--eq12-danger);
+        }
+        
+        .confidence-high {
+            color: var(--eq12-success);
+        }
+        
+        .confidence-medium {
+            color: var(--eq12-warning);
+        }
+        
+        .confidence-low {
+            color: var(--eq12-danger);
+        }
+        
+        .sgp-card {
+            margin-bottom: 20px;
+            border-left: 4px solid var(--eq12-secondary);
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--eq12-secondary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-live {
+            background: var(--eq12-success);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-cached {
+            background: var(--eq12-warning);
+        }
+        
+        .status-error {
+            background: var(--eq12-danger);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                EQ12 GODSTACK
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#dashboard"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#sgp"><i class="fas fa-coins me-1"></i>SGP Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#analysis"><i class="fas fa-brain me-1"></i>Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#api"><i class="fas fa-code me-1"></i>API</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container-fluid" style="margin-top: 80px;">
+        <!-- Status Bar -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <span class="status-indicator status-live"></span>
+                                <strong>EQ12 System Status: </strong>
+                                <span class="text-success" id="system-status">OPERATIONAL</span>
+                            </div>
+                            <div class="col-md-3">
+                                <i class="fas fa-key me-1"></i>
+                                <strong>API Key: </strong>
+                                <span class="text-warning" id="api-status">8eb8...7d1 ✓</span>
+                            </div>
+                            <div class="col-md-3">
+                                <i class="fas fa-clock me-1"></i>
+                                <strong>Last Update: </strong>
+                                <span id="last-update">--:--</span>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-sm btn-primary" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value roi-positive" id="total-roi">+44.4x</div>
+                    <div class="metric-label">Best SGP ROI</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value text-info" id="win-probability">2.3%</div>
+                    <div class="metric-label">Win Probability</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value text-warning" id="active-games">3</div>
+                    <div class="metric-label">Active Games</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="metric-value text-success" id="recommended-stake">$8.00</div>
+                    <div class="metric-label">Recommended Stake</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="sgp-tab" data-bs-toggle="tab" data-bs-target="#sgp-pane" type="button">
+                            <i class="fas fa-coins me-1"></i>SGP Recommendations
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="odds-tab" data-bs-toggle="tab" data-bs-target="#odds-pane" type="button">
+                            <i class="fas fa-chart-bar me-1"></i>Live Odds
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis-pane" type="button">
+                            <i class="fas fa-brain me-1"></i>AI Analysis
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tools-tab" data-bs-toggle="tab" data-bs-target="#tools-pane" type="button">
+                            <i class="fas fa-tools me-1"></i>Tools
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="mainTabContent" style="margin-top: 20px;">
+                    <!-- SGP Recommendations Tab -->
+                    <div class="tab-pane fade show active" id="sgp-pane" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-trophy me-2"></i>Top SGP Recommendations
+                                            <button class="btn btn-sm btn-success float-end" onclick="buildNewSgp()">
+                                                <i class="fas fa-plus me-1"></i>Build New SGP
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="sgp-recommendations">
+                                            <div class="card sgp-card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <strong>NHL Stacked SGP - Tonight's Games</strong>
+                                                        <span class="badge bg-success ms-2">HIGH CONFIDENCE</span>
+                                                    </h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p><strong>Games:</strong> CHI@FLA, PIT@NYR, COL@LAK</p>
+                                                            <p><strong>Legs:</strong> 4 optimized selections</p>
+                                                            <p><strong>Stake:</strong> $8.00</p>
+                                                        </div>
+                                                        <div class="col-md-6 text-end">
+                                                            <div class="metric-value roi-positive">44.4x</div>
+                                                            <div class="metric-label">ROI Potential</div>
+                                                            <button class="btn btn-primary btn-sm mt-2">View Details</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card sgp-card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <strong>MLB Single Game - SEA vs DET</strong>
+                                                        <span class="badge bg-warning ms-2">MEDIUM CONFIDENCE</span>
+                                                    </h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p><strong>Game:</strong> Seattle Mariners vs Detroit Tigers</p>
+                                                            <p><strong>Legs:</strong> 3 selections</p>
+                                                            <p><strong>Stake:</strong> $8.00</p>
+                                                        </div>
+                                                        <div class="col-md-6 text-end">
+                                                            <div class="metric-value roi-positive">12.5x</div>
+                                                            <div class="metric-label">ROI Potential</div>
+                                                            <button class="btn btn-primary btn-sm mt-2">View Details</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Kelly Calculator</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Win Probability (%)</label>
+                                            <input type="number" class="form-control" id="kelly-probability" placeholder="55.0" min="0" max="100" step="0.1">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Decimal Odds</label>
+                                            <input type="number" class="form-control" id="kelly-odds" placeholder="2.00" min="1.01" step="0.01">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Bankroll ($)</label>
+                                            <input type="number" class="form-control" id="kelly-bankroll" placeholder="1000" min="1">
+                                        </div>
+                                        <button class="btn btn-primary w-100" onclick="calculateKelly()">
+                                            <i class="fas fa-calculator me-1"></i>Calculate Kelly
+                                        </button>
+                                        <div class="mt-3" id="kelly-results" style="display: none;">
+                                            <div class="alert alert-info">
+                                                <strong>Kelly Fraction:</strong> <span id="kelly-fraction">--</span><br>
+                                                <strong>Recommended Stake:</strong> <span id="kelly-stake">$--</span><br>
+                                                <strong>Expected Value:</strong> <span id="kelly-ev">--</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Odds Tab -->
+                    <div class="tab-pane fade" id="odds-pane" role="tabpanel">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>Live Odds Feed
+                                    <div class="float-end">
+                                        <select class="form-select form-select-sm d-inline-block w-auto" id="sport-selector">
+                                            <option value="icehockey_nhl">NHL</option>
+                                            <option value="baseball_mlb">MLB</option>
+                                            <option value="americanfootball_nfl">NFL</option>
+                                            <option value="basketball_nba">NBA</option>
+                                        </select>
+                                    </div>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Game</th>
+                                                <th>Time</th>
+                                                <th>Home Odds</th>
+                                                <th>Away Odds</th>
+                                                <th>Best Value</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="odds-table-body">
+                                            <tr>
+                                                <td colspan="6" class="text-center">
+                                                    <div class="loading-spinner me-2"></div>Loading live odds...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Analysis Tab -->
+                    <div class="tab-pane fade" id="analysis-pane" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Market Analysis</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="marketChart" width="400" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Risk Distribution</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="riskChart" width="400" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-comments me-2"></i>AI Insights</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="ai-insights">
+                                            <div class="alert alert-info">
+                                                <strong>Market Trend:</strong> NHL games showing increased volatility in moneyline odds. 
+                                                Recommended focus on puck line and totals markets for better value.
+                                            </div>
+                                            <div class="alert alert-warning">
+                                                <strong>Risk Alert:</strong> High correlation detected between COL@LAK and PIT@NYR games. 
+                                                Consider portfolio diversification across different sports.
+                                            </div>
+                                            <div class="alert alert-success">
+                                                <strong>Opportunity:</strong> Chicago@Florida showing arbitrage opportunity with 
+                                                2.3% edge on home team moneyline. Confidence: 87%.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tools Tab -->
+                    <div class="tab-pane fade" id="tools-pane" role="tabpanel">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>API Management</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Odds API Key</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="api-key-input" placeholder="Enter API key...">
+                                                <button class="btn btn-primary" onclick="updateApiKey()">
+                                                    <i class="fas fa-save"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <button class="btn btn-warning w-100" onclick="testApiConnection()">
+                                                <i class="fas fa-plug me-1"></i>Test API Connection
+                                            </button>
+                                        </div>
+                                        <div class="mb-3">
+                                            <button class="btn btn-info w-100" onclick="clearCache()">
+                                                <i class="fas fa-broom me-1"></i>Clear Cache
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-download me-2"></i>Data Export</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-success" onclick="exportSgpData()">
+                                                <i class="fas fa-file-csv me-1"></i>Export SGP Data (CSV)
+                                            </button>
+                                            <button class="btn btn-success" onclick="exportOddsData()">
+                                                <i class="fas fa-file-excel me-1"></i>Export Odds Data (Excel)
+                                            </button>
+                                            <button class="btn btn-success" onclick="exportAnalysisReport()">
+                                                <i class="fas fa-file-pdf me-1"></i>Export Analysis Report (PDF)
+                                            </button>
+                                            <hr>
+                                            <button class="btn btn-primary" onclick="openApiDocs()">
+                                                <i class="fas fa-book me-1"></i>API Documentation
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 EQ12 GODSTACK - Professional Betting Analysis Platform</p>
+            <small class="text-muted">Powered by The Odds API | Real-time data with Kelly criterion optimization</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // EQ12 Dashboard JavaScript
+        
+        // Global variables
+        let currentSport = 'icehockey_nhl';
+        let oddsData = {};
+        let sgpRecommendations = {};
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 EQ12 GODSTACK Dashboard Initializing...');
+            updateLastUpdateTime();
+            initializeCharts();
+            loadInitialData();
+            
+            // Set up auto-refresh every 5 minutes
+            setInterval(refreshData, 5 * 60 * 1000);
+        });
+        
+        // Update last update time
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('last-update').textContent = timeString;
+        }
+        
+        // Refresh all data
+        async function refreshData() {
+            console.log('🔄 Refreshing EQ12 data...');
+            updateLastUpdateTime();
+            
+            try {
+                // Update status indicators
+                document.getElementById('system-status').textContent = 'REFRESHING...';
+                document.getElementById('system-status').className = 'text-warning';
+                
+                // Simulate API calls (replace with actual API endpoints)
+                await Promise.all([
+                    loadOddsData(),
+                    loadSgpRecommendations(),
+                    loadMarketAnalysis()
+                ]);
+                
+                // Update status back to operational
+                document.getElementById('system-status').textContent = 'OPERATIONAL';
+                document.getElementById('system-status').className = 'text-success';
+                
+                console.log('✅ EQ12 data refresh complete');
+                
+            } catch (error) {
+                console.error('❌ Error refreshing data:', error);
+                document.getElementById('system-status').textContent = 'ERROR';
+                document.getElementById('system-status').className = 'text-danger';
+            }
+        }
+        
+        // Load odds data
+        async function loadOddsData() {
+            // This would call your PHP API endpoint
+            // For demo, we'll simulate the data
+            const mockOdds = [
+                {
+                    game: 'Chicago Blackhawks @ Florida Panthers',
+                    time: '7:00 PM EST',
+                    home_odds: 1.85,
+                    away_odds: 2.10,
+                    best_value: 'Away +110',
+                    game_id: 'chi_fla_20251007'
+                },
+                {
+                    game: 'Pittsburgh Penguins @ New York Rangers',
+                    time: '7:30 PM EST',
+                    home_odds: 1.75,
+                    away_odds: 2.25,
+                    best_value: 'Away +125',
+                    game_id: 'pit_nyr_20251007'
+                },
+                {
+                    game: 'Colorado Avalanche @ Los Angeles Kings',
+                    time: '10:30 PM EST',
+                    home_odds: 1.95,
+                    away_odds: 1.95,
+                    best_value: 'Even',
+                    game_id: 'col_lak_20251007'
+                }
+            ];
+            
+            oddsData = mockOdds;
+            updateOddsTable();
+        }
+        
+        // Update odds table
+        function updateOddsTable() {
+            const tbody = document.getElementById('odds-table-body');
+            tbody.innerHTML = '';
+            
+            oddsData.forEach(game => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${game.game}</strong></td>
+                    <td>${game.time}</td>
+                    <td><span class="badge bg-info">${game.home_odds}</span></td>
+                    <td><span class="badge bg-warning">${game.away_odds}</span></td>
+                    <td><strong>${game.best_value}</strong></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="buildSgpForGame('${game.game_id}')">
+                            <i class="fas fa-plus"></i> SGP
+                        </button>
+                    </td>
+                `;
+            });
+        }
+        
+        // Load SGP recommendations
+        async function loadSgpRecommendations() {
+            // Mock data - replace with actual API call
+            console.log('Loading SGP recommendations...');
+        }
+        
+        // Load market analysis
+        async function loadMarketAnalysis() {
+            // Mock data - replace with actual API call
+            console.log('Loading market analysis...');
+        }
+        
+        // Kelly Calculator
+        function calculateKelly() {
+            const probability = parseFloat(document.getElementById('kelly-probability').value) / 100;
+            const odds = parseFloat(document.getElementById('kelly-odds').value);
+            const bankroll = parseFloat(document.getElementById('kelly-bankroll').value);
+            
+            if (!probability || !odds || !bankroll) {
+                alert('Please fill in all Kelly calculator fields');
+                return;
+            }
+            
+            // Kelly formula: f = (bp - q) / b
+            // Where: b = odds - 1, p = probability, q = 1 - probability
+            const b = odds - 1;
+            const q = 1 - probability;
+            const kellyFraction = (b * probability - q) / b;
+            const clampedKelly = Math.min(kellyFraction, 0.25); // Cap at 25%
+            const recommendedStake = bankroll * Math.max(clampedKelly, 0);
+            const expectedValue = (probability * (odds - 1) - (1 - probability)) * recommendedStake;
+            
+            // Update results
+            document.getElementById('kelly-fraction').textContent = (clampedKelly * 100).toFixed(2) + '%';
+            document.getElementById('kelly-stake').textContent = '$' + recommendedStake.toFixed(2);
+            document.getElementById('kelly-ev').textContent = '$' + expectedValue.toFixed(2);
+            document.getElementById('kelly-results').style.display = 'block';
+        }
+        
+        // Initialize Charts
+        function initializeCharts() {
+            // Market Analysis Chart
+            const marketCtx = document.getElementById('marketChart').getContext('2d');
+            new Chart(marketCtx, {
+                type: 'line',
+                data: {
+                    labels: ['6h ago', '5h ago', '4h ago', '3h ago', '2h ago', '1h ago', 'Now'],
+                    datasets: [{
+                        label: 'Market Efficiency',
+                        data: [85, 87, 83, 89, 91, 88, 92],
+                        borderColor: '#f5c842',
+                        backgroundColor: 'rgba(245, 200, 66, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+            
+            // Risk Distribution Chart
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                    datasets: [{
+                        data: [60, 30, 10],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Utility functions
+        function buildNewSgp() {
+            alert('SGP Builder - Feature coming soon! This will integrate with your Python algorithms.');
+        }
+        
+        function buildSgpForGame(gameId) {
+            alert(`Building SGP for game: ${gameId}`);
+        }
+        
+        function updateApiKey() {
+            const apiKey = document.getElementById('api-key-input').value;
+            if (apiKey) {
+                // This would send to your PHP backend
+                alert('API Key updated successfully!');
+                document.getElementById('api-key-input').value = '';
+            }
+        }
+        
+        function testApiConnection() {
+            alert('Testing API connection... This will verify your Odds API key.');
+        }
+        
+        function clearCache() {
+            alert('Cache cleared successfully!');
+        }
+        
+        function exportSgpData() {
+            alert('Exporting SGP data to CSV...');
+        }
+        
+        function exportOddsData() {
+            alert('Exporting odds data to Excel...');
+        }
+        
+        function exportAnalysisReport() {
+            alert('Generating analysis report PDF...');
+        }
+        
+        function openApiDocs() {
+            window.open('/api/docs', '_blank');
+        }
+        
+        // Sport selector change
+        document.getElementById('sport-selector').addEventListener('change', function(e) {
+            currentSport = e.target.value;
+            loadOddsData();
+        });
+        
+        // Load initial data
+        function loadInitialData() {
+            refreshData();
+        }
+        
+        console.log('🎉 EQ12 GODSTACK Dashboard loaded successfully!');
+    </script>
+</body>
+</html>

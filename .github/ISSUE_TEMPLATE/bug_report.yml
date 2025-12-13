@@ -1,0 +1,111 @@
+name: 🐛 Bug Report
+description: Report a bug in EQ12 GODSTACK
+title: "[BUG]: "
+labels: ["bug", "triage"]
+assignees: ["Vibehigheric"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report for EQ12 GODSTACK
+        
+        Thanks for reporting a bug! Please provide detailed information to help us fix it quickly.
+
+  - type: checkboxes
+    id: stack-affected
+    attributes:
+      label: "🎯 Affected EQ12 Stack"
+      description: "Which business stack is affected by this bug?"
+      options:
+        - label: "🏈 Betting / OddsAPI"
+        - label: "✈️ Travel / Affiliate"
+        - label: "🌿 Cannabis / CBD"
+        - label: "🚗 Fleet / Turo" 
+        - label: "🏠 Credit / Housing"
+        - label: "🎓 Education"
+        - label: "🛒 AliDropship"
+        - label: "⚙️ Core GODSTACK"
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "⚠️ Bug Severity"
+      description: "How severe is this bug?"
+      options:
+        - "🔴 Critical - System broken, revenue impacted"
+        - "🟠 High - Major functionality broken"
+        - "🟡 Medium - Minor functionality issue" 
+        - "🟢 Low - Cosmetic or minor inconvenience"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "📝 Bug Description"
+      description: "Describe what happened and what you expected"
+      placeholder: "Clear description of the bug..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "🔄 Steps to Reproduce"
+      description: "Step-by-step instructions to reproduce the bug"
+      placeholder: |
+        1. Go to...
+        2. Run command...
+        3. Click on...
+        4. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "✅ Expected Behavior"
+      description: "What should have happened instead?"
+      placeholder: "Expected behavior description..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "🖥️ Environment"
+      description: "System information"
+      placeholder: |
+        - OS: Windows 11
+        - Python Version: 3.12
+        - EQ12 Component: trending_monitor.py
+        - Error Context: Task Scheduler / Manual run
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "📋 Error Messages / Logs"
+      description: "Any error messages, stack traces, or relevant logs"
+      placeholder: "Paste error messages or logs here..."
+      render: text
+
+  - type: checkboxes
+    id: sensitive-data
+    attributes:
+      label: "🔒 Sensitive Data Check"
+      description: "Confirm no sensitive information is included"
+      options:
+        - label: "I have removed all API keys, tokens, and personal information"
+          required: true
+        - label: "I have verified no financial or gambling data is exposed"
+          required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "📎 Additional Context"
+      description: "Screenshots, related issues, or other context"
+      placeholder: "Any additional information..."

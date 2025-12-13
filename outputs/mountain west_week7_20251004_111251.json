@@ -1,0 +1,176 @@
+{
+  "generated_at": "2025-10-04T11:12:51.664561",
+  "system": "EQ12 NCAA Week 7 Conference Builder",
+  "conference": "Mountain West",
+  "week": 7,
+  "parlays": [
+    {
+      "parlay_id": "Mountain West_BALANCED_Week7_20251004_111251",
+      "conference": "Mountain West",
+      "parlay_type": "balanced",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "e90085ebaf4a599c531e3e0bd5a6c1b1",
+          "sport": "NCAA-FB",
+          "conference": "Mountain West",
+          "matchup": "Nevada Wolf Pack @ Fresno State Bulldogs",
+          "home_team": "Fresno State Bulldogs",
+          "away_team": "Nevada Wolf Pack",
+          "pick_type": "H2H",
+          "bet": "Nevada Wolf Pack ML",
+          "odds": 405.0,
+          "confidence": 0.5599999999999999,
+          "kelly_percentage": 0.0902716049382716,
+          "sentiment": 0.7,
+          "weather": "Light Rain",
+          "edge_percentage": 36.198019801980195,
+          "clv_variance": 0.038132502984275826,
+          "start_time": "2025-10-05T02:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetUS",
+            "market": "h2h",
+            "outcome_name": "Nevada Wolf Pack"
+          }
+        }
+      ],
+      "combined_odds": 405.0,
+      "win_probability": 0.5599999999999999,
+      "expected_roi": 182.79999999999995,
+      "clv_vs_open": 0.038132502984275826,
+      "recommended_stake": 50.0,
+      "total_edge": 36.198019801980195,
+      "risk_score": 0.15,
+      "top25_count": 0,
+      "steam_count": 0,
+      "created_at": "2025-10-04T11:12:51.646787"
+    },
+    {
+      "parlay_id": "Mountain West_HIGH-PAYOUT_Week7_20251004_111251",
+      "conference": "Mountain West",
+      "parlay_type": "high-payout",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "8fe4d3c56069de55c950af75be1ef8d2",
+          "sport": "NCAA-FB",
+          "conference": "Mountain West",
+          "matchup": "Boise State Broncos @ Notre Dame Fighting Irish",
+          "home_team": "Notre Dame Fighting Irish",
+          "away_team": "Boise State Broncos",
+          "pick_type": "H2H",
+          "bet": "Boise State Broncos ML",
+          "odds": 980.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.09640816326530614,
+          "sentiment": 0.6,
+          "weather": "Light Rain",
+          "edge_percentage": 43.74074074074075,
+          "clv_variance": 0.032653235299904354,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Boise State Broncos"
+          }
+        },
+        {
+          "game_id": "e90085ebaf4a599c531e3e0bd5a6c1b1",
+          "sport": "NCAA-FB",
+          "conference": "Mountain West",
+          "matchup": "Nevada Wolf Pack @ Fresno State Bulldogs",
+          "home_team": "Fresno State Bulldogs",
+          "away_team": "Nevada Wolf Pack",
+          "pick_type": "H2H",
+          "bet": "Nevada Wolf Pack ML",
+          "odds": 405.0,
+          "confidence": 0.5599999999999999,
+          "kelly_percentage": 0.0902716049382716,
+          "sentiment": 0.7,
+          "weather": "Light Rain",
+          "edge_percentage": 36.198019801980195,
+          "clv_variance": 0.038132502984275826,
+          "start_time": "2025-10-05T02:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetUS",
+            "market": "h2h",
+            "outcome_name": "Nevada Wolf Pack"
+          }
+        },
+        {
+          "game_id": "7bf7e3851e7ac12cd6fe2f8ec3b795da",
+          "sport": "NCAA-FB",
+          "conference": "Mountain West",
+          "matchup": "Air Force Falcons @ Navy Midshipmen",
+          "home_team": "Navy Midshipmen",
+          "away_team": "Air Force Falcons",
+          "pick_type": "H2H",
+          "bet": "Air Force Falcons ML",
+          "odds": 415.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08334939759036147,
+          "sentiment": 0.6,
+          "weather": "Windy",
+          "edge_percentage": 33.58252427184466,
+          "clv_variance": 0.0781697181380709,
+          "start_time": "2025-10-04T16:00:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "BetOnline.ag",
+            "market": "h2h",
+            "outcome_name": "Air Force Falcons"
+          }
+        },
+        {
+          "game_id": "08fe7e0a9a16b45419f955cb3ac4f443",
+          "sport": "NCAA-FB",
+          "conference": "Mountain West",
+          "matchup": "UNLV Rebels @ Wyoming Cowboys",
+          "home_team": "Wyoming Cowboys",
+          "away_team": "UNLV Rebels",
+          "pick_type": "H2H",
+          "bet": "Wyoming Cowboys ML",
+          "odds": 150.0,
+          "confidence": 0.515,
+          "kelly_percentage": 0.03833333333333333,
+          "sentiment": 0.55,
+          "weather": "Cloudy",
+          "edge_percentage": 11.5,
+          "clv_variance": -0.00772407889063245,
+          "start_time": "2025-10-04T23:00:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "DraftKings",
+            "market": "h2h",
+            "outcome_name": "Wyoming Cowboys"
+          }
+        }
+      ],
+      "combined_odds": 70120.25000000001,
+      "win_probability": 0.08101156,
+      "expected_roi": 5588.6519960900005,
+      "clv_vs_open": 0.03530784438290466,
+      "recommended_stake": 25.0,
+      "total_edge": 125.0212848145656,
+      "risk_score": 0.6,
+      "top25_count": 0,
+      "steam_count": 1,
+      "created_at": "2025-10-04T11:12:51.646787"
+    }
+  ],
+  "summary": {
+    "total_parlays": 2,
+    "total_legs": 5,
+    "top25_games": 0,
+    "steam_moves": 1,
+    "total_stake": 75.0
+  }
+}

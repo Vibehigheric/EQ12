@@ -1,0 +1,261 @@
+name: EQ12 Nightly Sports Betting Evaluation
+# Professional daily analysis of betting performance, model accuracy, and recommendations
+
+on:
+    schedule:
+        # Run at 3:00 AM UTC daily (11 PM ET / 8 PM PT - after all games)
+        - cron: "0 3 * * *"
+    workflow_dispatch: # Allow manual trigger
+
+env:
+    ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    PYTHON_VERSION: "3.12"
+
+jobs:
+    nightly-evaluation:
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+
+        steps:
+            - name: 📥 Checkout EQ12 Repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 7 # Get last week of commits for analysis
+
+            - name: 🐍 Setup Python Environment
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  cache: "pip"
+
+            - name: 📦 Install Dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+                  # Additional evaluation dependencies
+                  pip install pandas numpy matplotlib seaborn scikit-learn
+
+            - name: 📊 Run Daily Performance Analysis
+              id: performance-analysis
+              run: |
+                  echo "🔄 Starting nightly performance evaluation..."
+                  python scripts/eq12_nightly_evaluator.py --analysis-type daily --verbose
+
+                  # Check if analysis completed successfully
+                  if [ $? -eq 0 ]; then
+                    echo "analysis_success=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "analysis_success=false" >> $GITHUB_OUTPUT
+                    exit 1
+                  fi
+
+            - name: 🧮 Model Accuracy Assessment
+              if: steps.performance-analysis.outputs.analysis_success == 'true'
+              run: |
+                  echo "🎯 Analyzing model prediction accuracy..."
+                  python scripts/eq12_model_evaluator.py --period 7days --include-hooks-analysis
+
+                  # Generate accuracy report
+                  python scripts/eq12_accuracy_reporter.py --format json --output logs/
+
+            - name: 💰 Profit/Loss Calculation
+              if: steps.performance-analysis.outputs.analysis_success == 'true'
+              run: |
+                  echo "💸 Calculating hypothetical P&L..."
+                  python scripts/eq12_pnl_calculator.py --period 1day --stake-method kelly --max-stake 0.05
+
+                  # Generate P&L summary
+                  python scripts/eq12_pnl_reporter.py --format markdown --output logs/daily_pnl_$(date +%Y%m%d).md
+
+            - name: 📈 EV vs Actual Correlation
+              if: steps.performance-analysis.outputs.analysis_success == 'true'
+              run: |
+                  echo "📊 Analyzing EV prediction accuracy..."
+                  python scripts/eq12_ev_correlator.py --window 7days --generate-plots
+
+                  # Check for model drift
+                  python scripts/eq12_drift_detector.py --threshold 0.15 --alert-on-drift
+
+            - name: 🎣 Hooks Performance Deep Dive
+              if: steps.performance-analysis.outputs.analysis_success == 'true'
+              run: |
+                  echo "🎣 Analyzing hooks betting performance..."
+                  python scripts/eq12_hooks_evaluator.py --key-numbers 3,7,10,14 --period 7days
+
+                  # Generate hooks-specific recommendations
+                  python scripts/eq12_hooks_optimizer.py --optimize-thresholds --output logs/
+
+            - name: 🔧 Recommendation Tuning
+              if: steps.performance-analysis.outputs.analysis_success == 'true'
+              run: |
+                  echo "⚙️ Optimizing recommendation parameters..."
+                  python scripts/eq12_parameter_optimizer.py --optimize ev-thresholds,kelly-fractions,correlation-penalties
+
+                  # Update configuration if significant improvements found
+                  python scripts/eq12_config_updater.py --auto-apply --backup-original
+
+            - name: 📱 Generate Nightly Report
+              if: always()
+              run: |
+                  echo "📄 Generating comprehensive nightly report..."
+                  python scripts/eq12_report_generator.py \
+                    --include performance,accuracy,pnl,hooks,recommendations \
+                    --format telegram-summary \
+                    --output logs/nightly_report_$(date +%Y%m%d).json
+
+            - name: 🚨 Send Nightly Alert
+              if: always()
+              env:
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              run: |
+                  echo "📲 Sending nightly evaluation summary..."
+
+                  # Determine alert priority based on results
+                  if [ "${{ steps.performance-analysis.outputs.analysis_success }}" == "true" ]; then
+                    ALERT_PRIORITY="SUCCESS"
+                  else
+                    ALERT_PRIORITY="FAILURE"
+                  fi
+
+                  python scripts/eq12_alerting_service.py \
+                    --mode nightly-report \
+                    --priority $ALERT_PRIORITY \
+                    --include-charts \
+                    --max-length 4000
+
+            - name: 💾 Archive Evaluation Results
+              if: always()
+              uses: actions/upload-artifact@v3
+              with:
+                  name: nightly-evaluation-${{ github.run_number }}
+                  path: |
+                      logs/nightly_report_*.json
+                      logs/daily_pnl_*.md
+                      logs/model_accuracy_*.json
+                      logs/hooks_analysis_*.json
+                      logs/parameter_optimization_*.json
+                  retention-days: 30
+
+            - name: 🔄 Update Performance Tracking
+              if: steps.performance-analysis.outputs.analysis_success == 'true'
+              run: |
+                  echo "📊 Updating long-term performance tracking..."
+
+                  # Update performance database
+                  python scripts/eq12_perf_tracker.py --add-daily-entry --compute-rolling-stats
+
+                  # Generate trend analysis
+                  python scripts/eq12_trend_analyzer.py --period 30days --detect-patterns
+
+                  # Check for performance degradation alerts
+                  python scripts/eq12_performance_monitor.py --check-degradation --alert-threshold 0.10
+
+    weekly-deep-analysis:
+        runs-on: ubuntu-latest
+        # Run weekly analysis on Sundays at 4:00 AM UTC
+        if: github.event.schedule == '0 4 * * 0' || github.event_name == 'workflow_dispatch'
+        timeout-minutes: 60
+
+        steps:
+            - name: 📥 Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 30 # Get last month for weekly analysis
+
+            - name: 🐍 Setup Python Environment
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  cache: "pip"
+
+            - name: 📦 Install Dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+                  pip install pandas numpy matplotlib seaborn scikit-learn plotly jupyter
+
+            - name: 📊 Weekly Performance Deep Dive
+              run: |
+                  echo "🔍 Running comprehensive weekly analysis..."
+
+                  # Full week performance analysis
+                  python scripts/eq12_weekly_analyzer.py \
+                    --period 7days \
+                    --include-all-metrics \
+                    --generate-visualizations \
+                    --output-format comprehensive
+
+                  # Market inefficiency detection
+                  python scripts/eq12_inefficiency_detector.py \
+                    --scan-period 7days \
+                    --detect-patterns \
+                    --update-opportunities
+
+                  # Model performance attribution
+                  python scripts/eq12_attribution_analyzer.py \
+                    --period 7days \
+                    --breakdown-by market,book,hook-type,ev-range
+
+            - name: 🎯 Strategic Recommendations Update
+              run: |
+                  echo "🎯 Generating strategic recommendations..."
+
+                  # Update betting strategy based on weekly performance
+                  python scripts/eq12_strategy_optimizer.py \
+                    --analyze-weekly-patterns \
+                    --optimize-allocations \
+                    --update-thresholds \
+                    --generate-recommendations
+
+                  # Create strategy update report
+                  python scripts/eq12_strategy_reporter.py \
+                    --format executive-summary \
+                    --include-backtesting \
+                    --output logs/weekly_strategy_update_$(date +%Y%m%d).md
+
+            - name: 📈 Generate Weekly Dashboard
+              run: |
+                  echo "📈 Creating weekly performance dashboard..."
+
+                  # Generate interactive dashboard
+                  python scripts/eq12_dashboard_generator.py \
+                    --type weekly \
+                    --include performance,trends,recommendations,opportunities \
+                    --format html \
+                    --output dashboard/weekly_performance.html
+
+                  # Update summary statistics
+                  python scripts/eq12_stats_updater.py --period weekly --publish-to-dashboard
+
+            - name: 💾 Archive Weekly Results
+              uses: actions/upload-artifact@v3
+              with:
+                  name: weekly-analysis-${{ github.run_number }}
+                  path: |
+                      logs/weekly_*
+                      dashboard/weekly_performance.html
+                      logs/strategy_update_*.md
+                  retention-days: 90
+
+    alert-on-failure:
+        runs-on: ubuntu-latest
+        needs: [nightly-evaluation]
+        if: failure()
+
+        steps:
+            - name: 🚨 Send Failure Alert
+              env:
+                  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+                  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              run: |
+                  curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+                    -H 'Content-Type: application/json' \
+                    -d "{
+                      \"chat_id\": \"${TELEGRAM_CHAT_ID}\",
+                      \"text\": \"🚨 **EQ12 Nightly Evaluation FAILED**\n\n❌ Workflow: ${GITHUB_WORKFLOW}\n🔗 Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\n⏰ Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')\",
+                      \"parse_mode\": \"Markdown\"
+                    }"

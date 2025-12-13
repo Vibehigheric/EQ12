@@ -1,0 +1,19 @@
+{
+   "api_console_project_id": "749005554160",
+   "app": {
+      "launch": {
+         "web_url": "https://twistedwave.com/online/"
+      },
+      "urls": [ "https://d1o0328zb1mp9s.cloudfront.net/", "http://online.twistedwave.com/", "https://online.twistedwave.com/", "http://twistedwave.com/online/", "https://twistedwave.com/online/" ]
+   },
+   "container": "GOOGLE_DRIVE",
+   "description": "An audio editor",
+   "icons": {
+      "128": "icon_128.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDM1SCB96oM1htp6MwKKfXppA2jCT5HRVgPoeL/Hgq2cv+VH7TeIFBxiqiVylmJIDfS1cULNuHPWVWiSPzD7xUv9lhjSsdZ/Ez5ZcNQj4kedtV8BP8T1Os8hVKsPRhEe/ZXsdTXv+3gu3DDhjOQJWDyASs5BZ9h1Y6wNApz6AtaawIDAQAB",
+   "manifest_version": 2,
+   "name": "TwistedWave",
+   "update_url": "http://clients2.google.com/service/update2/crx",
+   "version": "1.0.6"
+}

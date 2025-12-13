@@ -24,28 +24,28 @@
 [CmdletBinding()]
 param(
     # Manual commit message
-    [Parameter(Mandatory=$false, ParameterSetName='Manual')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Manual')]
     [string]$Message,
 
     # Auto-commit based on script success
-    [Parameter(Mandatory=$false, ParameterSetName='Auto')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Auto')]
     [switch]$Auto,
 
     # Last script exit code for auto-commit
-    [Parameter(Mandatory=$false, ParameterSetName='Auto')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Auto')]
     [int]$ScriptResult = 0,
 
     # Use commit message template
-    [Parameter(Mandatory=$false, ParameterSetName='Template')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Template')]
     [ValidateSet('feat', 'fix', 'docs', 'style', 'refactor', 'test', 'chore')]
     [string]$Template,
 
     # Template scope
-    [Parameter(Mandatory=$false, ParameterSetName='Template')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Template')]
     [string]$Scope,
 
     # Template description
-    [Parameter(Mandatory=$false, ParameterSetName='Template')]
+    [Parameter(Mandatory = $false, ParameterSetName = 'Template')]
     [string]$Description,
 
     # Sign commit with GPG
@@ -72,11 +72,11 @@ param(
 # ============================================================
 
 $Script:Config = @{
-    LogPath = "C:\EQ12\logs\commit_audit.log"
-    GitIgnoreSecrets = @('*.key', '*.env', 'secrets.json', 'api_keys.json')
+    LogPath                = "C:\EQ12\logs\commit_audit.log"
+    GitIgnoreSecrets       = @('*.key', '*.env', 'secrets.json', 'api_keys.json')
     MaxCommitMessageLength = 72
-    RequireScope = $true
-    AutoSign = $Sign
+    RequireScope           = $true
+    AutoSign               = $Sign
 }
 
 # ============================================================
@@ -86,11 +86,11 @@ $Script:Config = @{
 function Write-CommitLog {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('INFO', 'SUCCESS', 'WARNING', 'ERROR')]
         [string]$Level,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Message
     )
 
@@ -99,10 +99,10 @@ function Write-CommitLog {
 
     # Console output with colors
     $color = switch ($Level) {
-        'INFO'    { 'Cyan' }
+        'INFO' { 'Cyan' }
         'SUCCESS' { 'Green' }
         'WARNING' { 'Yellow' }
-        'ERROR'   { 'Red' }
+        'ERROR' { 'Red' }
     }
 
     Write-Host $logEntry -ForegroundColor $color
@@ -131,7 +131,8 @@ function Test-CommitReadiness {
     # Check 1: Is this a Git repository?
     if (-not (Test-Path ".git")) {
         $issues += "❌ Not a Git repository. Run 'git init' first."
-    } else {
+    }
+    else {
         Write-CommitLog -Level SUCCESS -Message "✅ Git repository detected"
     }
 
@@ -139,7 +140,8 @@ function Test-CommitReadiness {
     $status = git status --porcelain
     if (-not $status) {
         $issues += "⚠️ No changes to commit. Run 'git add <file>' first."
-    } else {
+    }
+    else {
         $stagedCount = ($status | Where-Object { $_ -match '^[MADRCU]' }).Count
         Write-CommitLog -Level SUCCESS -Message "✅ $stagedCount file(s) staged for commit"
     }
@@ -162,7 +164,8 @@ function Test-CommitReadiness {
 
     if (-not $userName -or -not $userEmail) {
         $issues += "❌ Git user not configured. Run: git config user.name 'Your Name' && git config user.email 'you@example.com'"
-    } else {
+    }
+    else {
         Write-CommitLog -Level SUCCESS -Message "✅ Git user: $userName <$userEmail>"
     }
 
@@ -171,7 +174,8 @@ function Test-CommitReadiness {
         $gpgProgram = git config gpg.program
         if (-not $gpgProgram) {
             $issues += "⚠️ GPG program not configured. Signing may fail."
-        } else {
+        }
+        else {
             Write-CommitLog -Level SUCCESS -Message "✅ GPG program: $gpgProgram"
         }
 
@@ -239,7 +243,8 @@ function New-AutoCommitMessage {
     if ($ExitCode -eq 0) {
         $type = "chore"
         $desc = "auto-commit after successful execution at $timestamp"
-    } else {
+    }
+    else {
         $type = "fix"
         $desc = "auto-commit with errors (exit code: $ExitCode) at $timestamp"
     }
@@ -254,7 +259,7 @@ function New-AutoCommitMessage {
 function Invoke-GitCommit {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Message,
 
         [bool]$SignCommit = $false,
@@ -293,13 +298,15 @@ function Invoke-GitCommit {
                 $signature = git log --show-signature -1 2>&1
                 if ($signature -match "Good signature") {
                     Write-CommitLog -Level SUCCESS -Message "✅ GPG signature verified"
-                } else {
+                }
+                else {
                     Write-CommitLog -Level WARNING -Message "⚠️ GPG signature verification inconclusive"
                 }
             }
 
             return $true
-        } else {
+        }
+        else {
             Write-CommitLog -Level ERROR -Message "❌ Commit failed: $output"
             return $false
         }
@@ -335,7 +342,8 @@ function Invoke-GitPush {
         if ($LASTEXITCODE -eq 0) {
             Write-CommitLog -Level SUCCESS -Message "✅ Push successful"
             return $true
-        } else {
+        }
+        else {
             Write-CommitLog -Level ERROR -Message "❌ Push failed: $output"
             return $false
         }
@@ -371,7 +379,8 @@ function Invoke-CommitRollback {
             Write-CommitLog -Level SUCCESS -Message "✅ Rollback successful ($resetType)"
             Write-CommitLog -Level INFO -Message "Changes are now unstaged (--mixed) or removed (--hard)"
             return $true
-        } else {
+        }
+        else {
             Write-CommitLog -Level ERROR -Message "❌ Rollback failed: $output"
             return $false
         }

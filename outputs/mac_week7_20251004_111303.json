@@ -1,0 +1,183 @@
+{
+  "generated_at": "2025-10-04T11:13:03.434512",
+  "system": "EQ12 NCAA Week 7 Conference Builder",
+  "conference": "MAC",
+  "week": 7,
+  "parlays": [
+    {
+      "parlay_id": "MAC_HIGH-PAYOUT_Week7_20251004_111303",
+      "conference": "MAC",
+      "parlay_type": "high-payout",
+      "week": 7,
+      "legs": [
+        {
+          "game_id": "1c2bc1c8623e7527c13a515529541b89",
+          "sport": "NCAA-FB",
+          "conference": "MAC",
+          "matchup": "Minnesota Golden Gophers @ Ohio State Buckeyes",
+          "home_team": "Ohio State Buckeyes",
+          "away_team": "Minnesota Golden Gophers",
+          "pick_type": "H2H",
+          "bet": "Minnesota Golden Gophers ML",
+          "odds": 1500.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.09973333333333334,
+          "sentiment": 0.6,
+          "weather": "Cloudy",
+          "edge_percentage": 46.75,
+          "clv_variance": 0.01906851762249658,
+          "start_time": "2025-10-04T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Minnesota Golden Gophers"
+          }
+        },
+        {
+          "game_id": "6850ce38681c03906af201d68cdd70e7",
+          "sport": "NCAA-FB",
+          "conference": "MAC",
+          "matchup": "Ohio State Buckeyes @ Illinois Fighting Illini",
+          "home_team": "Illinois Fighting Illini",
+          "away_team": "Ohio State Buckeyes",
+          "pick_type": "H2H",
+          "bet": "Illinois Fighting Illini ML",
+          "odds": 540.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08859259259259261,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 37.375,
+          "clv_variance": 0.05824413992279501,
+          "start_time": "2025-10-11T16:00:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "FanDuel",
+            "market": "h2h",
+            "outcome_name": "Illinois Fighting Illini"
+          }
+        },
+        {
+          "game_id": "03d3f28e904cf8e05320709c03cbf06e",
+          "sport": "NCAA-FB",
+          "conference": "MAC",
+          "matchup": "Ohio Bobcats @ Ball State Cardinals",
+          "home_team": "Ball State Cardinals",
+          "away_team": "Ohio Bobcats",
+          "pick_type": "H2H",
+          "bet": "Ball State Cardinals ML",
+          "odds": 450.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08511111111111114,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 34.81818181818182,
+          "clv_variance": 0.057610501423822805,
+          "start_time": "2025-10-04T16:00:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "BetMGM",
+            "market": "h2h",
+            "outcome_name": "Ball State Cardinals"
+          }
+        },
+        {
+          "game_id": "c1614464ceef18bdc3108d0fb3899343",
+          "sport": "NCAA-FB",
+          "conference": "MAC",
+          "matchup": "Colorado Buffaloes @ TCU Horned Frogs",
+          "home_team": "TCU Horned Frogs",
+          "away_team": "Colorado Buffaloes",
+          "pick_type": "H2H",
+          "bet": "Colorado Buffaloes ML",
+          "odds": 425.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08388235294117648,
+          "sentiment": 0.6,
+          "weather": "Light Rain",
+          "edge_percentage": 33.952380952380956,
+          "clv_variance": -0.013605460062016489,
+          "start_time": "2025-10-04T23:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetUS",
+            "market": "h2h",
+            "outcome_name": "Colorado Buffaloes"
+          }
+        },
+        {
+          "game_id": "3c1a2eb27aec91630f0cda00f959ee61",
+          "sport": "NCAA-FB",
+          "conference": "MAC",
+          "matchup": "Western Michigan Broncos @ UMass Minutemen",
+          "home_team": "UMass Minutemen",
+          "away_team": "Western Michigan Broncos",
+          "pick_type": "H2H",
+          "bet": "UMass Minutemen ML",
+          "odds": 375.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.08093333333333334,
+          "sentiment": 0.6,
+          "weather": "Cold",
+          "edge_percentage": 31.947368421052637,
+          "clv_variance": 0.012721786881687933,
+          "start_time": "2025-10-04T18:30:00Z",
+          "is_top25": false,
+          "steam_detected": false,
+          "market_data": {
+            "bookmaker": "BetUS",
+            "market": "h2h",
+            "outcome_name": "UMass Minutemen"
+          }
+        },
+        {
+          "game_id": "48dea4f4b99b6976d2c519dc48b52ed4",
+          "sport": "NCAA-FB",
+          "conference": "MAC",
+          "matchup": "Central Michigan Chippewas @ Akron Zips",
+          "home_team": "Akron Zips",
+          "away_team": "Central Michigan Chippewas",
+          "pick_type": "H2H",
+          "bet": "Akron Zips ML",
+          "odds": 254.0,
+          "confidence": 0.53,
+          "kelly_percentage": 0.06899212598425197,
+          "sentiment": 0.6,
+          "weather": "Cloudy",
+          "edge_percentage": 24.751412429378533,
+          "clv_variance": 0.06162753205470846,
+          "start_time": "2025-10-04T19:30:00Z",
+          "is_top25": false,
+          "steam_detected": true,
+          "market_data": {
+            "bookmaker": "MyBookie.ag",
+            "market": "h2h",
+            "outcome_name": "Akron Zips"
+          }
+        }
+      ],
+      "combined_odds": 4971759.2,
+      "win_probability": 0.02216436112900001,
+      "expected_roi": 110098.08279134109,
+      "clv_vs_open": 0.03261116964058238,
+      "recommended_stake": 13.147786493747104,
+      "total_edge": 209.59434362099395,
+      "risk_score": 0.8999999999999999,
+      "top25_count": 0,
+      "steam_count": 3,
+      "created_at": "2025-10-04T11:13:03.419931"
+    }
+  ],
+  "summary": {
+    "total_parlays": 1,
+    "total_legs": 6,
+    "top25_games": 0,
+    "steam_moves": 3,
+    "total_stake": 13.147786493747104
+  }
+}

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+EQ12.TelegramBot
+</name>
+</assembly>
+<members>
+<member name="T:EQ12.TelegramBot.EQ12.TelegramBot.TelegramBotService">
+ <summary>Telegram bot command handler and webhook receiver</summary>
+</member>
+<member name="M:EQ12.TelegramBot.EQ12.TelegramBot.TelegramBotService.HandleUpdateAsync(System.String)">
+ <summary>Handle incoming Telegram webhook update</summary>
+</member>
+<member name="M:EQ12.TelegramBot.EQ12.TelegramBot.TelegramBotService.SendMessageAsync(System.Int64,System.String)">
+ <summary>Send a message to a Telegram chat</summary>
+</member>
+</members>
+</doc>

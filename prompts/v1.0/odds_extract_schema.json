@@ -1,0 +1,146 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "EQ12 Odds Extract Schema",
+    "type": "object",
+    "required": [
+        "extracted_at_utc",
+        "games",
+        "stale_data_warning",
+        "missing_books"
+    ],
+    "properties": {
+        "extracted_at_utc": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "games": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "game_id",
+                    "away_team",
+                    "home_team",
+                    "start_time_utc",
+                    "books"
+                ],
+                "properties": {
+                    "game_id": {
+                        "type": "string",
+                        "pattern": "^nfl_[0-9]{8}_[a-z]+_[a-z]+$"
+                    },
+                    "away_team": {
+                        "type": "string"
+                    },
+                    "home_team": {
+                        "type": "string"
+                    },
+                    "start_time_utc": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "books": {
+                        "type": "object",
+                        "properties": {
+                            "draftkings": {
+                                "$ref": "#/definitions/book_odds"
+                            },
+                            "fanduel": {
+                                "$ref": "#/definitions/book_odds"
+                            },
+                            "betmgm": {
+                                "$ref": "#/definitions/book_odds"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "stale_data_warning": {
+            "type": "boolean"
+        },
+        "missing_books": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "draftkings",
+                    "fanduel",
+                    "betmgm"
+                ]
+            }
+        }
+    },
+    "definitions": {
+        "book_odds": {
+            "type": "object",
+            "properties": {
+                "moneyline": {
+                    "type": "object",
+                    "properties": {
+                        "away": {
+                            "type": "integer"
+                        },
+                        "home": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "spread": {
+                    "type": "object",
+                    "properties": {
+                        "away": {
+                            "type": "object",
+                            "properties": {
+                                "point": {
+                                    "type": "number"
+                                },
+                                "odds": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "home": {
+                            "type": "object",
+                            "properties": {
+                                "point": {
+                                    "type": "number"
+                                },
+                                "odds": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "total": {
+                    "type": "object",
+                    "properties": {
+                        "over": {
+                            "type": "object",
+                            "properties": {
+                                "point": {
+                                    "type": "number"
+                                },
+                                "odds": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "under": {
+                            "type": "object",
+                            "properties": {
+                                "point": {
+                                    "type": "number"
+                                },
+                                "odds": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

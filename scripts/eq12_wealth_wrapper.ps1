@@ -1,0 +1,503 @@
+#!/usr/bin/env powershell
+<#
+EQ12 Wealth Intelligence PowerShell Wrapper
+Cross-platform management for the unified Sports Betting + Financial AI system.
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("Start", "Stop", "Status", "Report", "Analyze", "Parlay", "Monitor", "Test")]
+    [string]$Action = "Status",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory=$false)]
+    [int]$ParlayLegs = 8,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Sport = "MLB",
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$GenerateReport,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$AutoDaemon
+)
+
+# EQ12 Wealth Intelligence Wrapper
+# Professional PowerShell wrapper for unified betting + financial AI
+
+$ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
+
+# Global configuration
+$SCRIPT_NAME = "EQ12 Wealth Intelligence Wrapper"
+$VERSION = "1.0.0"
+$LOG_PATH = Join-Path $Workspace "logs\wealth_wrapper.log"
+$PID_FILE = Join-Path $Workspace "data\wealth_core.pid"
+$PYTHON_SCRIPT = Join-Path $Workspace "scripts\eq12_wealth_core.py"
+
+# Ensure directories exist
+$null = New-Item -ItemType Directory -Force -Path (Split-Path $LOG_PATH)
+$null = New-Item -ItemType Directory -Force -Path (Split-Path $PID_FILE)
+
+function Write-Log {
+    param(
+        [string]$Message,
+        [ValidateSet("INFO", "WARNING", "ERROR", "SUCCESS")]
+        [string]$Level = "INFO"
+    )
+    
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogMessage = "[$Timestamp] [$Level] $Message"
+    
+    # Color output
+    switch ($Level) {
+        "SUCCESS" { Write-Host $LogMessage -ForegroundColor Green }
+        "WARNING" { Write-Host $LogMessage -ForegroundColor Yellow }
+        "ERROR" { Write-Host $LogMessage -ForegroundColor Red }
+        default { Write-Host $LogMessage -ForegroundColor White }
+    }
+    
+    # Log to file
+    try {
+        $LogMessage | Out-File -Append -FilePath $LOG_PATH -Encoding UTF8
+    }
+    catch {
+        # Ignore logging errors
+    }
+}
+
+function Test-PythonAvailable {
+    try {
+        $null = python --version 2>&1
+        return $true
+    }
+    catch {
+        return $false
+    }
+}
+
+function Test-WealthCoreScript {
+    if (-not (Test-Path $PYTHON_SCRIPT)) {
+        Write-Log "Wealth core script not found: $PYTHON_SCRIPT" "ERROR"
+        return $false
+    }
+    return $true
+}
+
+function Get-WealthCoreStatus {
+    try {
+        if (Test-Path $PID_FILE) {
+            $pid = Get-Content $PID_FILE -ErrorAction SilentlyContinue
+            if ($pid -and (Get-Process -Id $pid -ErrorAction SilentlyContinue)) {
+                $process = Get-Process -Id $pid
+                return @{
+                    Running = $true
+                    PID = $pid
+                    StartTime = $process.StartTime
+                    CPU = $process.CPU
+                    Memory = [Math]::Round($process.WorkingSet64 / 1MB, 2)
+                }
+            }
+        }
+        
+        return @{
+            Running = $false
+            PID = $null
+            StartTime = $null
+            CPU = 0
+            Memory = 0
+        }
+    }
+    catch {
+        Write-Log "Status check failed: $($_.Exception.Message)" "ERROR"
+        return @{
+            Running = $false
+            PID = $null
+            StartTime = $null
+            CPU = 0
+            Memory = 0
+        }
+    }
+}
+
+function Start-WealthCore {
+    param(
+        [bool]$Daemon = $false
+    )
+    
+    Write-Log "Starting EQ12 Wealth Intelligence Core..." "INFO"
+    
+    # Check if already running
+    $status = Get-WealthCoreStatus
+    if ($status.Running) {
+        Write-Log "Wealth core already running (PID: $($status.PID))" "WARNING"
+        return $true
+    }
+    
+    # Validate prerequisites
+    if (-not (Test-PythonAvailable)) {
+        Write-Log "Python not available in PATH" "ERROR"
+        return $false
+    }
+    
+    if (-not (Test-WealthCoreScript)) {
+        return $false
+    }
+    
+    try {
+        if ($Daemon) {
+            # Start as daemon
+            $arguments = @(
+                $PYTHON_SCRIPT
+                "--workspace", $Workspace
+                "--daemon"
+            )
+            
+            if ($VerboseOutput) {
+                $arguments += "--verbose"
+            }
+            
+            $process = Start-Process -FilePath "python" -ArgumentList $arguments -NoNewWindow -PassThru
+            
+            # Save PID
+            $process.Id | Out-File -FilePath $PID_FILE -Encoding ASCII
+            
+            Write-Log "Wealth core daemon started (PID: $($process.Id))" "SUCCESS"
+            return $true
+        }
+        else {
+            # Interactive mode
+            $arguments = @(
+                $PYTHON_SCRIPT
+                "--workspace", $Workspace
+                "--report"
+            )
+            
+            python @arguments
+            Write-Log "Wealth core executed successfully" "SUCCESS"
+            return $true
+        }
+    }
+    catch {
+        Write-Log "Failed to start wealth core: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Stop-WealthCore {
+    Write-Log "Stopping EQ12 Wealth Intelligence Core..." "INFO"
+    
+    $status = Get-WealthCoreStatus
+    if (-not $status.Running) {
+        Write-Log "Wealth core is not running" "WARNING"
+        return $true
+    }
+    
+    try {
+        Stop-Process -Id $status.PID -Force
+        
+        # Clean up PID file
+        if (Test-Path $PID_FILE) {
+            Remove-Item $PID_FILE -Force
+        }
+        
+        Write-Log "Wealth core stopped successfully" "SUCCESS"
+        return $true
+    }
+    catch {
+        Write-Log "Failed to stop wealth core: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Get-WealthReport {
+    Write-Log "Generating wealth intelligence report..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--report"
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Wealth report generated successfully" "SUCCESS"
+            
+            if ($VerboseOutput) {
+                Write-Host $result
+            }
+            
+            return $true
+        }
+        else {
+            Write-Log "Wealth report generation failed" "ERROR"
+            Write-Host $result
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Report generation error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Start-BettingAnalysis {
+    Write-Log "Starting betting opportunity analysis for $Sport..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--analyze"
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Betting analysis completed successfully" "SUCCESS"
+            
+            if ($VerboseOutput) {
+                Write-Host $result
+            }
+            
+            return $true
+        }
+        else {
+            Write-Log "Betting analysis failed" "ERROR"
+            Write-Host $result
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Analysis error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function New-OptimalParlay {
+    Write-Log "Generating $ParlayLegs-leg optimal parlay for $Sport..." "INFO"
+    
+    try {
+        $arguments = @(
+            $PYTHON_SCRIPT
+            "--workspace", $Workspace
+            "--parlay", $ParlayLegs
+        )
+        
+        $result = python @arguments 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Log "Optimal parlay generated successfully" "SUCCESS"
+            
+            if ($VerboseOutput) {
+                Write-Host $result
+            }
+            
+            return $true
+        }
+        else {
+            Write-Log "Parlay generation failed" "ERROR"
+            Write-Host $result
+            return $false
+        }
+    }
+    catch {
+        Write-Log "Parlay generation error: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Test-WealthSystem {
+    Write-Log "Testing EQ12 Wealth Intelligence system..." "INFO"
+    
+    $tests = @()
+    
+    # Test 1: Python availability
+    $pythonTest = Test-PythonAvailable
+    $tests += @{
+        Name = "Python Runtime"
+        Status = $pythonTest
+        Message = if ($pythonTest) { "Available" } else { "Not found in PATH" }
+    }
+    
+    # Test 2: Script availability
+    $scriptTest = Test-WealthCoreScript
+    $tests += @{
+        Name = "Wealth Core Script"
+        Status = $scriptTest
+        Message = if ($scriptTest) { "Found" } else { "Missing" }
+    }
+    
+    # Test 3: Workspace structure
+    $workspaceTest = Test-Path $Workspace
+    $tests += @{
+        Name = "Workspace Directory"
+        Status = $workspaceTest
+        Message = if ($workspaceTest) { "Exists" } else { "Missing" }
+    }
+    
+    # Test 4: Required directories
+    $requiredDirs = @("data", "logs", "configs", "reports")
+    foreach ($dir in $requiredDirs) {
+        $dirPath = Join-Path $Workspace $dir
+        $dirTest = Test-Path $dirPath
+        $tests += @{
+            Name = "$dir Directory"
+            Status = $dirTest
+            Message = if ($dirTest) { "Exists" } else { "Missing" }
+        }
+    }
+    
+    # Test 5: Environment variables
+    $envVars = @("OPENAI_API_KEY", "ODDS_API_KEY")
+    foreach ($var in $envVars) {
+        $envTest = [bool](Get-ChildItem env: | Where-Object Name -eq $var)
+        $tests += @{
+            Name = "$var Environment"
+            Status = $envTest
+            Message = if ($envTest) { "Set" } else { "Not set" }
+        }
+    }
+    
+    # Display results
+    Write-Host "`n EQ12 Wealth Intelligence System Test Results" -ForegroundColor Cyan
+    Write-Host "=" * 60 -ForegroundColor Gray
+    
+    $passed = 0
+    $total = $tests.Count
+    
+    foreach ($test in $tests) {
+        $status = if ($test.Status) { " PASS" } else { " FAIL" }
+        $color = if ($test.Status) { "Green" } else { "Red" }
+        
+        Write-Host "$status $($test.Name): $($test.Message)" -ForegroundColor $color
+        
+        if ($test.Status) { $passed++ }
+    }
+    
+    Write-Host "=" * 60 -ForegroundColor Gray
+    Write-Host "Tests Passed: $passed/$total" -ForegroundColor $(if ($passed -eq $total) { "Green" } else { "Yellow" })
+    
+    return ($passed -eq $total)
+}
+
+function Show-WealthStatus {
+    Write-Host "`n EQ12 Wealth Intelligence Status" -ForegroundColor Cyan
+    Write-Host "=" * 50 -ForegroundColor Gray
+    
+    $status = Get-WealthCoreStatus
+    
+    if ($status.Running) {
+        Write-Host " Status: Running" -ForegroundColor Green
+        Write-Host " PID: $($status.PID)" -ForegroundColor White
+        Write-Host " Started: $($status.StartTime)" -ForegroundColor White
+        Write-Host " CPU: $($status.CPU)" -ForegroundColor White
+        Write-Host " Memory: $($status.Memory) MB" -ForegroundColor White
+    }
+    else {
+        Write-Host " Status: Stopped" -ForegroundColor Red
+    }
+    
+    # Show recent log entries
+    if (Test-Path $LOG_PATH) {
+        Write-Host "`n Recent Activity:" -ForegroundColor Yellow
+        Get-Content $LOG_PATH -Tail 5 | ForEach-Object {
+            Write-Host "  $_" -ForegroundColor Gray
+        }
+    }
+    
+    # Show workspace info
+    Write-Host "`n Workspace: $Workspace" -ForegroundColor Yellow
+    if (Test-Path $Workspace) {
+        $size = (Get-ChildItem $Workspace -Recurse | Measure-Object -Property Length -Sum).Sum
+        $sizeGB = [Math]::Round($size / 1GB, 2)
+        Write-Host " Size: $sizeGB GB" -ForegroundColor White
+    }
+}
+
+# Main execution logic
+function Main {
+    Write-Log "Starting $SCRIPT_NAME v$VERSION" "INFO"
+    Write-Log "Action: $Action | Workspace: $Workspace" "INFO"
+    
+    switch ($Action.ToLower()) {
+        "start" {
+            $success = Start-WealthCore -Daemon:$AutoDaemon
+            if ($success -and $GenerateReport) {
+                Start-Sleep -Seconds 3
+                Get-WealthReport | Out-Null
+            }
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "stop" {
+            $success = Stop-WealthCore
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "status" {
+            Show-WealthStatus
+            exit 0
+        }
+        
+        "report" {
+            $success = Get-WealthReport
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "analyze" {
+            $success = Start-BettingAnalysis
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "parlay" {
+            $success = New-OptimalParlay
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "monitor" {
+            Write-Log "Starting continuous monitoring..." "INFO"
+            $success = Start-WealthCore -Daemon:$true
+            if ($success) {
+                Write-Host " Wealth Intelligence monitoring started" -ForegroundColor Green
+                Write-Host "Use 'Stop' action to terminate" -ForegroundColor Yellow
+            }
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        "test" {
+            $success = Test-WealthSystem
+            Write-Log "System test completed: $(if ($success) { 'PASS' } else { 'FAIL' })" $(if ($success) { "SUCCESS" } else { "ERROR" })
+            exit $(if ($success) { 0 } else { 1 })
+        }
+        
+        default {
+            Write-Log "Unknown action: $Action" "ERROR"
+            Write-Host "Available actions: Start, Stop, Status, Report, Analyze, Parlay, Monitor, Test" -ForegroundColor Yellow
+            exit 1
+        }
+    }
+}
+
+# Execute main function
+try {
+    Main
+}
+catch {
+    Write-Log "Unexpected error: $($_.Exception.Message)" "ERROR"
+    Write-Host "Stack trace:" -ForegroundColor Red
+    Write-Host $_.ScriptStackTrace -ForegroundColor Red
+    exit 1
+}
+finally {
+    Write-Log "$SCRIPT_NAME execution completed" "INFO"
+}

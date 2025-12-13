@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: eq12-parlays-webhook
+    env: docker
+    plan: free
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile.webhook
+    envVars:
+      - key: GUMROAD_ACCESS_TOKEN
+        sync: false  # set in Render dashboard
+      - key: GUMROAD_PARLAYS_PRODUCT_ID
+        sync: false  # set in Render dashboard
+      - key: WEBHOOK_SECRET
+        sync: false  # optional; set in Render dashboard
+    healthCheckPath: /gumroad/ping
+    region: oregon

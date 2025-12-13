@@ -1,0 +1,10 @@
+{
+   "appDesc": {
+      "description": "App description.",
+      "message": "TwitterやFacebookなどの複数ソーシャルネットワークへの投稿、追跡調査そして結果分析…"
+   },
+   "appName": {
+      "description": "App name.",
+      "message": "Hootsuite"
+   }
+}

@@ -1,0 +1,15 @@
+{
+    "generated_at": "2025-12-11 20:23:15.017027",
+    "stats": {
+        "total_profit": 0.0,
+        "total_bets": 0,
+        "avg_clv": 0.0
+    },
+    "recent_bets": [],
+    "alerts": [
+        {
+            "type": "INFO",
+            "message": "Dashboard Data Updated"
+        }
+    ]
+}

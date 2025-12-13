@@ -1,0 +1,33 @@
+<svg width="124" height="162" viewBox="0 0 124 162" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M116.116 61.6152H108.129V46.2146C108.129 20.6974 87.4436 0.0117188 61.9265 0.0117188C36.4093 0.0117188 15.7237 20.6974 15.7237 46.2146V61.6152H7.88442C1.02746 61.6152 -1.6654 70.5085 4.04004 74.3121L15.3694 81.865C15.4903 81.9457 15.6079 82.0297 15.7237 82.1147V92.4175V97.6482V100.118C15.7237 106.278 20.66 108.951 26.5043 110.899C31.1246 112.439 34.2048 120.139 40.3652 120.139C43.4454 120.139 43.4454 118.599 49.6058 118.599C54.2261 118.599 55.7662 123.219 61.9265 123.219C68.0869 123.219 69.627 118.599 74.2473 118.599C80.4077 118.599 80.4077 120.139 83.4879 120.139C89.6483 120.139 92.8663 112.019 97.3487 110.899C103.509 109.359 108.129 106.278 108.129 100.118V97.4519V92.4175V82.2265C108.292 82.1021 108.458 81.9802 108.631 81.865L119.96 74.3121C125.665 70.5085 122.973 61.6152 116.116 61.6152Z" fill="white"/>
+<path d="M108.941 25.0115C105.941 18.0115 93.9412 11.5115 82.9412 12.0115C87.6078 30.0114 98.6412 63.8112 105.441 55.0112C113.941 44.0112 111.941 32.0115 108.941 25.0115Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M85.4412 25.632V22.3879C85.4412 20.6963 83.4667 19.5336 81.6946 20.205C76.0616 22.3401 71.9412 29.1682 71.9412 37.2622C71.9412 47.0649 77.9854 55.0117 85.4412 55.0117C92.8969 55.0117 98.9412 47.0649 98.9412 37.2622C98.9412 33.1443 97.8736 29.3556 96.0835 26.3453C95.2443 24.9344 93.0722 24.657 91.7886 25.7821L90.0503 27.3055C88.3493 28.7964 85.4412 27.7404 85.4412 25.632Z" fill="#73706E"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M51.2917 34.0432V32.2821C51.2917 31.3638 50.1948 30.7326 49.2103 31.0971C46.0809 32.2562 43.7917 35.9629 43.7917 40.3567C43.7917 45.6782 47.1496 49.9922 51.2917 49.9922C55.4338 49.9922 58.7917 45.6782 58.7917 40.3567C58.7917 38.1213 58.1986 36.0646 57.2041 34.4304C56.7379 33.6645 55.5312 33.5139 54.8181 34.1247L53.8524 34.9516C52.9074 35.761 51.2917 35.1878 51.2917 34.0432Z" fill="#73706E"/>
+<g filter="url(#filter0_f_359_18522)">
+<g filter="url(#filter1_f_359_18522)">
+<g filter="url(#filter2_f_359_18522)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M61.9994 151.989C85.1954 151.989 104 146.693 104 140.159C104 133.626 85.1954 128.328 61.9994 128.328C38.8034 128.328 20.0002 133.626 20.0002 140.159C20.0002 146.693 38.8034 151.989 61.9994 151.989Z" fill="#5273E8" fill-opacity="0.2"/>
+</g>
+</g>
+</g>
+<circle cx="86.9412" cy="37.0117" r="25" fill="white" fill-opacity="0.1" stroke="#5273E8" stroke-width="4"/>
+<path d="M119.626 76.7311C120.576 77.7334 122.158 77.7762 123.161 76.8266C124.163 75.877 124.206 74.2947 123.256 73.2924L119.626 76.7311ZM101.626 57.7311L119.626 76.7311L123.256 73.2924L105.256 54.2924L101.626 57.7311Z" fill="#5273E8"/>
+<path d="M70.4412 39.0129C72.9412 26.5127 82.9412 19.5129 96.9412 23.0129" stroke="white" stroke-opacity="0.5" stroke-width="3"/>
+<defs>
+<filter id="filter0_f_359_18522" x="13.2394" y="121.567" width="97.5217" height="37.1839" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="3.38044" result="effect1_foregroundBlur_359_18522"/>
+</filter>
+<filter id="filter1_f_359_18522" x="13.2394" y="121.567" width="97.5217" height="37.1839" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="3.38044" result="effect1_foregroundBlur_359_18522"/>
+</filter>
+<filter id="filter2_f_359_18522" x="10.0002" y="118.328" width="104" height="43.6621" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="5" result="effect1_foregroundBlur_359_18522"/>
+</filter>
+</defs>
+</svg>

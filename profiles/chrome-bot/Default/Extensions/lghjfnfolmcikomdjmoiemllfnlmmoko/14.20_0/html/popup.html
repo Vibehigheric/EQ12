@@ -1,0 +1,125 @@
+<div id="pb-popup">
+  <div id="pb-maximized" style="display: none;">
+    <div id="pb-header">
+      <div class="pb-header-top">
+        <div class="brand-icon">
+          <div id="logo"><img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg"></div>
+          <div class="disclosure-text browser-chrome">When you buy after clicking on CNET Shopping, we may earn a commission.</div>
+        </div>
+        <div class="right">
+          <img class="debug-no" src="chrome-extension://{{ extension_id }}/images/icons8-bug-50.png">
+          <div class="separator hide-chrome debug-no"></div>
+          <i class="material-icons settings hide-chrome">settings</i>
+          <div class="separator hide-chrome"></div>
+          <i class="material-icons pb-close">close</i>
+        </div>
+      </div>
+      <div class="pb-header-bottom">
+        <div class="title">
+          __MSG_coupon_text__
+        </div>
+      </div>
+    </div>
+    <div id="pb-content">
+      <div id="ihprices" style="display: none;">
+        <div class="placeholder-text">Price comparison not available for this page</div>
+      </div>
+      <div id="pb-coupons" style="display: none;">
+        <div class="placeholder-text">No __MSG_coupon_text__s available for this site</div>
+      </div>
+      <div id="pb-search">
+        <input placeholder="Search" type="text" />
+        <button><i class="material-icons">search</i></button>
+      </div>
+    </div>
+    <div id="pb-footer">
+      <div class="footer-item browser-chrome footer-item-main" data-content-id="ihprices">
+        <img src="chrome-extension://{{ extension_id }}/images/priceComp-normal@2x.svg">
+        <div class="label">PRICE COMPARISON</div>
+      </div>
+      <div class="footer-item browser-chrome footer-item-main selected" data-content-id="pb-coupons" data-display="flex">
+        <img src="chrome-extension://{{ extension_id }}/images/voucher-active@2x.svg">
+        <div class="label">__MSG_coupon_text__s</div>
+        <div class="coupon-amount">0</div>
+      </div>
+      <div class="footer-item hide-chrome" id="pb-pricealert" data-display="flex">
+        <img src="chrome-extension://{{ extension_id }}/images/pricealert-normal@2x.svg">
+        <div class="label">PRICE ALERTS</div>
+      </div>
+      <div class="footer-item hide-chrome" id="pb-cashback" data-display="flex">
+        <img src="chrome-extension://{{ extension_id }}/images/cashback-normal@2x.svg">
+        <div class="label">CASHBACK EARNINGS</div>
+      </div>
+    </div>
+
+  </div>
+  <div id="pb-minimized">
+    <div class="icon">
+    </div>
+    <div id="cs-minimized__message" class="pb-message">
+      <div class="ih">InvisibleHand is now CNET Shopping</div>
+    </div>
+    <div class="buttons">
+      <div id="cs-minimized__button--close" class="close">Close</div>
+      <div id="cs-minimized__button--open" class="open">Compare</div>
+    </div>
+    <div class="disclosure-text browser-chrome">When you buy after clicking on CNET Shopping, we may earn a commission.</div>
+  </div>
+  <div id="pb-auto-coupons" style="display: none;">
+    <div class="header">
+      <div class="ih-icon">
+        <img src="chrome-extension://{{ extension_id }}/images/cnet-shopping-logo.svg"/>
+      </div>
+      <div class="close-icon"><i class="material-icons pb-close">close</i></div>
+    </div>
+    <div class="content">
+      <div class="confetti" id="confetti1"></div>
+        <div class="confetti" id="confetti2"></div>
+        <div id="ticketContainer">
+          <div id="ticket">
+            <div class="face">
+                <h1 class="coupons-amount"></h1>
+                <p class="coupons-text">__MSG_coupon_text__ found!</p>
+                <button id="apply-auto-coupon-btn" class="apply-button">Apply __MSG_coupon_text__s</button>
+              </div>
+              <div class="face back"></div>
+          </div>
+        </div>
+        <div class="disclosure-text browser-chrome">When you buy after clicking on CNET Shopping, we may earn a commission.</div>
+        <div class="confetti" id="confetti3"></div>
+    </div>
+  </div>
+</div>
+<div class="rebrand-container" style="display: none">
+  <div class="confetti" id="confetti-1"></div>
+  <div class="confetti" id="confetti-2"></div>
+  <button class="close-notification">
+      <img src="chrome-extension://{{ extension_id }}/images/close-icon.svg">
+  </button>
+  <div class="message-container">
+    <div class="message-icons">
+      <div class="icon-ih"><img src="chrome-extension://{{ extension_id }}/images/ih_logo.png"></div>
+      <div class="icon-point-arrow"><img src="chrome-extension://{{ extension_id }}/images/points-arrow.svg"></div>
+      <div class="icon-cnet-logo">
+        <svg width="124" height="24" viewBox="0 0 124 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g id="temp-logo">
+              <rect width="124" height="24" fill="transparent" />
+              <g id="Logo">
+                <path id="Logo_2" fill-rule="evenodd" clip-rule="evenodd"
+                  d="M9.58857 0H8.10359V24H9.58857V0ZM2.03531 8.7422C2.05364 7.22738 4.69361 7.17262 4.69361 8.6692L4.71195 9.96502H6.72859V8.76046C6.85692 4.74525 -0.0546729 4.74525 0.000326521 8.6692V15.5863C-0.0546729 19.5103 6.87526 19.6015 6.74693 15.5863V14.1445H4.69361V15.6958C4.69361 17.1924 2.07197 17.2289 2.03531 15.6958V8.7422ZM14.7952 6.15057C13.8785 6.6616 13.5302 7.17262 13.5302 7.17262V6.05932H10.6519V7.55589L11.7702 7.57414V16.7544H10.8169V18.2509H13.8052V8.54144C13.8235 7.08137 16.2435 7.04487 16.2435 8.46844V18.2509H19.5801V16.7544H18.2785V8.5597C18.2052 7.46464 17.8568 6.47909 16.9402 6.07757C17.1052 6.15057 15.9685 5.51179 14.7952 6.15057ZM28.6184 15.5498C28.6915 16.6424 29.0385 17.6259 29.9504 18.0292C29.8086 17.9673 30.4235 18.269 31.0384 18.251H33V16.7544C33 16.7544 32.175 16.7361 31.735 16.7544C31.185 16.7544 30.7084 16.4989 30.6717 15.7141V7.5924V7.57415H32.6333V6.09582H30.6717V6.07757V2.92015H28.6184V15.5498ZM24.9151 15.6776V14.1445H26.9684V15.5863C27.0967 19.6015 20.1668 19.5103 20.2218 15.5863V8.6692C20.1668 4.74525 27.0784 4.74525 26.9501 8.76046V12.0821C26.9501 12.2829 26.7851 12.4471 26.5834 12.4471H22.2568V15.6776C22.2751 17.2106 24.9151 17.1741 24.9151 15.6776ZM24.9151 8.6692C24.9151 7.15437 22.2934 7.15437 22.2568 8.65095H22.2751V10.9323H24.9151V8.6692Z"
+                  fill="white" />
+              </g>
+              <line id="Divider" x1="41.5" y1="4" x2="41.5" y2="20" stroke="#D8D8D8" />
+              <path id="Shopping"
+                d="M52.636 16.144C54.796 16.144 55.84 15.04 55.84 13.576C55.84 10.588 51.244 11.44 51.244 10.168C51.244 9.688 51.652 9.364 52.384 9.364C53.2 9.364 54.064 9.64 54.712 10.24L55.66 8.992C54.868 8.26 53.812 7.876 52.54 7.876C50.656 7.876 49.504 8.98 49.504 10.312C49.504 13.324 54.112 12.352 54.112 13.768C54.112 14.224 53.656 14.656 52.72 14.656C51.616 14.656 50.74 14.164 50.176 13.576L49.252 14.872C49.996 15.628 51.1 16.144 52.636 16.144ZM66.1873 16V7.996H64.4713V11.14H60.6913V7.996H58.9873V16H60.6913V12.64H64.4713V16H66.1873ZM73.5567 16.144C75.9807 16.144 77.7447 14.416 77.7447 12.004C77.7447 9.592 75.9807 7.864 73.5567 7.864C71.1447 7.864 69.3807 9.592 69.3807 12.004C69.3807 14.416 71.1447 16.144 73.5567 16.144ZM73.5567 14.632C72.0807 14.632 71.1327 13.492 71.1327 12.004C71.1327 10.504 72.0807 9.376 73.5567 9.376C75.0327 9.376 75.9927 10.504 75.9927 12.004C75.9927 13.492 75.0327 14.632 73.5567 14.632ZM82.6444 16V13.156H84.6844C86.4124 13.156 87.3724 11.968 87.3724 10.576C87.3724 9.172 86.4244 7.996 84.6844 7.996H80.9404V16H82.6444ZM84.4564 11.656H82.6444V9.496H84.4564C85.1284 9.496 85.6324 9.904 85.6324 10.576C85.6324 11.236 85.1284 11.656 84.4564 11.656ZM92.1327 16V13.156H94.1727C95.9007 13.156 96.8607 11.968 96.8607 10.576C96.8607 9.172 95.9127 7.996 94.1727 7.996H90.4287V16H92.1327ZM93.9447 11.656H92.1327V9.496H93.9447C94.6167 9.496 95.1207 9.904 95.1207 10.576C95.1207 11.236 94.6167 11.656 93.9447 11.656ZM101.621 16V7.996H99.917V16H101.621ZM112.374 16V7.996H110.67V13.024L106.962 7.996H105.21V16H106.914V10.78L110.73 16H112.374ZM119.828 16.156C121.28 16.156 122.42 15.556 123.236 14.644V11.572H119.42V13.06H121.532V14.02C121.208 14.32 120.536 14.632 119.828 14.632C118.376 14.632 117.32 13.516 117.32 12.004C117.32 10.492 118.376 9.376 119.828 9.376C120.68 9.376 121.364 9.856 121.724 10.42L123.14 9.652C122.54 8.704 121.496 7.864 119.828 7.864C117.488 7.864 115.568 9.472 115.568 12.004C115.568 14.524 117.488 16.156 119.828 16.156Z"
+                fill="white" />
+            </g>
+          </svg>
+        </div>
+    </div>
+    <div class="message-text">
+        <p class="notification-primary-text">InvisibleHand is now CNET Shopping!</p>
+        <p class="notification-secondary-text">CNET Shopping will continue to find you the lowest price on your favorite products and apply the best coupons across the internet. <a class="notification-link" href="https://welcome.invisiblehandlabs.com/welcome-to-cnet-shopping" target="_blank">Learn More</a></p>
+    </div>
+  </div>
+</div>

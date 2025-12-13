@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Enhanced Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0b0e11 0%, #14181d 100%);
+            color: #e7e7e7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(20, 24, 29, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00d4ff;
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: #00d4ff;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-connected {
+            background: #00ff88;
+        }
+
+        .status-disconnected {
+            background: #ff4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            margin-top: 80px;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .github-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .repo-badge {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .arbitrage-alert {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #ffd700;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
+        .kelly-recommendation {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .card {
+            background: rgba(20, 24, 29, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #00d4ff;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            color: #00d4ff;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #a0a0a0;
+        }
+
+        .metric-value {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .metric-value.warning {
+            color: #ffaa00;
+        }
+
+        .metric-value.danger {
+            color: #ff4444;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .alert {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid #ffaa00;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            color: #ffaa00;
+        }
+
+        .alert.success {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .alert.danger {
+            background: rgba(255, 68, 68, 0.1);
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .loading {
+            text-align: center;
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>
+            <span id="connection-status" class="status-indicator status-disconnected"></span>
+            EQ12 Enhanced Real-Time Dashboard
+        </h1>
+    </header>
+
+    <div class="container">
+        <!-- System Health Card -->
+        <div class="card">
+            <h2>🏥 System Health</h2>
+            <div id="health-content" class="loading">Connecting to server...</div>
+        </div>
+
+        <!-- Sports Odds Card -->
+        <div class="card">
+            <h2>🏈 Live Sports Odds</h2>
+            <button class="btn" onclick="fetchOdds()">Refresh Odds</button>
+            <div id="odds-content" class="loading">Loading odds data...</div>
+        </div>
+
+        <!-- Arbitrage Opportunities Card -->
+        <div class="card">
+            <h2>⚡ Arbitrage Opportunities</h2>
+            <div id="arbitrage-content" class="loading">Scanning for opportunities...</div>
+        </div>
+
+        <!-- Revenue Analytics Card -->
+        <div class="card">
+            <h2>💰 Revenue Analytics</h2>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+            <div id="revenue-metrics"></div>
+        </div>
+
+        <!-- Free Tier Usage Card -->
+        <div class="card">
+            <h2>📊 Free Tier Usage</h2>
+            <div id="usage-content" class="loading">Loading usage data...</div>
+        </div>
+
+        <!-- Content Inventory Card -->
+        <div class="card">
+            <h2>📚 Content Inventory</h2>
+            <div id="inventory-content" class="loading">Loading inventory...</div>
+        </div>
+
+        <!-- GitHub Integration Status -->
+        <div class="card">
+            <h2>🐙 GitHub Integration</h2>
+            <div id="github-status">
+                <div class="github-status">
+                    <span class="repo-badge">ArbitrageEngine.vb</span>
+                    <span class="metric-value">✅ Active</span>
+                </div>
+                <div class="github-status">
+                    <span class="repo-badge">KellyCalculator.vb</span>
+                    <span class="metric-value">✅ Active</span>
+                </div>
+                <div class="github-status">
+                    <span class="repo-badge">OddsApiClient.vb</span>
+                    <span class="metric-value">✅ Active</span>
+                </div>
+                <div class="metric">
+                    <span>Repositories Integrated:</span>
+                    <span class="metric-value" id="repos-count">3</span>
+                </div>
+                <div class="metric">
+                    <span>Last Integration:</span>
+                    <span class="metric-value" id="last-integration">2025-10-03</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kelly Calculator -->
+        <div class="card">
+            <h2>🧮 Kelly Calculator</h2>
+            <div id="kelly-calculator">
+                <div class="metric">
+                    <label>American Odds:</label>
+                    <input type="number" id="kelly-odds" value="+150" style="background: rgba(0,0,0,0.3); border: 1px solid #00d4ff; color: white; padding: 0.5rem; border-radius: 4px;">
+                </div>
+                <div class="metric">
+                    <label>Win Probability:</label>
+                    <input type="number" id="kelly-prob" value="0.55" step="0.01" min="0" max="1" style="background: rgba(0,0,0,0.3); border: 1px solid #00d4ff; color: white; padding: 0.5rem; border-radius: 4px;">
+                </div>
+                <div class="metric">
+                    <label>Kelly Fraction:</label>
+                    <input type="number" id="kelly-fraction" value="0.5" step="0.1" min="0.1" max="1" style="background: rgba(0,0,0,0.3); border: 1px solid #00d4ff; color: white; padding: 0.5rem; border-radius: 4px;">
+                </div>
+                <button class="btn" onclick="calculateKelly()">Calculate Kelly Stake</button>
+                <div id="kelly-result"></div>
+            </div>
+        </div>
+
+        <!-- Live Arbitrage Alerts -->
+        <div class="card full-width">
+            <h2>⚡ Live Arbitrage Alerts</h2>
+            <div id="live-arbitrage-alerts">
+                <div class="arbitrage-alert">
+                    <h3>🎯 NFL Arbitrage Opportunity</h3>
+                    <p><strong>Chicago Bears vs Green Bay Packers</strong></p>
+                    <p>🟢 Bears ML (+165) at DraftKings | 🔴 Packers ML (-150) at FanDuel</p>
+                    <p><strong>Arbitrage: 2.4% | Lock Profit: $24.50</strong></p>
+                    <a href="https://bit.ly/eq12-arb-chi-gb" target="_blank" class="btn">Bet Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Alerts Card -->
+        <div class="card">
+            <h2>🔔 Live Alerts</h2>
+            <div id="alerts-container">
+                <div class="alert">
+                    <strong>Welcome!</strong> Dashboard is initializing...
+                </div>
+            </div>
+        </div>
+
+        <!-- API Status Card -->
+        <div class="card">
+            <h2>🌐 API Endpoints</h2>
+            <div id="api-status" class="loading">Testing API endpoints...</div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let socket;
+        let revenueChart;
+        const API_BASE = 'http://localhost:3000/api';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWebSocket();
+            loadInitialData();
+            setupCharts();
+            startPeriodicUpdates();
+        });
+
+        // WebSocket connection
+        function initializeWebSocket() {
+            try {
+                socket = io('http://localhost:3000');
+                
+                socket.on('connect', () => {
+                    updateConnectionStatus(true);
+                    addAlert('Connected to EQ12 server!', 'success');
+                    
+                    // Subscribe to data feeds
+                    socket.emit('subscribe', ['odds', 'arbitrage', 'alerts']);
+                });
+
+                socket.on('disconnect', () => {
+                    updateConnectionStatus(false);
+                    addAlert('Disconnected from server', 'danger');
+                });
+
+                socket.on('data_update', (data) => {
+                    handleDataUpdate(data);
+                });
+
+                socket.on('alert', (alert) => {
+                    addAlert(alert.message, alert.type || 'info');
+                });
+
+                socket.on('error', (error) => {
+                    addAlert(`Error: ${error.message}`, 'danger');
+                });
+
+            } catch (error) {
+                console.error('WebSocket initialization failed:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('connection-status');
+            indicator.className = connected ? 
+                'status-indicator status-connected' : 
+                'status-indicator status-disconnected';
+        }
+
+        // Load initial data
+        async function loadInitialData() {
+            await Promise.all([
+                fetchSystemHealth(),
+                fetchOdds(),
+                fetchArbitrage(),
+                fetchRevenue(),
+                fetchFreeTierUsage(),
+                fetchContentInventory(),
+                testAPIEndpoints()
+            ]);
+        }
+
+        // Fetch system health
+        async function fetchSystemHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                const content = `
+                    <div class="metric">
+                        <span class="metric-label">Status</span>
+                        <span class="metric-value">${data.status}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Uptime</span>
+                        <span class="metric-value">${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Memory</span>
+                        <span class="metric-value">${Math.round(data.memory.heapUsed / 1024 / 1024)}MB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Version</span>
+                        <span class="metric-value">${data.version}</span>
+                    </div>
+                `;
+                
+                document.getElementById('health-content').innerHTML = content;
+            } catch (error) {
+                document.getElementById('health-content').innerHTML = 
+                    '<div class="alert danger">Failed to connect to server</div>';
+            }
+        }
+
+        // Fetch sports odds
+        async function fetchOdds() {
+            try {
+                const response = await fetch(`${API_BASE}/odds`);
+                const data = await response.json();
+                
+                let content = '<table class="data-table"><tr><th>Team</th><th>Odds</th><th>Time</th></tr>';
+                
+                if (data.data && data.data.length > 0) {
+                    data.data.slice(0, 5).forEach(game => {
+                        content += `<tr>
+                            <td>${game.home_team || 'TBD'} vs ${game.away_team || 'TBD'}</td>
+                            <td>Live</td>
+                            <td>${new Date(game.commence_time || Date.now()).toLocaleTimeString()}</td>
+                        </tr>`;
+                    });
+                } else {
+                    content += '<tr><td colspan="3">No live games available</td></tr>';
+                }
+                
+                content += '</table>';
+                document.getElementById('odds-content').innerHTML = content;
+            } catch (error) {
+                document.getElementById('odds-content').innerHTML = 
+                    '<div class="alert danger">Failed to load odds data</div>';
+            }
+        }
+
+        // Fetch arbitrage opportunities
+        async function fetchArbitrage() {
+            try {
+                const response = await fetch(`${API_BASE}/arbitrage`);
+                const data = await response.json();
+                
+                let content = '';
+                
+                if (data.opportunities && data.opportunities.length > 0) {
+                    content = '<table class="data-table"><tr><th>Match</th><th>Profit</th><th>Books</th></tr>';
+                    data.opportunities.forEach(opp => {
+                        content += `<tr>
+                            <td>${opp.match}</td>
+                            <td class="metric-value">${opp.profit.toFixed(2)}%</td>
+                            <td>${opp.bookmaker1} / ${opp.bookmaker2}</td>
+                        </tr>`;
+                    });
+                    content += '</table>';
+                } else {
+                    content = '<div class="alert">No arbitrage opportunities found</div>';
+                }
+                
+                document.getElementById('arbitrage-content').innerHTML = content;
+            } catch (error) {
+                document.getElementById('arbitrage-content').innerHTML = 
+                    '<div class="alert danger">Failed to load arbitrage data</div>';
+            }
+        }
+
+        // Fetch revenue data and update chart
+        async function fetchRevenue() {
+            try {
+                const response = await fetch(`${API_BASE}/revenue/projections`);
+                const data = await response.json();
+                
+                updateRevenueChart(data);
+                
+                const metrics = `
+                    <div class="metric">
+                        <span class="metric-label">Current Month</span>
+                        <span class="metric-value">$${data.currentMonth.toLocaleString()}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Projected</span>
+                        <span class="metric-value">$${data.projectedMonth.toLocaleString()}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Growth Rate</span>
+                        <span class="metric-value">${data.growthRate}%</span>
+                    </div>
+                `;
+                
+                document.getElementById('revenue-metrics').innerHTML = metrics;
+            } catch (error) {
+                document.getElementById('revenue-metrics').innerHTML = 
+                    '<div class="alert danger">Failed to load revenue data</div>';
+            }
+        }
+
+        // Fetch free tier usage
+        async function fetchFreeTierUsage() {
+            try {
+                const response = await fetch(`${API_BASE}/monitoring/free-tier`);
+                const data = await response.json();
+                
+                let content = '';
+                
+                Object.entries(data.services).forEach(([service, usage]) => {
+                    const percentage = usage.percentage;
+                    const statusClass = percentage > 80 ? 'danger' : percentage > 60 ? 'warning' : '';
+                    
+                    content += `
+                        <div class="metric">
+                            <span class="metric-label">${service}</span>
+                            <span class="metric-value ${statusClass}">${percentage}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%"></div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('usage-content').innerHTML = content;
+            } catch (error) {
+                document.getElementById('usage-content').innerHTML = 
+                    '<div class="alert danger">Failed to load usage data</div>';
+            }
+        }
+
+        // Calculate Kelly Criterion stake
+        async function calculateKelly() {
+            try {
+                const odds = parseInt(document.getElementById('kelly-odds').value);
+                const probability = parseFloat(document.getElementById('kelly-prob').value);
+                const fraction = parseFloat(document.getElementById('kelly-fraction').value);
+                const bankroll = 10000; // Default bankroll
+                
+                const response = await fetch(`${API_BASE}/kelly/calculate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        odds: odds,
+                        probability: probability,
+                        fraction: fraction,
+                        bankroll: bankroll
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const kelly = data.kelly;
+                    const resultDiv = document.getElementById('kelly-result');
+                    
+                    const riskClass = parseFloat(kelly.stakePercent) > 10 ? 'danger' : 
+                                    parseFloat(kelly.stakePercent) > 5 ? 'warning' : '';
+                    
+                    resultDiv.innerHTML = `
+                        <div class="kelly-recommendation">
+                            <h3>📊 Kelly Calculation Result</h3>
+                            <div class="metric">
+                                <span>Recommended Stake:</span>
+                                <span class="metric-value ${riskClass}">$${parseFloat(kelly.stakeAmount).toLocaleString()} (${kelly.stakePercent}%)</span>
+                            </div>
+                            <div class="metric">
+                                <span>Expected Value:</span>
+                                <span class="metric-value">$${parseFloat(kelly.expectedValue).toLocaleString()}</span>
+                            </div>
+                            <div class="metric">
+                                <span>Edge:</span>
+                                <span class="metric-value">${(parseFloat(kelly.edge) * 100).toFixed(1)}%</span>
+                            </div>
+                            <div class="metric">
+                                <span>Risk Level:</span>
+                                <span class="metric-value ${riskClass}">${kelly.riskLevel}</span>
+                            </div>
+                            ${kelly.isPositiveEV ? 
+                                '<p style="color: #00ff88;">✅ Positive Expected Value - Consider betting</p>' : 
+                                '<p style="color: #ff4444;">❌ Negative Expected Value - Avoid betting</p>'}
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('kelly-result').innerHTML = 
+                        '<div class="alert danger">Error calculating Kelly stake</div>';
+                }
+                
+            } catch (error) {
+                console.error('Error calculating Kelly:', error);
+                document.getElementById('kelly-result').innerHTML = 
+                    '<div class="alert danger">Failed to calculate Kelly stake</div>';
+            }
+        }
+
+        // Fetch GitHub integration status
+        async function fetchGitHubStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/github/repos`);
+                const data = await response.json();
+                
+                let repoCount = 0;
+                if (data.repositories) {
+                    if (Array.isArray(data.repositories)) {
+                        repoCount = data.repositories.length;
+                    } else {
+                        repoCount = Object.values(data.repositories).flat().length;
+                    }
+                }
+                
+                document.getElementById('repos-count').textContent = repoCount;
+                document.getElementById('last-integration').textContent = new Date().toLocaleDateString();
+                
+            } catch (error) {
+                console.error('Error fetching GitHub status:', error);
+            }
+        }
+
+        // Update live arbitrage alerts
+        function updateArbitrageAlerts(opportunities) {
+            const container = document.getElementById('live-arbitrage-alerts');
+            
+            if (opportunities && opportunities.length > 0) {
+                let html = '';
+                opportunities.slice(0, 3).forEach(opp => {
+                    html += `
+                        <div class="arbitrage-alert">
+                            <h3>🎯 ${opp.sport} Arbitrage Opportunity</h3>
+                            <p><strong>${opp.matchup || `${opp.sideA} vs ${opp.sideB}`}</strong></p>
+                            <p>🟢 ${opp.sideA} (${opp.oddsA > 0 ? '+' : ''}${opp.oddsA}) at ${opp.bookA} | 🔴 ${opp.sideB} (${opp.oddsB > 0 ? '+' : ''}${opp.oddsB}) at ${opp.bookB}</p>
+                            <p><strong>Arbitrage: ${opp.arb_pct}% | Lock Profit: $${opp.lock_profit}</strong></p>
+                            <a href="${opp.bitly_url || '#'}" target="_blank" class="btn">Bet Now</a>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p>No arbitrage opportunities currently available</p>';
+            }
+        }
+
+        // Fetch content inventory
+        async function fetchContentInventory() {
+            try {
+                const response = await fetch(`${API_BASE}/content/inventory`);
+                const data = await response.json();
+                
+                const content = `
+                    <div class="metric">
+                        <span class="metric-label">Total Documents</span>
+                        <span class="metric-value">${data.totalDocuments.toLocaleString()}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Monthly Revenue</span>
+                        <span class="metric-value">$${data.revenueProjections.monthly.toLocaleString()}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Categories</span>
+                        <span class="metric-value">${Object.keys(data.categories).length}</span>
+                    </div>
+                `;
+                
+                document.getElementById('inventory-content').innerHTML = content;
+            } catch (error) {
+                document.getElementById('inventory-content').innerHTML = 
+                    '<div class="alert danger">Failed to load inventory</div>';
+            }
+        }
+
+        // Test API endpoints
+        async function testAPIEndpoints() {
+            const endpoints = [
+                { name: 'Health', url: '/health' },
+                { name: 'Odds', url: '/odds' },
+                { name: 'Arbitrage', url: '/arbitrage' },
+                { name: 'Revenue', url: '/revenue/projections' },
+                { name: 'Free Tier', url: '/monitoring/free-tier' }
+            ];
+
+            let content = '<table class="data-table"><tr><th>Endpoint</th><th>Status</th><th>Response Time</th></tr>';
+            
+            for (const endpoint of endpoints) {
+                const start = performance.now();
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint.url}`);
+                    const time = Math.round(performance.now() - start);
+                    const status = response.ok ? '✅ OK' : '❌ Error';
+                    content += `<tr><td>${endpoint.name}</td><td>${status}</td><td>${time}ms</td></tr>`;
+                } catch (error) {
+                    content += `<tr><td>${endpoint.name}</td><td>❌ Failed</td><td>-</td></tr>`;
+                }
+            }
+            
+            content += '</table>';
+            document.getElementById('api-status').innerHTML = content;
+        }
+
+        // Setup charts
+        function setupCharts() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Daily Revenue',
+                        data: [145, 267, 189, 298, 187, 234, 289],
+                        borderColor: '#00d4ff',
+                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e7e7e7'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update revenue chart
+        function updateRevenueChart(data) {
+            if (revenueChart && data.trends && data.trends.daily) {
+                revenueChart.data.datasets[0].data = data.trends.daily;
+                revenueChart.update();
+            }
+        }
+
+        // Handle WebSocket data updates
+        function handleDataUpdate(data) {
+            switch (data.type) {
+                case 'odds':
+                    // Update odds display
+                    break;
+                case 'arbitrage':
+                    fetchArbitrage(); // Refresh arbitrage data
+                    break;
+                default:
+                    console.log('Unknown data update type:', data.type);
+            }
+        }
+
+        // Add alert to alerts container
+        function addAlert(message, type = 'info') {
+            const container = document.getElementById('alerts-container');
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> ${message}`;
+            
+            container.insertBefore(alert, container.firstChild);
+            
+            // Remove old alerts (keep only last 5)
+            while (container.children.length > 5) {
+                container.removeChild(container.lastChild);
+            }
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 10000);
+        }
+
+        // Start periodic updates
+        function startPeriodicUpdates() {
+            // Refresh data every 30 seconds
+            setInterval(() => {
+                fetchSystemHealth();
+                fetchFreeTierUsage();
+                fetchGitHubStatus();
+            }, 30000);
+            
+            // Refresh revenue data every 5 minutes
+            setInterval(() => {
+                fetchRevenue();
+                fetchContentInventory();
+            }, 300000);
+            
+            // Check for arbitrage opportunities every minute
+            setInterval(() => {
+                fetchArbitrage();
+            }, 60000);
+        }
+
+        // Initial load and WebSocket setup
+        document.addEventListener('DOMContentLoaded', function() {
+            setupCharts();
+            loadInitialData();
+            setupWebSocket();
+            startPeriodicUpdates();
+            fetchGitHubStatus(); // Load GitHub integration status
+        });
+
+        // Manual refresh functions
+        window.fetchOdds = fetchOdds;
+        window.refreshAll = loadInitialData;
+        window.calculateKelly = calculateKelly;
+    </script>
+</body>
+</html>

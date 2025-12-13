@@ -1,0 +1,1459 @@
+{
+  "file_hashes": [
+    {
+      "file_path": "C:\\EQ12\\EdgeGodParlays\\ngrok.exe",
+      "hash_result": {
+        "error": "OSError",
+        "details": "[Errno 22] Invalid argument: 'C:\\\\EQ12\\\\EdgeGodParlays\\\\ngrok.exe'",
+        "errno": 22
+      },
+      "timestamp": "2025-11-07T08:09:10.726796"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\agentic_cicd_intelligence.py",
+      "hash_result": "d3cff5d4253944a0280284e3bb0c8d68ef0c81c14db48b955d2eb567756fcf8a",
+      "timestamp": "2025-11-07T08:09:10.737647"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\agentic_devops_accelerator.py",
+      "hash_result": "af2a6a24ba9ada159b59e66fa2105f644ae291d13972397e4b7a9056574ad0df",
+      "timestamp": "2025-11-07T08:09:10.741465"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\agentic_secret_detection.py",
+      "hash_result": "179b1216e7b95bc1c73206c1ec6376d8746d905011e794c358a75b04e211e5ac",
+      "timestamp": "2025-11-07T08:09:10.744515"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\ai_provider_config.py",
+      "hash_result": "0db2fa66d0ee9b92d3e5f7ff261ea9816c8c1b01840d4ea1a823418ef19e2f44",
+      "timestamp": "2025-11-07T08:09:10.749131"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\aligned_model.py",
+      "hash_result": "0ba428d3641b463d8d3c179c0d7115f1330b6c3cddef53f115dbdd520dd788ff",
+      "timestamp": "2025-11-07T08:09:10.752223"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\alternative_bills_chiefs_parlays.py",
+      "hash_result": "fa99eda5f675f7692362af576c5164ddeb469ef84a64c4fb95f7993cf4660165",
+      "timestamp": "2025-11-07T08:09:10.754287"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\alternative_seahawks_commanders.py",
+      "hash_result": "5b7f5da4dcd634193f9caacc922c2c36916e5b3ea792fbeeb36d474cc17cf824",
+      "timestamp": "2025-11-07T08:09:10.756449"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\audit_imports.py",
+      "hash_result": "b0b47bc9b2034a412110064369db2ca34d40369325f65838eedfea34c2cada69",
+      "timestamp": "2025-11-07T08:09:10.758450"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\automated_sgp_generator.py",
+      "hash_result": "12971bd3b7853f9a536f81766117112663b21a9cf195e560b2329c92b19c86f2",
+      "timestamp": "2025-11-07T08:09:10.760502"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\badge_health_monitor.py",
+      "hash_result": "70e0c731b91e679a1a1cf90ef3fae16b7cf78a12fd6f59449af37744cd09168a",
+      "timestamp": "2025-11-07T08:09:10.764796"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\bankroll_tracker_clean.py",
+      "hash_result": "d48269bacd849f11a98c8d012d58bcbe88ec01b6450d106e20366dbd4bf7559d",
+      "timestamp": "2025-11-07T08:09:10.771491"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\betting_intelligence_orchestrator.py",
+      "hash_result": "48af098683748e0fa8107e0a3216790b45e160b6e5a788d29c2a8cbec28db70b",
+      "timestamp": "2025-11-07T08:09:10.775141"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\bills_chiefs_sgp_analyzer.py",
+      "hash_result": "2e0bcf2d5574594f183a042c72d51b4139994786608a9b72406dcbdea6598971",
+      "timestamp": "2025-11-07T08:09:10.777214"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\bills_vs_chiefs_analyzer.py",
+      "hash_result": "813e3691b9c2f49760774fc62bbf02552e0598435b796c20e5b329594e7fdeec",
+      "timestamp": "2025-11-07T08:09:10.781151"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\ccc_tracker.py",
+      "hash_result": "fc7aa567af6082b8f6efabda9439bee024580c255f3c27aa3f4b0de9c98fbb5a",
+      "timestamp": "2025-11-07T08:09:10.784163"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\cfb_analyzer_demo.py",
+      "hash_result": "2da17b56320b42046080a1623d58eb88f9c67400649bd155a833c67af88e26d9",
+      "timestamp": "2025-11-07T08:09:10.789039"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\cfb_manual_picker.py",
+      "hash_result": "6080bcc798d80af90822dceb5552cd22e77a7197914658ea72ccebb20ca70304",
+      "timestamp": "2025-11-07T08:09:10.792051"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\cf_rewards_scraper.py",
+      "hash_result": "dc5299c0a5df7d372dfd77844797973fb7af8e3bf431a78f7dacf6f1250cd333",
+      "timestamp": "2025-11-07T08:09:10.796054"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\chi_mil_mlb_sgp_builder.py",
+      "hash_result": "3dc52f81c117d699a51f91fb24db9e9361a3487e79e2732a9ddad0e02e5234de",
+      "timestamp": "2025-11-07T08:09:10.798570"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\circuit_breaker_service.py",
+      "hash_result": "ff079b775b5e9f7f71c79affacc6b8ca99a424b8515d90c160a6d3f7ea4b6262",
+      "timestamp": "2025-11-07T08:09:10.800568"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\ci_pipeline.py",
+      "hash_result": "df1e12662fd43b9081dc28bc3fdc6cd2c2d0d35a56068e97ebf4542267f630d5",
+      "timestamp": "2025-11-07T08:09:10.802293"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\codex_check.py",
+      "hash_result": "f424f43ea5d72567f4d7cd88d2ed5ee7505e4e255a29e3dd172f5ea90f53dc62",
+      "timestamp": "2025-11-07T08:09:10.804306"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\crypto.py",
+      "hash_result": "6bcfee39e0efe41d5e339cdf4b5da897154736d73294300abe86d78df05e9d35",
+      "timestamp": "2025-11-07T08:09:10.807414"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\deploy_github_security.py",
+      "hash_result": "7f525e162af0f95397b6f88ad856fc9232e242aa9e318588dc9e182ad67df37c",
+      "timestamp": "2025-11-07T08:09:10.809415"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\display_coral_results.py",
+      "hash_result": "f36d0274cede3721fb7499d000ac37bac7b9cbabf7758547300ee6386e49c487",
+      "timestamp": "2025-11-07T08:09:10.812089"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\emergency_bills_chiefs.py",
+      "hash_result": "eeaa18088aa4f3e418b4510a8a4ce89e3710fc3cfd7afc83e0f971e3bdef00be",
+      "timestamp": "2025-11-07T08:09:10.815348"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\enhanced_usage_recommendations.py",
+      "hash_result": "f36ffa449da2fb358171b13354f6a012b9f6cdab8de301ce8c10789d8746c0e9",
+      "timestamp": "2025-11-07T08:09:10.819372"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_advanced_parlay_generator.py",
+      "hash_result": "5d285e0383f09d075954d9886620801dcc4443b423d8bc63fe6d302c912de761",
+      "timestamp": "2025-11-07T08:09:10.822453"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_advanced_player_validator.py",
+      "hash_result": "7379a393929b921e29751f0b629d9261226fce6013cd542478daf13467a8c0c7",
+      "timestamp": "2025-11-07T08:09:10.824899"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_agentic_ecosystem_deploy.py",
+      "hash_result": "bedd9ac762a3f961e3acba8af55cf098a27c338f39b0df475e12f81c0f0e07d3",
+      "timestamp": "2025-11-07T08:09:10.827453"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_ai_enhanced_nfl_intelligence.py",
+      "hash_result": "b0a7a05ff3ba28c9eb58ad5a0a76389a0da3dbc1d8b8d25372d408b4e7d91834",
+      "timestamp": "2025-11-07T08:09:10.831468"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_ai_guardrails.py",
+      "hash_result": "c0947aaa675ba6779a1815798c790912930000a9f08dbee20c33528b36944154",
+      "timestamp": "2025-11-07T08:09:10.836384"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_alerting_service.py",
+      "hash_result": "0838ff4ec0c13134d3abe41b2e597a65a1e824c24399d6b248c94c9eb675a507",
+      "timestamp": "2025-11-07T08:09:10.839991"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_alerts.py",
+      "hash_result": "c4dea8e21c32d085a4a59388453e7b1c2318dc04135dc9cc3c6fc447fcd788ce",
+      "timestamp": "2025-11-07T08:09:10.847223"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_all_sports_roster_verification.py",
+      "hash_result": "0e7d394234830f66784b3d10c1811d4286934af65325d735ec20ca5bac4f29b9",
+      "timestamp": "2025-11-07T08:09:10.854693"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_api_data_normalization_engine.py",
+      "hash_result": "88518a12061e681f31960cc49958694b22039dbef565cf774cc0f8b737742668",
+      "timestamp": "2025-11-07T08:09:10.858811"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_api_integration_sales_analyzer.py",
+      "hash_result": "6805a44e74f66e8e24b85729391097b2523768c7df6bee0701e3e1a9b3763b58",
+      "timestamp": "2025-11-07T08:09:10.864003"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_auto_reporter.py",
+      "hash_result": "007cf6215f0563c4e67aecde4cbd220927085c824c67fb991b9f57f6a78646b6",
+      "timestamp": "2025-11-07T08:09:10.867914"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_best_sgp_combinations.py",
+      "hash_result": "2b1b267bfbed6901d8c17d2cfacb13a00ea52f93ca620b13fe906b6a1380f974",
+      "timestamp": "2025-11-07T08:09:10.870869"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_betting_arbitrage_bot.py",
+      "hash_result": "96755c0df6eefc35518b3d29d4bb424bc6dd14149f393d2a1bb9ef999a64f0c6",
+      "timestamp": "2025-11-07T08:09:10.873442"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_betting_function_caller.py",
+      "hash_result": "e38e96c0364e61a7c8cd61eec34216e7b6458ca6329dfa1f4b09298ab6004611",
+      "timestamp": "2025-11-07T08:09:10.875388"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_bulletproof_intelligence_suite.py",
+      "hash_result": "53ca7094091e2f3c9bb68289f0668757d2da1d7d0889901ec07a8c0f93d08798",
+      "timestamp": "2025-11-07T08:09:10.879173"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_bulletproof_parlay_generator.py",
+      "hash_result": "6327b88b98384a766b95b484abbf65193c7c8f046348e08dc870b70a56be5d46",
+      "timestamp": "2025-11-07T08:09:10.883714"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_bulletproof_standalone.py",
+      "hash_result": "5ab4dabc1b2eab7f52521ecb9705220f2f04613d409409a60ca60d1b6664ab01",
+      "timestamp": "2025-11-07T08:09:10.886724"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_bulletproof_test_suite.py",
+      "hash_result": "00ee9e013ee1f0633c0935ee0837a41c7d0711ad61433c2bb23becc3ad0346a7",
+      "timestamp": "2025-11-07T08:09:10.889226"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_capacity_optimization_implementation.py",
+      "hash_result": "0439f65484c40c50ef0dac436eccd58150d48f527bc5ee42ea685beea9c05e98",
+      "timestamp": "2025-11-07T08:09:10.891349"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_cfb_backend.py",
+      "hash_result": "46d1a171ad98885bc0c8c3d9316bd39bd3b0f27723426a78bec7bc04ea821b55",
+      "timestamp": "2025-11-07T08:09:10.893865"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_cfb_optimizer.py",
+      "hash_result": "47dfefa161f4ceaeb0f6a0bfcc73cdd3808b10a123109dea86d922bf04a728eb",
+      "timestamp": "2025-11-07T08:09:10.898459"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chatgpt.py",
+      "hash_result": "894d955a8d9a34bdd87cb32e138bd0d4ec52bce035e3d64062cc4b4791d74581",
+      "timestamp": "2025-11-07T08:09:10.904025"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chrome_extension_integration.py",
+      "hash_result": "6a17bee9eb772d89253edf685b4c865f1d819a2a8099b483323cba8eb0111cd0",
+      "timestamp": "2025-11-07T08:09:10.907044"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chromium_integration_report.py",
+      "hash_result": "f6f6b26c9040f44db7fd2d4754a2901c7e70ab305fab7924024142cfafb0f8a4",
+      "timestamp": "2025-11-07T08:09:10.909728"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chromium_memory.py",
+      "hash_result": "d10dd0af2e99adf71cdc820324e0226058641c6039a3c216bd2c4fef2da120be",
+      "timestamp": "2025-11-07T08:09:10.912745"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chromium_source_scanner.py",
+      "hash_result": "549e4f43934304d823328dae99c5ed1c161eba06e48ae8a342344c6d3a1949e7",
+      "timestamp": "2025-11-07T08:09:10.916311"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chromium_testing.py",
+      "hash_result": "ee3475faa447b5ab9df3bb076b2fe207f371857a809b9ed9773f7f0c840410b2",
+      "timestamp": "2025-11-07T08:09:10.919313"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_chromium_validation.py",
+      "hash_result": "266de6ef6d2ebcf85d12d21eddba424fa878fbe43190e0d7a940c503c27b4704",
+      "timestamp": "2025-11-07T08:09:10.921840"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_codemod.py",
+      "hash_result": "79df70e64840a04a8eb1c7de151523d0384ad2545f4b401ed261a3c829c62175",
+      "timestamp": "2025-11-07T08:09:10.924808"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_college_stadium_weather.py",
+      "hash_result": "8df72a4e6d176dbed349d3060ad2889d6b326d0dbef1fe7b0a916b69ab092473",
+      "timestamp": "2025-11-07T08:09:10.928821"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_complete_free_api_summary.py",
+      "hash_result": "44c86d7bcbfc4c78f6ee02b83d1a65a80fb871a3d395b5cff9218608ff24a8cc",
+      "timestamp": "2025-11-07T08:09:10.932847"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_comprehensive_link_integration.py",
+      "hash_result": "5192d89d774a44a2196d15a93d30b75b41c91fc639c904fe67e560881f7dbcd8",
+      "timestamp": "2025-11-07T08:09:10.938400"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_comprehensive_monitor.py",
+      "hash_result": "5d1351cdc0c8acf6d87974a0167bb2e182e9f9096440e3f8f24d6b451af3d189",
+      "timestamp": "2025-11-07T08:09:10.942180"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_comprehensive_nba_feed_searcher.py",
+      "hash_result": "11ae8a755502ae4f5c14be9e4365a774046e9cd0fc4d52acef90cffb43846bac",
+      "timestamp": "2025-11-07T08:09:10.943197"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_comprehensive_player_gatekeeper.py",
+      "hash_result": "84678d193beb7b04058500b95a3d62141eb3a1f305a5713caef8d0ffda84cc2d",
+      "timestamp": "2025-11-07T08:09:10.947011"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_comprehensive_weather_report.py",
+      "hash_result": "a4b8c2d87c6e18acb8df6761d7cfe35f87802c7710666240ad72bad54ab8b597",
+      "timestamp": "2025-11-07T08:09:10.949986"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_container_validator.py",
+      "hash_result": "e6e66eb91af65c0f537a0a8c0baeabd2dc10fc9c5405b45f7ccf519cf4ec38b4",
+      "timestamp": "2025-11-07T08:09:10.952499"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_copilot_api.py",
+      "hash_result": "985e1bff7946d006a8b1550ab1b9c1ba4a5c29e4597fe82fdfcfafe2cc44276a",
+      "timestamp": "2025-11-07T08:09:10.954313"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_copilot_content.py",
+      "hash_result": "74dc2730b9e8331ce3b52bcd8c903843d154a75b4c67645da54b338d8eadf745",
+      "timestamp": "2025-11-07T08:09:10.956468"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_copilot_url_handler.py",
+      "hash_result": "db690d23b275c8c772524afe32ccc0d62993d8478d414c2ca82c0ed796b00fdf",
+      "timestamp": "2025-11-07T08:09:10.958468"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_coral_betting_ai.py",
+      "hash_result": "0ae1321325922e3df981a2347e3d8bade99318197c5e4cce24e9fb960ddcd356",
+      "timestamp": "2025-11-07T08:09:10.960464"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_coral_crypto_ai.py",
+      "hash_result": "ab1ed3175b73f182e99cec367b094dfe4a6125dede0c6f13e5c9a9ab365fc323",
+      "timestamp": "2025-11-07T08:09:10.963491"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_coral_crypto_master.py",
+      "hash_result": "be988ceb8b46cd27171d789f2774fc1b8430466c7239a8da07bcb544c279d262",
+      "timestamp": "2025-11-07T08:09:10.965969"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_coral_synergistic_engine.py",
+      "hash_result": "b44ebe0ff411deaba0db501020174f99c83925e0b3f91c0bc366992404d48f4e",
+      "timestamp": "2025-11-07T08:09:10.968011"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_coral_synergistic_launcher.py",
+      "hash_result": "19201ae76b0907c4675baba6d486282ffb16a0e817924a2068f466fcd9885e0b",
+      "timestamp": "2025-11-07T08:09:10.969647"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_cross_browser_extension_builder.py",
+      "hash_result": "14d0bf0b92b1ad412d068bbf7e4f0228c44632fb9d379bcf2c960bb057e337b2",
+      "timestamp": "2025-11-07T08:09:10.971730"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_crypto_stream.py",
+      "hash_result": "cadd2783a0adf893812eb4d1c03769746395e2123deb87916ff4735328719aa1",
+      "timestamp": "2025-11-07T08:09:10.973709"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_crypto_suite_runner.py",
+      "hash_result": "c1439f23082d94bac556964b1ebd899d81f95f2d7532a0f1cd3f9ce3a4d7cdb3",
+      "timestamp": "2025-11-07T08:09:10.974710"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_docker_setup_manager.py",
+      "hash_result": "2179572484a543ffe19ecf628860dc2416f3192ec6836b64308e9d247db78530",
+      "timestamp": "2025-11-07T08:09:10.977235"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_dotnet_tools_manager.py",
+      "hash_result": "e0461f7ff607c870f41068e15a4ce4b95646942b341bab5cd85fa97929f23be6",
+      "timestamp": "2025-11-07T08:09:10.983244"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_dual_weather_strategy.py",
+      "hash_result": "595d97160e5db031efd9314cb8be3baa00fd5e776493872720659b6f08bdfb94",
+      "timestamp": "2025-11-07T08:09:10.988513"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_ebay_automation_toolkit.py",
+      "hash_result": "3c3461d20a46fb06879a56fccd2400e40ef4dc6ab4affa5b3cd383ce1a26c136",
+      "timestamp": "2025-11-07T08:09:10.991779"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_edgefinder.py",
+      "hash_result": "864152a9712a7286af83c33b7e3f9ee859dd4fde1955641dade7411745e06e11",
+      "timestamp": "2025-11-07T08:09:10.993766"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_emergency_incident_response.py",
+      "hash_result": "ceeb9645f1e8f9bf44d5665b54a6264e2a8cfe8469a2e3d76e97594ef38103a7",
+      "timestamp": "2025-11-07T08:09:10.998267"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_ai.py",
+      "hash_result": "236118757cb164188423d1b174e7fc5038e2ffc136398f60378b7d952b1ce1b2",
+      "timestamp": "2025-11-07T08:09:11.002824"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_live_odds_with_bulletproof.py",
+      "hash_result": "2ebdfa21f90f20dc94e98bd75a5b3a312f559b7810fe172b4fce292f98983d68",
+      "timestamp": "2025-11-07T08:09:11.005846"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_nba_intelligence.py",
+      "hash_result": "f57f2075fa4c8b5e2abcea3de8cddced98c98cbc7ba1df4c9b317e6061055afe",
+      "timestamp": "2025-11-07T08:09:11.009421"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_nba_monitoring.py",
+      "hash_result": "8ec32b584cbf7645bafecae8b4e2987dc17791a5898dd9ddc8cde70cfe86bd2c",
+      "timestamp": "2025-11-07T08:09:11.013433"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_odds_api.py",
+      "hash_result": "c210f203056f370de83daabe97d695b3f69a81b71c64cce20eed6ab5c338c582",
+      "timestamp": "2025-11-07T08:09:11.017341"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_security_ai_integration.py",
+      "hash_result": "73595c6446e343ad1d5dd70992fe8569204119d461a91e65dcaa80fa1a6105a0",
+      "timestamp": "2025-11-07T08:09:11.022891"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_enhanced_stadium_weather_system.py",
+      "hash_result": "90b8bf5ce9e93edec6fd087a3331435f4edf8da5832406585b21c1bf7beedd35",
+      "timestamp": "2025-11-07T08:09:11.026886"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_entertainment_betting_guide.py",
+      "hash_result": "5a29397fcb2dffb318a1c3cedd7a9408b05caf3c60a56d778e8f5d044dc97651",
+      "timestamp": "2025-11-07T08:09:11.030106"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_executive_dashboard_generator.py",
+      "hash_result": "6ffdc05adc7134eb062febbf4f8f9d4e84b41dc80f2e3e83abe40519adbb555d",
+      "timestamp": "2025-11-07T08:09:11.033260"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_expert_optimizer.py",
+      "hash_result": "f1ab533b1229e9b87a10594dd95d735b6d0b3008f40fef81cd6973752fd3e938",
+      "timestamp": "2025-11-07T08:09:11.035192"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_expert_system_discovery.py",
+      "hash_result": "a59582dad8c938fa7275d75121e7aca2451af8b6f07e953e11c518e18d842420",
+      "timestamp": "2025-11-07T08:09:11.037155"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_exploitation_toolkit.py",
+      "hash_result": "cc8458c92c8617b4231300cf0caa760bcc44327855b65b4be5a71301456f58a5",
+      "timestamp": "2025-11-07T08:09:11.039190"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_extended_goalscorer_parlays.py",
+      "hash_result": "cdf227a2e239dbd349a1bcad3eb2804d4ade910e34a07e2d998d4b45ed904f7c",
+      "timestamp": "2025-11-07T08:09:11.041371"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_extension_backend.py",
+      "hash_result": "ef6ac7ea6504abcf1615fc3a4ec9c82c938738f3a63d77eacfd88ea0b157a21c",
+      "timestamp": "2025-11-07T08:09:11.043751"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_extension_debug_manager.py",
+      "hash_result": "fde921ea48f370abcfda9ece434d02a1b6549eea632e533155fe0b48739c7e94",
+      "timestamp": "2025-11-07T08:09:11.046491"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_extension_monetization_manager.py",
+      "hash_result": "0ceb6ddc1d77f39a42d2796f9f67e5409d0981225ebfcce4e75c8e912220ee35",
+      "timestamp": "2025-11-07T08:09:11.049797"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_extension_security_auditor.py",
+      "hash_result": "ed347a8cf20d503c60c71441865f109f786358a1f976db13428a05a0e8b95e69",
+      "timestamp": "2025-11-07T08:09:11.053508"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_extension_tester.py",
+      "hash_result": "f852ced2416d0cb277fcda86e2ee9f78fe6087a6f1ef09ab1ccfc28da5eeab67",
+      "timestamp": "2025-11-07T08:09:11.055867"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_final_goalscorer_picks.py",
+      "hash_result": "b4835042feb3e97c4e52ffb56a3aaade04596dad952af4ac84536d140d03e413",
+      "timestamp": "2025-11-07T08:09:11.058281"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_firefox_bookmarks.py",
+      "hash_result": "6777c95686717d4bddbabfe3ff7b947f1081a3b0d08723143fb4b849d64adff3",
+      "timestamp": "2025-11-07T08:09:11.064597"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_flake8_autofix.py",
+      "hash_result": "1544847d193bba4fc0d98d2a73a1512aa8ca19a9d655885a030cc2c9317d02aa",
+      "timestamp": "2025-11-07T08:09:11.071084"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_forensic_evidence_collector.py",
+      "hash_result": "3624e0984dad3308a0f9ea67b5706f9897dcd79eba89022dc657316756b230ba",
+      "timestamp": "2025-11-07T08:09:11.074056"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gatekeeper_test_suite.py",
+      "hash_result": "30cc2eb3b12590db8e8b4d07dce1e3cb30c04e44ae683253555eaadfe324555f",
+      "timestamp": "2025-11-07T08:09:11.077211"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_github_cli.py",
+      "hash_result": "11e1886e3669982064c2eecbd7c821c954c1e9406cfab269c142b23fa398a5d2",
+      "timestamp": "2025-11-07T08:09:11.081560"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gitleaks_guardian.py",
+      "hash_result": "c47cd68b2462952a3bd2dc1191c1fc5c0120c7a85cd57e9954b9edf8f12ab543",
+      "timestamp": "2025-11-07T08:09:11.084810"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gitleaks_monitor.py",
+      "hash_result": "79e8cf4b7f531655555e54db014258ab8260dbb9f677b9dc0f900485d5010ebc",
+      "timestamp": "2025-11-07T08:09:11.088490"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_goalscorer_parlays.py",
+      "hash_result": "8b427f0ec0b6ffce7453936050c4e59763895dc919a52c3a28745d7476c424e3",
+      "timestamp": "2025-11-07T08:09:11.091999"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gpg.py",
+      "hash_result": "e8129d4b4d500bcb88ffb270e5f15cb147b1a7b42c4db2ff35ca93a3168f7201",
+      "timestamp": "2025-11-07T08:09:11.094805"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gpt5_dashboard_generator.py",
+      "hash_result": "0fc1babd771a83942140023eac0222ac4f6521911a9e5decba436b6467e102e5",
+      "timestamp": "2025-11-07T08:09:11.099185"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gpt5_frontend.py",
+      "hash_result": "0d4eb787d3b8fb46b3e6b261ca1c438e2ca39b32de9e234a8682fb6b28f6d2d2",
+      "timestamp": "2025-11-07T08:09:11.102352"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gpt5_integration.py",
+      "hash_result": "1d4c0bd283a193464bad81fc13e67055b7a52bed9bd752bf2d732034f39168ac",
+      "timestamp": "2025-11-07T08:09:11.104236"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gpt5_manager.py",
+      "hash_result": "19a99029505d93766997a77acb115a304734b9886021798e5618dec3e628fc1b",
+      "timestamp": "2025-11-07T08:09:11.106498"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gpt5_system_upgrade.py",
+      "hash_result": "4bda457f59b3a19c37943a8460974bdbaa6cf3f4fd3af4328f43f245af774d90",
+      "timestamp": "2025-11-07T08:09:11.109234"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gumroad_package_creator.py",
+      "hash_result": "96b01ec78b46a0beb84df3714d31a06b7937e483fd367f058dd65b988ee03dbd",
+      "timestamp": "2025-11-07T08:09:11.111959"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gumroad_production.py",
+      "hash_result": "71e275b876cd84f5fe9589b2695f45d2619ef10e9a4155bc27fefceff37fbdd8",
+      "timestamp": "2025-11-07T08:09:11.117319"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_gumroad_simple.py",
+      "hash_result": "96588163052d5d094d2f20992a271f3d8f2e43abe7c898c5a19eae51d98ee54d",
+      "timestamp": "2025-11-07T08:09:11.122407"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_hf_betting_demo.py",
+      "hash_result": "e0fc7234a081de5639315fc7a7251ede659156f01360fb4ef456739a2f526a67",
+      "timestamp": "2025-11-07T08:09:11.125182"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_hf_betting_integration.py",
+      "hash_result": "d1bcef507335f6f542d0b1ccd941de97b0ede12ac6e1c689f7272b7bcded614e",
+      "timestamp": "2025-11-07T08:09:11.128556"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_hf_betting_model.py",
+      "hash_result": "0a371fd4e08d8516a56795966bdfd95fb6518e9ded50c0fc0bfd3083e35f9277",
+      "timestamp": "2025-11-07T08:09:11.133545"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_hf_integration.py",
+      "hash_result": "3caa30cf4e5df48d08ad79dafdd6896f1b667230c5c015184fc1c3f641505556",
+      "timestamp": "2025-11-07T08:09:11.137198"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_high_confidence_parlay.py",
+      "hash_result": "588bde43f6b7ae9ed65087783b7eaf5d047843f586c606a37dc1d5c914cbf177",
+      "timestamp": "2025-11-07T08:09:11.140753"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_hooks_specialist.py",
+      "hash_result": "8c628a92d31a2ffd4991ddf101115901996fdb5724e60d37aaba33c05f64a2af",
+      "timestamp": "2025-11-07T08:09:11.143269"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_hop_analysis.py",
+      "hash_result": "4677a8f00119612ed45ce7d8a4b88f38b9284ede983ea98d89bfc4388bd7ad9b",
+      "timestamp": "2025-11-07T08:09:11.146799"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_injury_intelligence_corrector.py",
+      "hash_result": "39224bd801c1e6c6f99a96b24a413fca139c60e85eb60f0d7f830f7b7f8eac28",
+      "timestamp": "2025-11-07T08:09:11.149803"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_injury_intelligence_test_suite.py",
+      "hash_result": "98111d38abb1bcfd5fd6102b4e0e66a37894ea36ab2996b8de65fde59896ef03",
+      "timestamp": "2025-11-07T08:09:11.151796"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_kernel_capacity_expert.py",
+      "hash_result": "6e92e544bae7a9a79906cead95d57c1f39e59f98289e577fbcbcd0a2f775a101",
+      "timestamp": "2025-11-07T08:09:11.154317"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_live_odds_fetcher.py",
+      "hash_result": "ee3beda7832f7159da1e0313300d6730a929d504c37f22e9b82b5c891c8c1cab",
+      "timestamp": "2025-11-07T08:09:11.157920"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_live_odds_parlay_generator.py",
+      "hash_result": "729aadd62ddc8224526c39c6f94c0f36178658213b4d56b2081d1cd6919bfba4",
+      "timestamp": "2025-11-07T08:09:11.160444"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_main.py",
+      "hash_result": "ce2fc88a7d9cfa9dad5953957d36163009c598c2c864917c033bd4ede36a8504",
+      "timestamp": "2025-11-07T08:09:11.165118"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_master_system_fixer.py",
+      "hash_result": "f225f52760124bd4a755100d16afac03d85eba91f55274d0f7bca57a915221e5",
+      "timestamp": "2025-11-07T08:09:11.171978"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_master_weather_intelligence.py",
+      "hash_result": "0896f1ad9d64331f1074de5c23bc9c5c847806eb384f8fc5523420e646148bec",
+      "timestamp": "2025-11-07T08:09:11.175460"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_math.py",
+      "hash_result": "0d66da09bba68d85c523e890c6d8eb11db3b04e5b3d62f2d76114d53723e63c3",
+      "timestamp": "2025-11-07T08:09:11.178422"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_max_payout_parlays.py",
+      "hash_result": "b4782e59c1bcfe5db0a4fc78306c2aae15539b6723e9590ed1dc1d33704cd929",
+      "timestamp": "2025-11-07T08:09:11.181517"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_mcp_debug_test.py",
+      "hash_result": "79e613bc4f00153d723610710fd4c93c750459d27fbfb13b23e9947aab6cf448",
+      "timestamp": "2025-11-07T08:09:11.186878"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_mcp_demo.py",
+      "hash_result": "1d24a80262c5e44ccb65517d97e6a82bead87be0c962467e248e591c04012ddd",
+      "timestamp": "2025-11-07T08:09:11.191390"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_mcp_integration.py",
+      "hash_result": "3186a948d91932e9df653c88af00f6391f74fbefd00f74f946f9ef7edf373327",
+      "timestamp": "2025-11-07T08:09:11.194386"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_mcp_server.py",
+      "hash_result": "d875c010b51dbd9eb80b7783641524028b095f91ea88bbda7e0702f78fd97d9a",
+      "timestamp": "2025-11-07T08:09:11.198953"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_model_updater.py",
+      "hash_result": "633a76c1588efe3669010b7381b7487d8dce882cfe906cad2a4d8a32f86e092d",
+      "timestamp": "2025-11-07T08:09:11.202733"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_mozilla_vpn_analysis.py",
+      "hash_result": "d368e1d4b721957b31db47f19062b61f6272d74dafa7d0a8fa151cbb8c92ca6c",
+      "timestamp": "2025-11-07T08:09:11.204729"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_mozilla_vpn_setup.py",
+      "hash_result": "82c56c401f9aafdf6072f9a4418635494a42f0f378c0cb9e192c2877091547f0",
+      "timestamp": "2025-11-07T08:09:11.207511"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_multi_sports_api_client.py",
+      "hash_result": "6d31bde753f5175eee16b07b0339c972edae11172a7581e36c959461b0349e6e",
+      "timestamp": "2025-11-07T08:09:11.209521"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nba_apisports_integration.py",
+      "hash_result": "1bc3ba1b239128f1399298279b0ae2baf0fb806ec24553bbbf9ebd382d1cb58d",
+      "timestamp": "2025-11-07T08:09:11.212543"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nba_continuous_monitoring.py",
+      "hash_result": "b3ff56f396aedb153a790084e84ac2c9ad440191103b8cb101ae3662bb02672b",
+      "timestamp": "2025-11-07T08:09:11.219148"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nba_live_monitoring.py",
+      "hash_result": "5334681c52aa4ab3d1e9a4989733265021526afdb248672ad16dc42a2ecd0a27",
+      "timestamp": "2025-11-07T08:09:11.223239"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nba_news_harvester.py",
+      "hash_result": "3f6e6f9a17b0e36efdb4ab4eb26176c8b1a8c2e683b6662bd42b9ddbb485a94e",
+      "timestamp": "2025-11-07T08:09:11.225875"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nba_weather_intelligence.py",
+      "hash_result": "4d8c732a909c62a4eb57b2a48850182fa07675b68bd6ccbd05847f43a4ce0816",
+      "timestamp": "2025-11-07T08:09:11.229325"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_bulletproof_live.py",
+      "hash_result": "fb5d522889f049f5683e6ca7433fc3aeac6b50779f397461dd5284988a1ce7e4",
+      "timestamp": "2025-11-07T08:09:11.234640"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_live_api_intelligence.py",
+      "hash_result": "c2ecd2f906e5056240a7befec5480ec403dc2910a01fd6152f5dbaf8c017eeef",
+      "timestamp": "2025-11-07T08:09:11.238879"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_live_intelligence.py",
+      "hash_result": "714e4a8b0e8af0c96f4fa330c603259f68670b8492549f3ff536c095569cc077",
+      "timestamp": "2025-11-07T08:09:11.242993"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_logging_optimizer.py",
+      "hash_result": "97420ddfefda75b9dd946b205260749df87701da57ec83edae6a5feb0bf35ac6",
+      "timestamp": "2025-11-07T08:09:11.245829"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_log_rotator.py",
+      "hash_result": "f46941f8209a10d9878cdfdde5ef5c67ffcd14ea790c7469ea303bb9b4ac1a30",
+      "timestamp": "2025-11-07T08:09:11.251635"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_monitor.py",
+      "hash_result": "77b6d40baa5ef03d2adbc9165552f256d9e71635472d24d3131af7c2773e7222",
+      "timestamp": "2025-11-07T08:09:11.254636"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_parlay_cleanup.py",
+      "hash_result": "a599845eef2e02aaecdc32048b28087d356f0d36de08a45b306ad2dec766b7e9",
+      "timestamp": "2025-11-07T08:09:11.257634"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_stadium_weather.py",
+      "hash_result": "809195f37ff1f55ef569fb78575a7d7399a4e2614c6457f68b149c9e09d03f07",
+      "timestamp": "2025-11-07T08:09:11.259142"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_tonight_lv_den_special.py",
+      "hash_result": "a87ff89f1e01180ff32720586b58c38ace2226b27fe7de1463e88b42f2ea628d",
+      "timestamp": "2025-11-07T08:09:11.263842"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nfl_weather_enhanced_betting.py",
+      "hash_result": "b8cf2d132bf77ed51e013b9123b3e8813a6f2f54785830bc44005108c0910976",
+      "timestamp": "2025-11-07T08:09:11.270471"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nhl_winning_margins.py",
+      "hash_result": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2025-11-07T08:09:11.273157"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nodejs_modernizer.py",
+      "hash_result": "75ead5e836c0d1ead80a978544f08ce0ec5a096259def6efa697dfaa285bc6b9",
+      "timestamp": "2025-11-07T08:09:11.276100"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_nws_weather_client.py",
+      "hash_result": "9ef7d196bc634fd1fabc9cb925a1ede53fafa4dea8b60009f07f3a7a5fe3f16b",
+      "timestamp": "2025-11-07T08:09:11.280044"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_odds_ingest.py",
+      "hash_result": "5e4ffa255a192b38e8eec5f6dae42a5522f7876e481c4b391c3b83f2fe14e9cb",
+      "timestamp": "2025-11-07T08:09:11.283240"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_odds_stream.py",
+      "hash_result": "df8d9b5d5ab4b895a3097846eab77047d2afe549c91bdcb1c2d5d646a8ae39a6",
+      "timestamp": "2025-11-07T08:09:11.286468"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_openweather_enhancement_analysis.py",
+      "hash_result": "707ee567308ea793239e08eeaee3d0aa225159095ef115f1b488c198062a8df5",
+      "timestamp": "2025-11-07T08:09:11.288469"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_openweather_integration.py",
+      "hash_result": "1e93e00059f2ff6807aaa1d2bcccac552c1b33d81b0cd6e572773fab488b2ff5",
+      "timestamp": "2025-11-07T08:09:11.290505"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_openweather_integration_summary.py",
+      "hash_result": "ec8eae5965c1e7382deb7b1ecad6e9c7834cd3d1ca3015e17807844fe31ce6cb",
+      "timestamp": "2025-11-07T08:09:11.293672"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_orchestrator.py",
+      "hash_result": "29f52f99150b02f0bca3827cdf4421cc7ea813c9cb61a3fb3e9945b04c3c027c",
+      "timestamp": "2025-11-07T08:09:11.300042"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_original_parlay_weather_analysis.py",
+      "hash_result": "326aed11ec3bde235a451f71b5a24e39d670cf5b0dca285f9eb638201cd26d7c",
+      "timestamp": "2025-11-07T08:09:11.305375"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_parlays_webhook.py",
+      "hash_result": "428f6a0ea57b91acb044e00c5b993a5e0d1f192f56fe3aebe428a78d6eb1f239",
+      "timestamp": "2025-11-07T08:09:11.308588"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_parlay_builder.py",
+      "hash_result": "383c0c097dadf085a13add1d335ae6848e25fb535afd38dd4fc7d8ce5196ab0f",
+      "timestamp": "2025-11-07T08:09:11.312367"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_parlay_conflict_detector.py",
+      "hash_result": "23117e715b3e12053c2d0874ee58bbf6610e58ac5b6819c9b53c2bfa9d7d644f",
+      "timestamp": "2025-11-07T08:09:11.318152"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_parlay_filter_engine.py",
+      "hash_result": "4429b7db62bab0682f933aa7420de92e0b39e1ccec54ba6245872312bbace23b",
+      "timestamp": "2025-11-07T08:09:11.322670"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_parlay_monetization_engine.py",
+      "hash_result": "eff50305b20bec27efb23abfa8d29465b418b50b0d29e558c8cb5f5c9da10bc2",
+      "timestamp": "2025-11-07T08:09:11.328254"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_parlay_optimizer.py",
+      "hash_result": "5ca0e50f2a3cd78388a872e1fcd233e319dd48a5b63e09a996604a137df98e4a",
+      "timestamp": "2025-11-07T08:09:11.331831"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_performance_accelerator.py",
+      "hash_result": "de291df14fb5dfff6fcac4abaa9b323498d7f20223061730f153a9661f751043",
+      "timestamp": "2025-11-07T08:09:11.334560"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_performance_monitor.py",
+      "hash_result": "72c43302ef895f376eeb44669d4a7642070ef2a10fb2013a776165dbe6b11c63",
+      "timestamp": "2025-11-07T08:09:11.341932"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_performance_secrets.py",
+      "hash_result": "4005ecc2dc0b2606ab7c0291fd5b287aea7c139b9f903e7c2f6858480e75aabf",
+      "timestamp": "2025-11-07T08:09:11.346104"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_player_availability.py",
+      "hash_result": "9dce1539e6e5478c51f57714c0e1b2c5be42c3d3d0d099a912b214de159bf816",
+      "timestamp": "2025-11-07T08:09:11.350338"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_player_status_checker.py",
+      "hash_result": "836a15d45a45f2862760f0bf3216d7a8e9e97b8f246b91213a6efb05df0cb392",
+      "timestamp": "2025-11-07T08:09:11.353597"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_playground.py",
+      "hash_result": "5c36d6f5e1784d4f810c066322a96344230ef6f54da3ed4d9642c0f5a6f22086",
+      "timestamp": "2025-11-07T08:09:11.355775"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_premium_openweather_integration.py",
+      "hash_result": "e29ef077c5030ccc2318a716152b0c758123e23e505ae6b2cd83811bf6bf0cbd",
+      "timestamp": "2025-11-07T08:09:11.358496"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_production_betting_pipeline.py",
+      "hash_result": "6a63d2fc45dbc65cd8da6b3dce94d6c18d5903e8c627be5133f5ca17a86d0f09",
+      "timestamp": "2025-11-07T08:09:11.360694"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_production_tokenization_demo.py",
+      "hash_result": "ba131bbc960098c100f313bdac6953d0d6324d7bbe73224dffb6ad66a0224a3b",
+      "timestamp": "2025-11-07T08:09:11.363574"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_quantum_betting_superposition.py",
+      "hash_result": "da762ddfaa8eb4e10427b281a96e1e7d326b68d9cec4da4207feecd2e69509a6",
+      "timestamp": "2025-11-07T08:09:11.366405"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_quantum_nfl_intelligence.py",
+      "hash_result": "ba7c197ccf084f82b5d27ecfa3bb5b5eba37b1877bad73a45aaf54bd56bba12a",
+      "timestamp": "2025-11-07T08:09:11.368671"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_realtime_sports_intelligence.py",
+      "hash_result": "25670702fdf7b7162145463ace0a5ea0b8f22391f25d7ca8fa5ce9520283fb3d",
+      "timestamp": "2025-11-07T08:09:11.370921"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_responses_client.py",
+      "hash_result": "5dca00cbb207da5fd6cbe232856f4c1ca0db36a5fb76a7bbc23aeb09d3314f40",
+      "timestamp": "2025-11-07T08:09:11.373774"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_roster_validated_sgp_generator.py",
+      "hash_result": "ef5ae5d2e997d2d419aa0debbe7b8019e67e8cf0e2a7392b188fcc9834f96703",
+      "timestamp": "2025-11-07T08:09:11.375538"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_roster_validated_sgp_generator_enhanced.py",
+      "hash_result": "d45ba07b2c91447bac6cb893075c7f7099d2e77652e9c8a473450bd9303320c0",
+      "timestamp": "2025-11-07T08:09:11.377237"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_security_intelligence_hub.py",
+      "hash_result": "cfa26994efd354859ddd6eeebff2e586120d86e8b868d4e965d050f1ae310687",
+      "timestamp": "2025-11-07T08:09:11.381369"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_sgp_generator.py",
+      "hash_result": "8734c4f70f4d2d792c9fb86cecd9a696184575bf79fabe92e50811d7fe5cbc7b",
+      "timestamp": "2025-11-07T08:09:11.387364"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_snyk_security_integration.py",
+      "hash_result": "b2885fa18ef8c135a11a445d06cd5258508faa7cdce5afd7afbdd504e18f520f",
+      "timestamp": "2025-11-07T08:09:11.391081"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_specific_date_sports_pull.py",
+      "hash_result": "beaef3e0036073925b18f09aa7801af733ee4013bd8b438f8afe2255ff2caca7",
+      "timestamp": "2025-11-07T08:09:11.393345"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_sportsbooks.py",
+      "hash_result": "d7ca49ef2ab083cb546a2cfe36c455d68979d97d37326adf60545c9c5e15d936",
+      "timestamp": "2025-11-07T08:09:11.397360"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_sports_analysis_report.py",
+      "hash_result": "b5d032de2d617db578a1df133251cfbbf57bf7e00a8a5be674301bf0f338e080",
+      "timestamp": "2025-11-07T08:09:11.401298"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_sports_parlay_analyzer.py",
+      "hash_result": "f0bc06fbcf91753849629b0b595cf8848cff407b96c5008895397fc976a8a688",
+      "timestamp": "2025-11-07T08:09:11.404112"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_sports_parlay_demo.py",
+      "hash_result": "a20c92eb6d7a56a4f14838f2391ffd345b7c94916c5c82779efb4f5929c2b0b8",
+      "timestamp": "2025-11-07T08:09:11.407505"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_status.py",
+      "hash_result": "f69fdbba80a3dbdef8bd720b97d147200b42cc3cf4166a5691c2f4b0a0146191",
+      "timestamp": "2025-11-07T08:09:11.410267"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_system_health_analyzer.py",
+      "hash_result": "9ce51cae800e0e6897a8a2cd177a40c7f27ed76e193c835adffad6de48e8637c",
+      "timestamp": "2025-11-07T08:09:11.413227"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_telegram_alerts.py",
+      "hash_result": "75242a74523b399a58919409b2dd911f8f581787113fa3e6a272073113277ecd",
+      "timestamp": "2025-11-07T08:09:11.415958"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_tg_alert.py",
+      "hash_result": "c58b3eed347cc76e03b6a85e8bf3d4cd5867ebd2861efd9487e09c6827e0db56",
+      "timestamp": "2025-11-07T08:09:11.417468"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_thesportsdb_enhanced_integration.py",
+      "hash_result": "7ba661ec35fbc62c04ee1fcb6f1073f5238b1b6bd1dfa128a3f9fcad677d27dd",
+      "timestamp": "2025-11-07T08:09:11.419461"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_thesportsdb_master_integration.py",
+      "hash_result": "b06d4dc9be9f9a006c2c939d10797d77fe16e70f136824f56d9f15ef0f797d5b",
+      "timestamp": "2025-11-07T08:09:11.421465"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_thesportsdb_pricing_analysis.py",
+      "hash_result": "4dd8717ad15fb9ef0b9fc62f2d38e8cff27ac16668d20e0b25c351173b280d81",
+      "timestamp": "2025-11-07T08:09:11.423461"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_timezone.py",
+      "hash_result": "ea71c84cd95eb41deb4dfbff5fcd552c5e24dbe8bd0e35bf9d29c340935c302a",
+      "timestamp": "2025-11-07T08:09:11.424463"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_todays_entertainment_triggers.py",
+      "hash_result": "056c5513de488bd316025137b1e9b5f0c9073aab5639fab2febb229418190721",
+      "timestamp": "2025-11-07T08:09:11.426999"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_tokenizer.py",
+      "hash_result": "9665ac6a34dd2345875eecc5a68c0e71f7083f005cfab115654e0088e6ddc068",
+      "timestamp": "2025-11-07T08:09:11.430995"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_tokenizer_tests.py",
+      "hash_result": "552ddcad6a1d64c4802e267f459af2f606e162a7d6288fefe8687a912527e366",
+      "timestamp": "2025-11-07T08:09:11.434721"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_tuned_parlay_optimizer.py",
+      "hash_result": "e9f04d3ef33b579a51db3cda6d1d17146055d7edceada57cd13df5c565b6dd0f",
+      "timestamp": "2025-11-07T08:09:11.440405"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_ultimate_bulletproof_system.py",
+      "hash_result": "8573431e434fec9c92d50a3bc773a38067be8fd5a659426add0c7dc949b5a8f0",
+      "timestamp": "2025-11-07T08:09:11.442400"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_unified_system_enhancement.py",
+      "hash_result": "4d07ecb58e9cc892a77f1bed3367bf65d548fbb4695878a17e1e0a5c625d2d78",
+      "timestamp": "2025-11-07T08:09:11.444884"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_universal_repair_assistant.py",
+      "hash_result": "21ed22653e93291d38044c47f589ce565e33a24fb97bd06a5048921bea4e2fb3",
+      "timestamp": "2025-11-07T08:09:11.449754"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_updated_goalscorer_picks.py",
+      "hash_result": "6b0ddf880d9d051eea0eb566c09b6a899e68b670270f1cc2e0353f993932f257",
+      "timestamp": "2025-11-07T08:09:11.452776"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_url_scanner.py",
+      "hash_result": "a85e8fb0ac5289c0910e3a8a9e9752a38669e26d72e7b1550b3fce087899878d",
+      "timestamp": "2025-11-07T08:09:11.454756"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_vb_debugging_system.py",
+      "hash_result": "3553c004a034c436d8452040046924c2e05fb55e4f7cfb6a4f765ebe1687e8e4",
+      "timestamp": "2025-11-07T08:09:11.457317"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_vb_debug_logger.py",
+      "hash_result": "0725e5a2f672099dec6ff125c24a6e6cd8504566f53eab009383fce00c908f38",
+      "timestamp": "2025-11-07T08:09:11.459345"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_vb_testing_framework.py",
+      "hash_result": "348f9b3568d2706687ce480c8f8ae21f7ea4a5cedc8cae11f55e325da979aa5d",
+      "timestamp": "2025-11-07T08:09:11.462316"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_vpn_install_fix.py",
+      "hash_result": "e15442ddc93a914b2a9f4674f574e927df8f3ca17c17a230c4576c8c154cc9e6",
+      "timestamp": "2025-11-07T08:09:11.466106"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_vpn_plan_recommendation.py",
+      "hash_result": "1d3269da09ec861058f0f3a7f17e169b2389602cefd620c848e5c0050305e650",
+      "timestamp": "2025-11-07T08:09:11.470576"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_weather_client.py",
+      "hash_result": "8fa5eb2a36af26ca5f7ff54c0f8aceb94eadf6c872e9e75eb7d3e5109415add2",
+      "timestamp": "2025-11-07T08:09:11.474581"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_weather_enhanced_betting_system.py",
+      "hash_result": "bc5b0bb74b435af6cc9dd50f1227037948965ef982b0c803170be61f8ee381e7",
+      "timestamp": "2025-11-07T08:09:11.479622"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_weather_enhanced_parlay.py",
+      "hash_result": "42dbba353726d1a63e2194158ba7a407459edc19150924b39b5f6a35788471ca",
+      "timestamp": "2025-11-07T08:09:11.482621"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_weather_integration_summary.py",
+      "hash_result": "dd640043f0b04084835eb4df3df17c9f5a6519d9ebae95cb08336690a879f680",
+      "timestamp": "2025-11-07T08:09:11.484627"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_weather_recommendation.py",
+      "hash_result": "5a2449db761729545fc25a066a1f8f005a0888de4d6e83924452a360ed7ca723",
+      "timestamp": "2025-11-07T08:09:11.488146"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_weather_setup_guide.py",
+      "hash_result": "1f0c491f2a5c73cf020ecff3217b8a9f638b0e596db14f032ad2c3766bad9185",
+      "timestamp": "2025-11-07T08:09:11.491693"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_winning_margin_analyzer.py",
+      "hash_result": "5eaea5446c087bf9b7050b4fe05ded4bf30df168b55bd2eed2d1f1bf94064003",
+      "timestamp": "2025-11-07T08:09:11.495678"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\eq12_yolo_parlay_generator.py",
+      "hash_result": "22866029428f4feb9992ab612aa1b1bceddc0c19ae02b0f023edd3be9415308b",
+      "timestamp": "2025-11-07T08:09:11.499829"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\extension_tester.py",
+      "hash_result": "2eece1cd8edc846ad289fdb4c77d5dc3da964f34c333b1197089a84260ec9d58",
+      "timestamp": "2025-11-07T08:09:11.502090"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\financial_parlay_analysis.py",
+      "hash_result": "9c0824c778e00eb5b17c163b2ffcce6307e5ee241c54263e5e56cd9852bd9163",
+      "timestamp": "2025-11-07T08:09:11.505121"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\firefox_governance_automation.py",
+      "hash_result": "497ca45e7a720a8056efea74960d2ffa497f19481c85eebc39c87fc2cd09d9f9",
+      "timestamp": "2025-11-07T08:09:11.506629"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\forensic_helpers.py",
+      "hash_result": "d3717208f3856048c7ecf2094a0fa2633616e7b53d79fe74d3854dea73759104",
+      "timestamp": "2025-11-07T08:09:11.508819"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\forensic_helpers_fixed.py",
+      "hash_result": "d975b419d6716e0bebdd2b16b4142159ccf391e67d9edc8f89341375ae7545d9",
+      "timestamp": "2025-11-07T08:09:11.510999"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\generate_sample_predictions.py",
+      "hash_result": "badb34ae68a14d90e481bdfdee32582dce5c9b0c46c1b6a9011d5cf6c81d2e30",
+      "timestamp": "2025-11-07T08:09:11.514945"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\get_chat_id.py",
+      "hash_result": "59d776b1f2a3de45e97fd2db4f85a16cde1a373e25f7dd2a392e28ffc37b2fb6",
+      "timestamp": "2025-11-07T08:09:11.517164"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\get_in_season_games.py",
+      "hash_result": "282be88b54c4a46b701749f4b5d1397739721c347a41fcda7dee6e2afb515a2b",
+      "timestamp": "2025-11-07T08:09:11.519387"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_cli.py",
+      "hash_result": "4d22a83ee943c4cb34e9db42494f1698b20344f554ce0a78546d46a48a5128f3",
+      "timestamp": "2025-11-07T08:09:11.521122"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_marketplace_mcp_scanner.py",
+      "hash_result": "e2958cd27c591ae75b54d42b07d471c5d6a49601785c7933ff42e09b695eb5b2",
+      "timestamp": "2025-11-07T08:09:11.523022"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_models_client.py",
+      "hash_result": "f8f7d4695ac35710144845e64330b4cdbb15e8a8e2f32aa1c7958111f085ebee",
+      "timestamp": "2025-11-07T08:09:11.525900"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_models_integration.py",
+      "hash_result": "cbb1f97107cd3059d8971d6d20cef800f56b292d06c35c247fe5969b09c40120",
+      "timestamp": "2025-11-07T08:09:11.528556"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_repo_integrator.py",
+      "hash_result": "a9e9ce72b63f99782b5e1645f8be456fb36690021920fb5c813c8daefb61115a",
+      "timestamp": "2025-11-07T08:09:11.533482"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_repo_integrator_enhanced.py",
+      "hash_result": "6bbbec61a092ed67aab787d84a82d2ea6ade1daa48a2c58179a38b5e47bca83d",
+      "timestamp": "2025-11-07T08:09:11.536520"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\github_whitepaper_analyzer.py",
+      "hash_result": "9ea6523f6d9fe9a1d6501e749fc6601d7a67f339fcf9275d5a751a233da9ceed",
+      "timestamp": "2025-11-07T08:09:11.539509"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\google_ai_client.py",
+      "hash_result": "b6b8ba42e6c2507f4b5cda140129dea92add7f73bb93a5c7ebdad164766ccd7a",
+      "timestamp": "2025-11-07T08:09:11.542585"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\groq_ai_client.py",
+      "hash_result": "75f68204db03e8edbc0bc99669ae3f997ee7a2c109877042d0fe181b018a0d76",
+      "timestamp": "2025-11-07T08:09:11.545115"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\groq_cookbook_integration_summary.py",
+      "hash_result": "7d4c34a6a78581695058714f0b4938dbfb3d2df5ee31dd5415b1f24b08c0e8fe",
+      "timestamp": "2025-11-07T08:09:11.548631"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\groq_integration_hub.py",
+      "hash_result": "6a0a6c15781b39adb09f3b0ab5202ef34d0732eb8b5abe5f1acd01d916aabca5",
+      "timestamp": "2025-11-07T08:09:11.551139"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\gumroad_subscribe.py",
+      "hash_result": "abc9ea38cc36abea698e6f455301a7bcb7edf146b78ff050fd1a0fae6b8d5622",
+      "timestamp": "2025-11-07T08:09:11.554013"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\hardcoded_ai_status.py",
+      "hash_result": "e20e9698811fd5d37515c2fda3ead35bb2cd4d68bfbc97701e29428414a35403",
+      "timestamp": "2025-11-07T08:09:11.557864"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\hardcoded_roster_automation.py",
+      "hash_result": "c2cb393a1f522c11979805499a000231feeea39a4d240e5d44a01d0368a22871",
+      "timestamp": "2025-11-07T08:09:11.561191"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\hardcoded_trigger_checker.py",
+      "hash_result": "d02a819bfd9cda18b0a4acd68a31e9f01071d9493e9213ef1a6c4bce25fbee03",
+      "timestamp": "2025-11-07T08:09:11.566220"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\health_monitor.py",
+      "hash_result": "5aba5017ef0aca3fe5b4a8c3c1dd44ada36b9e5a9e8abc0fe90f2c4af820ba79",
+      "timestamp": "2025-11-07T08:09:11.568260"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\intel_rag_demo.py",
+      "hash_result": "838f664c6e9d663d84b3922c00bd1831e9d2045ec46add009dc3e44ff7569bc6",
+      "timestamp": "2025-11-07T08:09:11.570244"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\jobs_controltech.py",
+      "hash_result": "706c01a707ca1536ad84bbfb5d9d55d284eeda6cc7c84946fd1517cda5e92b31",
+      "timestamp": "2025-11-07T08:09:11.572286"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\kc_jac_sgp_builder.py",
+      "hash_result": "d3ca71288320dc357d26b7a0cd450441d3149fbd299b5414ddeb68bbfa3caf8a",
+      "timestamp": "2025-11-07T08:09:11.574294"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\la_phi_mlb_sgp_builder.py",
+      "hash_result": "18a50a84b9346bb77e39c889aa422eae162c902f52b433cc5c6a390406574464",
+      "timestamp": "2025-11-07T08:09:11.575293"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\logs_to_jsonl.py",
+      "hash_result": "39059a7283b10dbc20ce13110a0a13656aa91f4c90de4dab1283382dabf983d7",
+      "timestamp": "2025-11-07T08:09:11.578840"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\multi_provider_ai_router.py",
+      "hash_result": "8deb834c2b2c1d9adeaa63a437a97b60b047f55d60ab379ed3fef30ed7b4acbe",
+      "timestamp": "2025-11-07T08:09:11.582731"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\nba_live_roster_verification.py",
+      "hash_result": "aa37f821f1143b842b639bac2e553bb2967b8a828aaa45b3b524b5286be7eb80",
+      "timestamp": "2025-11-07T08:09:11.588163"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\nba_sgp_player_status_verification.py",
+      "hash_result": "7409b981e87d7666d36fa47e22fd2df6a03723b607672569a06bcbe987027e0c",
+      "timestamp": "2025-11-07T08:09:11.590662"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\nfl_live_roster_verification.py",
+      "hash_result": "452c096aa83d02a0a73fadced41501ccb8907e5cae5b80eb5920a72eb929d471",
+      "timestamp": "2025-11-07T08:09:11.593191"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\nfl_roster_fetcher.py",
+      "hash_result": "3084ce088a66d08392bb8b846c86cf8db2c8e3a041013ee50f473c0f4d4b9e51",
+      "timestamp": "2025-11-07T08:09:11.595529"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\nfl_roster_prevention_system.py",
+      "hash_result": "96bb6b75ecd140eb7af5ec7aece67c597d8b0b6a8196cc99f08302084dc59a1f",
+      "timestamp": "2025-11-07T08:09:11.597541"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\ngrok_tunnel_monitor.py",
+      "hash_result": "354a9217554447f28727006a46849e7c4d2bce6cfb6029f4fd926625f53ef192",
+      "timestamp": "2025-11-07T08:09:11.599545"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\odds_parser.py",
+      "hash_result": "9f220b7680c61a54f441eb9086e89d2c874390e92863fb5f034947bdd4d83ee9",
+      "timestamp": "2025-11-07T08:09:11.602233"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\omni_run.py",
+      "hash_result": "1a6556a18e9627bd2682897763be06e84502d7e32cd46aceed80895f27effb82",
+      "timestamp": "2025-11-07T08:09:11.604095"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\openai_migration_helper.py",
+      "hash_result": "f9a78415f0875b580bfb9beeae0ce93abe0acab2dc4a5621bf9aeafb49e0486c",
+      "timestamp": "2025-11-07T08:09:11.605838"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\openai_repo_scan.py",
+      "hash_result": "0bc44df93c668226e9ed13e2fbc7394ad35c5ee5c2c4ec63df2c8cb266753414",
+      "timestamp": "2025-11-07T08:09:11.607800"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\parlay_analysis_system.py",
+      "hash_result": "18c830add5f2e5504295e392c0ebb7cc4d4a6eef8168b29ea48e07c389af5c23",
+      "timestamp": "2025-11-07T08:09:11.609817"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\parlay_builder.py",
+      "hash_result": "d7bb3780b80bea2c8390daf9b35da6d26ef46d6a16d19ac1354857de72e45800",
+      "timestamp": "2025-11-07T08:09:11.612625"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\rakuten_scraper.py",
+      "hash_result": "904f322adf7480ae6ddd42f01aeac0b50d09babff8cd843156bf879667e92a1d",
+      "timestamp": "2025-11-07T08:09:11.616520"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\realistic_bills_chiefs_sgp.py",
+      "hash_result": "905182d3db98af5885248dc470badc2e4b734d417ee14fb8b82b1ee829d0bd15",
+      "timestamp": "2025-11-07T08:09:11.619548"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\recent_parlay_analysis.py",
+      "hash_result": "2aef868a88d3ddbb598383af6072dbcbae11539c9123019e2652b624129d6267",
+      "timestamp": "2025-11-07T08:09:11.621529"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\repair_all_tasks.py",
+      "hash_result": "7a811557bb7afbeaabbe502c08c225feca513d5eeda1be41786c81caa1f2d961",
+      "timestamp": "2025-11-07T08:09:11.624074"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\run_evals.py",
+      "hash_result": "511898d4e38a3aa1d79584acd7ebe85f0685c7f0daa72ab1a6fd04dbba31ef9e",
+      "timestamp": "2025-11-07T08:09:11.627089"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\run_tests.py",
+      "hash_result": "098d321d911fe12ea754204c41fe1580f7ec56a488b0fc4e637e0517960431f6",
+      "timestamp": "2025-11-07T08:09:11.631777"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\seahawks_commanders_sgp.py",
+      "hash_result": "65ca018bfc769b9386f5d9add2925c98d66d278a2a99177ff056bbb6d704a42f",
+      "timestamp": "2025-11-07T08:09:11.635692"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\snyk_rss_sync.py",
+      "hash_result": "f73131b601c66cd8e93a6522e5ca29d8fd7ce37303fa640a98fa94c13b199d95",
+      "timestamp": "2025-11-07T08:09:11.638655"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\sports.py",
+      "hash_result": "ac7ef0f94cc18d6489b1dc2634616d358f904a18dcdfc242074f6dfde22ace9a",
+      "timestamp": "2025-11-07T08:09:11.640675"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\stocks.py",
+      "hash_result": "55badbadfb2c80ebce604ad6cd1a4cf9f18ec8d915cee7beb2f9bcca7137a3f0",
+      "timestamp": "2025-11-07T08:09:11.642657"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\test_eq12_integration.py",
+      "hash_result": "038bda4777ff6501fa5d71369a2ea0b649d0b92fabba660901c34d38d75d3158",
+      "timestamp": "2025-11-07T08:09:11.646191"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\test_integration.py",
+      "hash_result": "63265257a6b5a937eac643ebb2f3c40e886e89d612f79fbc107a9fe064c561e7",
+      "timestamp": "2025-11-07T08:09:11.649552"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\test_mlb_fixed.py",
+      "hash_result": "0f0c2549ed70ea609109585b3332b0e788050f1ef97f9fb0dcdfefe5553ea26e",
+      "timestamp": "2025-11-07T08:09:11.652516"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\test_telegram_formats.py",
+      "hash_result": "5fc60f094b9860548de38941e3dfa9fc70bed183c7c7dc86d64736871e86c60a",
+      "timestamp": "2025-11-07T08:09:11.654548"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\test_telegram_quick.py",
+      "hash_result": "4c51bb8bfbaeee8f579e960cd3348405e6669c79bbd3416b7c4765318da77861",
+      "timestamp": "2025-11-07T08:09:11.656996"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\test_week7_system.py",
+      "hash_result": "d66f225440020dbc873c3defe80dc23029bf3be5737ab7d5bee7782e0e8b680f",
+      "timestamp": "2025-11-07T08:09:11.658005"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\travel_deals_scraper.py",
+      "hash_result": "860f878d1ac25be23dd04a98550ee8bd5249bdcac8aa9b1c1a0ee5a11637e1c9",
+      "timestamp": "2025-11-07T08:09:11.659995"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\ultimate_roster_validator.py",
+      "hash_result": "45ef7e36edde4cfddf5ea0873de19c67a4b1760d435e45665c1322d4d6a561ea",
+      "timestamp": "2025-11-07T08:09:11.663100"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\validate_setup.py",
+      "hash_result": "d45816f7b7d9e3fabd46056ba4839687a57abcfdd8e52751941bc45231be3d8e",
+      "timestamp": "2025-11-07T08:09:11.666602"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\vpn_check.py",
+      "hash_result": "0ed06a7cd6e20d0b76fa8f2bb3dedad2d6f4c2d840c75c7be649858d8825898c",
+      "timestamp": "2025-11-07T08:09:11.667746"
+    },
+    {
+      "file_path": "C:\\EQ12\\scripts\\__init__.py",
+      "hash_result": "bf01de7f65b6b64c82b33c0d52acd857c6e73d5172a59fee52c08c923d82a20e",
+      "timestamp": "2025-11-07T08:09:11.669689"
+    }
+  ],
+  "count": 290
+}

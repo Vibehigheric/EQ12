@@ -1,0 +1,195 @@
+name: EQ12 CI - Continuous Integration
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUTF8: 1
+  PYTHONIOENCODING: ascii
+  EQ12_ASCII_MODE: ACTIVE
+  EQ12_NO_PYCACHE: ACTIVE
+
+jobs:
+  eq12-validation:
+    name: EQ12 System Validation
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout EQ12 Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Configure ASCII-Safe Environment
+      shell: pwsh
+      run: |
+        echo "Setting ASCII-safe environment for EQ12..."
+        $env:PYTHONDONTWRITEBYTECODE = "1"
+        $env:PYTHONUTF8 = "1"
+        $env:PYTHONIOENCODING = "ascii"
+        $env:EQ12_ASCII_MODE = "ACTIVE"
+        echo "Environment configured"
+
+    - name: Install EQ12 Dependencies
+      shell: pwsh
+      run: |
+        echo "Installing EQ12 Python dependencies..."
+        python -m pip install --upgrade pip
+        pip install pytest black ruff pylint flake8
+        pip install requests beautifulsoup4 selenium
+        pip install pandas numpy matplotlib
+        pip install python-dotenv pyyaml
+
+    - name: Remove All Pycache
+      shell: pwsh
+      run: |
+        echo "Removing all __pycache__ directories..."
+        Get-ChildItem -Path . -Include "__pycache__" -Recurse -Directory | Remove-Item -Recurse -Force
+        echo "Pycache cleanup complete"
+
+    - name: ASCII Validation
+      shell: pwsh
+      run: |
+        echo "Validating ASCII-only content..."
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1", "*.json", "*.yml", "*.yaml" -Recurse -File
+        $errors = 0
+        foreach ($file in $files) {
+          $content = Get-Content $file.FullName -Raw -Encoding UTF8
+          $asciiContent = [System.Text.Encoding]::ASCII.GetString([System.Text.Encoding]::ASCII.GetBytes($content))
+          if ($content -ne $asciiContent) {
+            echo "ERROR: Non-ASCII content found in $($file.FullName)"
+            $errors++
+          }
+        }
+        if ($errors -gt 0) {
+          echo "ASCII validation failed with $errors errors"
+          exit 1
+        }
+        echo "ASCII validation passed"
+
+    - name: Python Syntax Validation
+      shell: pwsh
+      run: |
+        echo "Validating Python syntax..."
+        $pythonFiles = Get-ChildItem -Path . -Include "*.py" -Recurse -File
+        foreach ($file in $pythonFiles) {
+          echo "Checking: $($file.FullName)"
+          python -m py_compile $file.FullName
+        }
+        echo "Python syntax validation complete"
+
+    - name: PowerShell Syntax Validation
+      shell: pwsh
+      run: |
+        echo "Validating PowerShell syntax..."
+        $psFiles = Get-ChildItem -Path . -Include "*.ps1" -Recurse -File
+        foreach ($file in $psFiles) {
+          echo "Checking: $($file.FullName)"
+          $null = [System.Management.Automation.PSParser]::Tokenize((Get-Content $file.FullName -Raw), [ref]$null)
+        }
+        echo "PowerShell syntax validation complete"
+
+    - name: Run Black Formatter Check
+      run: |
+        echo "Checking Black formatting..."
+        black --check --diff .
+
+    - name: Run Ruff Linting
+      run: |
+        echo "Running Ruff linting..."
+        ruff check .
+
+    - name: EQ12 Import Hook Validation
+      shell: pwsh
+      run: |
+        echo "Testing EQ12 import hooks..."
+        python -c "
+        import sys
+        sys.path.insert(0, '.')
+        from eq12_no_pycache import eq12_import_hook
+        eq12_import_hook()
+        print('EQ12 import hook validation passed')
+        "
+
+    - name: Run EQ12 Unit Tests
+      shell: pwsh
+      run: |
+        echo "Running EQ12 unit tests..."
+        if (Test-Path "tests/") {
+          python -m pytest tests/ -v --tb=short
+        } else {
+          echo "No tests directory found, skipping unit tests"
+        }
+
+    - name: Generate EQ12 System Report
+      shell: pwsh
+      run: |
+        echo "Generating EQ12 system validation report..."
+        python -c "
+        import sys, os
+        print('=== EQ12 CI VALIDATION REPORT ===')
+        print(f'Python Version: {sys.version}')
+        print(f'Python Path: {sys.executable}')
+        print(f'PYTHONDONTWRITEBYTECODE: {os.environ.get(\"PYTHONDONTWRITEBYTECODE\", \"Not Set\")}')
+        print(f'EQ12_ASCII_MODE: {os.environ.get(\"EQ12_ASCII_MODE\", \"Not Set\")}')
+        print('=== VALIDATION COMPLETE ===')
+        "
+
+  eq12-security-scan:
+    name: EQ12 Security Validation
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout EQ12 Code
+      uses: actions/checkout@v4
+
+    - name: Scan for Secrets
+      shell: pwsh
+      run: |
+        echo "Scanning for potential secrets..."
+        $secretPatterns = @(
+          'api_key\s*=\s*["\'']\w+["\'']\s*',
+          'password\s*=\s*["\'']\w+["\'']\s*',
+          'token\s*=\s*["\'']\w+["\'']\s*',
+          'secret\s*=\s*["\'']\w+["\'']\s*'
+        )
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1", "*.json" -Recurse -File
+        $violations = 0
+        foreach ($file in $files) {
+          $content = Get-Content $file.FullName -Raw
+          foreach ($pattern in $secretPatterns) {
+            if ($content -match $pattern) {
+              echo "WARNING: Potential secret found in $($file.FullName)"
+              $violations++
+            }
+          }
+        }
+        echo "Security scan complete: $violations potential issues found"
+
+    - name: Check for Unicode Corruption
+      shell: pwsh
+      run: |
+        echo "Checking for Unicode corruption patterns..."
+        $corruptionPatterns = @('\\u[0-9a-fA-F]{4}', '[^\x20-\x7E\r\n\t]')
+        $files = Get-ChildItem -Path . -Include "*.py", "*.ps1" -Recurse -File
+        $corrupted = 0
+        foreach ($file in $files) {
+          $content = Get-Content $file.FullName -Raw
+          foreach ($pattern in $corruptionPatterns) {
+            if ($content -match $pattern) {
+              echo "CORRUPTION: Unicode issues in $($file.FullName)"
+              $corrupted++
+            }
+          }
+        }
+        if ($corrupted -gt 0) {
+          echo "Unicode corruption detected in $corrupted files"
+          exit 1
+        }
+        echo "No Unicode corruption detected"

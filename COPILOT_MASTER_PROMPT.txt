@@ -1,0 +1,23 @@
+# EQ12 Master Patch Directive
+- All Python: argparse, logging, JSON export, CSV stubs.
+- All PowerShell: CmdletBinding + Verb-Noun style.
+- Dashboard: table-based Crypto/Stocks/Sports/Jobs/Recycle.
+- Secrets: use env vars (never hardcode).
+- Commit: always GPG signed.
+- Devcontainer: Python, PowerShell, Playwright, Chrome/Firefox, gpg.
+- Retry-Exec + Ensure-OddsAPIKey anchors never removed.
+EQ12 Copilot Master Prompt
+
+Always scaffold repositories with:
+- .devcontainer/devcontainer.json (Python 3.12, PowerShell, postCreateCommand loads EQ12 profile).
+- dotfiles auto-install with PowerShell profile + aliases.
+- Codespaces secrets (ODDS_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).
+- Git + GPG signing pre-configured.
+- Dashboard exports JSON/CSV into logs/.
+- Stealth scrapers (undetected-geckodriver, playwright-stealth).
+- All scripts refactored with CmdletBinding() (PowerShell) and argparse+logging (Python).
+
+When generating code:
+- PowerShell: include [CmdletBinding()] and use Verb-Noun naming.
+- Python: use argparse, logging module, json output and safe error handling.
+- Always ensure commands that touch git signing set git config gpg.program and commit.gpgsign.

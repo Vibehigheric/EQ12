@@ -1,0 +1,109 @@
+﻿C:\EQ12\archive_duplicates\eq12_launcher - Copy.ps1
+C:\EQ12\archive_duplicates\eq12_master_task - Copy.xml
+C:\EQ12\archive_duplicates\EQ12_Profile - Copy.ps1
+C:\EQ12\archive_duplicates\EQ12_Profile - Copy.ps1.diff.txt
+C:\EQ12\archive_duplicates\eq12_update - Copy.ps1
+C:\EQ12\archive_duplicates\odds_parser - Copy.py
+C:\EQ12\archive_duplicates\parlay_builder - Copy.py
+C:\EQ12\archive_duplicates\EdgeGodParlays\ai_betting_bot_stealth_final_flask_pro.py.bak
+C:\EQ12\archive_duplicates\EdgeGodParlays\ai_betting_bot_stealth_final_flask_pro.py.bak.diff.txt
+C:\EQ12\archive_duplicates\EdgeGodParlays\ai_betting_bot_stealth_final_flask_pro.py.bak_admin
+C:\EQ12\archive_duplicates\EdgeGodParlays\sports_live.py.bak_rosters
+C:\EQ12\archive_duplicates\EdgeGodParlays\sports_live.py.bak_weather
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Bookmarks.bak
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Bookmarks.bak.diff.txt
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\AutofillStrikeDatabase\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\BudgetDatabase\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\chrome_cart_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\ClientCertificates\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\commerce_subscription_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\discounts_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\discount_infos_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Download Service\EntryDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Extension Rules\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Extension Scripts\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Extension State\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Extensions\aoffgjejcepnijgahpckhajchahfpojo\1.1.9_0\manifest.json~
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Extensions\aoffgjejcepnijgahpckhajchahfpojo\1.1.9_0\script.js~
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\GCM Store\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\GCM Store\Encryption\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\image_cache\cached_image_fetcher_images\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\IndexedDB\chrome-extension_chhjbpecpncaggjpdakmflnfcopglcmi_0.indexeddb.leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\IndexedDB\chrome-extension_gighmmpiobklfepjocnamgkkbiglidom_0.indexeddb.leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\IndexedDB\chrome-extension_gngocbkfmikdgphklgmmehbjjlfgdemm_0.indexeddb.leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\IndexedDB\chrome-extension_kbfnbcaeplbcioakkpcpgfkobkghlhen_0.indexeddb.leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\bmnlcjabgnpnenekpadlanbbkooimhnj\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\chhjbpecpncaggjpdakmflnfcopglcmi\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\coplmfnphahpcknbchcehdikbdieognn\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\doojmbjmlfjjnbmnoijecmcbfeoakpjm\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\ghbmnnjooekpmoecnnnilnnbdlolhkhi\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\gighmmpiobklfepjocnamgkkbiglidom\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\gngocbkfmikdgphklgmmehbjjlfgdemm\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\kbfnbcaeplbcioakkpcpgfkobkghlhen\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\kegphgaihkjoophpabchkmpaknehfamb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\lghjfnfolmcikomdjmoiemllfnlmmoko\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\neebplgakaahbhdphmkckjjcegoiijjo\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\nenlahapcbofgnanklpelkaejcehkggg\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Extension Settings\opmeopcambhfimffbomjgemehjkbbmji\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Local Storage\leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Managed Extension Settings\gighmmpiobklfepjocnamgkkbiglidom\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Managed Extension Settings\kbfnbcaeplbcioakkpcpgfkobkghlhen\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\optimization_guide_hint_cache_store\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\parcel_tracking_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\PersistentOriginTrials\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Platform Notifications\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Segmentation Platform\SegmentInfoDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Segmentation Platform\SignalDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Segmentation Platform\SignalStorageConfigDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Service Worker\Database\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Session Storage\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\shared_proto_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\shared_proto_db\metadata\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Site Characteristics Database\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync App Settings\mmfbcljfglbokpmkimbfghdkjmjhdgbg\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Data\LevelDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\bmnlcjabgnpnenekpadlanbbkooimhnj\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\coplmfnphahpcknbchcehdikbdieognn\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\dhogjnnleghndloamdkljhnhdchpcijl\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\doojmbjmlfjjnbmnoijecmcbfeoakpjm\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\ghnomdcacenbmilgjigehppbamfndblo\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\hdadmgabliibighlbejhlglfjgplfmhb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\hibfheifkaehlpnfggmfimfbhhffcmla\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\idmmhhijggcmbeejedibpdcahpkneegg\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\kegphgaihkjoophpabchkmpaknehfamb\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\lghjfnfolmcikomdjmoiemllfnlmmoko\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\nenlahapcbofgnanklpelkaejcehkggg\LOG.old
+C:\EQ12\archive_duplicates\profiles\chrome-bot\Default\Sync Extension Settings\njmehopjdpcckochcggncklnlmikcbnb\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\AdPlatform\auto_show_data.db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Asset Store\assets.db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\AutofillStrikeDatabase\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\BudgetDatabase\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\ClientCertificates\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\commerce_subscription_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\discounts_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\discount_infos_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Download Service\EntryDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\EdgeCoupons\coupons_data.db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\EdgePushStorageWithConnectTokenAndKey\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Extension Rules\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Extension Scripts\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Extension State\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Feature Engagement Tracker\AvailabilityDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Feature Engagement Tracker\EventDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\IndexedDB\https_ntp.msn.com_0.indexeddb.leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Local Extension Settings\fnmihdojmnkclgjpcoonokmkhjpjechg\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Local Storage\leveldb\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\optimization_guide_hint_cache_store\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\parcel_tracking_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\PersistentOriginTrials\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Segmentation Platform\SegmentInfoDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Segmentation Platform\SignalDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Segmentation Platform\SignalStorageConfigDB\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Service Worker\Database\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Session Storage\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\shared_proto_db\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\shared_proto_db\metadata\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Site Characteristics Database\LOG.old
+C:\EQ12\archive_duplicates\profiles\edge-bot\Default\Sync Data\LevelDB\LOG.old

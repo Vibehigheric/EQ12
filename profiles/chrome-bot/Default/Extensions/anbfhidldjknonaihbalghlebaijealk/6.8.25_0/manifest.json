@@ -1,0 +1,62 @@
+{
+   "action": {
+      "default_icon": {
+         "16": "assets/browser-action/16.png",
+         "24": "assets/browser-action/24.png",
+         "32": "assets/browser-action/32.png"
+      },
+      "default_popup": "html/popup.html",
+      "default_title": "Chrome Currency Converter"
+   },
+   "author": "George Papadakis",
+   "background": {
+      "service_worker": "dist/background.js",
+      "type": "module"
+   },
+   "commands": {
+      "rates": {
+         "description": "Current rates",
+         "suggested_key": {
+            "default": "Ctrl+Shift+T",
+            "mac": "MacCtrl+Shift+T"
+         }
+      },
+      "toggle": {
+         "description": "Toggle CCC conversion",
+         "suggested_key": {
+            "default": "Ctrl+Shift+C",
+            "mac": "MacCtrl+Shift+C"
+         }
+      }
+   },
+   "content_scripts": [ {
+      "all_frames": false,
+      "js": [ "dist/script.js" ],
+      "matches": [ "http://*/*", "https://*/*", "file:///*" ],
+      "run_at": "document_start"
+   } ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "description": "Automatically convert in-page prices to the selected currency using current rates.",
+   "host_permissions": [ "http://*/*", "https://*/*", "file:///*" ],
+   "icons": {
+      "128": "assets/icon/128.png",
+      "16": "assets/icon/16.png",
+      "48": "assets/icon/48.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCkP8fblHMekbhsory/8Q6/wB24IGfN2HjVU7zEGWh0mim9wZCp4136BV1yAoSzUn6s82ctvmNqYlPwexdjP1vcD/6HXc/vYRSLB+3TvitMBc5vmMoGnvHU8Lgs7MO9PJHMYgOPZCBMz0AXgedRBjLtP5ByIsr0HG2Q5pn+SVH5MQIDAQAB",
+   "manifest_version": 3,
+   "name": "Chrome Currency Converter",
+   "options_ui": {
+      "page": "html/options.html"
+   },
+   "permissions": [ "contextMenus", "storage" ],
+   "short_name": "CCC",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "6.8.25",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "html/test.html", "html/*", "assets/*" ]
+   } ]
+}

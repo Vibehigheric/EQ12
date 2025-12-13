@@ -1,0 +1,28 @@
+name: TravelDeals Scheduled
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Run travel deals scraper (dry-run)
+        run: |
+          python scripts/travel_deals_scraper.py --dry-run --out logs/travel_snapshot.json || true
+      - name: Upload snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: travel-snapshot
+          path: logs/travel_snapshot.json

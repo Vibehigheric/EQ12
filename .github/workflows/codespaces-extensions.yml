@@ -1,0 +1,16 @@
+# EQ12 patch: workflow to signal extension recommendations (no secrets used)
+name: 'EQ12: Recommend Extensions'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  recommend-extensions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Show extensions script
+        run: |
+          ls -la scripts || true
+          head -n 30 scripts/install_extensions.sh || true

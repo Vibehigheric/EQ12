@@ -1,0 +1,204 @@
+Here’s a mobile-first UX/UI blueprint for EQ12, a premium NHL parlay app. It focuses on touch-first interactions, live odds, fast parlay building, and a distinct hockey identity.
+
+Brand and feel
+- Brand: EQ12 (logomark: stylized puck “Q” with a subtle ice texture)
+- Visual style: premium, clean, high-contrast text over subtle ice-rink gradients; soft glassmorphism on cards
+- Motion: smooth, spring-based micro-interactions; subtle parallax on background ice patterns
+- Sound (optional, toggleable): soft puck “clack” for add-to-slip, whistle for odds updates, crowd swell on bet placed
+
+Navigation and structure (bottom navigation bar)
+- Home: Live games, quick picks, trending parlays
+- Build: Quick Bet Slip Builder
+- Favorites: Saved parlays and followed teams/games
+- Notifications: Push settings and alerts center
+- Account: Profile, payments, preferences, responsible gaming
+
+Mobile-first patterns
+- Large, thumb-friendly buttons and chips (min 44–48dp touch targets)
+- Swipeable parlay cards: swipe left to save/share, right to add/remove legs
+- Collapsible sections for game slates, markets, and slip details
+- Pull-to-refresh on all feeds with a rink-line progress indicator
+- Sticky bottom “Bet Slip” tray with leg count and estimated payout, expandable with an upward swipe
+
+Screens and key features
+
+1) Home
+- Header: EQ12 logo, search icon, notification bell with dot for unread
+- Ice rink background: faint blue/white rink lines, parallax scroll
+- Live Now (collapsible): horizontally scrollable cards with:
+  - Team badges and dynamic team-color accents
+  - Moneyline, puck line, total chips
+  - Animated odds: green pulse up for improved odds, red pulse down for worse
+- Tonight’s Matchups (collapsible): upcoming games with quick add chips for common markets
+- Trending Parlays (swipeable):
+  - Card shows legs summary, implied payout, community saves
+  - Swipe actions: left to Save or Share; right to Expand or Add to Slip
+- Quick Actions bar: Build Parlay, My Favorites, Boosted Odds (if applicable)
+- Pull-to-refresh: stick + puck spinner animating along a center-ice faceoff dot
+
+2) Build (Quick Bet Slip Builder)
+- Top tabs: Moneyline, Puck Line, Totals, Player Props (e.g., Shots on Goal, Points)
+- Grid of matchups with one-tap market chips
+- Quick Add interactions:
+  - Tap to add a leg (chip turns filled; haptic tick; puck “clack” sound)
+  - Long-press a leg to open alternate lines/props in a bottom sheet
+- Filters: Team, Time, Favorites, Boosted only
+- Selected legs bar: sticky at bottom; shows count and fractional/decimal/US odds toggle
+- “Review Slip” CTA animates to open slip sheet
+
+3) Bet Slip (expandable tray)
+- Collapsible header: Parlay name (auto-generated, editable), legs count
+- Legs list:
+  - Each leg tile shows team colors, market, odds, and an animated “last updated” ping
+  - Swipe left to remove leg; reorder by long-press drag for clarity
+- Stake input: numeric keypad, presets (5, 10, 25, 50), “Max”
+- Payout module: estimated payout with animated change on odds updates
+- Price change guard: if odds change on submit, show confirmation dialog with updated odds
+- Place Bet button: large gradient button with micro-press animation and a brief confirm haptic
+- Save Parlay button: bookmark to Favorites for later
+- Share: social share sheet with a branded card (team logos, legs, and deep link)
+
+4) Favorites
+- Saved Parlays: list of cards with last odds refresh time
+- Followed Teams/Games: quick tiles to jump into matchups
+- Bulk actions: refresh odds for all saved parlays, share multiple
+- Empty state: puck and stick icon with “Save your favorite parlays to come back fast”
+
+5) Notifications
+- Global toggle: Enable Push Notifications
+- Categories:
+  - Live game alerts: goals, penalties, period start/end
+  - Odds changes: for saved parlays, watched markets
+  - Bet status: placed, settled, cash-out opportunities (if applicable)
+  - Promotions/boosts (optional)
+- Quiet hours and frequency settings
+- Per-team/per-parlay toggles and thresholds (e.g., alert only if odds move > 10%)
+
+6) Account
+- Profile, payment methods, transaction history
+- Preferences: odds format, units, theme sounds, haptics, data saver
+- Responsible gaming tools: limits, cool-off, support links
+- Legal/compliance info
+
+Hockey theme integration
+- Backgrounds: subtle ice textures with blue and red line patterns; dark mode uses slate/graphite with frosted overlays
+- Icons: stick, puck, goal lamp, rink lines; simple, duotone style
+- Team colors: accent chips and progress bars adapt to selected teams; ensure accessible contrast with overlays
+- Microcopy: “Face off with EQ12,” “Hat trick picks,” “Power play boosts”
+
+Core components and interactions
+
+Parlay Card (swipeable)
+- Default state: legs count, payout estimate, save count, share icon
+- Swipe left:
+  - Short: Save
+  - Long: Share (reveals share actions)
+- Swipe right:
+  - Short: Expand details
+  - Long: Add legs to slip
+- Expanded details: list of legs, odds breakdown, “Load Variations” to swap a leg quickly
+
+Odds Chip with live updates
+- States: default, improving (green up arrow + light pulse), worsening (red down arrow + fade)
+- Transition timing: 150–250ms pulse; update label count-up/down for fractional changes
+
+Collapsible Sections
+- Header with arrow chevron that rotates 0–180°
+- Remember last state per user; auto-collapse non-active sections to keep screens short
+
+Pull-to-refresh
+- Rink spinner: puck slides along a curved path; on release, stick “taps” puck to trigger refresh
+- Haptic light tick on complete; confetti of tiny ice particles for significant updates (optional)
+
+Bottom Navigation Bar
+- Icons: Home (goal lamp), Build (sticks crossed), Favorites (star/puck), Notifs (bell), Account (jersey)
+- Active tab has a glow accent in team color when relevant (contextual)
+
+Animations and haptics
+- Add to slip: scale-up on chip, drop-in animation into slip tray, light haptic
+- Remove leg: swipe-off with subtle ice “skid”
+- Place bet: progress ring around button; success checkmark with short crowd swell sound
+- Microdurations: 150–250ms for small transitions; 300–400ms for modal/bottom sheets
+
+Design system (tokens)
+- Colors
+  - Ice White #F7FAFF
+  - Rink Blue #2F6DAE
+  - Center Red #D84444
+  - Boards Grey #101317 (dark), #E9EDF5 (light surfaces)
+  - Puck Black #0B0C0E
+  - Accent Green (odds up) #2BC569
+  - Accent Red (odds down) #FF5A5F
+- Typography
+  - Display: SF Pro / Inter Semibold
+  - Body: SF Pro / Inter Regular
+  - Numeric: Tabular figures for odds/payouts
+- Elevation
+  - Frosted glass cards with blur 12–16, subtle shadow; hover-like highlight on press
+- Spacing
+  - 8pt system; minimum 16pt padding on edges
+- Iconography
+  - 24px default, 28–32px in bottom nav
+
+Accessibility
+- WCAG AA contrast; avoid relying on green/red only—use arrows and patterns
+- Dynamic type support; responsive layouts for L/XL text
+- VoiceOver labels for odds changes (“Odds improved from +120 to +130”)
+- Large target areas; focus order logical in bottom sheets
+
+Data and updates
+- Live odds via WebSocket; fallback to short polling
+- Client state model
+  - Game: id, teams, startTime, status, scores
+  - Market: id, type (ML, PL, Total, Prop), line, odds, lastUpdated
+  - Leg: gameId, marketId, selection, odds, line
+  - Parlay: id, legs[], combinedOdds, estPayout, saved, sharedCount, lastUpdated
+- Update strategy
+  - Diff incoming odds; animate only when numeric value changes
+  - Debounce rapid updates to 300–500ms
+  - Show “price changed” confirmation on submit
+
+Social sharing
+- Share card: team logos, leg list, EQ12 branding, short URL deep link to rebuild the parlay
+- Share targets: Messages, X/Twitter, Instagram story (export image), clipboard link
+
+Favorites and saved lists
+- Save individual parlays or template parlays (e.g., “Shots on Goal Ladder”)
+- Bulk refresh and compare current payout vs. saved snapshot
+- Auto-notify on significant payout change thresholds
+
+Empty and error states
+- Empty slip: “Build your winning line—start from Live Now or Quick Builder”
+- Offline: frost overlay with “Signal in the penalty box—retry” and Retry button
+- Odds unavailable: greyed chips with “Temporarily off the board”
+
+Settings and preferences
+- Odds display: American/Decimal/Fractional
+- Sounds: On/Off; volume respect
+- Haptics: On/Off
+- Theme: Light, Dark, System
+- Data saver: lower image/animation fidelity on cellular
+
+Performance and tech notes
+- Lazy-load team assets; prefetch logos for upcoming games
+- Virtualized lists for large slates
+- Use Lottie or lightweight vector animations for pulses and rink spinner
+- Safe areas respected; bottom-sheet slip clears keyboard when entering stake
+
+Microcopy examples
+- Place Bet CTA: “Place EQ12 Parlay”
+- Odds change dialog: “Price changed from +480 to +460. Accept and place?”
+- Save confirmation: “Parlay saved to Favorites”
+- Notifications toggle: “Get goal and odds alerts”
+
+Responsible gaming
+- Persistent “RG” icon linking to limits and support
+- Nudges for time-on-app and spending reminders (configurable)
+
+QA checklist
+- One-handed reachability for all primary CTAs
+- Swipe gestures discoverable (first-run coach marks with visual hints)
+- Live odds animation doesn’t cause layout shift
+- VoiceOver reads odds changes and payouts succinctly
+
+This design delivers a premium, hockey-first betting experience: fast, tactile, visually rich, and built for live action with swipeable cards, animated odds, a frictionless quick builder, and robust favorites and notifications—wrapped in a distinctive NHL rink aesthetic that feels right at home on mobile.

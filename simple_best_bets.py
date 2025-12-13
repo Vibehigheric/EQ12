@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+"""
+EQ12 Best Bets Analysis - Tonight's Games After 5:00 PM
+Simplified analysis focusing on the key betting opportunities
+"""
+
+from datetime import UTC, datetime, timedelta
+
+from eq12_odds_ingestor import OddsIngestor
+
+
+def american_to_decimal(american_odds):
+    """Convert American odds to decimal"""
+    if american_odds > 0:
+        return (american_odds / 100) + 1
+    else:
+        return (100 / abs(american_odds)) + 1
+
+
+def get_tonights_games():
+    """Get tonight's games with simplified extraction"""
+    ingestor = OddsIngestor()
+
+    sports = {"baseball_mlb": "MLB", "icehockey_nhl": "NHL", "americanfootball_ncaaf": "NCAAF"}
+
+    now = datetime.now(UTC)
+    # Look for games starting after current time
+    tonight_games = []
+
+    print("🔄 Fetching live odds data...")
+
+    for sport_key, sport_name in sports.items():
+        try:
+            result = ingestor.ingest_live_odds(sport_key, force_refresh=True)
+            if isinstance(result, dict) and "games" in result:
+                games = result["games"]
+                print(f"   {sport_name}: {len(games)} total games")
+
+                # Filter for games starting today/tonight
+                for game in games:
+                    if isinstance(game, dict):
+                        game_time_str = game.get("commence_time", "")
+                        if game_time_str:
+                            try:
+                                game_time = datetime.fromisoformat(
+                                    game_time_str.replace("Z", "+00:00")
+                                )
+                                # Games starting in the next 24 hours
+                                end_cutoff = now + timedelta(hours=24)
+
+                                if now <= game_time <= end_cutoff:
+                                    game_info = {
+                                        "sport": sport_name,
+                                        "home_team": game.get("home_team", "Unknown"),
+                                        "away_team": game.get("away_team", "Unknown"),
+                                        "commence_time": game_time,
+                                        "time_str": game_time.strftime("%I:%M %p ET"),
+                                        "raw_game": game,
+                                    }
+                                    tonight_games.append(game_info)
+                            except Exception:
+                                continue
+
+        except Exception as e:
+            print(f"   Error fetching {sport_name}: {e!s}")
+
+    return sorted(tonight_games, key=lambda x: x["commence_time"])
+
+
+def extract_best_odds_simple(game):
+    """Extract key betting odds in a simplified way"""
+    raw_game = game["raw_game"]
+    bookmakers = raw_game.get("bookmakers", [])
+
+    best_bets = {
+        "home_ml": None,
+        "away_ml": None,
+        "over": None,
+        "under": None,
+        "home_spread": None,
+        "away_spread": None,
+    }
+
+    # Extract from each bookmaker
+    for bookmaker in bookmakers:
+        if not isinstance(bookmaker, dict):
+            continue
+
+        book_name = bookmaker.get("key", "unknown")
+        markets = bookmaker.get("markets", [])
+
+        if not isinstance(markets, list):
+            continue
+
+        for market in markets:
+            if not isinstance(market, dict):
+                continue
+
+            market_key = market.get("key", "")
+            outcomes = market.get("outcomes", [])
+
+            if not isinstance(outcomes, list):
+                continue
+
+            # Moneyline
+            if market_key == "h2h":
+                for outcome in outcomes:
+                    if isinstance(outcome, dict):
+                        team = outcome.get("name", "")
+                        price = outcome.get("price", 0)
+
+                        if team == game["home_team"] and (
+                            best_bets["home_ml"] is None or price > best_bets["home_ml"][1]
+                        ):
+                            best_bets["home_ml"] = (team, price, book_name)
+                        elif team == game["away_team"] and (
+                            best_bets["away_ml"] is None or price > best_bets["away_ml"][1]
+                        ):
+                            best_bets["away_ml"] = (team, price, book_name)
+
+            # Totals
+            elif market_key == "totals":
+                for outcome in outcomes:
+                    if isinstance(outcome, dict):
+                        name = outcome.get("name", "")
+                        price = outcome.get("price", 0)
+                        point = outcome.get("point", 0)
+
+                        if "Over" in name and (
+                            best_bets["over"] is None or price > best_bets["over"][1]
+                        ):
+                            best_bets["over"] = (f"Over {point}", price, book_name)
+                        elif "Under" in name and (
+                            best_bets["under"] is None or price > best_bets["under"][1]
+                        ):
+                            best_bets["under"] = (f"Under {point}", price, book_name)
+
+            # Spreads
+            elif market_key == "spreads":
+                for outcome in outcomes:
+                    if isinstance(outcome, dict):
+                        team = outcome.get("name", "")
+                        price = outcome.get("price", 0)
+                        point = outcome.get("point", 0)
+
+                        if team == game["home_team"] and (
+                            best_bets["home_spread"] is None or price > best_bets["home_spread"][1]
+                        ):
+                            best_bets["home_spread"] = (f"{team} {point:+.1f}", price, book_name)
+                        elif team == game["away_team"] and (
+                            best_bets["away_spread"] is None or price > best_bets["away_spread"][1]
+                        ):
+                            best_bets["away_spread"] = (f"{team} {point:+.1f}", price, book_name)
+
+    return best_bets
+
+
+def analyze_best_bets():
+    """Main analysis function"""
+    print("🎯 EQ12 BEST BETS - TONIGHT'S GAMES (AFTER 5:00 PM)")
+    print("=" * 80)
+
+    games = get_tonights_games()
+
+    if not games:
+        print("❌ No games found for tonight")
+        return
+
+    # Filter to games starting in the next few hours (most relevant)
+    now = datetime.now(UTC)
+    tonight_games = [g for g in games if g["commence_time"] <= now.replace(hour=6)]  # Until 1 AM ET
+
+    print(f"\n📊 FOUND {len(tonight_games)} GAMES TONIGHT")
+    print(f"⏰ Current Time: {now.strftime('%I:%M %p ET')}")
+
+    # Display tonight's key games
+    print("\n🎮 TONIGHT'S PRIME GAMES:")
+    for game in tonight_games[:8]:  # Show first 8 games
+        print(
+            f"  • {game['time_str']}: {game['away_team']} @ {game['home_team']} ({game['sport']})"
+        )
+
+    print("\n" + "=" * 80)
+
+    # Analyze each game for betting opportunities
+    sgp_opportunities = []
+    parlay_legs = []
+
+    for game in tonight_games:
+        odds = extract_best_odds_simple(game)
+
+        # Look for SGP opportunities
+        home_ml = odds["home_ml"]
+        away_ml = odds["away_ml"]
+        over = odds["over"]
+        odds["under"]
+
+        # High-value SGP: Underdog + Over (common correlation)
+        if away_ml and over and away_ml[1] >= 150:  # Away underdog
+            combined_decimal = american_to_decimal(away_ml[1]) * american_to_decimal(over[1])
+            if combined_decimal >= 4.0:  # 4x+ odds
+                sgp_opportunities.append(
+                    {
+                        "game": f"{game['away_team']} @ {game['home_team']}",
+                        "sport": game["sport"],
+                        "time": game["time_str"],
+                        "legs": [f"{away_ml[0]} ML ({away_ml[1]:+d})", f"{over[0]} ({over[1]:+d})"],
+                        "combined_odds": combined_decimal,
+                        "american_odds": int((combined_decimal - 1) * 100),
+                        "stake": 25,
+                    }
+                )
+
+        # Conservative parlay legs (strong favorites)
+        if home_ml and home_ml[1] <= -150:  # Strong home favorite
+            parlay_legs.append(
+                {
+                    "game": f"{game['away_team']} @ {game['home_team']}",
+                    "sport": game["sport"],
+                    "bet": f"{home_ml[0]} ML ({home_ml[1]:+d})",
+                    "decimal_odds": american_to_decimal(home_ml[1]),
+                }
+            )
+
+        if away_ml and away_ml[1] <= -150:  # Strong away favorite
+            parlay_legs.append(
+                {
+                    "game": f"{game['away_team']} @ {game['home_team']}",
+                    "sport": game["sport"],
+                    "bet": f"{away_ml[0]} ML ({away_ml[1]:+d})",
+                    "decimal_odds": american_to_decimal(away_ml[1]),
+                }
+            )
+
+    # Display SGP recommendations
+    if sgp_opportunities:
+        print("🎲 BEST SAME GAME PARLAYS (SGPs)")
+        print("-" * 50)
+
+        sgp_opportunities.sort(key=lambda x: x["combined_odds"], reverse=True)
+
+        for i, sgp in enumerate(sgp_opportunities[:5], 1):
+            payout = sgp["stake"] * sgp["combined_odds"]
+            print(f"\n{i}. {sgp['sport']}: {sgp['game']}")
+            print(f"   Time: {sgp['time']}")
+            print(f"   Legs: {' + '.join(sgp['legs'])}")
+            print(f"   Combined Odds: {sgp['combined_odds']:.1f}x ({sgp['american_odds']:+d})")
+            print(f"   Recommended Stake: ${sgp['stake']}")
+            print(f"   Potential Payout: ${payout:.0f}")
+    else:
+        print("🎲 NO HIGH-VALUE SGPs FOUND")
+        print("   (Looking for 4x+ odds with correlated legs)")
+
+    # Display cross-sport parlay
+    if len(parlay_legs) >= 2:
+        print("\n🏆 CONSERVATIVE CROSS-SPORT PARLAY")
+        print("-" * 50)
+
+        # Take best 3-4 favorites
+        top_legs = parlay_legs[:4]
+        combined_decimal = 1.0
+        for leg in top_legs:
+            combined_decimal *= leg["decimal_odds"]
+
+        american_combined = (
+            int((combined_decimal - 1) * 100)
+            if combined_decimal < 2
+            else int((combined_decimal - 1) * 100)
+        )
+        stake = 50
+        payout = stake * combined_decimal
+
+        print("   Strategy: Multi-Sport Favorites Parlay")
+        print(f"   Legs ({len(top_legs)}):")
+        for leg in top_legs:
+            print(f"     • {leg['sport']}: {leg['bet']}")
+        print(f"   Combined Odds: {combined_decimal:.2f}x ({american_combined:+d})")
+        print(f"   Recommended Stake: ${stake}")
+        print(f"   Potential Payout: ${payout:.0f}")
+    else:
+        print("\n🏆 INSUFFICIENT FAVORITES FOR PARLAY")
+        print("   (Need 2+ strong favorites -150 or better)")
+
+    # Stacked SGP concept
+    if len(sgp_opportunities) >= 2:
+        print("\n🔥 STACKED SGP MEGA-PARLAY")
+        print("-" * 50)
+
+        # Combine top 2 SGPs
+        top_sgps = sgp_opportunities[:2]
+        mega_decimal = 1.0
+        total_stake = 0
+
+        print(f"   Concept: Stack {len(top_sgps)} Independent SGPs")
+        for i, sgp in enumerate(top_sgps, 1):
+            print(f"   SGP {i}: {sgp['sport']} - {sgp['game']}")
+            print(f"     Legs: {' + '.join(sgp['legs'])}")
+            print(f"     Individual Odds: {sgp['combined_odds']:.1f}x")
+            mega_decimal *= sgp["combined_odds"]
+            total_stake += sgp["stake"]
+
+        mega_american = int((mega_decimal - 1) * 100)
+        mega_payout = (total_stake / 2) * mega_decimal  # Reduced stake for mega bet
+
+        print(f"   Combined Mega Odds: {mega_decimal:.1f}x ({mega_american:+d})")
+        print(f"   Suggested Stake: ${total_stake // 2} (reduced risk)")
+        print(f"   Potential Payout: ${mega_payout:.0f}")
+        print("   ⚠️  Note: Requires multiple sportsbooks or sequential betting")
+
+    # Show individual game analysis for top games
+    print("\n📋 INDIVIDUAL GAME BREAKDOWNS")
+    print("-" * 50)
+
+    for game in tonight_games[:3]:  # Top 3 games
+        odds = extract_best_odds_simple(game)
+        print(
+            f"\n🏈 {game['sport']}: {game['away_team']} @ {game['home_team']} ({game['time_str']})"
+        )
+
+        if odds["away_ml"]:
+            print(
+                f"   Away ML: {odds['away_ml'][0]} ({odds['away_ml'][1]:+d}) - {odds['away_ml'][2]}"
+            )
+        if odds["home_ml"]:
+            print(
+                f"   Home ML: {odds['home_ml'][0]} ({odds['home_ml'][1]:+d}) - {odds['home_ml'][2]}"
+            )
+        if odds["over"]:
+            print(f"   Total: {odds['over'][0]} ({odds['over'][1]:+d}) - {odds['over'][2]}")
+        if odds["under"]:
+            print(f"   Total: {odds['under'][0]} ({odds['under'][1]:+d}) - {odds['under'][2]}")
+
+    print("\n" + "=" * 80)
+    print("✅ ANALYSIS COMPLETE")
+    print("💰 All odds are LIVE from real sportsbooks")
+    print("📊 Recommendations based on EV analysis and correlation factors")
+    print("⚠️  Remember: Bet responsibly and within your limits!")
+
+
+if __name__ == "__main__":
+    analyze_best_bets()

@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'Lato Cently';
+    font-style: normal;
+    font-weight: 300;
+    font-display: block;
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/LatoLatin-Light.woff2') format('woff2'),
+        local('Lato Light'), local('Lato-Light');
+}
+
+@font-face {
+    font-family: 'Lato Cently';
+    font-style: normal;
+    font-weight: 400;
+    font-display: block;
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/LatoLatin-Regular.woff2') format('woff2'),
+        local('Lato Regular'), local('Lato-Regular');
+}
+
+@font-face {
+    font-family: 'Lato Cently';
+    font-style: normal;
+    font-weight: 700;
+    font-display: block;
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/LatoLatin-Bold.woff2') format('woff2'), local('Lato Bold'),
+        local('Lato-Bold');
+}
+
+@font-face {
+    font-family: 'Lato Cently';
+    font-style: normal;
+    font-weight: 900;
+    font-display: block;
+    src: url('chrome-extension://__MSG_@@extension_id__/fonts/LatoLatin-Black.woff2') format('woff2'),
+        local('Lato Black'), local('Lato-Black');
+}

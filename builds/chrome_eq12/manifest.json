@@ -1,0 +1,29 @@
+﻿{
+  "manifest_version": 2,
+  "name": "EQ12 Data Pusher",
+  "version": "1.0.0", 
+  "description": "Advanced data capture for sports betting, travel deals, and financial data. Chrome Web Store edition.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "contextMenus", 
+    "notifications",
+    "http://localhost:*/*",
+    "https://*.draftkings.com/*",
+    "https://*.fanduel.com/*",
+    "https://*.expedia.com/*"
+  ],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "EQ12 Data Pusher - Chrome Edition"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_end"
+  }]
+}

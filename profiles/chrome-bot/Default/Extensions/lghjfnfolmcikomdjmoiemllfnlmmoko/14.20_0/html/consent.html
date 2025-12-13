@@ -1,0 +1,93 @@
+<div class="onboarding_consent">
+  <div class="onboarding_consent_content onboarding_consent_content_step1 show">
+    <img class="onboarding_consent_logo" src="chrome-extension://{{ extension_id }}/images/cnet-logo-40.png">
+    <p class="onboarding_consent_heading text-xl mb-4 mt-4">
+      To enable CNET Shopping, please review the required permissions
+    </p>
+    <p class="text-base mb-2 font-medium">
+      CNET Shopping collects the following information that could
+      potentially personally identify you:
+    </p>
+    <ul class="onboarding_consent_onboarding_ul list-disc">
+      <li>
+        IP address, which we use to determine your geographic location so
+        that we can calculate accurate shipping rates
+      </li>
+      <li>
+        The URLs of the pages you visit on websites where our price
+        comparison and coupons features are active. We use this information
+        to offer price comparisons and coupons relevant to the page you are
+        viewing.
+      </li>
+    </ul>
+    <p class="text-base mb-2 mt-2 font-medium">
+      CNET Shopping collects the following technical information:
+    </p>
+    <ul class="onboarding_consent_onboarding_ul list-disc">
+      <li>
+        Browser type, operating system, and interactions with the CNET
+        Shopping Add-On, which we use to improve our products.
+      </li>
+    </ul>
+
+    <p class="text-base mb-2 mt-2">
+      Full details about the data we collect, what we do with it, and your
+      data rights are available in our
+      <a class="text-red-600" href="https://www.cnet.com/privacy-policy/#CNETShoppingAddendum" target="_blank">Privacy Policy.</a>
+    </p>
+
+    <p class="text-base mb-2 mt-4 font-medium">
+      Can we collect the information described above?
+    </p>
+<p class="text-base mb-2">
+  If you chose not to allow personal data collection CNET Shopping will not function properly and you will be prompted to uninstall.
+</p>
+<p class="text-base mt-2 mb-2 optConsentCheck">
+  <input id="consentTechnical" type="checkbox" checked=""> <label for="consentTechnical"> Yes, I agree to the technical data collection(required) </label>
+  </p>
+<p class="text-base mt-2 mb-4 optConsentCheck">
+  <input id="consentPersonal" type="checkbox"> <label for="consentPersonal">Yes, I agree to the personal data collection(required) </label>
+  </p>
+
+    <div class="onboarding_consent_button">
+      <button id="optConsent" class="consentButton" data-consent="check">
+        Proceed
+      </button>
+    </div>
+  </div>
+  <div class="onboarding_consent_content onboarding_consent_content_step2 hide">
+    <img class="onboarding_consent_logo" src="chrome-extension://{{ extension_id }}/images/cnet-logo-40.png">
+    <p class="onboarding_consent_heading text-xl mb-4 mt-6">
+      CNET Shopping is Not Enabled
+    </p>
+    <p class="text-lg mb-6">
+      Unfortunately, without permission to access the data described in the
+      prior screen, CNET Shopping will not function. We need to be able to
+      know the sites and products you are viewing in order to automatically
+      check for lower prices.
+    </p>
+    <div class="onboarding_consent_button">
+      <button id="optConsentUninstall" class="consentButton" data-consent="uninstall">
+        Remove CNET Shopping
+      </button>
+      <button id="optConsentRevist" class="consentButton" data-consent="revisit">
+        Revisit Data Permissions
+      </button>
+    </div>
+  </div>
+  <div class="onboarding_consent_content onboarding_consent_content_step3 hide">
+    <img class="onboarding_consent_logo" src="chrome-extension://{{ extension_id }}/images/cnet-logo-40.png">
+    <p class="onboarding_consent_heading text-xl mb-6 mt-6">
+      CNET Shopping is Active!
+    </p>
+
+    <div class="onboarding_consent_button">
+      <button id="closeConsent" class="consentButton" data-consent="closeConsent">
+        Close
+      </button>
+      <button id="optConsentRevist_step3" class="consentButton consentButton2" data-consent="revisit">
+        Revisit Data Permissions
+      </button>
+    </div>
+  </div>
+</div>

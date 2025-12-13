@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------
+  # PORTAINER AGENT (Global - Runs on all nodes)
+  # ---------------------------------------------------------
+  agent:
+    image: portainer/agent:2.19.4
+    environment:
+      # Required for Docker Swarm
+      AGENT_CLUSTER_ADDR: tasks.agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.platform.os == linux
+
+  # ---------------------------------------------------------
+  # PROMETHEUS (Metrics Database)
+  # ---------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      - prometheus_data:/prometheus
+      - ./config/prometheus:/etc/prometheus
+    networks:
+      - monitor_net
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == worker  # Run on M70q
+
+  # ---------------------------------------------------------
+  # GRAFANA (Visualization Dashboard)
+  # ---------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=eq12_monitor
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - monitor_net
+    deploy:
+      placement:
+        constraints:
+          - node.labels.type == manager # Run on EQ12 for easy access
+
+  # ---------------------------------------------------------
+  # NODE EXPORTER (Hardware Metrics - Global)
+  # ---------------------------------------------------------
+  node-exporter:
+    image: prom/node-exporter:latest
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - '^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - monitor_net
+    deploy:
+      mode: global
+
+  # ---------------------------------------------------------
+  # CADVISOR (Container Metrics - Global)
+  # ---------------------------------------------------------
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitor_net
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.platform.os == linux
+
+networks:
+  agent_network:
+    driver: overlay
+    attachable: true
+  monitor_net:
+    driver: overlay
+    attachable: true
+
+volumes:
+  prometheus_data:
+  grafana_data:

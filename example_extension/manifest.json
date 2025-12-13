@@ -1,0 +1,73 @@
+{
+  "manifest_version": 2,
+  "name": "EQ12 Governance Assistant",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "eq12-governance@example.com",
+      "strict_min_version": "89.0",
+      "data_collection_permissions": {
+        "required": false
+      }
+    }
+  },
+  "version": "1.0.0",
+  "description": "Helps analyze web pages for governance compliance and security best practices. Does not collect personal data without explicit consent.",
+  "author": "EQ12 Development Team",
+  "homepage_url": "https://github.com/EQ12/extension",
+  
+  "permissions": [
+    "activeTab",
+    "storage",
+    "contextMenus",
+    "notifications"
+  ],
+  
+  "optional_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "background": {
+    "scripts": [
+      "polyfill.js",
+      "debug-utils.js",
+      "security-utils.js",
+      "secure-error-handler.js",
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "EQ12 Extension",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*/*"
+      ],
+      "js": [
+        "polyfill.js",
+        "debug-utils.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg", 
+    "128": "icons/icon128.svg"
+  },  "web_accessible_resources": [
+    "icons/*",
+    "debug-utils.js"
+  ],
+  
+  "incognito": "spanning",
+  
+  "content_security_policy": "script-src 'self'; object-src 'self'"
+}

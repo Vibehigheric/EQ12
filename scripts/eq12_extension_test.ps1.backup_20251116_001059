@@ -1,0 +1,419 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+# EQ12 Extension Testing PowerShell Wrapper
+# Provides PowerShell interface for extension testing and validation
+
+[CmdletBinding()]
+param(
+    [Parameter(Position = 0)]
+    [ValidateSet('test', 'validate', 'install', 'package', 'deploy', 'help')]
+    [string]$Action = 'test',
+
+    [Parameter()]
+    [switch]$Verbose,
+
+    [Parameter()]
+    [switch]$GenerateReport,
+
+    [Parameter()]
+    [string]$OutputPath = "C:\EQ12\logs"
+)
+
+# Initialize logging
+$LogFile = Join-Path $OutputPath "extension_test_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+if (!(Test-Path (Split-Path $LogFile))) {
+    New-Item -ItemType Directory -Path (Split-Path $LogFile) -Force | Out-Null
+}
+
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    Write-Host $logEntry
+    Add-Content -Path $LogFile -Value $logEntry
+}
+
+function Test-Prerequisites {
+    Write-Log "Checking prerequisites..." "INFO"
+
+    # Check Python installation
+    try {
+        $pythonVersion = python --version 2>&1
+        Write-Log "Python found: $pythonVersion" "INFO"
+    } catch {
+        Write-Log "Python not found or not in PATH" "ERROR"
+        return $false
+    }
+
+    # Check required Python packages
+    $requiredPackages = @('selenium', 'requests', 'pathlib')
+    foreach ($package in $requiredPackages) {
+        try {
+            python -c "import $package" 2>&1 | Out-Null
+            Write-Log "Python package '$package' found" "INFO"
+        } catch {
+            Write-Log "Python package '$package' not found. Installing..." "WARN"
+            pip install $package
+        }
+    }
+
+    # Check Firefox installation
+    $firefoxPaths = @(
+        "${env:ProgramFiles}\Mozilla Firefox\firefox.exe",
+        "${env:ProgramFiles(x86)}\Mozilla Firefox\firefox.exe"
+    )
+
+    $firefoxFound = $false
+    foreach ($path in $firefoxPaths) {
+        if (Test-Path $path) {
+            Write-Log "Firefox found at: $path" "INFO"
+            $firefoxFound = $true
+            break
+        }
+    }
+
+    if (!$firefoxFound) {
+        Write-Log "Firefox not found. Please install Firefox." "ERROR"
+        return $false
+    }
+
+    # Check extension files
+    $extensionPath = "C:\EQ12\firefox_extensions\eq12_betting_dashboard"
+    if (!(Test-Path $extensionPath)) {
+        Write-Log "Extension directory not found: $extensionPath" "ERROR"
+        return $false
+    }
+
+    $requiredFiles = @(
+        'manifest.json',
+        'background_v3_enhanced.js',
+        'sportsbook_scraper_v3_enhanced.js',
+        'popup_v3_enhanced.html',
+        'popup_v3_enhanced.js',
+        'options.html',
+        'options.js'
+    )
+
+    foreach ($file in $requiredFiles) {
+        $filePath = Join-Path $extensionPath $file
+        if (Test-Path $filePath) {
+            $fileSize = (Get-Item $filePath).Length
+            Write-Log "Extension file '$file' found (${fileSize} bytes)" "INFO"
+        } else {
+            Write-Log "Extension file '$file' missing" "ERROR"
+            return $false
+        }
+    }
+
+    Write-Log "All prerequisites satisfied" "INFO"
+    return $true
+}
+
+function Invoke-ExtensionTest {
+    Write-Log "Starting extension test suite..." "INFO"
+
+    try {
+        # Run Python test script
+        $testScript = "C:\EQ12\scripts\extension_tester.py"
+        $testArgs = @()
+
+        if ($Verbose) {
+            $testArgs += "--verbose"
+        }
+
+        Write-Log "Executing: python $testScript $($testArgs -join ' ')" "INFO"
+
+        $process = Start-Process -FilePath "python" -ArgumentList @($testScript) + $testArgs -Wait -PassThru -RedirectStandardOutput "$OutputPath\test_output.txt" -RedirectStandardError "$OutputPath\test_errors.txt"
+
+        $exitCode = $process.ExitCode
+
+        # Read output files
+        if (Test-Path "$OutputPath\test_output.txt") {
+            $output = Get-Content "$OutputPath\test_output.txt" -Raw
+            Write-Log "Test Output:`n$output" "INFO"
+        }
+
+        if (Test-Path "$OutputPath\test_errors.txt") {
+            $errors = Get-Content "$OutputPath\test_errors.txt" -Raw
+            if ($errors.Trim()) {
+                Write-Log "Test Errors:`n$errors" "ERROR"
+            }
+        }
+
+        if ($exitCode -eq 0) {
+            Write-Log "Extension tests completed successfully" "INFO"
+            return $true
+        } else {
+            Write-Log "Extension tests failed with exit code: $exitCode" "ERROR"
+            return $false
+        }
+    } catch {
+        Write-Log "Failed to execute extension tests: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Test-ManifestValidation {
+    Write-Log "Validating manifest.json..." "INFO"
+
+    $manifestPath = "C:\EQ12\firefox_extensions\eq12_betting_dashboard\manifest.json"
+
+    try {
+        $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+
+        # Check required fields
+        $requiredFields = @('manifest_version', 'name', 'version', 'description')
+        foreach ($field in $requiredFields) {
+            if ($manifest.$field) {
+                Write-Log "Manifest field '$field': $($manifest.$field)" "INFO"
+            } else {
+                Write-Log "Missing required manifest field: $field" "ERROR"
+                return $false
+            }
+        }
+
+        # Validate manifest version
+        if ($manifest.manifest_version -notin @(2, 3)) {
+            Write-Log "Invalid manifest_version: $($manifest.manifest_version)" "ERROR"
+            return $false
+        }
+
+        # Check permissions
+        if ($manifest.permissions) {
+            Write-Log "Permissions: $($manifest.permissions -join ', ')" "INFO"
+        }
+
+        Write-Log "Manifest validation passed" "INFO"
+        return $true
+    } catch {
+        Write-Log "Manifest validation failed: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function New-ExtensionPackage {
+    Write-Log "Creating extension package..." "INFO"
+
+    $extensionPath = "C:\EQ12\firefox_extensions\eq12_betting_dashboard"
+    $packagePath = Join-Path $OutputPath "eq12_extension_$(Get-Date -Format 'yyyyMMdd_HHmmss').zip"
+
+    try {
+        # Create zip package
+        Compress-Archive -Path "$extensionPath\*" -DestinationPath $packagePath -Force
+
+        $packageSize = (Get-Item $packagePath).Length
+        Write-Log "Extension package created: $packagePath (${packageSize} bytes)" "INFO"
+
+        return $packagePath
+    } catch {
+        Write-Log "Failed to create extension package: $($_.Exception.Message)" "ERROR"
+        return $null
+    }
+}
+
+function Install-ExtensionInFirefox {
+    Write-Log "Installing extension in Firefox (developer mode)..." "INFO"
+
+    try {
+        # Create temporary profile for testing
+        $profilePath = Join-Path ${env}TEMP "firefox_eq12_test"
+        if (Test-Path $profilePath) {
+            Remove-Item $profilePath -Recurse -Force
+        }
+        New-Item -ItemType Directory -Path $profilePath -Force | Out-Null
+
+        # Start Firefox with temporary profile and extension loading
+        $extensionPath = "C:\EQ12\firefox_extensions\eq12_betting_dashboard"
+        $firefoxPath = "${env:ProgramFiles}\Mozilla Firefox\firefox.exe"
+
+        if (!(Test-Path $firefoxPath)) {
+            $firefoxPath = "${env:ProgramFiles(x86)}\Mozilla Firefox\firefox.exe"
+        }
+
+        Write-Log "Starting Firefox for extension installation..." "INFO"
+        Write-Log "Extension path: $extensionPath" "INFO"
+        Write-Log "Profile path: $profilePath" "INFO"
+
+        # Note: Manual installation required for unsigned extensions
+        Write-Log "Firefox started. Please manually install the extension from: $extensionPath" "WARN"
+        Write-Log "1. Open Firefox Developer Tools (F12)" "INFO"
+        Write-Log "2. Go to about:debugging" "INFO"
+        Write-Log "3. Click 'This Firefox'" "INFO"
+        Write-Log "4. Click 'Load Temporary Add-on'" "INFO"
+        Write-Log "5. Select manifest.json from: $extensionPath" "INFO"
+
+        Start-Process -FilePath $firefoxPath -ArgumentList @("-profile", $profilePath)
+
+        return $true
+    } catch {
+        Write-Log "Failed to install extension: $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+function Show-ExtensionHelp {
+    Write-Host @"
+EQ12 Extension Testing & Management Tool
+
+USAGE:
+    .\eq12_extension_test.ps1 [ACTION] [OPTIONS]
+
+ACTIONS:
+    test        Run complete extension test suite (default)
+    validate    Validate extension files and manifest
+    install     Install extension in Firefox (developer mode)
+    package     Create distributable extension package
+    deploy      Deploy extension for testing
+    help        Show this help message
+
+OPTIONS:
+    -Verbose           Enable verbose output
+    -GenerateReport    Generate detailed test report
+    -OutputPath        Specify output directory (default: C:\EQ12\logs)
+
+EXAMPLES:
+    # Run complete test suite
+    .\eq12_extension_test.ps1 test -Verbose
+
+    # Validate extension files only
+    .\eq12_extension_test.ps1 validate
+
+    # Create extension package
+    .\eq12_extension_test.ps1 package
+
+    # Install extension in Firefox
+    .\eq12_extension_test.ps1 install
+
+TESTING WORKFLOW:
+    1. Validate extension files and manifest
+    2. Package extension for testing
+    3. Install in Firefox developer mode
+    4. Run automated test suite
+    5. Generate test report
+
+FILES TESTED:
+    - manifest.json (structure and permissions)
+    - background_v3_enhanced.js (service worker)
+    - sportsbook_scraper_v3_enhanced.js (content script)
+    - popup_v3_enhanced.html/js (extension popup)
+    - options.html/js (settings page)
+    - tab_manager.js (tab management)
+
+TEST CATEGORIES:
+    ✓ File structure validation
+    ✓ Manifest compliance (Manifest V3)
+    ✓ Content script injection
+    ✓ Extension popup functionality
+    ✓ Options page operation
+    ✓ VPN integration testing
+    ✓ Storage functionality
+    ✓ Network request handling
+    ✓ Error handling and recovery
+    ✓ Performance benchmarks
+
+LOGS & REPORTS:
+    All test results are saved to: C:\EQ12\logs\
+    - extension_test_YYYYMMDD_HHMMSS.log
+    - extension_test_report.json
+    - test_output.txt
+    - test_errors.txt
+"@
+}
+
+# Main execution logic
+Write-Log "EQ12 Extension Testing & Management Tool" "INFO"
+Write-Log "Action: $Action" "INFO"
+
+switch ($Action.ToLower()) {
+    'test' {
+        if (Test-Prerequisites) {
+            $success = Invoke-ExtensionTest
+            if ($success) {
+                Write-Log "✅ Extension testing completed successfully" "INFO"
+                if ($GenerateReport) {
+                    Write-Log "📊 Test report generated in: $OutputPath" "INFO"
+                }
+            } else {
+                Write-Log "❌ Extension testing failed" "ERROR"
+                exit 1
+            }
+        } else {
+            Write-Log "❌ Prerequisites not met" "ERROR"
+            exit 1
+        }
+    }
+
+    'validate' {
+        $manifestValid = Test-ManifestValidation
+        $filesValid = Test-Prerequisites
+
+        if ($manifestValid -and $filesValid) {
+            Write-Log "✅ Extension validation passed" "INFO"
+        } else {
+            Write-Log "❌ Extension validation failed" "ERROR"
+            exit 1
+        }
+    }
+
+    'install' {
+        if (Test-Prerequisites) {
+            Install-ExtensionInFirefox
+        } else {
+            Write-Log "❌ Prerequisites not met" "ERROR"
+            exit 1
+        }
+    }
+
+    'package' {
+        if (Test-Prerequisites) {
+            $package = New-ExtensionPackage
+            if ($package) {
+                Write-Log "✅ Extension packaged: $package" "INFO"
+            } else {
+                Write-Log "❌ Extension packaging failed" "ERROR"
+                exit 1
+            }
+        } else {
+            Write-Log "❌ Prerequisites not met" "ERROR"
+            exit 1
+        }
+    }
+
+    'deploy' {
+        Write-Log "Deploying extension for testing..." "INFO"
+
+        if (Test-Prerequisites) {
+            $manifestValid = Test-ManifestValidation
+            if ($manifestValid) {
+                $package = New-ExtensionPackage
+                if ($package) {
+                    Install-ExtensionInFirefox
+                    Write-Log "✅ Extension deployed for testing" "INFO"
+                } else {
+                    Write-Log "❌ Deployment failed during packaging" "ERROR"
+                    exit 1
+                }
+            } else {
+                Write-Log "❌ Deployment failed - manifest invalid" "ERROR"
+                exit 1
+            }
+        } else {
+            Write-Log "❌ Prerequisites not met" "ERROR"
+            exit 1
+        }
+    }
+
+    'help' {
+        Show-ExtensionHelp
+    }
+
+    default {
+        Write-Log "Unknown action: $Action" "ERROR"
+        Show-ExtensionHelp
+        exit 1
+    }
+}
+
+Write-Log "EQ12 Extension Testing completed" "INFO"
+Write-Log "Log file: $LogFile" "INFO"

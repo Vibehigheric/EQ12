@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.4" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Date>2025-09-27T12:00:00.0000000</Date>
+    <Author>EQ12-GODSTACK</Author>
+    <Description>Monthly automated monitoring of EQ12 GODSTACK GitHub repository badge health with Telegram alerts</Description>
+    <URI>\EQ12\Badge Health Monitor</URI>
+  </RegistrationInfo>
+  <Triggers>
+    <!-- Monthly trigger - 1st of every month at 9:00 AM -->
+    <CalendarTrigger>
+      <StartBoundary>2025-10-01T09:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByMonth>
+        <DaysOfMonth>
+          <Day>1</Day>
+        </DaysOfMonth>
+        <Months>
+          <January />
+          <February />
+          <March />
+          <April />
+          <May />
+          <June />
+          <July />
+          <August />
+          <September />
+          <October />
+          <November />
+          <December />
+        </Months>
+      </ScheduleByMonth>
+    </CalendarTrigger>
+    
+    <!-- Weekly trigger for critical monitoring - Every Sunday at 6:00 AM -->
+    <CalendarTrigger>
+      <StartBoundary>2025-09-28T06:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <WeeksInterval>1</WeeksInterval>
+        <DaysOfWeek>
+          <Sunday />
+        </DaysOfWeek>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+    
+    <!-- On-demand trigger for manual execution -->
+    <RegistrationTrigger>
+      <Enabled>true</Enabled>
+    </RegistrationTrigger>
+  </Triggers>
+  
+  <Principals>
+    <Principal id="Author">
+      <UserId>S-1-5-18</UserId>
+      <RunLevel>LeastPrivilege</RunLevel>
+    </Principal>
+  </Principals>
+  
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>true</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <DisallowStartOnRemoteAppSession>false</DisallowStartOnRemoteAppSession>
+    <UseUnifiedSchedulingEngine>true</UseUnifiedSchedulingEngine>
+    <WakeToRun>false</WakeToRun>
+    <ExecutionTimeLimit>PT30M</ExecutionTimeLimit>
+    <Priority>6</Priority>
+    <RestartPolicy>
+      <Interval>PT15M</Interval>
+      <Count>3</Count>
+    </RestartPolicy>
+  </Settings>
+  
+  <Actions Context="Author">
+    <Exec>
+      <Command>PowerShell.exe</Command>
+      <Arguments>-ExecutionPolicy Bypass -WindowStyle Hidden -File "C:\EQ12\scripts\badge_health_monitor.ps1"</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+  
+  <!-- Environment Variables for Task -->
+  <Data Name="EnvironmentVariables">
+    <!-- These should be set in system environment or user profile -->
+    <!-- GITHUB_TOKEN=your_github_token_here -->
+    <!-- TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here -->  
+    <!-- TELEGRAM_CHAT_ID=your_telegram_chat_id_here -->
+  </Data>
+</Task>
+
+<!--
+EQ12 GODSTACK Badge Health Monitor - Task Scheduler Configuration
+
+FEATURES:
+• Monthly automated badge health monitoring (1st of each month)
+• Weekly critical issue scanning (every Sunday)
+• On-demand manual execution capability
+• Comprehensive GitHub badge status validation
+• Automated Telegram alerts for issues
+• Detailed logging and reporting
+
+MONITORING SCOPE:
+• 🔄 CI/Security Workflow Status
+• 🔐 CodeQL Security Analysis Results
+• 🔑 Secret Scanning Alert Status
+• 🤖 Dependabot Vulnerability Alerts
+• 🔒 Repository Security Configuration
+
+ALERT CONDITIONS:
+• Critical Issues: Immediate Telegram notification
+• Warning Issues: Monthly report with recommendations
+• All Clear: Confirmation message (monthly only)
+• Script Errors: Technical failure notifications
+
+DEPLOYMENT INSTRUCTIONS:
+
+1. Install Task:
+   schtasks /Create /TN "EQ12\Badge Health Monitor" /XML "C:\EQ12\eq12_badge_health_monitor.xml" /F
+
+2. Set Environment Variables:
+   setx GITHUB_TOKEN "your_github_token_here" /M
+   setx TELEGRAM_BOT_TOKEN "your_telegram_bot_token_here" /M
+   setx TELEGRAM_CHAT_ID "your_telegram_chat_id_here" /M
+
+3. Test Execution:
+   schtasks /Run /TN "EQ12\Badge Health Monitor"
+
+4. Manual Test (PowerShell):
+   C:\EQ12\scripts\badge_health_monitor.ps1 -TestMode
+
+5. Force Alert Test:
+   C:\EQ12\scripts\badge_health_monitor.ps1 -ForceAlert
+
+SECURITY CONSIDERATIONS:
+• Task runs with least privilege
+• Environment variables should be secured
+• Logs are written to C:\EQ12\logs\
+• Network connectivity required for GitHub/Telegram APIs
+• Automatic retry on failure (3 attempts, 15-minute intervals)
+
+MAINTENANCE:
+• Review logs monthly in C:\EQ12\logs\badge-health-monitor.log
+• Update GitHub token annually or as needed
+• Monitor Telegram bot status quarterly
+• Validate alert delivery monthly
+
+INTEGRATION WITH EQ12 GODSTACK:
+• Monitors all GitHub Advanced Security features
+• Validates business stack-specific security (betting, cannabis, credit)
+• Ensures regulatory compliance monitoring
+• Provides enterprise-grade security visibility
+• Integrates with existing EQ12 logging and alerting infrastructure
+
+This task scheduler configuration provides automated, enterprise-grade
+monitoring of your EQ12 GODSTACK repository's security posture with
+real-time alerting and comprehensive reporting capabilities.
+-->

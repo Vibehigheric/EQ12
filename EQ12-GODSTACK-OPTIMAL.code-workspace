@@ -1,0 +1,189 @@
+{
+    "folders": [
+        {
+            "name": "EQ12 Root",
+            "path": "C:\\EQ12"
+        }
+    ],
+    "settings": {
+        "python.defaultInterpreterPath": "C:\\EQ12\\.venv\\Scripts\\python.exe",
+        "ruff.nativeServer": "on",
+        "ruff.enable": true,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports.ruff": "explicit",
+            "source.fixAll.ruff": "explicit"
+        },
+        "[python]": {
+            "editor.defaultFormatter": "charliermarsh.ruff",
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.fixAll.ruff": "explicit",
+                "source.organizeImports.ruff": "explicit"
+            }
+        },
+        "[powershell]": {
+            "editor.defaultFormatter": "ms-vscode.powershell",
+            "editor.formatOnSave": true
+        },
+        "[yaml]": {
+            "editor.defaultFormatter": "redhat.vscode-yaml",
+            "editor.formatOnSave": true
+        },
+        "[json]": {
+            "editor.defaultFormatter": "vscode.json-language-features"
+        },
+        "[jsonc]": {
+            "editor.defaultFormatter": "vscode.json-language-features"
+        },
+        "[markdown]": {
+            "editor.defaultFormatter": "vscode.markdown-language-features",
+            "editor.wordWrap": "on"
+        },
+        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.completeFunctionParens": true,
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": [
+            "tests"
+        ],
+        "terminal.integrated.defaultProfile.windows": "PowerShell",
+        "git.autofetch": true,
+        "git.enableSmartCommit": true,
+        "git.confirmSync": false,
+        "github.copilot.enable": {
+            "*": true,
+            "plaintext": false,
+            "markdown": true,
+            "yaml": true
+        },
+        "github.copilot.editor.enableAutoCompletions": true,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "files.trimFinalNewlines": true,
+        "editor.rulers": [
+            88,
+            120
+        ],
+        "editor.wordWrap": "bounded",
+        "editor.wordWrapColumn": 88,
+        "editor.minimap.enabled": true,
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "files.exclude": {
+            "**/__pycache__": true,
+            "**/.pytest_cache": true,
+            "**/.mypy_cache": true,
+            "**/.ruff_cache": true,
+            "**/node_modules": true,
+            "**/.git": true,
+            "**/.DS_Store": true,
+            "**/Thumbs.db": true,
+            "**/*.pyc": true,
+            "**/*.disabled": true,
+            "**/*.bak": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/bower_components": true,
+            "**/*.code-search": true,
+            "**/__pycache__": true,
+            "**/.pytest_cache": true,
+            "**/.mypy_cache": true,
+            "**/.ruff_cache": true,
+            "**/data/github_repos": true,
+            "**/edgegod-parlay": true
+        },
+        "files.watcherExclude": {
+            "**/data/github_repos/**": true,
+            "**/edgegod-parlay/**": true,
+            "**/.venv/**": true,
+            "**/logs/**": true
+        },
+        "files.associations": {
+            "*.ps1": "powershell",
+            "*.yaml": "yaml",
+            "*.yml": "yaml",
+            "*.toml": "toml",
+            "*.cfg": "ini"
+        },
+        "workbench.editor.enablePreview": false,
+        "workbench.editor.enablePreviewFromQuickOpen": false,
+        "workbench.startupEditor": "welcomePageInEmptyWorkbench",
+        "python.envFile": "${workspaceFolder}/.env",
+        "task.autoDetect": "on",
+        "task.showDecorations": true,
+        "notebook.formatOnSave.enabled": true,
+        "jupyter.interactiveWindow.creationMode": "perFile"
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "charliermarsh.ruff",
+            "github.copilot",
+            "github.copilot-chat",
+            "ms-vscode.powershell",
+            "ms-python.debugpy",
+            "ms-toolsai.jupyter",
+            "tamasfe.even-better-toml",
+            "redhat.vscode-yaml",
+            "ms-vscode.vscode-json"
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "EQ12: Debug Current File",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${file}",
+                "console": "integratedTerminal",
+                "justMyCode": true,
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}",
+                    "EQ12_ROOT": "${workspaceFolder}"
+                },
+                "preLaunchTask": "EQ12: System Validation"
+            },
+            {
+                "name": "EQ12: Debug Scheduler",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${workspaceFolder}/eq12_scheduler.py",
+                "console": "integratedTerminal",
+                "args": [
+                    "--config",
+                    "configs/scheduler_config.yaml"
+                ],
+                "justMyCode": true,
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}",
+                    "EQ12_ROOT": "${workspaceFolder}"
+                },
+                "preLaunchTask": "EQ12: Bootstrap Environment"
+            }
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "EQ12: Full Setup & Validation",
+                "dependsOrder": "sequence",
+                "dependsOn": [
+                    "EQ12: Bootstrap Environment",
+                    "EQ12: Lint & Format",
+                    "EQ12: Run Tests (Fast)",
+                    "EQ12: System Validation"
+                ],
+                "group": "build"
+            }
+        ]
+    }
+}

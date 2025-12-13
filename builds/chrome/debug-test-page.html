@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EQ12 Extension Debug Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-button { padding: 10px 15px; margin: 5px; cursor: pointer; background: #007cba; color: white; border: none; border-radius: 3px; }
+        .debug-output { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 3px; font-family: monospace; }
+        #console-output { max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>EQ12 Extension Debug Test Page</h1>
+    
+    <div class="debug-section">
+        <h3>Extension Detection</h3>
+        <button class="debug-button" onclick="testExtensionPresence()">Test Extension Presence</button>
+        <div id="extension-status" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Storage Testing</h3>
+        <button class="debug-button" onclick="testStorage()">Test Storage Operations</button>
+        <button class="debug-button" onclick="inspectStorage()">Inspect Storage</button>
+        <button class="debug-button" onclick="clearStorage()">Clear Storage</button>
+        <div id="storage-output" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Messaging Testing</h3>
+        <button class="debug-button" onclick="testMessaging()">Test Background Communication</button>
+        <div id="messaging-output" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Error Testing</h3>
+        <button class="debug-button" onclick="triggerError()">Trigger Test Error</button>
+        <button class="debug-button" onclick="showErrors()">Show Tracked Errors</button>
+        <button class="debug-button" onclick="clearErrors()">Clear Errors</button>
+        <div id="error-output" class="debug-output"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>Console Output</h3>
+        <div id="console-output" class="debug-output"></div>
+    </div>
+
+    <script>
+        // Override console methods to capture output
+        const originalConsole = {
+            log: console.log,
+            info: console.info,
+            warn: console.warn,
+            error: console.error,
+            debug: console.debug
+        };
+        
+        function addToConsoleOutput(type, ...args) {
+            const output = document.getElementById('console-output');
+            const entry = document.createElement('div');
+            entry.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : type === 'debug' ? 'gray' : 'black';
+            entry.textContent = `[${type.toUpperCase()}] ${new Date().toLocaleTimeString()}: ${args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ')}`;
+            output.appendChild(entry);
+            output.scrollTop = output.scrollHeight;
+            
+            // Call original console method
+            originalConsole[type](...args);
+        }
+        
+        console.log = (...args) => addToConsoleOutput('log', ...args);
+        console.info = (...args) => addToConsoleOutput('info', ...args);
+        console.warn = (...args) => addToConsoleOutput('warn', ...args);
+        console.error = (...args) => addToConsoleOutput('error', ...args);
+        console.debug = (...args) => addToConsoleOutput('debug', ...args);
+        
+        function testExtensionPresence() {
+            const status = document.getElementById('extension-status');
+            if (typeof EQ12Debug !== 'undefined') {
+                status.innerHTML = '<span style="color: green;">✓ EQ12 Extension Debug utilities detected</span>';
+                EQ12Debug.logger.info('Test', 'Extension debug utilities are working');
+            } else {
+                status.innerHTML = '<span style="color: red;">✗ EQ12 Extension not detected or debug utilities not loaded</span>';
+            }
+        }
+        
+        async function testStorage() {
+            const output = document.getElementById('storage-output');
+            if (typeof EQ12Debug === 'undefined') {
+                output.textContent = 'Extension not detected';
+                return;
+            }
+            
+            try {
+                // Test data
+                const testData = { 
+                    test_key: 'test_value', 
+                    timestamp: new Date().toISOString(),
+                    debug_test: true 
+                };
+                
+                if (typeof browser !== 'undefined' && browser.storage) {
+                    await browser.storage.local.set(testData);
+                    output.innerHTML = '<span style="color: green;">✓ Storage write test successful</span>';
+                    EQ12Debug.logger.info('Test', 'Storage write test completed');
+                } else {
+                    output.innerHTML = '<span style="color: red;">✗ Browser storage API not available</span>';
+                }
+            } catch (error) {
+                output.innerHTML = `<span style="color: red;">✗ Storage test failed: ${error.message}</span>`;
+                EQ12Debug.logger.error('Test', 'Storage test failed', error);
+            }
+        }
+        
+        async function inspectStorage() {
+            const output = document.getElementById('storage-output');
+            if (typeof EQ12Debug === 'undefined') {
+                output.textContent = 'Extension not detected';
+                return;
+            }
+            
+            const data = await EQ12Debug.storage.inspect();
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        async function clearStorage() {
+            const output = document.getElementById('storage-output');
+            if (typeof EQ12Debug === 'undefined') {
+                output.textContent = 'Extension not detected';
+                return;
+            }
+            
+            const success = await EQ12Debug.storage.clear();
+            output.innerHTML = success ? 
+                '<span style="color: green;">✓ Storage cleared</span>' : 
+                '<span style="color: red;">✗ Failed to clear storage</span>';
+        }
+        
+        function testMessaging() {
+            const output = document.getElementById('messaging-output');
+            if (typeof EQ12Debug === 'undefined') {
+                output.textContent = 'Extension not detected';
+                return;
+            }
+            
+            const testMessage = {
+                type: 'debug_test',
+                timestamp: new Date().toISOString(),
+                data: 'Test message from debug page'
+            };
+            
+            EQ12Debug.messaging.sendMessage(testMessage, (response) => {
+                if (response) {
+                    output.innerHTML = `<span style="color: green;">✓ Message sent and response received: ${JSON.stringify(response)}</span>`;
+                } else {
+                    output.innerHTML = '<span style="color: orange;">⚠ Message sent but no response received</span>';
+                }
+            });
+        }
+        
+        function triggerError() {
+            if (typeof EQ12Debug === 'undefined') {
+                throw new Error('Test error: Extension not detected');
+            }
+            
+            try {
+                // Intentional error for testing
+                throw new Error('Intentional test error for debugging');
+            } catch (error) {
+                EQ12Debug.logger.error('Test', 'Triggered test error', error);
+            }
+        }
+        
+        function showErrors() {
+            const output = document.getElementById('error-output');
+            if (typeof EQ12Debug === 'undefined') {
+                output.textContent = 'Extension not detected';
+                return;
+            }
+            
+            const errors = EQ12Debug.errorTracker.getErrors();
+            output.textContent = JSON.stringify(errors, null, 2);
+        }
+        
+        function clearErrors() {
+            const output = document.getElementById('error-output');
+            if (typeof EQ12Debug === 'undefined') {
+                output.textContent = 'Extension not detected';
+                return;
+            }
+            
+            EQ12Debug.errorTracker.clearErrors();
+            output.innerHTML = '<span style="color: green;">✓ Errors cleared</span>';
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', function() {
+            setTimeout(testExtensionPresence, 1000);
+        });
+    </script>
+</body>
+</html>

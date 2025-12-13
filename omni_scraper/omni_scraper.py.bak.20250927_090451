@@ -1,0 +1,175 @@
+import time
+import json
+import logging
+from typing import List, Any, Dict, Callable, Optional
+
+import sqlite3
+from abc import ABC, abstractmethod
+
+
+logger = logging.getLogger("omni_scraper")
+
+
+class ScraperConfig:
+    def __init__(self, api_key: str = None, api_host: str = "https://api.the-odds-api.com",
+                 regions: str = "us", markets: str = "h2h,spreads,totals",
+                 chunk_size: int = 10, backoff_base: float = 1.5, max_retries: int = 5,
+                 db_path: Optional[str] = None, dry_run: bool = True):
+        self.api_key = api_key
+        self.api_host = api_host
+        self.regions = regions
+        self.markets = markets
+        self.chunk_size = chunk_size
+        self.backoff_base = backoff_base
+        self.max_retries = max_retries
+        self.db_path = db_path
+        self.dry_run = dry_run
+
+
+class EventEmitter:
+    def __init__(self):
+        self._handlers: Dict[str, List[Callable]] = {}
+
+    def on(self, event: str, handler: Callable):
+        self._handlers.setdefault(event, []).append(handler)
+
+    def emit(self, event: str, *args, **kwargs):
+        for h in self._handlers.get(event, []):
+            try:
+                h(*args, **kwargs)
+            except Exception:
+                logger.exception("Event handler for %s failed", event)
+
+
+class ScraperState(ABC):
+    @abstractmethod
+    def run(self, context: "OmniScraper"):
+        pass
+
+
+class FetchSportsState(ScraperState):
+    def run(self, context: "OmniScraper"):
+        logger.info("STATE: Fetching active sports")
+        # NOTE: network call is via injected fetcher for testability
+        try:
+            resp = context.fetch_json(f"{context.config.api_host}/v4/sports?apiKey={context.config.api_key}")
+            active = [s["key"] for s in resp if s.get("active")]
+            context.active_sports = active
+            logger.info("Found %d active sports", len(active))
+            if active:
+                context.set_state(FetchOddsState())
+            else:
+                context.set_state(FinishedState())
+        except Exception as e:
+            logger.warning("FetchSports failed: %s", e)
+            context.retry_or_fail(FetchSportsState())
+
+
+class FetchOddsState(ScraperState):
+    def run(self, context: "OmniScraper"):
+        logger.info("STATE: Fetching odds for sports (chunked)")
+        # process in chunks
+        while context.active_sports:
+            chunk = context.active_sports[: context.config.chunk_size]
+            context.active_sports = context.active_sports[len(chunk):]
+            logger.info("Processing chunk of size %d", len(chunk))
+            for sport in chunk:
+                try:
+                    url = f"{context.config.api_host}/v4/sports/{sport}/odds/?apiKey={context.config.api_key}&regions={context.config.regions}&markets={context.config.markets}"
+                    games = context.fetch_json(url)
+                    context.all_games.extend(games)
+                    context.emitter.emit("games_fetched", sport, games)
+                    time.sleep(0.5)
+                except Exception as e:
+                    logger.warning("Failed to fetch odds for %s: %s", sport, e)
+                    # Requeue sport to retry later
+                    context.active_sports.append(sport)
+                    context.retry_or_fail(FetchOddsState())
+                    return
+
+        context.set_state(ProcessDataState())
+
+
+class ProcessDataState(ScraperState):
+    def run(self, context: "OmniScraper"):
+        logger.info("STATE: Processing data, total games=%d", len(context.all_games))
+        if context.config.dry_run:
+            logger.info("Dry-run mode: not persisting results. Sample: %s", (context.all_games[:1] or []))
+        else:
+            # persist to JSON file
+            path = context.output_path or "all_in_season_games.json"
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(context.all_games, fh, indent=2)
+            logger.info("Wrote games to %s", path)
+
+            # optional DB persistence
+            if context.config.db_path:
+                logger.info("Persisting results to sqlite %s", context.config.db_path)
+                conn = sqlite3.connect(context.config.db_path)
+                c = conn.cursor()
+                c.execute("CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, sport TEXT, payload JSON)")
+                for g in context.all_games:
+                    sport = g.get("sport_key") or g.get("sport") or "unknown"
+                    c.execute("INSERT INTO games (sport, payload) VALUES (?, ?)", (sport, json.dumps(g)))
+                conn.commit()
+                conn.close()
+        context.set_state(FinishedState())
+
+
+class FinishedState(ScraperState):
+    def run(self, context: "OmniScraper"):
+        logger.info("STATE: Finished")
+        context.is_finished = True
+
+
+class OmniScraper:
+    def __init__(self, config: ScraperConfig):
+        self.config = config
+        self.active_sports: List[str] = []
+        self.all_games: List[Dict[str, Any]] = []
+        self.is_finished = False
+        self._state: ScraperState = FetchSportsState()
+        self.output_path: Optional[str] = None
+        self.emitter = EventEmitter()
+        self._retry_count = 0
+
+        # Dependency injection points for testability
+        self._fetcher = None
+
+    # Public API
+    def set_state(self, state: ScraperState):
+        self._state = state
+
+    def run(self):
+        logger.info("OmniScraper starting")
+        while not self.is_finished:
+            self._state.run(self)
+
+    def fetch_json(self, url: str):
+        if self._fetcher:
+            return self._fetcher(url)
+        # default simple implementation using requests but imported lazily
+        import requests
+
+        resp = requests.get(url, timeout=20)
+        resp.raise_for_status()
+        return resp.json()
+
+    def retry_or_fail(self, next_state: ScraperState) -> None:
+        self._retry_count += 1
+        if self._retry_count > self.config.max_retries:
+            logger.error("Max retries exceeded (%d). Failing.", self.config.max_retries)
+            self.set_state(FinishedState())
+        else:
+            backoff = (self.config.backoff_base ** self._retry_count)
+            logger.info("Retrying after %.1fs (retry #%d)", backoff, self._retry_count)
+            time.sleep(backoff)
+            # back to next_state
+            self.set_state(next_state)
+
+    def on(self, event: str, handler: Callable) -> None:
+        self.emitter.on(event, handler)
+
+    def set_fetcher(self, func: Callable[[str], Any]) -> None:
+        self._fetcher = func
+

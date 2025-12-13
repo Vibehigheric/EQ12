@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+"""
+eq12_chatgpt.py
+
+Small wrapper to call OpenAI ChatCompletion with a bootstrap for API key.
+If OPENAI_API_KEY envvar is present, it will be used. Otherwise it will
+prompt once and save to C:\\EQ12\\keys\\openai.txt.
+"""
+import argparse
+import json
+import logging
+import os
+import pathlib
+import subprocess
+import sys
+import time
+from typing import Any, Dict, Optional
+
+# Import EQ12 standardized configuration
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+
+def load_env_file():
+    """Load environment variables from .env file"""
+    env_file = pathlib.Path(__file__).resolve().parents[1] / ".env"
+    if env_file.exists():
+        try:
+            with open(env_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip()
+                        if key and value and not os.environ.get(key):
+                            os.environ[key] = value
+        except Exception:
+            pass
+
+
+# Load environment variables at startup
+load_env_file()
+
+try:
+    import openai
+except Exception:
+    print('openai package not installed. Install with: pip install openai', file=sys.stderr)
+    raise
+
+
+def ensure_api_key():
+    """Ensure API key exists, check env first, then local file, then prompt once."""
+    # Check env (useful for Codespaces / CI)
+    env_key = os.environ.get('OPENAI_API_KEY') or os.environ.get('OPENAI_APIKEY')
+    if env_key:
+        return env_key.strip()
+
+    key_dir = r"C:\EQ12\keys"
+    key_path = os.path.join(key_dir, "openai.txt")
+    os.makedirs(key_dir, exist_ok=True)
+
+    # Prefer a GPG-encrypted API key file (created via Kleopatra/Gpg4win)
+    enc_paths = [os.path.join(key_dir, 'openai_api.txt.gpg'),
+                 os.path.join(key_dir, 'openai.txt.gpg')]
+    for enc in enc_paths:
+        if os.path.exists(enc):
+            try:
+                # Use gpg to decrypt; requires gpg.exe on PATH
+                proc = subprocess.run(['gpg',
+                                       '--quiet',
+                                       '--batch',
+                                       '--yes',
+                                       '--decrypt',
+                                       enc],
+                                      capture_output=True,
+                                      text=True,
+                                      check=True)
+                dk = proc.stdout.strip()
+                if dk:
+                    return dk
+            except Exception:
+                # If gpg fails, continue to other fallbacks
+                pass
+
+    if os.path.exists(key_path):
+        return open(key_path).read().strip()
+
+    # Prompt user once (interactive)
+    try:
+        api_key = input("Enter your OpenAI API key: ").strip()
+    except EOFError:
+        raise RuntimeError(
+            "No API key available in env or file, and no interactive input possible.")
+
+    if not api_key:
+        raise ValueError("No API key entered. Exiting.")
+
+    # Ask if user wants to save the key
+    try:
+        save_choice = input("Save this API key for future use? (y/N): ").strip().lower()
+        if save_choice == 'y':
+            env_file = pathlib.Path(__file__).resolve().parents[1] / ".env"
+            try:
+                with open(env_file, 'a', encoding='utf-8') as f:
+                    f.write(f"\nOPENAI_API_KEY={api_key}\n")
+                print(f"API key saved to {env_file}")
+            except Exception as e:
+                print(f"Failed to save to .env, falling back to key file: {e}")
+                with open(key_path, "w") as f:
+                    f.write(api_key)
+                print(f"API key saved to {key_path}")
+        else:
+            with open(key_path, "w") as f:
+                f.write(api_key)
+            print(f"API key saved to {key_path}")
+    except EOFError:
+        # If we can't ask, just save to key file
+        with open(key_path, "w") as f:
+            f.write(api_key)
+        print(f"API key saved to {key_path}")
+
+    return api_key
+
+
+def call_chatgpt(prompt: str, model: str = "gpt-4o-mini",
+                 max_retries: int = 3, log_path: Optional[str] = None) -> Dict[str, Any]:
+    api_key = ensure_api_key()
+    openai.api_key = api_key
+
+    if not log_path:
+        log_path = os.getenv('EQ12_LOGS', r"C:\EQ12\logs")
+    os.makedirs(log_path, exist_ok=True)
+
+    logging.basicConfig(filename=os.path.join(log_path, "chatgpt.log"),
+                        level=logging.INFO,
+                        format="%(asctime)s - %(levelname)s - %(message)s")
+
+    for attempt in range(max_retries):
+        try:
+            resp = openai.ChatCompletion.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.2,
+            )
+            msg = resp["choices"][0]["message"]["content"]
+            out = {"ok": True, "prompt": prompt, "response": msg, "ts": time.time()}
+            out_path = os.path.join(log_path, "chatgpt_last.json")
+            with open(out_path, "w", encoding="utf-8") as f:
+                json.dump(out, f, indent=2, ensure_ascii=False)
+            return out
+        except Exception as e:
+            logging.error(f"ChatGPT API error (attempt {attempt + 1}): {e}")
+            time.sleep(2)
+    return {"ok": False, "error": "Max retries exceeded"}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="EQ12 ChatGPT wrapper")
+    parser.add_argument('--prompt', '-p', required=True,
+                        help='Prompt to send to ChatGPT')
+    parser.add_argument('--model', default='gpt-4o-mini')
+    args = parser.parse_args()
+
+    res = call_chatgpt(args.prompt, model=args.model)
+    if res.get('ok'):
+        print(res['response'])
+        sys.exit(0)
+    else:
+        print(json.dumps(res, indent=2), file=sys.stderr)
+        sys.exit(2)
+
+
+if __name__ == '__main__':
+    main()

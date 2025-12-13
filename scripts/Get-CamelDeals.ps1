@@ -1,0 +1,35 @@
+<# EQ12 patch: PowerShell wrapper for CamelCamelCamel tracker #>
+[CmdletBinding()]
+param(
+    [switch]$DryRun,
+    [string]$Watchlist = "configs/amazon_watchlist.json",
+    [string]$OutPath = "C:\EQ12\logs\ccc_tracker.json"
+)
+
+function Get-CamelDeals {
+    [CmdletBinding()]
+    param(
+        [switch]$DryRun,
+        [string]$Watchlist = "configs/amazon_watchlist.json",
+        [string]$OutPath = "C:\EQ12\logs\ccc_tracker.json"
+    )
+
+    $py = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $py) { Write-Error "Python not found"; return }
+
+    $pyArgs = @('scripts/ccc_tracker.py')
+    $pyArgs += '--watchlist'; $pyArgs += $Watchlist
+    if ($DryRun) { $pyArgs += '--dry-run' } else { $pyArgs += '--no-dry-run' }
+    $pyArgs += '--out'; $pyArgs += $OutPath
+
+    Write-Host "Invoking ccc_tracker with args: $($pyArgs -join ' ')"
+    & $py.Source @pyArgs
+}
+
+if ($null -ne $PSCommandPath -and $MyInvocation.InvocationName -eq '.') {
+    # dot-sourced
+} elseif ($null -ne $MyInvocation.InvocationName) {
+    Get-CamelDeals -DryRun:$DryRun -Watchlist $Watchlist -OutPath $OutPath
+}
+
+# TODO: add Pester test

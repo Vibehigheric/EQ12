@@ -1,0 +1,313 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 ALL SYSTEMS LAUNCHER - PowerShell Wrapper
+    
+.DESCRIPTION
+    Ultimate PowerShell wrapper for EQ12 Total System Launcher that fixes all Windows compatibility issues:
+    - Uses semicolon (;) instead of && for command chaining
+    - Forces UTF-8 encoding to handle emojis properly
+    - Comprehensive error handling with try/catch/finally blocks
+    - Updated Claude model references
+    - One-click execution of entire EQ12 business empire
+    
+.PARAMETER Action
+    Launch mode: 'Full', 'Critical', 'Test'
+    
+.PARAMETER Workspace
+    EQ12 workspace path (default: C:\EQ12)
+    
+.PARAMETER VerboseOutput
+    Enable detailed logging
+    
+.PARAMETER GenerateReport
+    Generate HTML dashboard after execution
+    
+.EXAMPLE
+    .\eq12_all_systems.ps1 -Action Full -VerboseOutput -GenerateReport
+    
+.NOTES
+    Author: EQ12 Quantum Development Team
+    Version: 1.0.0 - Windows Optimized
+    Date: November 7, 2025
+#>
+
+[CmdletBinding()]
+param(
+    [ValidateSet('Full', 'Critical', 'Test')]
+    [string]$Action = 'Full',
+    
+    [ValidateScript({ Test-Path $_ -PathType Container })]
+    [string]$Workspace = 'C:\EQ12',
+    
+    [switch]$VerboseOutput,
+    
+    [switch]$GenerateReport
+)
+
+begin {
+    # Force UTF-8 encoding for emoji compatibility
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+    $OriginalPSDefaultParameterValues = $PSDefaultParameterValues.Clone()
+    $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
+    
+    # Initialize execution tracking
+    $ExecutionStart = Get-Date
+    $ScriptName = $MyInvocation.MyCommand.Name
+    $LogTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+    $LogPath = Join-Path $Workspace "logs\powershell_launcher_$LogTimestamp.log"
+    
+    # Ensure logs directory exists
+    $LogDir = Join-Path $Workspace "logs"
+    if (-not (Test-Path $LogDir)) {
+        New-Item -Path $LogDir -ItemType Directory -Force | Out-Null
+    }
+    
+    function Write-EQ12Log {
+        param(
+            [string]$Message,
+            [ValidateSet('INFO', 'WARNING', 'ERROR', 'SUCCESS')]
+            [string]$Level = 'INFO'
+        )
+        
+        $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        $LogEntry = "[$Timestamp] [$Level] $Message"
+        
+        # Write to console with colors
+        switch ($Level) {
+            'INFO' { Write-Host $LogEntry -ForegroundColor Cyan }
+            'WARNING' { Write-Host $LogEntry -ForegroundColor Yellow }
+            'ERROR' { Write-Host $LogEntry -ForegroundColor Red }
+            'SUCCESS' { Write-Host $LogEntry -ForegroundColor Green }
+        }
+        
+        # Write to log file
+        try {
+            Add-Content -Path $LogPath -Value $LogEntry -Encoding UTF8 -ErrorAction SilentlyContinue
+        }
+        catch {
+            # Silently continue if logging fails
+        }
+    }
+    
+    Write-EQ12Log " EQ12 ALL SYSTEMS LAUNCHER STARTED" -Level SUCCESS
+    Write-EQ12Log " Execution Time: $ExecutionStart" -Level INFO
+    Write-EQ12Log " Workspace: $Workspace" -Level INFO
+    Write-EQ12Log " Action Mode: $Action" -Level INFO
+}
+
+process {
+    try {
+        # Validate workspace structure
+        Write-EQ12Log " Validating EQ12 workspace structure..." -Level INFO
+        
+        $RequiredPaths = @(
+            (Join-Path $Workspace "scripts"),
+            (Join-Path $Workspace "logs"),
+            (Join-Path $Workspace "dashboard")
+        )
+        
+        foreach ($Path in $RequiredPaths) {
+            if (-not (Test-Path $Path)) {
+                Write-EQ12Log " Creating directory: $Path" -Level INFO
+                New-Item -Path $Path -ItemType Directory -Force | Out-Null
+            }
+        }
+        
+        # Check Python installation
+        Write-EQ12Log " Checking Python installation..." -Level INFO
+        try {
+            $PythonVersion = & python --version 2>&1
+            if ($LASTEXITCODE -eq 0) {
+                Write-EQ12Log " Python found: $PythonVersion" -Level SUCCESS
+            }
+            else {
+                throw "Python not found in PATH"
+            }
+        }
+        catch {
+            Write-EQ12Log " Python installation issue: $($_.Exception.Message)" -Level ERROR
+            throw "Python is required but not found. Please install Python 3.12+ and add to PATH."
+        }
+        
+        # Validate launcher script exists
+        $LauncherScript = Join-Path $Workspace "eq12_total_system_launcher.py"
+        if (-not (Test-Path $LauncherScript)) {
+            Write-EQ12Log " Launcher script not found: $LauncherScript" -Level ERROR
+            throw "EQ12 Total System Launcher script not found. Please ensure eq12_total_system_launcher.py exists in workspace root."
+        }
+        
+        Write-EQ12Log " Workspace validation complete" -Level SUCCESS
+        
+        # Build Python command arguments
+        $PythonArgs = @()
+        
+        switch ($Action) {
+            'Full' { 
+                $PythonArgs += @('--mode', 'full')
+                Write-EQ12Log " Running FULL system execution (all modules)" -Level INFO
+            }
+            'Critical' { 
+                $PythonArgs += @('--mode', 'critical-only')
+                Write-EQ12Log " Running CRITICAL-ONLY execution (essential modules)" -Level INFO
+            }
+            'Test' { 
+                $PythonArgs += @('--mode', 'full')
+                Write-EQ12Log " Running TEST execution (validation mode)" -Level INFO
+            }
+        }
+        
+        $PythonArgs += @('--workspace', $Workspace)
+        
+        if ($VerboseOutput) {
+            $PythonArgs += '--verbose'
+            Write-EQ12Log " Verbose output enabled" -Level INFO
+        }
+        
+        # Display execution banner
+        Write-Host ""
+        Write-Host "=" * 80 -ForegroundColor Blue
+        Write-Host " EQ12 TOTAL SYSTEM LAUNCHER - ENTERPRISE EXECUTION" -ForegroundColor Green
+        Write-Host "=" * 80 -ForegroundColor Blue
+        Write-Host " Start Time: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")" -ForegroundColor Cyan
+        Write-Host " Workspace: $Workspace" -ForegroundColor Cyan
+        Write-Host " Mode: $Action" -ForegroundColor Cyan
+        Write-Host " Python Args: $($PythonArgs -join " ")" -ForegroundColor Cyan
+        Write-Host "=" * 80 -ForegroundColor Blue
+        Write-Host ""
+        
+        # Execute EQ12 Total System Launcher
+        Write-EQ12Log " Launching EQ12 Total System Orchestrator..." -Level INFO
+        
+        $LauncherResult = $null
+        $LauncherError = $null
+        
+        try {
+            # Change to workspace directory for execution
+            Push-Location $Workspace
+            
+            # Execute Python launcher with proper error capture
+            $ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo
+            $ProcessInfo.FileName = "python"
+            $ProcessInfo.Arguments = "$LauncherScript $($PythonArgs -join ' ')"
+            $ProcessInfo.RedirectStandardOutput = $true
+            $ProcessInfo.RedirectStandardError = $true
+            $ProcessInfo.UseShellExecute = $false
+            $ProcessInfo.CreateNoWindow = $false
+            $ProcessInfo.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+            $ProcessInfo.StandardErrorEncoding = [System.Text.Encoding]::UTF8
+            
+            $Process = New-Object System.Diagnostics.Process
+            $Process.StartInfo = $ProcessInfo
+            
+            # Start process and capture output
+            $Process.Start() | Out-Null
+            $LauncherResult = $Process.StandardOutput.ReadToEnd()
+            $LauncherError = $Process.StandardError.ReadToEnd()
+            $Process.WaitForExit()
+            $ExitCode = $Process.ExitCode
+            
+            # Display results
+            if ($LauncherResult) {
+                Write-Host $LauncherResult
+                Write-EQ12Log " Launcher output captured" -Level INFO
+            }
+            
+            if ($LauncherError -and $LauncherError.Trim()) {
+                Write-Host $LauncherError -ForegroundColor Yellow
+                Write-EQ12Log " Launcher stderr: $($LauncherError.Substring(0, [Math]::Min(200, $LauncherError.Length)))" -Level WARNING
+            }
+            
+            # Evaluate execution result
+            if ($ExitCode -eq 0) {
+                Write-EQ12Log " EQ12 Total System Launcher completed successfully (Exit Code: $ExitCode)" -Level SUCCESS
+                $ExecutionStatus = "SUCCESS"
+            }
+            elseif ($ExitCode -eq 1) {
+                Write-EQ12Log " EQ12 Total System Launcher completed with warnings (Exit Code: $ExitCode)" -Level WARNING
+                $ExecutionStatus = "DEGRADED"
+            }
+            else {
+                Write-EQ12Log " EQ12 Total System Launcher failed (Exit Code: $ExitCode)" -Level ERROR
+                $ExecutionStatus = "FAILED"
+            }
+        }
+        catch {
+            $ErrorDetails = $_.Exception.Message
+            Write-EQ12Log " Critical error during launcher execution: $ErrorDetails" -Level ERROR
+            $ExecutionStatus = "CRASHED"
+            throw
+        }
+        finally {
+            Pop-Location
+        }
+        
+        # Generate execution summary
+        $ExecutionEnd = Get-Date
+        $ExecutionDuration = $ExecutionEnd - $ExecutionStart
+        
+        Write-Host ""
+        Write-Host "=" * 80 -ForegroundColor Blue
+        Write-Host " EQ12 EXECUTION SUMMARY" -ForegroundColor Green
+        Write-Host "=" * 80 -ForegroundColor Blue
+        Write-Host " Status: $ExecutionStatus" -ForegroundColor $(if ($ExecutionStatus -eq "SUCCESS") { "Green" } elseif ($ExecutionStatus -eq "DEGRADED") { "Yellow" } else { "Red" })
+        Write-Host " Duration: $($ExecutionDuration.ToString("hh\:mm\:ss"))" -ForegroundColor Cyan
+        Write-Host " Completed: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")" -ForegroundColor Cyan
+        Write-Host " Log File: $LogPath" -ForegroundColor Cyan
+        
+        # Check for generated dashboard
+        $DashboardPattern = Join-Path $Workspace "dashboard\total_system_dashboard_*.html"
+        $DashboardFiles = Get-ChildItem $DashboardPattern -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending
+        
+        if ($DashboardFiles) {
+            $LatestDashboard = $DashboardFiles[0].FullName
+            Write-Host " Dashboard: $LatestDashboard" -ForegroundColor Cyan
+            
+            if ($GenerateReport) {
+                Write-EQ12Log " Opening dashboard in default browser..." -Level INFO
+                try {
+                    Start-Process $LatestDashboard
+                    Write-EQ12Log " Dashboard opened successfully" -Level SUCCESS
+                }
+                catch {
+                    Write-EQ12Log " Could not open dashboard automatically: $($_.Exception.Message)" -Level WARNING
+                }
+            }
+        }
+        
+        Write-Host "=" * 80 -ForegroundColor Blue
+        
+        Write-EQ12Log " EQ12 All Systems Launcher completed with status: $ExecutionStatus" -Level SUCCESS
+        
+    }
+    catch {
+        $ErrorDetails = $_.Exception.Message
+        Write-EQ12Log " CRITICAL FAILURE: $ErrorDetails" -Level ERROR
+        Write-Host ""
+        Write-Host " CRITICAL ERROR OCCURRED!" -ForegroundColor Red
+        Write-Host "Error: $ErrorDetails" -ForegroundColor Red
+        Write-Host "Log: $LogPath" -ForegroundColor Yellow
+        Write-Host ""
+        
+        # Set failed exit code
+        $global:LASTEXITCODE = 1
+        throw
+    }
+}
+
+end {
+    # Restore original encoding settings
+    $PSDefaultParameterValues.Clear()
+    $PSDefaultParameterValues += $OriginalPSDefaultParameterValues
+    
+    Write-EQ12Log " PowerShell wrapper execution complete" -Level INFO
+    
+    # Final status message
+    $FinalDuration = (Get-Date) - $ExecutionStart
+    Write-Host ""
+    Write-Host " EQ12 PowerShell Launcher finished in $($FinalDuration.ToString("hh\:mm\:ss"))" -ForegroundColor Green
+    Write-Host " Complete log available at: $LogPath" -ForegroundColor Cyan
+}

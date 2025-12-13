@@ -1,0 +1,198 @@
+name: EQ12 Cross-Stack Intelligence Sync
+
+on:
+  schedule:
+    # Run every 6 hours for continuous intelligence collection
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      stack:
+        description: 'Specific stack to analyze (or "all" for cross-stack)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - betting
+          - travel
+          - cannabis
+          - fleet
+          - housing
+          - education
+          - dropship
+
+jobs:
+  intelligence-collection:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.stack == 'all' || github.event.schedule
+    
+    strategy:
+      matrix:
+        stack: [betting, travel, cannabis, fleet, housing, education, dropship]
+      fail-fast: false
+      
+    steps:
+      - name: Checkout EQ12 GODSTACK
+        uses: actions/checkout@v4
+        
+      - name: Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install PyGithub
+          
+      - name: Configure Environment Variables
+        env:
+          OPENAI_SERVICE_KEY: ${{ secrets.OPENAI_SERVICE_KEY }}
+          BING_SEARCH_API_KEY: ${{ secrets.BING_SEARCH_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ORG: ${{ vars.GITHUB_ORG }}
+        run: |
+          echo "Environment configured for ${{ matrix.stack }} stack"
+          
+      - name: Generate Stack Query File
+        run: |
+          python github_integration.py --generate-queries --stack ${{ matrix.stack }}
+          
+      - name: Execute Stack Intelligence Chain
+        timeout-minutes: 20
+        run: |
+          echo "Starting ${{ matrix.stack }} intelligence collection..."
+          
+          # Run appropriate data collection based on stack
+          case "${{ matrix.stack }}" in
+            "betting"|"cannabis"|"fleet"|"housing"|"education")
+              python news_aggregator.py --query-file queries_${{ matrix.stack }}.txt
+              ;;
+            "travel"|"dropship")
+              python meta_search.py --query-file queries_${{ matrix.stack }}.txt
+              python swagbucks_offers.py --category ${{ matrix.stack == 'travel' && 'travel' || 'shopping' }}
+              ;;
+            *)
+              echo "Unknown stack configuration"
+              exit 1
+              ;;
+          esac
+          
+          # Run enrichment analysis
+          python enrichment.py ${{ matrix.stack }}
+          
+          # Create GitHub issues for high-priority intelligence
+          python github_integration.py --stack ${{ matrix.stack }} --create-issue --hours 6
+          
+      - name: Upload Intelligence Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: intelligence-data-${{ matrix.stack }}
+          path: |
+            meta_search.sqlite3
+            logs/*.log
+            queries_${{ matrix.stack }}.txt
+          retention-days: 7
+
+  cross-stack-analysis:
+    runs-on: ubuntu-latest
+    needs: intelligence-collection
+    if: always() && (github.event.inputs.stack == 'all' || github.event.schedule)
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install PyGithub
+          
+      - name: Download All Intelligence Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: intelligence-data-*
+          merge-multiple: true
+          
+      - name: Execute Cross-Stack Intelligence Sync
+        env:
+          OPENAI_SERVICE_KEY: ${{ secrets.OPENAI_SERVICE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ORG: ${{ vars.GITHUB_ORG }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          echo "Executing cross-stack intelligence analysis..."
+          
+          # Sync intelligence across all stack repositories
+          python github_integration.py --sync-cross-stack --hours 6
+          
+          # Generate master enrichment analysis
+          python enrichment.py all --cross-stack
+          
+          # Send consolidated Telegram summary
+          python alert_pipe.py --send-daily-summary
+          
+      - name: Update Cross-Stack Dashboard
+        run: |
+          echo "Cross-stack intelligence sync completed at $(date)"
+          echo "Check individual stack repositories for detailed intelligence reports"
+          
+  single-stack-analysis:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.stack != 'all'
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install PyGithub
+          
+      - name: Execute Single Stack Analysis
+        env:
+          OPENAI_SERVICE_KEY: ${{ secrets.OPENAI_SERVICE_KEY }}
+          BING_SEARCH_API_KEY: ${{ secrets.BING_SEARCH_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ORG: ${{ vars.GITHUB_ORG }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          STACK="${{ github.event.inputs.stack }}"
+          echo "Executing intelligence analysis for $STACK stack..."
+          
+          # Generate queries and run collection
+          python github_integration.py --generate-queries --stack $STACK
+          
+          # Execute stack-specific collection
+          case "$STACK" in
+            "betting"|"cannabis"|"fleet"|"housing"|"education")
+              python news_aggregator.py --query-file queries_$STACK.txt
+              ;;
+            "travel"|"dropship") 
+              python meta_search.py --query-file queries_$STACK.txt
+              ;;
+          esac
+          
+          # Run enrichment and GitHub integration
+          python enrichment.py $STACK
+          python github_integration.py --stack $STACK --create-issue --hours 6

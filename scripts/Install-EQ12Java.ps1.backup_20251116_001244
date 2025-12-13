@@ -1,0 +1,146 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+#!/usr/bin/env powershell
+<#
+.SYNOPSIS
+EQ12 Java Installation Script
+Install OpenJDK 1.8 for EQ12 system requirements
+
+.DESCRIPTION
+This script extracts and configures OpenJDK 1.8.0 for the EQ12 system.
+Sets up JAVA_HOME and updates PATH environment variables.
+
+Author: EQ12 System Team
+Date: 2025-10-10
+Version: 1.0.0
+#>
+
+[CmdletBinding()]
+param(
+    [string]$JavaZipPath = "C:\EQ12\java-1.8.0-openjdk-1.8.0.392-1.b08.redhat.windows.x86_64.zip",
+    [string]$InstallPath = "C:\EQ12\java",
+    [switch]$Verbose
+)
+
+# Setup logging
+if ($Verbose) {
+    $VerbosePreference = "Continue"
+}
+
+Write-Host "🚀 EQ12 JAVA INSTALLATION SCRIPT" -ForegroundColor Green
+Write-Host "=" * 60
+
+# Verify ZIP file exists
+if (-not (Test-Path $JavaZipPath)) {
+    Write-Error "❌ Java ZIP file not found: $JavaZipPath"
+    exit 1
+}
+
+Write-Host "✅ Java ZIP file found: $JavaZipPath" -ForegroundColor Green
+
+# Create installation directory
+if (-not (Test-Path $InstallPath)) {
+    Write-Verbose "📁 Creating installation directory: $InstallPath"
+    New-Item -ItemType Directory -Path $InstallPath -Force | Out-Null
+}
+
+Write-Host "📁 Installation directory: $InstallPath" -ForegroundColor Cyan
+
+# Extract ZIP file
+Write-Host "📦 Extracting Java ZIP file..." -ForegroundColor Yellow
+
+try {
+    # Use Expand-Archive for PowerShell 5.0+
+    Expand-Archive -Path $JavaZipPath -DestinationPath $InstallPath -Force
+    Write-Host "✅ Java extraction complete" -ForegroundColor Green
+} catch {
+    Write-Error "❌ Failed to extract Java ZIP: $($_.Exception.Message)"
+    exit 1
+}
+
+# Find the extracted Java directory (it should be the only directory in $InstallPath)
+$JavaDirs = Get-ChildItem -Path $InstallPath -Directory
+if ($JavaDirs.Count -eq 0) {
+    Write-Error "❌ No Java directory found after extraction"
+    exit 1
+}
+
+$JavaHome = $JavaDirs[0].FullName
+Write-Host "☕ Java Home: $JavaHome" -ForegroundColor Cyan
+
+# Verify Java executable exists
+$JavaExe = Join-Path $JavaHome "bin\java.exe"
+if (-not (Test-Path $JavaExe)) {
+    Write-Error "❌ Java executable not found: $JavaExe"
+    exit 1
+}
+
+# Test Java installation
+Write-Host "🔧 Testing Java installation..." -ForegroundColor Yellow
+try {
+    $JavaVersion = & $JavaExe -version 2>&1
+    Write-Host "✅ Java installation verified!" -ForegroundColor Green
+    Write-Host "Version info:" -ForegroundColor Cyan
+    $JavaVersion | ForEach-Object { Write-Host "   $_" -ForegroundColor White }
+} catch {
+    Write-Error "❌ Java test failed: $($_.Exception.Message)"
+    exit 1
+}
+
+# Set environment variables for current session
+${env}JAVA_HOME = $JavaHome
+${env}PATH = "$JavaHome\bin;${env}PATH"
+
+Write-Host "🌍 Environment variables set for current session:" -ForegroundColor Green
+Write-Host "   JAVA_HOME = ${env}JAVA_HOME" -ForegroundColor White
+Write-Host "   PATH updated with Java bin directory" -ForegroundColor White
+
+# Offer to set permanent environment variables
+Write-Host ""
+Write-Host "💡 PERMANENT ENVIRONMENT SETUP:" -ForegroundColor Yellow
+Write-Host "To make Java available permanently, run these commands as Administrator:" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "   [Environment]::SetEnvironmentVariable('JAVA_HOME', '$JavaHome', "Machine")" -ForegroundColor White
+Write-Host "   [Environment]::SetEnvironmentVariable('PATH', `${env}PATH + ';$JavaHome\bin', "Machine")" -ForegroundColor White
+Write-Host ""
+
+# Create convenience script for EQ12
+$EQ12JavaScript = @"
+# EQ12 Java Environment Setup
+# Source this script to set Java environment for EQ12
+
+`${env}JAVA_HOME = "$JavaHome"
+`${env}PATH = "$JavaHome\bin;`${env}PATH"
+
+Write-Host "☕ EQ12 Java environment activated" -ForegroundColor Green
+Write-Host "   JAVA_HOME: `${env}JAVA_HOME" -ForegroundColor Cyan
+Write-Host "   Java Version: " -NoNewline -ForegroundColor Cyan
+& java -version 2>&1 | Select-Object -First 1 | Write-Host -ForegroundColor White
+"@
+
+$ScriptPath = "C:\EQ12\scripts\eq12_java_env.ps1"
+Set-Content -Path $ScriptPath -Value $EQ12JavaScript
+Write-Host "📜 Created EQ12 Java environment script: $ScriptPath" -ForegroundColor Green
+
+# Summary
+Write-Host ""
+Write-Host "🎉 EQ12 JAVA INSTALLATION COMPLETE!" -ForegroundColor Green
+Write-Host "=" * 60
+Write-Host "📊 Installation Summary:" -ForegroundColor Cyan
+Write-Host "   Java Version: OpenJDK 1.8.0" -ForegroundColor White
+Write-Host "   Install Path: $JavaHome" -ForegroundColor White  
+Write-Host "   Status: ✅ Ready for use" -ForegroundColor Green
+Write-Host ""
+Write-Host "🚀 Quick Start:" -ForegroundColor Yellow
+Write-Host "   1. Java is ready for current PowerShell session" -ForegroundColor White
+Write-Host "   2. Run ". C:\EQ12\scripts\eq12_java_env.ps1" in new sessions" -ForegroundColor White
+Write-Host "   3. Or set permanent environment variables as Administrator" -ForegroundColor White
+Write-Host ""
+
+return @{
+    Success = $true
+    JavaHome = $JavaHome
+    JavaExecutable = $JavaExe
+    EnvironmentScript = $ScriptPath
+}

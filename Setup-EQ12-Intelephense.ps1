@@ -1,0 +1,142 @@
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    EQ12 Intelephense Setup Script
+
+.DESCRIPTION
+    Sets up Intelephense PHP language server for the EQ12 stack
+    - Installs VS Code extension
+    - Configures PHP environment
+    - Sets up Composer dependencies
+    - Validates installation
+
+.EXAMPLE
+    .\Setup-EQ12-Intelephense.ps1
+#>
+
+[CmdletBinding()]
+param(
+    [switch]$SkipExtensionInstall,
+    [switch]$SkipComposerInstall,
+    [string]$XamppPath = "C:\xampp"
+)
+
+Write-Host "🚀 EQ12 INTELEPHENSE SETUP" -ForegroundColor Green
+Write-Host "=" * 50
+
+# Check if VS Code is installed
+$vscodePath = Get-Command code -ErrorAction SilentlyContinue
+if (-not $vscodePath) {
+    Write-Error "❌ VS Code not found in PATH. Please install VS Code first."
+    exit 1
+}
+
+# Install Intelephense extension
+if (-not $SkipExtensionInstall) {
+    Write-Host "📦 Installing Intelephense extension..." -ForegroundColor Yellow
+    try {
+        code --install-extension bmewburn.vscode-intelephense-client --force
+        Write-Host "✅ Intelephense extension installed" -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "⚠️ Failed to install extension: $($_.Exception.Message)"
+    }
+}
+
+# Check XAMPP PHP installation
+$phpPath = Join-Path $XamppPath "php\php.exe"
+if (Test-Path $phpPath) {
+    Write-Host "✅ XAMPP PHP found: $phpPath" -ForegroundColor Green
+
+    # Get PHP version
+    $phpVersion = & $phpPath --version | Select-Object -First 1
+    Write-Host "📍 PHP Version: $phpVersion" -ForegroundColor Cyan
+}
+else {
+    Write-Warning "⚠️ XAMPP PHP not found at $phpPath"
+    Write-Host "💡 Please install XAMPP or update the XamppPath parameter" -ForegroundColor Yellow
+}
+
+# Check if Composer is installed
+$composerPath = Get-Command composer -ErrorAction SilentlyContinue
+if ($composerPath) {
+    Write-Host "✅ Composer found: $($composerPath.Source)" -ForegroundColor Green
+
+    if (-not $SkipComposerInstall) {
+        Write-Host "📦 Installing PHP development dependencies..." -ForegroundColor Yellow
+
+        Push-Location $PSScriptRoot
+        try {
+            # Install dependencies
+            composer install --optimize-autoloader --no-dev
+            Write-Host "✅ Composer dependencies installed" -ForegroundColor Green
+
+            # Install dev dependencies for code quality
+            Write-Host "📦 Installing development tools..." -ForegroundColor Yellow
+            composer install --dev
+            Write-Host "✅ Development dependencies installed" -ForegroundColor Green
+        }
+        catch {
+            Write-Warning "⚠️ Composer install failed: $($_.Exception.Message)"
+        }
+        finally {
+            Pop-Location
+        }
+    }
+}
+else {
+    Write-Warning "⚠️ Composer not found. Please install Composer: https://getcomposer.org/"
+}
+
+# Validate PHP files
+Write-Host "🔍 Validating PHP files..." -ForegroundColor Yellow
+$phpFiles = Get-ChildItem -Path . -Filter "*.php" -Recurse |
+Where-Object { $_.FullName -notlike "*vendor*" -and $_.FullName -notlike "*xampp-source*" } |
+Select-Object -First 5
+
+if ($phpFiles -and (Test-Path $phpPath)) {
+    foreach ($file in $phpFiles) {
+        Write-Host "  Checking: $($file.Name)" -ForegroundColor Gray
+        $lintResult = & $phpPath -l $file.FullName 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "  ✅ $($file.Name) - OK" -ForegroundColor Green
+        }
+        else {
+            Write-Host "  ❌ $($file.Name) - Syntax Error" -ForegroundColor Red
+            Write-Host "    $lintResult" -ForegroundColor Red
+        }
+    }
+}
+
+# Check workspace configuration
+$settingsPath = ".vscode\settings.json"
+if (Test-Path $settingsPath) {
+    $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
+
+    if ($settings."intelephense.environment.phpVersion") {
+        Write-Host "✅ Intelephense configured in VS Code settings" -ForegroundColor Green
+        Write-Host "📍 PHP Version: $($settings."intelephense.environment.phpVersion")" -ForegroundColor Cyan
+    }
+    else {
+        Write-Warning "⚠️ Intelephense not configured in VS Code settings"
+    }
+}
+
+# Performance recommendations
+Write-Host "`n🎯 PERFORMANCE RECOMMENDATIONS:" -ForegroundColor Cyan
+Write-Host "1. Restart VS Code after first-time setup" -ForegroundColor White
+Write-Host "2. If indexing feels slow, run: Ctrl+Shift+P -> Intelephense: Clear Cache" -ForegroundColor White
+Write-Host "3. Consider Intelephense Premium ($35) for advanced refactoring" -ForegroundColor White
+Write-Host "4. Use Task: 'PHP: Clear Intelephense Cache' if you see false errors" -ForegroundColor White
+
+# Display available tasks
+Write-Host "`n🔧 AVAILABLE PHP TASKS:" -ForegroundColor Cyan
+Write-Host "• PHP: Lint Check - Check syntax of current file" -ForegroundColor White
+Write-Host "• PHP: Lint All Files - Check all PHP files in project" -ForegroundColor White
+Write-Host "• PHP: Code Style Fix - Auto-fix code formatting" -ForegroundColor White
+Write-Host "• PHP: Run Tests - Execute PHPUnit tests" -ForegroundColor White
+Write-Host "• PHP: Install Dependencies - Run composer install" -ForegroundColor White
+
+Write-Host "`n✅ EQ12 INTELEPHENSE SETUP COMPLETE!" -ForegroundColor Green
+Write-Host "💡 Open any PHP file to see Intelephense in action" -ForegroundColor Yellow
+Write-Host "🚀 Use Ctrl+Shift+P -> Tasks: Run Task to access PHP workflows" -ForegroundColor Yellow

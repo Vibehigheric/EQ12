@@ -1,0 +1,25 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "💬 EQ12 Governance Q&A"
+    url: "https://github.com/Vibehigheric/EQ12/discussions/categories/governance-compliance"
+    about: "Ask governance, compliance, or process questions in Discussions instead of opening an issue."
+  
+  - name: "🔒 Security Questions & Best Practices"  
+    url: "https://github.com/Vibehigheric/EQ12/discussions/categories/security-secrets"
+    about: "Discuss security best practices, authentication, and workflow security in Discussions."
+    
+  - name: "📋 Quarterly Audit & Compliance"
+    url: "https://github.com/Vibehigheric/EQ12/discussions/categories/audits-reviews" 
+    about: "Participate in quarterly compliance audits and review processes."
+    
+  - name: "⚙️ CI/CD & Workflow Support"
+    url: "https://github.com/Vibehigheric/EQ12/discussions/categories/ci-cd-actions"
+    about: "Get help with GitHub Actions, workflows, and deployment issues."
+    
+  - name: "📧 Direct Compliance Contact"
+    url: "mailto:compliance@eq12-godstack.local"
+    about: "For urgent compliance matters, sensitive stack issues, or direct consultation."
+    
+  - name: "📖 EQ12 GODSTACK Documentation"
+    url: "https://github.com/Vibehigheric/EQ12/blob/main/README.md"
+    about: "Review complete documentation, setup guides, and governance policies."

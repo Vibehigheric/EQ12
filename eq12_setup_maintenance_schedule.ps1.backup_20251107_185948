@@ -1,0 +1,200 @@
+# EQ12 Maintenance Pack Task Configuration
+# Windows Task Scheduler XML for automated maintenance
+
+# Daily Maintenance Task
+$DailyTaskXML = @"
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Date>2025-11-07T17:00:00</Date>
+    <Author>EQ12 Quantum Development Team</Author>
+    <Description>EQ12 Autonomous Maintenance Pack - Daily system health and optimization for $1.9M/month business empire</Description>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2025-11-08T06:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <UserId>$env:USERNAME</UserId>
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <WakeToRun>false</WakeToRun>
+    <ExecutionTimeLimit>PT1H</ExecutionTimeLimit>
+    <Priority>7</Priority>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>python</Command>
+      <Arguments>C:\EQ12\eq12_daily_maintenance.py --workspace C:\EQ12</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
+"@
+
+# Health Monitoring Task (Every 4 Hours)
+$HealthTaskXML = @"
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Date>2025-11-07T17:00:00</Date>
+    <Author>EQ12 Quantum Development Team</Author>
+    <Description>EQ12 Health Monitor - Continuous health monitoring every 4 hours</Description>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <Repetition>
+        <Interval>PT4H</Interval>
+        <Duration>P365D</Duration>
+      </Repetition>
+      <StartBoundary>2025-11-07T18:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <UserId>$env:USERNAME</UserId>
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <WakeToRun>false</WakeToRun>
+    <ExecutionTimeLimit>PT15M</ExecutionTimeLimit>
+    <Priority>7</Priority>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>python</Command>
+      <Arguments>C:\EQ12\eq12_daily_maintenance.py --health-only</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
+"@
+
+# Self-Healing Task (Hourly)
+$SelfHealingTaskXML = @"
+<?xml version="1.0" encoding="UTF-16"?>
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Date>2025-11-07T17:00:00</Date>
+    <Author>EQ12 Quantum Development Team</Author>
+    <Description>EQ12 Self-Healing Orchestrator - Autonomous system recovery every hour</Description>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <Repetition>
+        <Interval>PT1H</Interval>
+        <Duration>P365D</Duration>
+      </Repetition>
+      <StartBoundary>2025-11-07T17:30:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByDay>
+        <DaysInterval>1</DaysInterval>
+      </ScheduleByDay>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <UserId>$env:USERNAME</UserId>
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>HighestAvailable</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+    <IdleSettings>
+      <StopOnIdleEnd>false</StopOnIdleEnd>
+      <RestartOnIdle>false</RestartOnIdle>
+    </IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <RunOnlyIfIdle>false</RunOnlyIfIdle>
+    <WakeToRun>false</WakeToRun>
+    <ExecutionTimeLimit>PT30M</ExecutionTimeLimit>
+    <Priority>7</Priority>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>python</Command>
+      <Arguments>C:\EQ12\eq12_self_healing_orchestrator.py --workspace C:\EQ12</Arguments>
+      <WorkingDirectory>C:\EQ12</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
+"@
+
+# Create task files
+$DailyTaskXML | Out-File -FilePath "C:\EQ12\eq12_daily_maintenance.xml" -Encoding UTF8
+$HealthTaskXML | Out-File -FilePath "C:\EQ12\eq12_health_monitor.xml" -Encoding UTF8  
+$SelfHealingTaskXML | Out-File -FilePath "C:\EQ12\eq12_self_healing.xml" -Encoding UTF8
+
+# Register tasks with Windows Task Scheduler
+try {
+    schtasks /create /tn "EQ12 Daily Maintenance" /xml "C:\EQ12\eq12_daily_maintenance.xml" /f
+    schtasks /create /tn "EQ12 Health Monitor" /xml "C:\EQ12\eq12_health_monitor.xml" /f
+    schtasks /create /tn "EQ12 Self-Healing" /xml "C:\EQ12\eq12_self_healing.xml" /f
+    
+    Write-Host "✅ EQ12 Maintenance Pack - Scheduled Tasks Created Successfully" -ForegroundColor Green
+    Write-Host "📅 Daily Maintenance: 6:00 AM daily" -ForegroundColor Cyan
+    Write-Host "🏥 Health Monitor: Every 4 hours" -ForegroundColor Cyan
+    Write-Host "🔮 Self-Healing: Every hour" -ForegroundColor Cyan
+    Write-Host "💰 Business Value Protected: `$1.9M/month" -ForegroundColor Green
+    
+    # Display task status
+    Write-Host "`n📋 Current Task Status:" -ForegroundColor Yellow
+    schtasks /query /tn "EQ12 Daily Maintenance" /fo table
+    schtasks /query /tn "EQ12 Health Monitor" /fo table  
+    schtasks /query /tn "EQ12 Self-Healing" /fo table
+    
+} catch {
+    Write-Host "❌ Failed to register tasks: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "💡 Try running as Administrator or use manual XML import" -ForegroundColor Yellow
+}

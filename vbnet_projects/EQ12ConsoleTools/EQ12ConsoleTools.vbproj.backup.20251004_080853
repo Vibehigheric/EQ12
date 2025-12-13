@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>EQ12ConsoleTools</RootNamespace>
+    <TargetFramework>net6.0</TargetFramework>
+    <UseWindowsForms>false</UseWindowsForms>
+    <AssemblyTitle>EQ12ConsoleTools</AssemblyTitle>
+    <AssemblyDescription>EQ12 VB.NET Console Application</AssemblyDescription>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>

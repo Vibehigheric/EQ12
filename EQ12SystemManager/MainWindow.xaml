@@ -1,0 +1,529 @@
+<Window x:Class="EQ12SystemManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EQ12 System Manager - Industrial Control Interface"
+        Height="800"
+        Width="1200"
+        WindowState="Maximized"
+        Background="#FF0A0A0A">
+
+    <Window.Resources>
+        <!-- Industrial SCADA Color Scheme -->
+        <SolidColorBrush x:Key="BackgroundPrimary"
+                Color="#FF0A0A0A"/>
+        <SolidColorBrush x:Key="BackgroundSecondary"
+                Color="#FF1A1A1A"/>
+        <SolidColorBrush x:Key="BackgroundAccent"
+                Color="#FF2A2A2A"/>
+        <SolidColorBrush x:Key="TextPrimary"
+                Color="#FFFAFAFA"/>
+        <SolidColorBrush x:Key="TextSecondary"
+                Color="#FFCCCCCC"/>
+        <SolidColorBrush x:Key="AccentGreen"
+                Color="#FF21BF73"/>
+        <SolidColorBrush x:Key="AccentBlue"
+                Color="#FF1E90FF"/>
+        <SolidColorBrush x:Key="AccentYellow"
+                Color="#FFFFD700"/>
+        <SolidColorBrush x:Key="AccentRed"
+                Color="#FFFF4444"/>
+        <SolidColorBrush x:Key="BorderColor"
+                Color="#FF333333"/>
+
+        <!-- Button Styles -->
+        <Style x:Key="ControlButton"
+                TargetType="Button">
+            <Setter Property="Background"
+                    Value="{StaticResource BackgroundAccent}"/>
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+            <Setter Property="Padding"
+                    Value="8,4"/>
+            <Setter Property="Margin"
+                    Value="2"/>
+            <Setter Property="FontFamily"
+                    Value="Segoe UI, Roboto"/>
+            <Setter Property="FontWeight"
+                    Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                    Value="True">
+                                <Setter Property="Background"
+                                        Value="{StaticResource AccentBlue}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed"
+                                    Value="True">
+                                <Setter Property="Background"
+                                        Value="{StaticResource AccentGreen}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="StartButton"
+                TargetType="Button"
+                BasedOn="{StaticResource ControlButton}">
+            <Setter Property="Background"
+                    Value="{StaticResource AccentGreen}"/>
+        </Style>
+
+        <Style x:Key="StopButton"
+                TargetType="Button"
+                BasedOn="{StaticResource ControlButton}">
+            <Setter Property="Background"
+                    Value="{StaticResource AccentRed}"/>
+        </Style>
+
+        <Style x:Key="RestartButton"
+                TargetType="Button"
+                BasedOn="{StaticResource ControlButton}">
+            <Setter Property="Background"
+                    Value="{StaticResource AccentYellow}"/>
+            <Setter Property="Foreground"
+                    Value="#FF000000"/>
+        </Style>
+
+        <!-- Card Style for Components -->
+        <Style x:Key="ComponentCard"
+                TargetType="Border">
+            <Setter Property="Background"
+                    Value="{StaticResource BackgroundSecondary}"/>
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness"
+                    Value="1"/>
+            <Setter Property="CornerRadius"
+                    Value="6"/>
+            <Setter Property="Margin"
+                    Value="4"/>
+            <Setter Property="Padding"
+                    Value="12"/>
+        </Style>
+
+        <!-- Status Indicator Style -->
+        <Style x:Key="StatusIndicator"
+                TargetType="Ellipse">
+            <Setter Property="Width"
+                    Value="12"/>
+            <Setter Property="Height"
+                    Value="12"/>
+            <Setter Property="Margin"
+                    Value="4,0"/>
+        </Style>
+
+        <!-- Data Grid Styling -->
+        <Style TargetType="DataGrid">
+            <Setter Property="Background"
+                    Value="{StaticResource BackgroundSecondary}"/>
+            <Setter Property="Foreground"
+                    Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderColor}"/>
+            <Setter Property="GridLinesVisibility"
+                    Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush"
+                    Value="{StaticResource BorderColor}"/>
+            <Setter Property="HeadersVisibility"
+                    Value="Column"/>
+            <Setter Property="AutoGenerateColumns"
+                    Value="False"/>
+            <Setter Property="CanUserAddRows"
+                    Value="False"/>
+            <Setter Property="CanUserDeleteRows"
+                    Value="False"/>
+            <Setter Property="IsReadOnly"
+                    Value="True"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background"
+                    Value="{StaticResource BackgroundAccent}"/>
+            <Setter Property="Foreground"
+                    Value="{StaticResource AccentBlue}"/>
+            <Setter Property="FontWeight"
+                    Value="Bold"/>
+            <Setter Property="Padding"
+                    Value="8,6"/>
+            <Setter Property="BorderBrush"
+                    Value="{StaticResource BorderColor}"/>
+            <Setter Property="BorderThickness"
+                    Value="0,0,1,1"/>
+        </Style>
+
+        <Style TargetType="DataGridRow">
+            <Setter Property="Background"
+                    Value="Transparent"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="{StaticResource BackgroundAccent}"/>
+                </Trigger>
+                <Trigger Property="IsSelected"
+                        Value="True">
+                    <Setter Property="Background"
+                            Value="{StaticResource AccentBlue}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0"
+                Background="{StaticResource BackgroundSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,0,2"
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                        Orientation="Horizontal">
+                    <TextBlock Text="🚀 EQ12 System Manager"
+                            FontSize="24"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentGreen}"
+                            VerticalAlignment="Center"/>
+                    <TextBlock Text="Industrial Control Interface"
+                            FontSize="14"
+                               Foreground="{StaticResource TextSecondary}"
+                            VerticalAlignment="Bottom"
+                            Margin="16,0,0,2"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                        Orientation="Horizontal">
+                    <TextBlock Text="{Binding Metrics.SystemStatus, StringFormat={}Status: {0}}"
+                               FontSize="14"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource AccentBlue}"
+                               VerticalAlignment="Center"
+                            Margin="0,0,16,0"/>
+                    <TextBlock x:Name="CurrentTime"
+                            FontSize="14"
+                               Foreground="{StaticResource TextSecondary}"
+                            VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- System Metrics Dashboard -->
+        <Border Grid.Row="1"
+                Background="{StaticResource BackgroundAccent}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,0,0,1"
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Total Components -->
+                <StackPanel Grid.Column="0"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="Total Components"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Metrics.TotalComponents}"
+                            FontSize="24"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentGreen}"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Active Components -->
+                <StackPanel Grid.Column="1"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="Active Components"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Metrics.ActiveComponents}"
+                            FontSize="24"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentBlue}"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- System Health -->
+                <StackPanel Grid.Column="2"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="System Health"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Metrics.SystemHealth, StringFormat={}{0:F1}%}"
+                            FontSize="24"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentGreen}"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Average CPU -->
+                <StackPanel Grid.Column="3"
+                        HorizontalAlignment="Center">
+                    <TextBlock Text="Avg CPU Usage"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Metrics.AverageCpuUsage, StringFormat={}{0:F1}%}"
+                            FontSize="24"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentYellow}"
+                            HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Control Buttons -->
+                <StackPanel Grid.Column="4"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                    <Button Content="📊 Dashboard"
+                            Style="{StaticResource ControlButton}"
+                            Click="OpenDashboard_Click"/>
+                    <Button Content="🔄 Refresh"
+                            Style="{StaticResource ControlButton}"
+                            Click="Refresh_Click"/>
+                    <Button Content="✅ Validate"
+                            Style="{StaticResource ControlButton}"
+                            Click="ValidateConfigs_Click"/>
+                    <Button Content="🚀 Deploy"
+                            Style="{StaticResource ControlButton}"
+                            Click="DeployConfigs_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource BackgroundSecondary}"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="0,0,1,0"
+                    Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Component Filter"
+                            FontSize="16"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentBlue}"
+                            Margin="0,0,0,12"/>
+
+                    <ComboBox ItemsSource="{Binding ComponentTypes}"
+                              SelectedItem="{Binding SelectedComponentType}"
+                              Background="{StaticResource BackgroundAccent}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderBrush="{StaticResource BorderColor}"
+                              Margin="0,0,0,16"/>
+
+                    <TextBlock Text="Quick Actions"
+                            FontSize="16"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentBlue}"
+                            Margin="0,16,0,12"/>
+
+                    <Button Content="🔍 System Scan"
+                            Style="{StaticResource ControlButton}"
+                            Margin="0,4"
+                            HorizontalAlignment="Stretch"
+                            Click="Refresh_Click"/>
+                    <Button Content="📋 Generate Report"
+                            Style="{StaticResource ControlButton}"
+                            Margin="0,4"
+                            HorizontalAlignment="Stretch"/>
+                    <Button Content="⚙️ Settings"
+                            Style="{StaticResource ControlButton}"
+                            Margin="0,4"
+                            HorizontalAlignment="Stretch"/>
+                    <Button Content="📊 Analytics"
+                            Style="{StaticResource ControlButton}"
+                            Margin="0,4"
+                            HorizontalAlignment="Stretch"/>
+
+                    <TextBlock Text="System Info"
+                            FontSize="16"
+                            FontWeight="Bold"
+                               Foreground="{StaticResource AccentBlue}"
+                            Margin="0,24,0,12"/>
+
+                    <TextBlock Text="EQ12 Version: 1.0.0"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            Margin="0,2"/>
+                    <TextBlock Text="Workspace: C:\EQ12"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            Margin="0,2"/>
+                    <TextBlock Text="{Binding Metrics.SystemStatus, StringFormat={}Status: {0}}"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            Margin="0,2"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Main Data Grid -->
+            <DataGrid Grid.Column="1"
+                    ItemsSource="{Binding Components}"
+                    Margin="8">
+                <DataGrid.Columns>
+                    <!-- Status Indicator -->
+                    <DataGridTemplateColumn Header="Status"
+                            Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Ellipse Fill="{Binding StatusBrush}"
+                                        Style="{StaticResource StatusIndicator}"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Component Name -->
+                    <DataGridTextColumn Header="Component Name"
+                            Binding="{Binding Name}"
+                            Width="200"/>
+
+                    <!-- Type -->
+                    <DataGridTextColumn Header="Type"
+                            Binding="{Binding Type}"
+                            Width="120"/>
+
+                    <!-- CPU Usage -->
+                    <DataGridTemplateColumn Header="CPU %"
+                            Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding CpuUsage, StringFormat={}{0:F1}%}"
+                                           Foreground="{StaticResource TextPrimary}"
+                                        HorizontalAlignment="Right"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Memory Usage -->
+                    <DataGridTemplateColumn Header="Memory (MB)"
+                            Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding MemoryUsage, StringFormat={}{0:F0}}"
+                                           Foreground="{StaticResource TextPrimary}"
+                                        HorizontalAlignment="Right"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Dependencies -->
+                    <DataGridTemplateColumn Header="Dependencies"
+                            Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Dependencies.Count}"
+                                           Foreground="{StaticResource TextSecondary}"
+                                        HorizontalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Last Update -->
+                    <DataGridTextColumn Header="Last Update"
+                            Binding="{Binding LastUpdate, StringFormat={}{0:HH:mm:ss}}"
+                            Width="80"/>
+
+                    <!-- Control Actions -->
+                    <DataGridTemplateColumn Header="Actions"
+                            Width="200">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="▶"
+                                            Style="{StaticResource StartButton}"
+                                            Width="30"
+                                            Height="24"
+                                            Click="StartComponent_Click"/>
+                                    <Button Content="⏹"
+                                            Style="{StaticResource StopButton}"
+                                            Width="30"
+                                            Height="24"
+                                            Click="StopComponent_Click"/>
+                                    <Button Content="🔄"
+                                            Style="{StaticResource RestartButton}"
+                                            Width="30"
+                                            Height="24"
+                                            Click="RestartComponent_Click"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="3"
+                Background="{StaticResource BackgroundSecondary}"
+                BorderBrush="{StaticResource BorderColor}"
+                BorderThickness="0,1,0,0"
+                Padding="16,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="StatusText"
+                        Grid.Column="0"
+                           Text="EQ12 System Manager Ready"
+                           Foreground="{StaticResource AccentGreen}"
+                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1"
+                        Orientation="Horizontal">
+                    <Ellipse Fill="{StaticResource AccentGreen}"
+                            Width="8"
+                            Height="8"
+                            Margin="0,0,8,0"/>
+                    <TextBlock Text="Connected"
+                            FontSize="12"
+                               Foreground="{StaticResource TextSecondary}"
+                            VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

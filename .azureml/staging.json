@@ -1,0 +1,11 @@
+{
+  "subscription_id": "REPLACE_WITH_YOUR_SUBSCRIPTION_ID",
+  "resource_group": "eq12-staging",
+  "workspace_name": "eq12-ml-staging",
+  "workspace_location": "eastus",
+  "compute_name": "gpu-cluster-staging",
+  "compute_size": "Standard_NC6s_v3",
+  "environment_name": "eq12-staging-env",
+  "registered_model_name": "EQ12BettingOptimizer",
+  "api_base": "https://eq12-ml-staging.eastus.inference.ml.azure.com"
+}

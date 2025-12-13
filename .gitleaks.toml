@@ -1,0 +1,93 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2025 EQ12 Project Contributors
+
+title = "EQ12 GitLeaks Configuration"
+description = "Comprehensive secret scanning for Python, PowerShell, JSON, YAML"
+
+[extend]
+useDefault = true
+
+[rules.generic-api-key]
+description = "Generic API Key"
+regex = '''(?i)(?:api[_-]?key|apikey|access[_-]?token)[\"']*\s*[:=]\s*[\"']?([a-zA-Z0-9]{20,})'''
+keywords = ["api", "key", "token", "secret"]
+
+[rules.slack-token]
+description = "Slack Token"
+regex = '''xox[baprs]-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}'''
+keywords = ["slack"]
+
+[rules.github-token]
+description = "GitHub Token"
+regex = '''gh[pousr]_[A-Za-z0-9_]{36}'''
+keywords = ["github"]
+
+[rules.openai-api-key]
+description = "OpenAI API Key"
+regex = '''sk-[a-zA-Z0-9]{48}'''
+keywords = ["openai", "sk-"]
+
+[rules.telegram-bot-token]
+description = "Telegram Bot Token"
+regex = '''[0-9]{8,10}:[a-zA-Z0-9_-]{35}'''
+keywords = ["telegram", "bot"]
+
+[rules.aws-secret-access-key]
+description = "AWS Secret Access Key"
+regex = '''(?i)aws[_-]?secret[_-]?access[_-]?key[\"']*\s*[:=]\s*[\"']?([A-Za-z0-9/\+=]{40})'''
+keywords = ["aws", "secret", "access"]
+
+[rules.private-key]
+description = "Private Key"
+regex = '''-----BEGIN [A-Z ]+ PRIVATE KEY-----'''
+keywords = ["private", "key", "BEGIN"]
+
+[rules.password]
+description = "Password in config"
+regex = '''(?i)password[\"']*\s*[:=]\s*[\"']([^\"'\\n]{8,})[\"']'''
+keywords = ["password"]
+
+[[rules.allowlist]]
+description = "Test fixtures and examples"
+paths = [
+    "tests/fixtures/**",
+    "examples/**",
+    "docs/**",
+    "**/test_*.py",
+    "**/*_test.py",
+    ".env.template",
+    ".env.example",
+]
+
+[[rules.allowlist]]
+description = "Sample/placeholder values"
+regex = '''(sk-|xox[baprs]-|gh[pousr]_)?(PLACEHOLDER|EXAMPLE|SAMPLE|YOUR_|REPLACE_|TODO|XXX|placeholder|example)'''
+
+[[rules.allowlist]]
+description = "Common test values"
+regex = '''(test_key|dummy_token|fake_secret|mock_api_key|example_password)'''
+
+[allowlist]
+commits = []
+paths = [
+    "**/.env.template",
+    "**/.env.example",
+    "**/test_*.py",
+    "**/*_test.py",
+    "tests/**",
+    "examples/**",
+    "docs/**",
+]
+stopwords = [
+    "PLACEHOLDER",
+    "EXAMPLE",
+    "SAMPLE",
+    "YOUR_KEY_HERE",
+    "REPLACE_ME",
+    "TODO",
+    "XXX",
+    "test_",
+    "dummy_",
+    "fake_",
+    "mock_",
+]

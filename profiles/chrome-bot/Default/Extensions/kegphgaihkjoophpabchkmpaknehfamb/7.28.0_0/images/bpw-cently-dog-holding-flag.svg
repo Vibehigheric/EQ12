@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 145 179">
+  <defs>
+    <path id="a" d="M.6.7v12.5a23.1 23.1 0 0 0 22.9 23.4H27V.6"/>
+    <path id="c" d="M.3 39.2c0 4.1 3.3 7.5 7.5 7.5 4.1 0 7.5-3.4 7.5-7.5V15.6A15 15 0 0 0 .3.6v38.6z"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <path stroke="#FFB500" stroke-linecap="round" stroke-width="7.2" d="M94.7 145.8l5 21M107 145.8l5 21"/>
+    <path stroke="#FFB500" stroke-width="5.8" d="M138 132.4v2.3c0 7.3-5.9 13.1-13.2 13.1h-4.2"/>
+    <path stroke="#FFE7CF" stroke-linecap="round" stroke-width="5.8" d="M138 132.4v2.3a13 13 0 0 1-1 5"/>
+    <path fill="#FFB500" d="M111.2 156.6H91.6c-5.9 0-10.7-4.7-10.7-10.6v-34h41v34c0 5.9-4.8 10.6-10.7 10.6"/>
+    <path fill="#FFB500" d="M47.6 79.7h58.6c8.6 0 15.7 7 15.7 15.7v20h-51a23.2 23.2 0 0 1-23.3-23.2V79.7z"/>
+    <path fill="#FFE7CF" d="M47.6 79.7H81v35.7H71a23.2 23.2 0 0 1-23.3-23.2V79.7z"/>
+    <g transform="translate(47 79)">
+      <mask id="b" fill="#fff">
+        <use xlink:href="#a"/>
+      </mask>
+      <path fill="#485065" d="M-19.2.7A20 20 0 0 1 .6-19.5c11 0 19.8 9 19.8 20.2A20 20 0 0 1 .6 20.9 20 20 0 0 1-19.2.7" mask="url(#b)"/>
+    </g>
+    <path fill="#485065" d="M123.5 138a7.5 7.5 0 0 1-7.5-7.5V92a15 15 0 0 1 15 15v23.5c0 4.2-3.4 7.5-7.5 7.5"/>
+    <g transform="translate(115 91)">
+      <mask id="d" fill="#fff">
+        <use xlink:href="#c"/>
+      </mask>
+      <path fill="#353B49" d="M40.7-27.7h-29v61.2a10 10 0 0 1-10.1 10h-49.2v28.9h82.1v-6.1h6.2v-94z" mask="url(#d)"/>
+    </g>
+    <g>
+      <path fill="#FFB500" d="M69.3 97.7c0 .8-.6 1.5-1.4 1.5a1.4 1.4 0 0 1 0-3c.8 0 1.4.7 1.4 1.5M74.4 102c0 .8-.7 1.5-1.5 1.5a1.4 1.4 0 0 1 0-2.9c.8 0 1.5.7 1.5 1.4M68.6 103.5c0 .8-.6 1.4-1.4 1.4a1.4 1.4 0 0 1 0-2.9c.8 0 1.4.7 1.4 1.5"/>
+      <path fill="#00C6A5" d="M98.9 52.6H18.5L7.4 7.4h79.4l-11.3 21z"/>
+      <path stroke="#FFB500" stroke-linecap="round" stroke-width="3.6" d="M6.4 4.1l38.5 166.5"/>
+      <path stroke="#FFB500" stroke-linecap="round" stroke-width="8.6" d="M34.8 125.2h59.7"/>
+      <path fill="#FFE7CF" d="M44.9 125.2a10.1 10.1 0 1 0-20.2 0 10.1 10.1 0 0 0 20.2 0"/>
+      <path stroke="#A6E5D7" stroke-linecap="round" stroke-width="4.3" d="M34.8 170H137"/>
+      <path fill="#FFF" d="M63.6 29.3a16 16 0 1 1-32.1 0 16 16 0 0 1 32 0"/>
+      <path fill="#00C6A5" d="M47.6 34.7a5.4 5.4 0 0 1 0-10.8c2.3 0 4.3 1.5 5 3.6h3a8.2 8.2 0 0 0-6.6-6.3v-3.5h-2.8v3.5a8.2 8.2 0 0 0 0 16.2v3.4H49v-3.4c3.1-.6 5.7-3 6.5-6h-3c-.8 2-2.7 3.3-5 3.3"/>
+      <path fill="#61372D" d="M85.2 83.9s-.6 8.8 5 8.8C96 92.7 96 84 96 84s-1.9 6.3-5.6 6.3c-3.8 0-5-6.3-5-6.3M99 83.9s-.6 8.8 5 8.8c5.7 0 5.7-8.8 5.7-8.8s-1.9 6.3-5.6 6.3c-3.8 0-5-6.3-5-6.3"/>
+      <path fill="#564100" d="M95.3 107.2s14.4-1.5 16.2-14.9c0 0 1 6.2-3.2 10.5-5.1 5.1-13 4.4-13 4.4"/>
+    </g>
+  </g>
+</svg>

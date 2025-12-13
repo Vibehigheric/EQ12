@@ -1,0 +1,146 @@
+{
+  "exchanges": {
+    "binance": {
+      "enabled": true,
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT", 
+        "BNBUSDT",
+        "ADAUSDT",
+        "SOLUSDT",
+        "DOGEUSDT",
+        "XRPUSDT",
+        "MATICUSDT",
+        "AVAXUSDT",
+        "LINKUSDT"
+      ],
+      "streams": ["ticker", "trade", "depth"],
+      "api_key": "${BINANCE_API_KEY}",
+      "api_secret": "${BINANCE_API_SECRET}",
+      "testnet": true
+    },
+    "coinbase": {
+      "enabled": true,
+      "symbols": [
+        "BTC-USD",
+        "ETH-USD",
+        "ADA-USD",
+        "SOL-USD"
+      ],
+      "streams": ["ticker", "matches"],
+      "api_key": "${COINBASE_API_KEY}",
+      "api_secret": "${COINBASE_API_SECRET}",
+      "passphrase": "${COINBASE_PASSPHRASE}"
+    }
+  },
+  "models": {
+    "price_trend": "C:\\EQ12\\models\\crypto\\price_trend_lstm_edgetpu.tflite",
+    "volatility_classifier": "C:\\EQ12\\models\\crypto\\volatility_classifier_edgetpu.tflite",
+    "sentiment_analyzer": "C:\\EQ12\\models\\crypto\\sentiment_microbert_edgetpu.tflite",
+    "anomaly_detector": "C:\\EQ12\\models\\crypto\\anomaly_detector_edgetpu.tflite",
+    "portfolio_optimizer": "C:\\EQ12\\models\\crypto\\portfolio_ev_edgetpu.tflite"
+  },
+  "alerts": {
+    "telegram": {
+      "enabled": true,
+      "bot_token": "${TELEGRAM_BOT_TOKEN}",
+      "chat_id": "${TELEGRAM_CHAT_ID}",
+      "rate_limit_minutes": 5
+    },
+    "discord": {
+      "enabled": false,
+      "webhook_url": "${DISCORD_WEBHOOK_URL}",
+      "rate_limit_minutes": 3
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.gmail.com",
+      "smtp_port": 587,
+      "email": "${ALERT_EMAIL}",
+      "password": "${ALERT_EMAIL_PASSWORD}",
+      "recipients": []
+    },
+    "thresholds": {
+      "high_confidence": 0.85,
+      "medium_confidence": 0.70,
+      "ev_threshold": 0.60,
+      "price_change_threshold": 5.0
+    }
+  },
+  "features": {
+    "technical_indicators": true,
+    "sentiment_analysis": true,
+    "order_book_analysis": true,
+    "volatility_modeling": true,
+    "anomaly_detection": true,
+    "portfolio_optimization": true
+  },
+  "feed_settings": {
+    "buffer_size": 1000,
+    "save_interval": 60,
+    "compress_data": true,
+    "data_retention_days": 30
+  },
+  "coral_settings": {
+    "inference_timeout": 5.0,
+    "batch_processing": false,
+    "performance_monitoring": true,
+    "fallback_to_cpu": true
+  },
+  "risk_management": {
+    "max_position_size": 0.05,
+    "stop_loss_percentage": 2.0,
+    "take_profit_percentage": 4.0,
+    "max_daily_trades": 10,
+    "blacklist_symbols": []
+  },
+  "automation": {
+    "auto_start_components": true,
+    "restart_on_failure": true,
+    "health_check_interval": 30,
+    "max_restart_attempts": 3,
+    "log_rotation_days": 7
+  },
+  "components": {
+    "coral_ai": {
+      "enabled": true,
+      "priority": 1,
+      "restart_delay": 10,
+      "memory_limit_mb": 512
+    },
+    "data_stream": {
+      "enabled": true,
+      "priority": 2,
+      "restart_delay": 5,
+      "memory_limit_mb": 256
+    },
+    "alerts": {
+      "enabled": true,
+      "priority": 3,
+      "restart_delay": 3,
+      "memory_limit_mb": 128
+    },
+    "model_updater": {
+      "enabled": false,
+      "priority": 4,
+      "restart_delay": 60,
+      "memory_limit_mb": 256
+    }
+  },
+  "reporting": {
+    "daily_reports": true,
+    "weekly_reports": true,
+    "monthly_reports": false,
+    "include_charts": true,
+    "chart_style": "darkgrid",
+    "email_reports": false,
+    "save_local": true
+  },
+  "monitoring": {
+    "system_metrics": true,
+    "component_health": true,
+    "performance_alerts": true,
+    "log_level": "INFO",
+    "metrics_retention_days": 30
+  }
+}

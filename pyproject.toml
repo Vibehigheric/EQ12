@@ -1,0 +1,125 @@
+[project]
+name = "eq12"
+requires-python = ">=3.12"
+version = "0.1.0"
+description = "EQ12 Professional Sports Betting Automation Stack"
+authors = [{ name = "EQ12 Team", email = "dev@eq12.com" }]
+keywords = ["sports-betting", "automation", "odds", "parlays", "ev-calculation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0",
+    "pandas>=2.1.0",
+    "numpy>=1.24.0",
+    "aiohttp>=3.9.0",
+    "aiofiles>=23.0.0",
+    "openai>=2.1.0",
+    "python-dateutil>=2.8.2",
+    "tzdata>=2023.3",
+    "rich>=13.7.0",
+    "GitPython>=3.1.40",
+    "pytz>=2023.3",
+    "pre-commit>=4.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.5.0",
+    "black>=24.0.0",
+    "mypy>=1.11.0",
+    "pre-commit>=3.0.0",
+]
+test = ["pytest>=7.4.0", "pytest-mock>=3.11.0", "pytest-asyncio>=0.21.0"]
+
+[tool.uv]
+# uv configuration for fast dependency resolution
+index-url = "https://pypi.org/simple"
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+extend-exclude = '''
+# Exclude problematic directories and files
+/(
+    envs/
+    | EdgeGodParlays/
+    | EQ12_Automation/
+    | generated_projects/
+    | openai-python-project/
+    | archive_duplicates/
+    | .venv/
+    | __pycache__/
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["eq12"] # adjust to your package name(s)
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+fix = true
+extend-exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "__pycache__",
+    "archive_duplicates",
+    "logs",
+    "generated_projects",
+    "openai-python-project",
+    "EdgeGodParlays",
+    "EQ12_Automation",
+    # Legacy files with syntax issues
+    "eq12_copilot_triggers_fixed.py",
+    "eq12_vbnet_copilot_assistant.py",
+    "eq12_telegram_master_bot.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "DTZ", "RUF"]
+ignore = [
+    "E203",
+    "E501",   # Line length handled by formatter
+    "B008",   # Allow datetime.now() in defaults (needed for betting)
+    "DTZ005", # Allow some datetime patterns
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["eq12"]
+force-single-line = false
+split-on-trailing-comma = true
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F401"]
+"scripts/*" = ["E402"]
+"tests/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-q --tb=short"
+pythonpath = ["."]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]

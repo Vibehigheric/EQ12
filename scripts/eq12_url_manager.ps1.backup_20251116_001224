@@ -1,0 +1,503 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$ErrorActionPreference = "Stop"
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("start", "stop", "restart", "status", "test")]
+    [string]$Action = "status",
+
+    [Parameter(Mandatory = $false)]
+    [string]$TestUrl = "",
+
+    [Parameter(Mandatory = $false)]
+    [switch]$Verbose,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$Force
+)
+
+<#
+.SYNOPSIS
+EQ12 URL Scanner and Learning System Manager
+
+.DESCRIPTION
+Manages the EQ12 URL scanning and learning system that automatically processes URLs
+submitted to Copilot and updates EQ12 folders based on learned information.
+
+.EXAMPLE
+.\eq12_url_manager.ps1 -Action start
+.\eq12_url_manager.ps1 -Action test -TestUrl "https://example.com"
+.\eq12_url_manager.ps1 -Action status -Verbose
+
+.NOTES
+Author: EQ12 AI System
+Version: 1.0.0
+#>
+
+# Script configuration
+$ScriptName = "EQ12URLManager"
+$LogDir = "C:\EQ12\logs"
+$LogFile = Join-Path $LogDir "url_manager.log"
+$PythonScript = "C:\EQ12\scripts\eq12_url_scanner.py"
+$HandlerScript = "C:\EQ12\scripts\eq12_copilot_url_handler.py"
+
+# Ensure logs directory exists
+if (!(Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
+}
+
+function Write-URLLog {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $logEntry = "$timestamp | $Level | $ScriptName | $Message"
+    Add-Content -Path $LogFile -Value $logEntry
+
+    $color = switch ($Level) {
+        "ERROR" { "Red"; break }
+        "WARN" { "Yellow"; break }
+        "SUCCESS" { "Green"; break }
+        default { "Cyan"; break }
+    }
+
+    Write-Host $Message -ForegroundColor $color
+}
+
+function Test-Prerequisites {
+    """Check system prerequisites for URL scanner"""
+
+    Write-URLLog "Checking URL scanner prerequisites..." "INFO"
+
+    # Check Python
+    try {
+        $pythonVersion = python --version 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-URLLog "Python not found. Please install Python 3.8+" "ERROR"
+            return $false
+        }
+        Write-URLLog "Found Python: $pythonVersion" "SUCCESS"
+    } catch {
+        Write-URLLog "Error checking Python: $_" "ERROR"
+        return $false
+    }
+
+    # Check required files
+    $requiredFiles = @(
+        $PythonScript,
+        $HandlerScript
+    )
+
+    foreach ($file in $requiredFiles) {
+        if (!(Test-Path $file)) {
+            Write-URLLog "Required file missing: $file" "ERROR"
+            return $false
+        }
+    }
+
+    Write-URLLog "All prerequisites met" "SUCCESS"
+    return $true
+}
+
+function Install-URLScannerDependencies {
+    """Install Python dependencies for URL scanner"""
+
+    Write-URLLog "Installing URL scanner dependencies..."
+
+    try {
+        # Install core dependencies
+        python -m pip install httpx beautifulsoup4 feedparser textblob nltk playwright --upgrade
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-URLLog "Core dependencies installed successfully" "SUCCESS"
+        } else {
+            Write-URLLog "Some core dependencies failed to install" "WARN"
+        }
+
+        # Install optional AI dependencies
+        Write-URLLog "Installing AI dependencies (optional)..."
+        python -m pip install openai transformers --upgrade 2>$null
+
+        # Install Playwright browsers
+        Write-URLLog "Installing Playwright browsers..."
+        python -m playwright install chromium --with-deps
+
+        Write-URLLog "URL scanner dependencies installation completed" "SUCCESS"
+        return $true
+
+    } catch {
+        Write-URLLog "Error installing dependencies: $_" "ERROR"
+        return $false
+    }
+}
+
+function Get-URLScannerProcesses {
+    """Get running URL scanner processes"""
+
+    $processes = Get-Process | Where-Object {
+        $_.ProcessName -eq "python" -and (
+            $_.CommandLine -like "*eq12_url_scanner*" -or
+            $_.CommandLine -like "*eq12_copilot_url_handler*"
+        )
+    }
+
+    return $processes
+}
+
+function Start-URLScanner {
+    """Start the URL scanner system"""
+
+    Write-URLLog "Starting EQ12 URL Scanner System..."
+
+    # Check prerequisites
+    if (!(Test-Prerequisites)) {
+        Write-URLLog "Prerequisites not met. Cannot start URL scanner." "ERROR"
+        return $false
+    }
+
+    # Check if already running
+    $existingProcesses = Get-URLScannerProcesses
+    if ($existingProcesses.Count -gt 0) {
+        Write-URLLog "URL scanner already running (PID: $($existingProcesses[0].Id))" "WARN"
+        if (!$Force) {
+            return $true
+        } else {
+            Write-URLLog "Force flag provided, stopping existing processes..."
+            Stop-URLScanner -Force
+            Start-Sleep 2
+        }
+    }
+
+    try {
+        # Start URL handler service (webhook server)
+        Write-URLLog "Starting URL handler webhook server..."
+
+        $processArgs = @{
+            FilePath         = "python"
+            ArgumentList     = @(
+                $HandlerScript,
+                "--host", "127.0.0.1",
+                "--port", "8080"
+            )
+            WindowStyle      = "Hidden"
+            PassThru         = $true
+            WorkingDirectory = "C:\EQ12"
+        }
+
+        $handlerProcess = Start-Process @processArgs
+
+        # Wait for startup
+        Start-Sleep 3
+
+        # Test handler health
+        try {
+            $response = Invoke-RestMethod -Uri "http://localhost:8080/status" -TimeoutSec 10
+            if ($response.handler_status -eq "active") {
+                Write-URLLog "URL handler started successfully (PID: $($handlerProcess.Id))" "SUCCESS"
+
+                # Save process info
+                $processInfo = @{
+                    HandlerPID = $handlerProcess.Id
+                    StartTime  = Get-Date
+                    Port       = 8080
+                    LogFile    = $LogFile
+                }
+
+                $processInfo | ConvertTo-Json | Set-Content "C:\EQ12\url_scanner_process.json"
+
+                return $true
+            }
+        } catch {
+            Write-URLLog "URL handler failed to start properly: $_" "ERROR"
+        }
+
+        # If we get here, startup failed
+        Write-URLLog "URL scanner startup failed" "ERROR"
+        Stop-URLScanner -Force
+        return $false
+
+    } catch {
+        Write-URLLog "Error starting URL scanner: $_" "ERROR"
+        return $false
+    }
+}
+
+function Stop-URLScanner {
+    """Stop the URL scanner system"""
+
+    Write-URLLog "Stopping EQ12 URL Scanner System..."
+
+    $processes = Get-URLScannerProcesses
+
+    if ($processes.Count -eq 0) {
+        Write-URLLog "No URL scanner processes found" "WARN"
+        return $true
+    }
+
+    foreach ($process in $processes) {
+        try {
+            if ($Force) {
+                Write-URLLog "Force killing URL scanner process (PID: $($process.Id))"
+                Stop-Process -Id $process.Id -Force
+            } else {
+                Write-URLLog "Gracefully stopping URL scanner process (PID: $($process.Id))"
+                Stop-Process -Id $process.Id
+
+                # Wait for graceful shutdown
+                $timeout = 10
+                while ($timeout -gt 0 -and (Get-Process -Id $process.Id -ErrorAction SilentlyContinue)) {
+                    Start-Sleep -Seconds 1
+                    $timeout--
+                }
+
+                # Force kill if still running
+                if (Get-Process -Id $process.Id -ErrorAction SilentlyContinue) {
+                    Write-URLLog "Graceful shutdown failed, force killing process" "WARN"
+                    Stop-Process -Id $process.Id -Force
+                }
+            }
+
+            Write-URLLog "URL scanner process stopped successfully"
+
+        } catch {
+            Write-URLLog "Error stopping URL scanner process: $_" "ERROR"
+        }
+    }
+
+    # Clean up process info file
+    $processFile = "C:\EQ12\url_scanner_process.json"
+    if (Test-Path $processFile) {
+        Remove-Item $processFile -Force
+    }
+
+    return $true
+}
+
+function Get-URLScannerStatus {
+    """Get detailed URL scanner status"""
+
+    Write-URLLog "Getting URL scanner status..."
+
+    $processes = Get-URLScannerProcesses
+    $isRunning = $processes.Count -gt 0
+
+    # Test handler API if running
+    $apiStatus = $null
+    if ($isRunning) {
+        try {
+            $apiStatus = Invoke-RestMethod -Uri "http://localhost:8080/status" -TimeoutSec 5
+        } catch {
+            Write-URLLog "Could not reach URL handler API: $_" "WARN"
+        }
+    }
+
+    $status = @{
+        IsRunning    = $isRunning
+        ProcessCount = $processes.Count
+        Processes    = @()
+        APIStatus    = $apiStatus
+    }
+
+    if ($processes.Count -gt 0) {
+        foreach ($process in $processes) {
+            $processInfo = @{
+                PID        = $process.Id
+                StartTime  = $process.StartTime
+                CPU        = $process.CPU
+                WorkingSet = [math]::Round($process.WorkingSet64 / 1MB, 2)
+            }
+            $status.Processes += $processInfo
+        }
+    }
+
+    # Display status
+    Write-URLLog "=== URL Scanner Status ==="
+    Write-URLLog "Running: $($status.IsRunning)"
+    Write-URLLog "Process Count: $($status.ProcessCount)"
+
+    if ($status.Processes.Count -gt 0) {
+        foreach ($proc in $status.Processes) {
+            Write-URLLog "  PID $($proc.PID): Started $($proc.StartTime), Memory: $($proc.WorkingSet) MB"
+        }
+    }
+
+    if ($apiStatus) {
+        Write-URLLog "Handler Status: $($apiStatus.handler_status)"
+        Write-URLLog "Scanner Status: $($apiStatus.scanner_status.status)"
+        if ($apiStatus.scanner_status.last_7_days) {
+            $stats = $apiStatus.scanner_status.last_7_days
+            Write-URLLog "Last 7 Days: $($stats.total_scans) scans, $($stats.total_insights) insights, $($stats.completed_updates) updates"
+        }
+    }
+
+    return $status
+}
+
+function Test-URLScanning {
+    """Test URL scanning with a sample URL"""
+
+    $testUrls = @(
+        "https://github.com/microsoft/playwright",
+        "https://fastapi.tiangolo.com/",
+        "https://example.com"
+    )
+
+    $urlToTest = if ($TestUrl) { $TestUrl } else { $testUrls[0] }
+
+    Write-URLLog "Testing URL scanning with: $urlToTest"
+
+    try {
+        # Test direct scanner
+        Write-URLLog "Testing direct scanner..."
+        $scannerTest = python -c "
+import asyncio
+import sys
+sys.path.append('C:/EQ12/scripts')
+from eq12_url_scanner import EQ12URLScanner
+
+async def test():
+    scanner = EQ12URLScanner()
+    result = await scanner.scan_url('$urlToTest')
+    print(f'Scan Result: {result.classification} ({result.confidence:.2f})')
+    if result.error:
+        print(f'Error: {result.error}')
+    else:
+        print(f'Title: {result.title}')
+        print(f'Processing Time: {result.processing_time:.2f}s')
+
+asyncio.run(test())
+" 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            Write-URLLog "Direct scanner test: SUCCESS" "SUCCESS"
+            Write-URLLog "Scanner output: $scannerTest"
+        } else {
+            Write-URLLog "Direct scanner test: FAILED" "ERROR"
+            Write-URLLog "Error output: $scannerTest"
+        }
+
+        # Test handler API if running
+        $processes = Get-URLScannerProcesses
+        if ($processes.Count -gt 0) {
+            Write-URLLog "Testing handler API..."
+
+            $submitData = @{
+                url     = $urlToTest
+                source  = "test"
+                context = "PowerShell test submission"
+            }
+
+            try {
+                $response = Invoke-RestMethod -Uri "http://localhost:8080/webhook/url" -Method POST -Body ($submitData | ConvertTo-Json) -ContentType "application/json" -TimeoutSec 30
+
+                if ($response.status -eq "success") {
+                    Write-URLLog "Handler API test: SUCCESS" "SUCCESS"
+                    Write-URLLog "API Response: $($response.message)"
+                } else {
+                    Write-URLLog "Handler API test: FAILED" "ERROR"
+                    Write-URLLog "API Response: $($response | ConvertTo-Json)"
+                }
+
+            } catch {
+                Write-URLLog "Handler API test: ERROR - $_" "ERROR"
+            }
+        } else {
+            Write-URLLog "Handler not running, skipping API test" "WARN"
+        }
+
+        return $true
+
+    } catch {
+        Write-URLLog "Error during URL scanning test: $_" "ERROR"
+        return $false
+    }
+}
+
+function Show-URLScannerInfo {
+    """Display URL scanner information"""
+
+    Write-URLLog ""
+    Write-URLLog "╔═══════════════════════════════════════╗" "SUCCESS"
+    Write-URLLog "║       EQ12 URL LEARNING SYSTEM        ║" "SUCCESS"
+    Write-URLLog "╠═══════════════════════════════════════╣" "SUCCESS"
+    Write-URLLog "║                                       ║" "SUCCESS"
+    Write-URLLog "║  🔍 Intelligent URL Scanning         ║" "SUCCESS"
+    Write-URLLog "║  🧠 AI-Powered Content Learning      ║" "SUCCESS"
+    Write-URLLog "║  📁 Automatic EQ12 Folder Updates    ║" "SUCCESS"
+    Write-URLLog "║  🔗 Copilot Integration               ║" "SUCCESS"
+    Write-URLLog "║                                       ║" "SUCCESS"
+    Write-URLLog "║  Webhook Server: http://localhost:8080║" "SUCCESS"
+    Write-URLLog "║                                       ║" "SUCCESS"
+    Write-URLLog "║  Supported Content Types:             ║" "SUCCESS"
+    Write-URLLog "║  - Betting & Sports Analytics         ║" "SUCCESS"
+    Write-URLLog "║  - Automation & Scripting             ║" "SUCCESS"
+    Write-URLLog "║  - Finance & Trading Data             ║" "SUCCESS"
+    Write-URLLog "║  - AI & Machine Learning              ║" "SUCCESS"
+    Write-URLLog "║  - Dashboard & Analytics              ║" "SUCCESS"
+    Write-URLLog "║  - Configuration & Settings           ║" "SUCCESS"
+    Write-URLLog "║                                       ║" "SUCCESS"
+    Write-URLLog "╚═══════════════════════════════════════╝" "SUCCESS"
+    Write-URLLog ""
+
+    Write-URLLog "💡 Control Commands:"
+    Write-URLLog "   Start:   .\scripts\eq12_url_manager.ps1 -Action start"
+    Write-URLLog "   Stop:    .\scripts\eq12_url_manager.ps1 -Action stop"
+    Write-URLLog "   Status:  .\scripts\eq12_url_manager.ps1 -Action status"
+    Write-URLLog "   Test:    .\scripts\eq12_url_manager.ps1 -Action test -TestUrl 'https://example.com'"
+    Write-URLLog ""
+    Write-URLLog "📊 Dashboard Integration:"
+    Write-URLLog "   URL Scanner status is integrated with EQ12 Unified Dashboard"
+    Write-URLLog "   Access at: http://localhost:9000/api/url-scanner/status"
+    Write-URLLog ""
+}
+
+# Main execution logic
+try {
+    Write-URLLog "EQ12 URL Scanner Manager started with action: $Action"
+
+    $success = switch ($Action.ToLower()) {
+        "start" {
+            $result = Start-URLScanner
+            if ($result) { Show-URLScannerInfo }
+            $result
+        }
+        "stop" {
+            Stop-URLScanner -Force:$Force
+        }
+        "restart" {
+            if (Stop-URLScanner -Force:$Force) {
+                Start-Sleep -Seconds 2
+                $result = Start-URLScanner
+                if ($result) { Show-URLScannerInfo }
+                $result
+            } else {
+                $false
+            }
+        }
+        "status" {
+            Get-URLScannerStatus
+            $true
+        }
+        "test" {
+            if (!$TestUrl) {
+                Write-URLLog "No test URL provided, using default..." "WARN"
+            }
+            Test-URLScanning
+        }
+        default {
+            Write-URLLog "Invalid action: $Action. Use start, stop, restart, status, or test" "ERROR"
+            $false
+        }
+    }
+
+    if ($success) {
+        Write-URLLog "URL scanner manager completed successfully"
+        exit 0
+    } else {
+        Write-URLLog "URL scanner manager failed" "ERROR"
+        exit 1
+    }
+
+} catch {
+    Write-URLLog "Unexpected error in URL scanner manager: $_" "ERROR"
+    exit 1
+}

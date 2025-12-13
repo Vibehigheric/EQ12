@@ -1,0 +1,285 @@
+#Requires -Version 5.1
+
+<#
+.SYNOPSIS
+    EQ12 MCP Integration PowerShell Wrapper
+
+.DESCRIPTION
+    PowerShell wrapper for EQ12 Model Context Protocol integration system.
+    Provides Windows-native access to MCP server management and debugging.
+
+.PARAMETER Action
+    Action to perform: status, start, stop, debug, test
+
+.PARAMETER Server
+    Specific MCP server to operate on: docker, advanced_docker, desktop_commander
+
+.PARAMETER Verbose
+    Enable verbose logging
+
+.EXAMPLE
+    .\eq12_mcp_integration.ps1 -Action debug
+    Start enhanced debugging session with MCP integration
+
+.EXAMPLE
+    .\eq12_mcp_integration.ps1 -Action status
+    Get status of all MCP servers
+
+.NOTES
+    Author: EQ12 AI Agent
+    Version: 1.0.0
+    Requires: Python 3.12, Node.js, Docker (optional)
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("status", "start", "stop", "debug", "test")]
+    [string]$Action = "debug",
+    
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("docker", "advanced_docker", "desktop_commander", "main_servers")]
+    [string]$Server,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$Verbose
+)
+
+# Script constants
+$EQ12_ROOT = "C:\EQ12"
+$PYTHON_SCRIPT = Join-Path $EQ12_ROOT "scripts\eq12_mcp_integration.py"
+$LOG_DIR = Join-Path $EQ12_ROOT "logs"
+
+function Write-EQ12Log {
+    param(
+        [string]$Message,
+        [string]$Level = "INFO"
+    )
+    
+    $timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+    $logEntry = "[$timestamp] [$Level] $Message"
+    
+    Write-Host $logEntry
+    
+    # Also log to file
+    $logFile = Join-Path $LOG_DIR "eq12_mcp_powershell.log"
+    Add-Content -Path $logFile -Value $logEntry -ErrorAction SilentlyContinue
+}
+
+function Test-Prerequisites {
+    <#
+    .SYNOPSIS
+    Test system prerequisites for EQ12 MCP integration
+    #>
+    
+    Write-EQ12Log "Testing EQ12 MCP prerequisites..."
+    
+    $results = @{
+        Python = $false
+        NodeJS = $false
+        Docker = $false
+        EQ12Scripts = $false
+        MCPServers = $false
+    }
+    
+    # Test Python
+    try {
+        $pythonVersion = python --version 2>$null
+        if ($pythonVersion -match "Python 3\.") {
+            $results.Python = $true
+            Write-EQ12Log "✅ Python detected: $pythonVersion"
+        }
+    } catch {
+        Write-EQ12Log "❌ Python not found" -Level "ERROR"
+    }
+    
+    # Test Node.js
+    try {
+        $nodeVersion = node --version 2>$null
+        if ($nodeVersion) {
+            $results.NodeJS = $true
+            Write-EQ12Log "✅ Node.js detected: $nodeVersion"
+        }
+    } catch {
+        Write-EQ12Log "❌ Node.js not found" -Level "ERROR"
+    }
+    
+    # Test Docker (optional)
+    try {
+        $dockerVersion = docker --version 2>$null
+        if ($dockerVersion) {
+            $results.Docker = $true
+            Write-EQ12Log "✅ Docker detected: $dockerVersion"
+        }
+    } catch {
+        Write-EQ12Log "⚠️ Docker not found (optional)" -Level "WARN"
+    }
+    
+    # Test EQ12 Scripts
+    if (Test-Path $PYTHON_SCRIPT) {
+        $results.EQ12Scripts = $true
+        Write-EQ12Log "✅ EQ12 MCP integration script found"
+    } else {
+        Write-EQ12Log "❌ EQ12 MCP integration script missing" -Level "ERROR"
+    }
+    
+    # Test MCP Servers
+    $mcpServers = @(
+        "$EQ12_ROOT\docker_mcp_server",
+        "$EQ12_ROOT\advanced_docker_mcp", 
+        "$EQ12_ROOT\desktop_commander_mcp"
+    )
+    
+    $mcpFound = 0
+    foreach ($serverPath in $mcpServers) {
+        if (Test-Path $serverPath) {
+            $mcpFound++
+        }
+    }
+    
+    if ($mcpFound -ge 2) {
+        $results.MCPServers = $true
+        Write-EQ12Log "✅ MCP servers found: $mcpFound/3"
+    } else {
+        Write-EQ12Log "❌ Insufficient MCP servers: $mcpFound/3" -Level "ERROR"
+    }
+    
+    return $results
+}
+
+function Invoke-MCPIntegration {
+    param(
+        [string]$Action,
+        [string]$Server,
+        [bool]$VerboseMode
+    )
+    
+    Write-EQ12Log "Invoking EQ12 MCP Integration: $Action"
+    
+    # Build Python command
+    $pythonArgs = @($PYTHON_SCRIPT, "--action", $Action)
+    
+    if ($Server) {
+        $pythonArgs += @("--server", $Server)
+    }
+    
+    if ($VerboseMode) {
+        $pythonArgs += "--verbose"
+    }
+    
+    try {
+        Write-EQ12Log "Executing: python $($pythonArgs -join ' ')"
+        
+        # Execute Python script
+        $process = Start-Process -FilePath "python" -ArgumentList $pythonArgs -Wait -PassThru -NoNewWindow
+        
+        if ($process.ExitCode -eq 0) {
+            Write-EQ12Log "✅ MCP integration completed successfully"
+            return $true
+        } else {
+            Write-EQ12Log "❌ MCP integration failed with exit code: $($process.ExitCode)" -Level "ERROR"
+            return $false
+        }
+        
+    } catch {
+        Write-EQ12Log "❌ Failed to execute MCP integration: $($_.Exception.Message)" -Level "ERROR"
+        return $false
+    }
+}
+
+function Show-MCPStatus {
+    Write-Host @"
+
+🚀 EQ12 MCP INTEGRATION STATUS
+═══════════════════════════════
+
+"@ -ForegroundColor Cyan
+
+    $prereqs = Test-Prerequisites
+    
+    Write-Host "System Prerequisites:" -ForegroundColor Yellow
+    foreach ($key in $prereqs.Keys) {
+        $status = if ($prereqs[$key]) { "✅" } else { "❌" }
+        Write-Host "  $status $key"
+    }
+    
+    Write-Host "`nAvailable MCP Servers:" -ForegroundColor Yellow
+    $mcpServers = @{
+        "docker" = "$EQ12_ROOT\docker_mcp_server"
+        "advanced_docker" = "$EQ12_ROOT\advanced_docker_mcp"
+        "desktop_commander" = "$EQ12_ROOT\desktop_commander_mcp"
+    }
+    
+    foreach ($server in $mcpServers.GetEnumerator()) {
+        $status = if (Test-Path $server.Value) { "✅" } else { "❌" }
+        Write-Host "  $status $($server.Key) - $($server.Value)"
+    }
+    
+    Write-Host "`nUsage Examples:" -ForegroundColor Yellow
+    Write-Host "  .\eq12_mcp_integration.ps1 -Action debug    # Start debug session"
+    Write-Host "  .\eq12_mcp_integration.ps1 -Action status   # Show server status"
+    Write-Host "  .\eq12_mcp_integration.ps1 -Action start -Server docker # Start Docker MCP"
+}
+
+# Main execution
+try {
+    Write-Host @"
+
+🔧 EQ12 MODEL CONTEXT PROTOCOL INTEGRATION
+═══════════════════════════════════════════
+PowerShell Wrapper v1.0.0
+Action: $Action
+"@ -ForegroundColor Green
+
+    if (-not (Test-Path $LOG_DIR)) {
+        New-Item -Path $LOG_DIR -ItemType Directory -Force | Out-Null
+    }
+    
+    Write-EQ12Log "EQ12 MCP Integration PowerShell wrapper started"
+    Write-EQ12Log "Action: $Action, Server: $Server, Verbose: $Verbose"
+    
+    # Show status if requested or as default info
+    if ($Action -eq "status" -or $PSBoundParameters.Count -eq 0) {
+        Show-MCPStatus
+        
+        if ($Action -eq "status") {
+            # Also call Python status
+            Invoke-MCPIntegration -Action "status" -Server $Server -VerboseMode $Verbose.IsPresent
+        }
+        exit 0
+    }
+    
+    # Check prerequisites
+    $prereqs = Test-Prerequisites
+    $criticalMissing = @()
+    
+    if (-not $prereqs.Python) { $criticalMissing += "Python" }
+    if (-not $prereqs.NodeJS) { $criticalMissing += "Node.js" }
+    if (-not $prereqs.EQ12Scripts) { $criticalMissing += "EQ12 Scripts" }
+    if (-not $prereqs.MCPServers) { $criticalMissing += "MCP Servers" }
+    
+    if ($criticalMissing.Count -gt 0) {
+        Write-EQ12Log "❌ Critical prerequisites missing: $($criticalMissing -join ', ')" -Level "ERROR"
+        Write-Host "`n⚠️  Please install missing prerequisites before continuing." -ForegroundColor Red
+        exit 1
+    }
+    
+    # Execute the requested action
+    $success = Invoke-MCPIntegration -Action $Action -Server $Server -VerboseMode $Verbose.IsPresent
+    
+    if ($success) {
+        Write-Host "`n✅ EQ12 MCP Integration completed successfully!" -ForegroundColor Green
+        exit 0
+    } else {
+        Write-Host "`n❌ EQ12 MCP Integration failed!" -ForegroundColor Red
+        exit 1
+    }
+    
+} catch {
+    Write-EQ12Log "❌ PowerShell wrapper error: $($_.Exception.Message)" -Level "ERROR"
+    Write-Host "`n💥 Unexpected error: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
+    
+} finally {
+    Write-EQ12Log "EQ12 MCP Integration PowerShell wrapper completed"
+}

@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ12 Unified Command Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        /* Core Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0b0e11 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e7e7e7;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #2a3441;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #00d4ff, #5a67d8, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-offline {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            color: #9ca3af;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(45deg, #5a67d8, #9333ea);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e7e7e7;
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(20, 24, 29, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:hover {
+            border-color: rgba(90, 103, 216, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 16px 48px rgba(90, 103, 216, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-badge {
+            background: linear-gradient(45deg, #06b6d4, #3b82f6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #5a67d8, #9333ea);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e7e7e7;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(90, 103, 216, 0.3);
+        }
+
+        /* Status Indicators */
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-success {
+            background: #10b981;
+        }
+
+        .status-warning {
+            background: #f59e0b;
+        }
+
+        .status-error {
+            background: #ef4444;
+        }
+
+        .status-info {
+            background: #3b82f6;
+        }
+
+        /* Progress Bars */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00d4ff, #5a67d8);
+            transition: width 0.3s ease;
+        }
+
+        /* Betting Specific Styles */
+        .parlay-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .odds-positive {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .odds-negative {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .edge-indicator {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .edge-high {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .edge-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .edge-low {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .nav-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Animation */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #9ca3af;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #5a67d8;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body x-data="dashboardApp()">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> EQ12 Command Center</h1>
+            <div class="header-controls">
+                <div class="status-indicator" :class="apiStatus === 'online' ? 'status-online' : 'status-offline'">
+                    <i class="fas fa-circle status-dot"></i>
+                    <span x-text="apiStatus === 'online' ? 'API Online' : 'API Offline'"></span>
+                </div>
+                <div class="status-indicator" :class="botStatus === 'online' ? 'status-online' : 'status-offline'">
+                    <i class="fas fa-robot"></i>
+                    <span x-text="botStatus === 'online' ? 'Bots Active' : 'Bots Offline'"></span>
+                </div>
+                <button class="btn btn-secondary" @click="refreshAll()">
+                    <i class="fas fa-sync-alt" :class="{ 'fa-spin': refreshing }"></i>
+                    Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <template x-for="(tab, key) in tabs" :key="key">
+                <button class="nav-tab" :class="{ active: activeTab === key }" @click="activeTab = key"
+                    x-text="tab.name">
+                </button>
+            </template>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div x-show="activeTab === 'betting'">
+            <div class="dashboard-grid grid-3">
+                <!-- Live Parlays -->
+                <div class="card parlay-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-dice"></i>
+                            Active Parlays
+                        </div>
+                        <div class="card-badge" x-text="parlays.length + ' Active'"></div>
+                    </div>
+                    <div x-show="parlays.length === 0" class="loading">
+                        <div class="spinner"></div>
+                        <span style="margin-left: 10px;">Loading parlays...</span>
+                    </div>
+                    <template x-for="parlay in parlays.slice(0, 3)" :key="parlay.id">
+                        <div class="card" style="margin-bottom: 15px; padding: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong x-text="parlay.name"></strong>
+                                    <div style="font-size: 0.9rem; color: #9ca3af;" x-text="parlay.legs + ' legs'">
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div class="odds-positive" x-text="'+' + parlay.combined_odds"></div>
+                                    <div class="edge-indicator"
+                                        :class="parlay.ev > 0.08 ? 'edge-high' : (parlay.ev > 0.04 ? 'edge-medium' : 'edge-low')"
+                                        x-text="(parlay.ev * 100).toFixed(1) + '% EV'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Live Odds -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Live Odds
+                        </div>
+                        <div class="card-badge" x-text="liveOdds.length + ' Games'"></div>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Matchup</th>
+                                    <th>Spread</th>
+                                    <th>Total</th>
+                                    <th>Edge</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="game in liveOdds.slice(0, 5)" :key="game.id">
+                                    <tr>
+                                        <td>
+                                            <div style="font-weight: 600;"
+                                                x-text="game.away_team + ' @ ' + game.home_team"></div>
+                                            <div style="font-size: 0.8rem; color: #9ca3af;" x-text="game.sport"></div>
+                                        </td>
+                                        <td>
+                                            <span :class="game.spread > 0 ? 'odds-positive' : 'odds-negative'"
+                                                x-text="(game.spread > 0 ? '+' : '') + game.spread"></span>
+                                        </td>
+                                        <td x-text="game.total"></td>
+                                        <td>
+                                            <span class="edge-indicator"
+                                                :class="game.edge > 0.05 ? 'edge-high' : (game.edge > 0.025 ? 'edge-medium' : 'edge-low')"
+                                                x-text="(game.edge * 100).toFixed(1) + '%'"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Betting Performance -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-trophy"></i>
+                            Performance
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="performance.totalBets"></span>
+                            <div class="metric-label">Total Bets</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="(performance.winRate * 100).toFixed(1) + '%'"></span>
+                            <div class="metric-label">Win Rate</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value"
+                                :class="performance.profit >= 0 ? 'odds-positive' : 'odds-negative'"
+                                x-text="'$' + performance.profit.toFixed(0)"></span>
+                            <div class="metric-label">Profit/Loss</div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'system'">
+            <div class="dashboard-grid grid-2">
+                <!-- System Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-server"></i>
+                            System Status
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="systemStats.uptime"></span>
+                            <div class="metric-label">Uptime</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="systemStats.memoryUsage + '%'"></span>
+                            <div class="metric-label">Memory</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="systemStats.cpuUsage + '%'"></span>
+                            <div class="metric-label">CPU</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="systemStats.apiCalls"></span>
+                            <div class="metric-label">API Calls</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VPN Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-shield-alt"></i>
+                            VPN Status
+                        </div>
+                        <button class="btn btn-secondary" @click="toggleVPN()">
+                            <i class="fas fa-power-off"></i>
+                            <span x-text="vpnStatus.connected ? 'Disconnect' : 'Connect'"></span>
+                        </button>
+                    </div>
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span>Status:</span>
+                            <span :class="vpnStatus.connected ? 'odds-positive' : 'odds-negative'"
+                                x-text="vpnStatus.connected ? 'Connected' : 'Disconnected'"></span>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span>Server:</span>
+                            <span x-text="vpnStatus.server || 'None'"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>IP Address:</span>
+                            <span x-text="vpnStatus.ip || 'Unknown'"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Services -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-cogs"></i>
+                            Active Services
+                        </div>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <template x-for="service in services" :key="service.name">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <div>
+                                    <div style="font-weight: 600;" x-text="service.name"></div>
+                                    <div style="font-size: 0.8rem; color: #9ca3af;" x-text="service.description"></div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="status-dot"
+                                        :class="service.status === 'running' ? 'status-success' : (service.status === 'error' ? 'status-error' : 'status-warning')"></span>
+                                    <span x-text="service.status"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Recent Logs -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-list-alt"></i>
+                            Recent Logs
+                        </div>
+                        <button class="btn btn-secondary" @click="refreshLogs()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem;">
+                        <template x-for="log in recentLogs" :key="log.id">
+                            <div style="padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="color: #9ca3af;" x-text="log.timestamp"></span>
+                                <span
+                                    :class="log.level === 'ERROR' ? 'odds-negative' : (log.level === 'WARN' ? 'status-warning' : 'odds-positive')"
+                                    x-text="'[' + log.level + ']'"></span>
+                                <span x-text="log.message"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'finance'">
+            <div class="dashboard-grid grid-3">
+                <!-- Portfolio Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-wallet"></i>
+                            Portfolio Overview
+                        </div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="'$' + portfolio.totalValue.toLocaleString()"></span>
+                            <div class="metric-label">Total Value</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value"
+                                :class="portfolio.dayChange >= 0 ? 'odds-positive' : 'odds-negative'"
+                                x-text="(portfolio.dayChange >= 0 ? '+' : '') + portfolio.dayChange.toFixed(2) + '%'"></span>
+                            <div class="metric-label">Day Change</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Watchlist -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-chart-line"></i>
+                            Stock Watchlist
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Price</th>
+                                <th>Change</th>
+                                <th>Signal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="stock in stocks.slice(0, 6)" :key="stock.symbol">
+                                <tr>
+                                    <td style="font-weight: 600;" x-text="stock.symbol"></td>
+                                    <td x-text="'$' + stock.price.toFixed(2)"></td>
+                                    <td :class="stock.change >= 0 ? 'odds-positive' : 'odds-negative'"
+                                        x-text="(stock.change >= 0 ? '+' : '') + stock.change.toFixed(2) + '%'"></td>
+                                    <td>
+                                        <span class="edge-indicator"
+                                            :class="stock.signal === 'BUY' ? 'edge-high' : (stock.signal === 'SELL' ? 'edge-low' : 'edge-medium')"
+                                            x-text="stock.signal"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Crypto Dashboard -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fab fa-bitcoin"></i>
+                            Crypto Tracker
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Coin</th>
+                                <th>Price</th>
+                                <th>24h Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="crypto in cryptos.slice(0, 5)" :key="crypto.symbol">
+                                <tr>
+                                    <td style="font-weight: 600;" x-text="crypto.name + ' (' + crypto.symbol + ')'">
+                                    </td>
+                                    <td x-text="'$' + crypto.price.toLocaleString()"></td>
+                                    <td :class="crypto.change >= 0 ? 'odds-positive' : 'odds-negative'"
+                                        x-text="(crypto.change >= 0 ? '+' : '') + crypto.change.toFixed(2) + '%'"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'automation'">
+            <div class="dashboard-grid grid-2">
+                <!-- Scrapers Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-spider"></i>
+                            Active Scrapers
+                        </div>
+                        <button class="btn btn-primary" @click="runAllScrapers()">
+                            <i class="fas fa-play"></i>
+                            Run All
+                        </button>
+                    </div>
+                    <template x-for="scraper in scrapers" :key="scraper.name">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <div>
+                                <div style="font-weight: 600;" x-text="scraper.name"></div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;" x-text="'Last run: ' + scraper.lastRun">
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span x-text="scraper.itemsFound + ' items'"></span>
+                                <button class="btn btn-secondary" @click="runScraper(scraper.name)">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Telegram Bot -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fab fa-telegram-plane"></i>
+                            Telegram Bot
+                        </div>
+                        <div class="card-badge" x-text="telegramBot.status"></div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="telegramBot.messagesProcessed"></span>
+                            <div class="metric-label">Messages Today</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="telegramBot.activeChats"></span>
+                            <div class="metric-label">Active Chats</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" @click="sendTestMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Test Message
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Apple TV Integration -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fab fa-apple"></i>
+                            Apple TV Dashboard
+                        </div>
+                    </div>
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span>Connected Devices:</span>
+                            <span class="metric-value" style="font-size: 1.2rem;"
+                                x-text="appleTv.connectedDevices"></span>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <span>Current Display:</span>
+                            <span x-text="appleTv.currentDisplay"></span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" @click="streamParlay()">
+                                <i class="fas fa-tv"></i>
+                                Stream Parlay
+                            </button>
+                            <button class="btn btn-secondary" @click="clearDisplay()">
+                                <i class="fas fa-times"></i>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Monitoring -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-briefcase"></i>
+                            Job Alerts
+                        </div>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <template x-for="job in jobs.slice(0, 5)" :key="job.id">
+                            <div style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                <div style="font-weight: 600;" x-text="job.title"></div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;"
+                                    x-text="job.company + ' • ' + job.location"></div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;" x-text="job.posted"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="activeTab === 'ai'">
+            <div class="dashboard-grid grid-2">
+                <!-- AI Models Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-brain"></i>
+                            AI Models
+                        </div>
+                    </div>
+                    <template x-for="model in aiModels" :key="model.name">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <div>
+                                <div style="font-weight: 600;" x-text="model.name"></div>
+                                <div style="font-size: 0.8rem; color: #9ca3af;" x-text="model.description"></div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="status-dot"
+                                    :class="model.status === 'active' ? 'status-success' : 'status-error'"></div>
+                                <div style="font-size: 0.8rem;" x-text="model.requestsToday + ' requests today'"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Cookbook Integration -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-book"></i>
+                            Cookbook System
+                        </div>
+                        <div class="card-badge" x-text="cookbook.totalRecipes + ' recipes'"></div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="cookbook.searchesToday"></span>
+                            <div class="metric-label">Searches Today</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="cookbook.grammarConstraints"></span>
+                            <div class="metric-label">Grammar Rules</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <input type="text" placeholder="Search cookbook..."
+                            style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white;"
+                            @keyup.enter="searchCookbook($event.target.value)">
+                    </div>
+                </div>
+
+                <!-- GPT-5 Controls -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-robot"></i>
+                            GPT-5 Controls
+                        </div>
+                    </div>
+                    <div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px;">Verbosity Level:</label>
+                            <select x-model="gptControls.verbosity"
+                                style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px;">Reasoning Effort:</label>
+                            <select x-model="gptControls.reasoning"
+                                style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
+                                <option value="minimal">Minimal</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <input type="checkbox" x-model="gptControls.cfgMode">
+                                CFG Grammar Mode
+                            </label>
+                        </div>
+                        <button class="btn btn-primary" @click="saveGPTSettings()">
+                            <i class="fas fa-save"></i>
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sora Integration -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="fas fa-video"></i>
+                            Sora Content Generation
+                        </div>
+                        <div class="card-badge" x-text="sora.videosGenerated + ' videos'"></div>
+                    </div>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="sora.queuedJobs"></span>
+                            <div class="metric-label">Queued Jobs</div>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-value" x-text="sora.processingTime"></span>
+                            <div class="metric-label">Avg Time (min)</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" @click="generateBettingVideo()">
+                            <i class="fas fa-magic"></i>
+                            Generate Betting Analysis Video
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function dashboardApp() {
+            return {
+                // State
+                activeTab: 'betting',
+                refreshing: false,
+                apiStatus: 'online',
+                botStatus: 'online',
+
+                // Tab Configuration
+                tabs: {
+                    betting: { name: '🎲 Betting Hub' },
+                    system: { name: '⚙️ System Status' },
+                    finance: { name: '📈 Finance' },
+                    automation: { name: '🤖 Automation' },
+                    ai: { name: '🧠 AI Controls' }
+                },
+
+                // Data
+                parlays: [],
+                liveOdds: [],
+                performance: {
+                    totalBets: 156,
+                    winRate: 0.634,
+                    profit: 2847.32
+                },
+                systemStats: {
+                    uptime: '5d 12h',
+                    memoryUsage: 67,
+                    cpuUsage: 23,
+                    apiCalls: 1247
+                },
+                vpnStatus: {
+                    connected: true,
+                    server: 'US-West-1',
+                    ip: '192.168.1.100'
+                },
+                services: [],
+                recentLogs: [],
+                portfolio: {
+                    totalValue: 125000,
+                    dayChange: 2.34
+                },
+                stocks: [],
+                cryptos: [],
+                scrapers: [],
+                telegramBot: {
+                    status: 'Active',
+                    messagesProcessed: 45,
+                    activeChats: 3
+                },
+                appleTv: {
+                    connectedDevices: 2,
+                    currentDisplay: 'Parlay Dashboard'
+                },
+                jobs: [],
+                aiModels: [],
+                cookbook: {
+                    totalRecipes: 2000,
+                    searchesToday: 23,
+                    grammarConstraints: 11
+                },
+                gptControls: {
+                    verbosity: 'medium',
+                    reasoning: 'medium',
+                    cfgMode: false
+                },
+                sora: {
+                    videosGenerated: 8,
+                    queuedJobs: 2,
+                    processingTime: 4.5
+                },
+
+                // Methods
+                init() {
+                    this.loadInitialData();
+                    this.startAutoRefresh();
+                },
+
+                async loadInitialData() {
+                    await Promise.all([
+                        this.loadParlays(),
+                        this.loadLiveOdds(),
+                        this.loadSystemData(),
+                        this.loadFinanceData(),
+                        this.loadAutomationData(),
+                        this.loadAIData()
+                    ]);
+                },
+
+                async loadParlays() {
+                    try {
+                        const response = await fetch('http://localhost:8000/api/parlay?size=3');
+                        const data = await response.json();
+                        this.parlays = data.bets || [];
+                    } catch (error) {
+                        console.error('Failed to load parlays:', error);
+                        this.parlays = this.mockParlays();
+                    }
+                },
+
+                async loadLiveOdds() {
+                    try {
+                        const response = await fetch('http://localhost:8000/api/live-odds');
+                        const data = await response.json();
+                        this.liveOdds = data.slice(0, 10);
+                    } catch (error) {
+                        console.error('Failed to load odds:', error);
+                        this.liveOdds = this.mockOdds();
+                    }
+                },
+
+                async loadSystemData() {
+                    try {
+                        const response = await fetch('http://localhost:8000/api/health');
+                        const data = await response.json();
+                        this.updateSystemStats(data);
+                    } catch (error) {
+                        console.error('Failed to load system data:', error);
+                        this.services = this.mockServices();
+                        this.recentLogs = this.mockLogs();
+                    }
+                },
+
+                async loadFinanceData() {
+                    this.stocks = this.mockStocks();
+                    this.cryptos = this.mockCryptos();
+                },
+
+                async loadAutomationData() {
+                    this.scrapers = this.mockScrapers();
+                    this.jobs = this.mockJobs();
+                },
+
+                async loadAIData() {
+                    this.aiModels = this.mockAIModels();
+                },
+
+                // Mock data generators
+                mockParlays() {
+                    return [
+                        {
+                            id: 1,
+                            name: 'NFL Sunday Special',
+                            legs: 5,
+                            combined_odds: 850,
+                            ev: 0.087
+                        },
+                        {
+                            id: 2,
+                            name: 'NBA Sharp Play',
+                            legs: 3,
+                            combined_odds: 425,
+                            ev: 0.052
+                        },
+                        {
+                            id: 3,
+                            name: 'NCAAF Value Bet',
+                            legs: 4,
+                            combined_odds: 650,
+                            ev: 0.034
+                        }
+                    ];
+                },
+
+                mockOdds() {
+                    return [
+                        {
+                            id: 1,
+                            sport: 'NFL',
+                            away_team: 'Chiefs',
+                            home_team: 'Bills',
+                            spread: -3.5,
+                            total: 47.5,
+                            edge: 0.067
+                        },
+                        {
+                            id: 2,
+                            sport: 'NBA',
+                            away_team: 'Lakers',
+                            home_team: 'Warriors',
+                            spread: 2.5,
+                            total: 225.5,
+                            edge: 0.042
+                        },
+                        {
+                            id: 3,
+                            sport: 'NCAAB',
+                            away_team: 'Duke',
+                            home_team: 'UNC',
+                            spread: -1.5,
+                            total: 145.5,
+                            edge: 0.038
+                        }
+                    ];
+                },
+
+                mockServices() {
+                    return [
+                        { name: 'EQ12 API', description: 'Main backend API', status: 'running' },
+                        { name: 'Telegram Bot', description: 'Telegram integration', status: 'running' },
+                        { name: 'Discord Bot', description: 'Discord integration', status: 'running' },
+                        { name: 'Odds Scraper', description: 'Live odds collection', status: 'running' },
+                        { name: 'Apple TV Manager', description: 'Apple TV integration', status: 'running' }
+                    ];
+                },
+
+                mockLogs() {
+                    return [
+                        { id: 1, timestamp: '2025-01-11 14:30:15', level: 'INFO', message: 'Parlay generated successfully: NFL Sunday Special' },
+                        { id: 2, timestamp: '2025-01-11 14:25:32', level: 'INFO', message: 'VPN connection established: US-West-1' },
+                        { id: 3, timestamp: '2025-01-11 14:20:45', level: 'WARN', message: 'High API usage detected: 95% of limit' },
+                        { id: 4, timestamp: '2025-01-11 14:15:18', level: 'INFO', message: 'Telegram message sent successfully' },
+                        { id: 5, timestamp: '2025-01-11 14:10:03', level: 'ERROR', message: 'Failed to connect to secondary odds API' }
+                    ];
+                },
+
+                mockStocks() {
+                    return [
+                        { symbol: 'AAPL', price: 185.42, change: 2.34, signal: 'BUY' },
+                        { symbol: 'TSLA', price: 248.67, change: -1.23, signal: 'HOLD' },
+                        { symbol: 'NVDA', price: 891.23, change: 4.56, signal: 'BUY' },
+                        { symbol: 'MSFT', price: 412.89, change: 0.87, signal: 'HOLD' },
+                        { symbol: 'GOOGL', price: 168.45, change: -0.34, signal: 'SELL' },
+                        { symbol: 'META', price: 542.78, change: 3.12, signal: 'BUY' }
+                    ];
+                },
+
+                mockCryptos() {
+                    return [
+                        { name: 'Bitcoin', symbol: 'BTC', price: 94250, change: 3.45 },
+                        { name: 'Ethereum', symbol: 'ETH', price: 3420, change: 2.67 },
+                        { name: 'Solana', symbol: 'SOL', price: 245, change: 8.92 },
+                        { name: 'Cardano', symbol: 'ADA', price: 1.05, change: -1.23 },
+                        { name: 'Polygon', symbol: 'MATIC', price: 1.15, change: 5.67 }
+                    ];
+                },
+
+                mockScrapers() {
+                    return [
+                        { name: 'DraftKings Scraper', lastRun: '5 min ago', itemsFound: 234 },
+                        { name: 'FanDuel Scraper', lastRun: '8 min ago', itemsFound: 187 },
+                        { name: 'Travel Deals Scraper', lastRun: '1 hour ago', itemsFound: 45 },
+                        { name: 'Job Alerts Scraper', lastRun: '2 hours ago', itemsFound: 12 }
+                    ];
+                },
+
+                mockJobs() {
+                    return [
+                        {
+                            id: 1,
+                            title: 'Senior Software Engineer',
+                            company: 'TechCorp',
+                            location: 'Remote',
+                            posted: '2 hours ago'
+                        },
+                        {
+                            id: 2,
+                            title: 'Data Scientist',
+                            company: 'DataLabs',
+                            location: 'San Francisco',
+                            posted: '4 hours ago'
+                        }
+                    ];
+                },
+
+                mockAIModels() {
+                    return [
+                        {
+                            name: 'GPT-5 Betting Analysis',
+                            description: 'Advanced betting prediction model',
+                            status: 'active',
+                            requestsToday: 156
+                        },
+                        {
+                            name: 'Sora Video Generation',
+                            description: 'AI video content generator',
+                            status: 'active',
+                            requestsToday: 23
+                        },
+                        {
+                            name: 'Cookbook Search Engine',
+                            description: 'Code pattern search and retrieval',
+                            status: 'active',
+                            requestsToday: 89
+                        }
+                    ];
+                },
+
+                // Actions
+                async refreshAll() {
+                    this.refreshing = true;
+                    await this.loadInitialData();
+                    setTimeout(() => {
+                        this.refreshing = false;
+                    }, 1000);
+                },
+
+                async toggleVPN() {
+                    this.vpnStatus.connected = !this.vpnStatus.connected;
+                    if (this.vpnStatus.connected) {
+                        this.vpnStatus.server = 'US-West-1';
+                        this.vpnStatus.ip = '192.168.1.100';
+                    } else {
+                        this.vpnStatus.server = null;
+                        this.vpnStatus.ip = null;
+                    }
+                },
+
+                async refreshLogs() {
+                    this.recentLogs = this.mockLogs();
+                },
+
+                async runAllScrapers() {
+                    console.log('Running all scrapers...');
+                },
+
+                async runScraper(name) {
+                    console.log(`Running scraper: ${name}`);
+                },
+
+                async sendTestMessage() {
+                    console.log('Sending test Telegram message...');
+                },
+
+                async streamParlay() {
+                    console.log('Streaming parlay to Apple TV...');
+                },
+
+                async clearDisplay() {
+                    this.appleTv.currentDisplay = 'Standby';
+                },
+
+                async searchCookbook(query) {
+                    console.log(`Searching cookbook for: ${query}`);
+                },
+
+                async saveGPTSettings() {
+                    console.log('Saving GPT-5 settings:', this.gptControls);
+                },
+
+                async generateBettingVideo() {
+                    console.log('Generating betting analysis video...');
+                    this.sora.queuedJobs++;
+                },
+
+                updateSystemStats(data) {
+                    if (data.status === 'healthy') {
+                        this.apiStatus = 'online';
+                    }
+                },
+
+                startAutoRefresh() {
+                    setInterval(() => {
+                        this.loadParlays();
+                        this.loadLiveOdds();
+                    }, 30000); // Refresh every 30 seconds
+                }
+            }
+        }
+
+        // Initialize Chart.js after page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Performance Chart
+            const ctx = document.getElementById('performanceChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Daily Profit',
+                            data: [120, 250, -80, 340, 180, 420, 290],
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#9ca3af'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: '#9ca3af'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e7e7e7'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

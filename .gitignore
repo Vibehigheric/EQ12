@@ -1,0 +1,593 @@
+# EQ12 Enhanced .gitignore - Comprehensive Security & Privacy Protection
+# ======================================================================
+
+# 🔐 Security & Secrets (CRITICAL - Never commit these)
+# API Keys and Tokens
+*.key
+*.pem
+*.pfx
+*.p12
+*.crt
+*.cer
+*.der
+.env
+.env.*
+!.env.template
+!.env.example
+api_keys.json
+secrets.json
+config.json
+.secrets
+.keys/
+tokens/
+credentials/
+auth/
+
+# SSH and GPG Keys
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.pub
+*.gpg
+*.asc
+authorized_keys
+known_hosts
+
+# Cloud Provider Credentials
+.aws/
+.azure/
+.gcp/
+gcloud/
+.boto
+aws-credentials
+azure-credentials
+google-credentials
+service-account*.json
+
+# Database Credentials & Connection Strings
+database.ini
+db_config.*
+connection_strings.*
+*.sqlite-journal
+*.db-wal
+*.db-shm
+
+# 🏦 Financial & Betting Data (SENSITIVE)
+# Live betting data
+/data/live_betting/
+/data/odds/
+/data/lines/
+betting_history.json
+account_balances.json
+pnl_*.json
+bankroll_*.json
+transaction_*.json
+win_loss_*.json
+
+# Personal betting information
+my_bets.json
+personal_strategy.json
+private_bankroll.json
+betting_diary.*
+personal_notes.*
+
+# 💾 Databases & Data Files
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+*.db3
+backup_*.db
+*_backup.db
+
+# Database dumps
+*.sql
+*.dump
+dump.rdb
+redis.conf
+
+# Large data files
+*.csv
+data/*.json
+data/raw/
+data/processed/
+data/backup/
+data/archive/
+*.parquet
+*.h5
+*.hdf5
+
+# 📊 Logs & Debug Files
+# Application logs
+*.log
+logs/
+log/
+*.log.*
+debug.log
+error.log
+access.log
+audit.log
+security.log
+
+# System logs
+*.out
+*.err
+crash.log
+core
+core.*
+
+# Python logs
+python.log
+django.log
+flask.log
+
+# 🐍 Python Specific
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+.pdm-python
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# 🌐 Web Development
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+lib-cov
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Temporary folders
+tmp/
+temp/
+
+# 🪟 Windows Specific
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# 🍎 macOS Specific
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# 🐧 Linux Specific
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# 🔧 IDEs & Editors
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# 🐳 Docker & Containers
+# Docker
+Dockerfile*.bak
+docker-compose*.override.yml
+.dockerignore.bak
+
+# Container data
+.docker/
+docker-data/
+
+# 📦 Package Managers & Build Tools
+# Yarn
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# ☁️ Cloud & Deployment
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+
+# Ansible
+*.vault
+vault_pass.txt
+inventory.ini
+hosts.ini
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+kube-config
+
+# 🧪 Testing & Quality Assurance
+# Security scanning results
+bandit-report.json
+safety-report.json
+semgrep-report.json
+checkov-report.json
+trivy-results.sarif
+
+# 📈 Monitoring & Analytics
+# Application monitoring
+newrelic.ini
+datadog.yaml
+
+# Analytics
+google-analytics.json
+mixpanel.json
+
+# 💬 Communication & Collaboration
+# Slack
+slack_credentials.json
+slack_token.txt
+
+# Discord
+discord_bot_token.txt
+discord_config.json
+
+# Telegram
+telegram_bot_token.txt
+telegram_config.json
+
+# 🎯 EQ12 Specific Exclusions
+# EQ12 Configuration
+eq12_config.json
+eq12_secrets.json
+eq12_api_keys.json
+eq12_credentials.json
+
+# EQ12 Data
+odds_data/
+betting_data/
+line_movements/
+correlation_data/
+
+# EQ12 Logs
+eq12_*.log
+edge_god.log
+parlay_*.log
+arbitrage_*.log
+
+# EQ12 Backup Files
+*.backup
+*_backup.*
+backup_*
+snapshots/
+
+# EQ12 Development
+.eq12/
+eq12_dev/
+scratch/
+playground/
+uploads/
+snips/
+screenshots/
+
+# EQ12 Runtime Files
+parlay_*.json
+betting_history.json
+travel_deals.json
+finance_snapshot.json
+telegram_messages.json
+discord_messages.json
+apple_tv_sessions.json
+snip_*.png
+ocr_results.txt
+
+# Tunnels & Tokens
+ngrok.exe
+*.ngrok
+tunnel_*
+
+# ⚡ Performance & Optimization
+# Profiling
+*.prof
+*.pstats
+profile_output
+.profiler/
+
+# Benchmarking
+benchmark_results/
+performance_logs/
+
+# 🔧 Miscellaneous
+# Archives
+*.zip
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tbz2
+*.tar.xz
+*.txz
+*.7z
+*.rar
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+
+# Lock files
+*.lock
+.lock
+
+# Cache directories
+.cache/
+cache/
+.tmp/
+
+# Generated files
+generated/
+auto-generated/
+
+# Documentation build
+docs/_build/
+docs/build/
+_site/
+
+# Large files that should use Git LFS
+*.large
+*.bin
+*.exe
+*.dll
+
+# END OF .gitignore
+# ===================
+#
+# Security Reminders:
+# - Never commit real API keys or secrets
+# - Use environment variables for sensitive data
+# - Add files with PII to .gitignore immediately
+# - Regularly scan for accidentally committed secrets
+# - Use pre-commit hooks to catch issues early
+#
+# For questions about what should be ignored:
+# - When in doubt, add it to .gitignore
+# - Better to over-exclude than accidentally expose sensitive data
+# - Review this file regularly and update as needed
+
+# --- EQ12 GIT HYGIENE AUTOMATION ---
+# Virtual environments
+.venv/
+.venv_win/
+.venv_wsl/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs & runtime output
+logs/
+reports/
+*.log
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+build_context/
+dist/
+*.egg-info/
+
+# Backups & restores
+EQ12_BACKUP_*/
+legacy_swarm/
+
+# OS / editor noise
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Env secrets
+.env
+.env.*
+
+backups/

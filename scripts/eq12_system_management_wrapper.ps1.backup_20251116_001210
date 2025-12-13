@@ -1,0 +1,505 @@
+﻿#Requires -Version 5.1
+<#
+.SYNOPSIS
+    EQ12 System Management PowerShell Wrapper
+    
+.DESCRIPTION
+    PowerShell wrapper for the EQ12 System Management Suite
+    Provides Windows-native system management and monitoring capabilities
+    
+.PARAMETER Action
+    The management action to perform
+    
+.PARAMETER Workspace
+    Path to the EQ12 workspace
+    
+.PARAMETER Interval
+    Monitoring interval in seconds
+    
+.PARAMETER VerboseOutput
+    Enable verbose output
+    
+.PARAMETER GenerateReport
+    Generate detailed system report
+    
+.EXAMPLE
+    .\eq12_system_management_wrapper.ps1 -Action HealthCheck -VerboseOutput
+    
+.EXAMPLE
+    .\eq12_system_management_wrapper.ps1 -Action Monitor -Interval 60
+#>
+
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("HealthCheck", "Diagnostics", "AutoRepair", "Monitor", "Report", "All")]
+    [string]$Action = "HealthCheck",
+    
+    [Parameter(Mandatory = $false)]
+    [string]$Workspace = "C:\EQ12",
+    
+    [Parameter(Mandatory = $false)]
+    [int]$Interval = 300,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$VerboseOutput,
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$GenerateReport
+)
+
+# Script metadata
+$ScriptInfo = @{
+    Name = "EQ12 System Management Wrapper"
+    Version = "1.0.0"
+    Author = "EQ12 AI Enterprise"
+    Description = "PowerShell wrapper for EQ12 system management operations"
+}
+
+# Initialize logging
+$LogTimestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+$LogFile = Join-Path $Workspace "logs\system_management_wrapper_$LogTimestamp.log"
+
+function Write-EQ12Log {
+    param(
+        [string]$Message,
+        [ValidateSet("INFO", "WARNING", "ERROR", "SUCCESS")]
+        [string]$Level = "INFO"
+    )
+    
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $LogEntry = "[$Timestamp] [$Level] $Message"
+    
+    # Console output with colors
+    switch ($Level) {
+        "INFO" { Write-Host $LogEntry -ForegroundColor Cyan }
+        "WARNING" { Write-Host $LogEntry -ForegroundColor Yellow }
+        "ERROR" { Write-Host $LogEntry -ForegroundColor Red }
+        "SUCCESS" { Write-Host $LogEntry -ForegroundColor Green }
+    }
+    
+    # File output
+    try {
+        $LogEntry | Out-File -FilePath $LogFile -Append -Encoding UTF8
+    }
+    catch {
+        Write-Warning "Failed to write to log file: $_"
+    }
+}
+
+function Test-EQ12Prerequisites {
+    <#
+    .SYNOPSIS
+    Test if EQ12 system prerequisites are met
+    #>
+    
+    Write-EQ12Log "🔍 Testing EQ12 system prerequisites..." "INFO"
+    
+    $Prerequisites = @{
+        WorkspaceExists = Test-Path $Workspace
+        PythonAvailable = $null
+        SystemManagerExists = $null
+        LogsDirectoryExists = $null
+    }
+    
+    # Test Python availability
+    try {
+        $PythonVersion = python --version 2>&1
+        $Prerequisites.PythonAvailable = $PythonVersion -match "Python \d+\.\d+"
+        if ($Prerequisites.PythonAvailable) {
+            Write-EQ12Log "✅ Python detected: $PythonVersion" "SUCCESS"
+        }
+    }
+    catch {
+        $Prerequisites.PythonAvailable = $false
+        Write-EQ12Log "❌ Python not available in PATH" "ERROR"
+    }
+    
+    # Test system manager script
+    $SystemManagerPath = Join-Path $Workspace "scripts\eq12_system_manager.py"
+    $Prerequisites.SystemManagerExists = Test-Path $SystemManagerPath
+    if ($Prerequisites.SystemManagerExists) {
+        Write-EQ12Log "✅ System manager script found" "SUCCESS"
+    } else {
+        Write-EQ12Log "❌ System manager script not found: $SystemManagerPath" "ERROR"
+    }
+    
+    # Test logs directory
+    $LogsDir = Join-Path $Workspace "logs"
+    $Prerequisites.LogsDirectoryExists = Test-Path $LogsDir
+    if (-not $Prerequisites.LogsDirectoryExists) {
+        try {
+            New-Item -Path $LogsDir -ItemType Directory -Force | Out-Null
+            $Prerequisites.LogsDirectoryExists = $true
+            Write-EQ12Log "✅ Created logs directory" "SUCCESS"
+        }
+        catch {
+            Write-EQ12Log "❌ Failed to create logs directory: $_" "ERROR"
+        }
+    }
+    
+    return $Prerequisites
+}
+
+function Get-SystemMetrics {
+    <#
+    .SYNOPSIS
+    Get Windows system metrics
+    #>
+    
+    Write-EQ12Log "📊 Collecting Windows system metrics..." "INFO"
+    
+    try {
+        $OS = Get-CimInstance -ClassName Win32_OperatingSystem
+        $CPU = Get-CimInstance -ClassName Win32_Processor
+        $Memory = Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum
+        $Disk = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DeviceID -eq "C:" }
+        
+        $SystemMetrics = [PSCustomObject]@{
+            Timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+            OS = @{
+                Name = $OS.Caption
+                Version = $OS.Version
+                Architecture = $OS.OSArchitecture
+                Uptime = (Get-Date) - $OS.LastBootUpTime
+            }
+            CPU = @{
+                Name = $CPU.Name
+                Cores = $CPU.NumberOfCores
+                LogicalProcessors = $CPU.NumberOfLogicalProcessors
+                LoadPercentage = (Get-Counter "\Processor(_Total)\% Processor Time").CounterSamples.CookedValue
+            }
+            Memory = @{
+                TotalGB = [math]::Round($Memory.Sum / 1GB, 2)
+                AvailableGB = [math]::Round($OS.FreePhysicalMemory / 1MB / 1024, 2)
+                UsedPercent = [math]::Round((($Memory.Sum - ($OS.FreePhysicalMemory * 1KB)) / $Memory.Sum) * 100, 2)
+            }
+            Disk = @{
+                TotalGB = [math]::Round($Disk.Size / 1GB, 2)
+                FreeGB = [math]::Round($Disk.FreeSpace / 1GB, 2)
+                UsedPercent = [math]::Round((($Disk.Size - $Disk.FreeSpace) / $Disk.Size) * 100, 2)
+            }
+            EQ12Processes = @()
+        }
+        
+        # Get EQ12 processes
+        $EQ12Processes = Get-Process | Where-Object { 
+            $_.ProcessName -like "*python*" -and 
+            $_.CommandLine -like "*eq12*" 
+        } -ErrorAction SilentlyContinue
+        
+        foreach ($Process in $EQ12Processes) {
+            $SystemMetrics.EQ12Processes += @{
+                Name = $Process.ProcessName
+                PID = $Process.Id
+                CPU = $Process.CPU
+                WorkingSet = [math]::Round($Process.WorkingSet / 1MB, 2)
+                StartTime = $Process.StartTime
+            }
+        }
+        
+        Write-EQ12Log "✅ System metrics collected successfully" "SUCCESS"
+        return $SystemMetrics
+        
+    }
+    catch {
+        Write-EQ12Log "❌ Failed to collect system metrics: $_" "ERROR"
+        return $null
+    }
+}
+
+function Invoke-EQ12SystemManager {
+    param(
+        [string]$SystemAction,
+        [hashtable]$Parameters = @{}
+    )
+    
+    Write-EQ12Log "🚀 Invoking EQ12 System Manager: $SystemAction" "INFO"
+    
+    $SystemManagerPath = Join-Path $Workspace "scripts\eq12_system_manager.py"
+    
+    # Build command arguments
+    $Arguments = @(
+        $SystemManagerPath,
+        "--workspace", $Workspace,
+        "--action", $SystemAction.ToLower()
+    )
+    
+    if ($Parameters.ContainsKey("Interval")) {
+        $Arguments += "--interval", $Parameters.Interval
+    }
+    
+    if ($VerboseOutput) {
+        $Arguments += "--verbose"
+    }
+    
+    try {
+        $StartTime = Get-Date
+        
+        Write-EQ12Log "Executing: python $($Arguments -join ' ')" "INFO"
+        
+        $Result = & python @Arguments 2>&1
+        $ExitCode = $LASTEXITCODE
+        $Duration = (Get-Date) - $StartTime
+        
+        $ExecutionResult = [PSCustomObject]@{
+            Action = $SystemAction
+            ExitCode = $ExitCode
+            Duration = $Duration
+            Output = $Result
+            Success = $ExitCode -eq 0
+            Timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+        }
+        
+        if ($ExecutionResult.Success) {
+            Write-EQ12Log "✅ System manager completed successfully in $($Duration.TotalSeconds) seconds" "SUCCESS"
+        } else {
+            Write-EQ12Log "❌ System manager failed with exit code $ExitCode" "ERROR"
+        }
+        
+        return $ExecutionResult
+        
+    }
+    catch {
+        Write-EQ12Log "❌ Failed to execute system manager: $_" "ERROR"
+        return [PSCustomObject]@{
+            Action = $SystemAction
+            Success = $false
+            Error = $_.Exception.Message
+            Timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+        }
+    }
+}
+
+function Start-ContinuousMonitoring {
+    param([int]$MonitorInterval = 300)
+    
+    Write-EQ12Log "🔄 Starting continuous system monitoring (interval: $MonitorInterval seconds)" "INFO"
+    
+    $MonitoringActive = $true
+    $IterationCount = 0
+    
+    # Register Ctrl+C handler
+    [Console]::CancelKeyPress += {
+        param($sender, $e)
+        ${script}MonitoringActive = $false
+        $e.Cancel = $true
+        Write-EQ12Log "🛑 Monitoring stopped by user" "WARNING"
+    }
+    
+    while ($MonitoringActive) {
+        try {
+            $IterationCount++
+            Write-EQ12Log "📊 Monitoring iteration #$IterationCount" "INFO"
+            
+            # Collect system metrics
+            $SystemMetrics = Get-SystemMetrics
+            
+            if ($SystemMetrics) {
+                # Check for critical conditions
+                if ($SystemMetrics.Memory.UsedPercent -gt 90) {
+                    Write-EQ12Log "🚨 CRITICAL: Memory usage is $($SystemMetrics.Memory.UsedPercent)%" "ERROR"
+                }
+                
+                if ($SystemMetrics.CPU.LoadPercentage -gt 85) {
+                    Write-EQ12Log "🔥 WARNING: CPU usage is $($SystemMetrics.CPU.LoadPercentage)%" "WARNING"
+                }
+                
+                if ($SystemMetrics.Disk.UsedPercent -gt 90) {
+                    Write-EQ12Log "💾 WARNING: Disk usage is $($SystemMetrics.Disk.UsedPercent)%" "WARNING"
+                }
+                
+                # Save metrics snapshot
+                $MetricsFile = Join-Path $Workspace "logs\system_metrics_$LogTimestamp.json"
+                $SystemMetrics | ConvertTo-Json -Depth 4 | Out-File -FilePath $MetricsFile -Encoding UTF8
+            }
+            
+            # Run health check every 3rd iteration
+            if ($IterationCount % 3 -eq 0) {
+                Write-EQ12Log "🏥 Running periodic health check..." "INFO"
+                $HealthResult = Invoke-EQ12SystemManager -SystemAction "health-check"
+                
+                if (-not $HealthResult.Success) {
+                    Write-EQ12Log "⚠️ Health check failed - consider running diagnostics" "WARNING"
+                }
+            }
+            
+            # Sleep until next iteration
+            Start-Sleep -Seconds $MonitorInterval
+            
+        }
+        catch {
+            Write-EQ12Log "❌ Error in monitoring loop: $_" "ERROR"
+            Start-Sleep -Seconds 60  # Wait before retrying
+        }
+    }
+    
+    Write-EQ12Log "🏁 Monitoring session completed" "INFO"
+}
+
+function New-SystemReport {
+    <#
+    .SYNOPSIS
+    Generate comprehensive system report
+    #>
+    
+    Write-EQ12Log "📄 Generating comprehensive system report..." "INFO"
+    
+    $ReportTimestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $ReportData = [PSCustomObject]@{
+        GeneratedAt = $ReportTimestamp
+        SystemInfo = Get-SystemMetrics
+        Prerequisites = Test-EQ12Prerequisites
+        HealthCheck = $null
+        Diagnostics = $null
+        Recommendations = @()
+    }
+    
+    # Run health check
+    Write-EQ12Log "Running health check for report..." "INFO"
+    $HealthResult = Invoke-EQ12SystemManager -SystemAction "health-check"
+    if ($HealthResult.Success) {
+        try {
+            $ReportData.HealthCheck = $HealthResult.Output | ConvertFrom-Json
+        }
+        catch {
+            $ReportData.HealthCheck = $HealthResult.Output
+        }
+    }
+    
+    # Run diagnostics
+    Write-EQ12Log "Running diagnostics for report..." "INFO"
+    $DiagnosticsResult = Invoke-EQ12SystemManager -SystemAction "diagnostics"
+    if ($DiagnosticsResult.Success) {
+        try {
+            $ReportData.Diagnostics = $DiagnosticsResult.Output | ConvertFrom-Json
+        }
+        catch {
+            $ReportData.Diagnostics = $DiagnosticsResult.Output
+        }
+    }
+    
+    # Generate recommendations
+    if ($ReportData.SystemInfo) {
+        if ($ReportData.SystemInfo.Memory.UsedPercent -gt 80) {
+            $ReportData.Recommendations += "Consider memory optimization or RAM upgrade"
+        }
+        
+        if ($ReportData.SystemInfo.Disk.UsedPercent -gt 80) {
+            $ReportData.Recommendations += "Disk space cleanup recommended"
+        }
+        
+        if ($ReportData.SystemInfo.EQ12Processes.Count -eq 0) {
+            $ReportData.Recommendations += "No EQ12 processes detected - system may not be running"
+        }
+    }
+    
+    # Save report
+    $ReportFile = Join-Path $Workspace "logs\system_report_$LogTimestamp.json"
+    $ReportData | ConvertTo-Json -Depth 6 | Out-File -FilePath $ReportFile -Encoding UTF8
+    
+    Write-EQ12Log "✅ System report saved: $ReportFile" "SUCCESS"
+    
+    return $ReportData
+}
+
+# Main execution logic
+function Main {
+    Write-EQ12Log "🌟 Starting $($ScriptInfo.Name) v$($ScriptInfo.Version)" "INFO"
+    Write-EQ12Log "Workspace: $Workspace" "INFO"
+    Write-EQ12Log "Action: $Action" "INFO"
+    
+    # Test prerequisites
+    $Prerequisites = Test-EQ12Prerequisites
+    
+    $CriticalFailures = @()
+    if (-not $Prerequisites.WorkspaceExists) { $CriticalFailures += "Workspace directory not found" }
+    if (-not $Prerequisites.PythonAvailable) { $CriticalFailures += "Python not available" }
+    if (-not $Prerequisites.SystemManagerExists) { $CriticalFailures += "System manager script not found" }
+    
+    if ($CriticalFailures.Count -gt 0) {
+        Write-EQ12Log "❌ Critical prerequisites not met:" "ERROR"
+        foreach ($Failure in $CriticalFailures) {
+            Write-EQ12Log "  - $Failure" "ERROR"
+        }
+        return 1
+    }
+    
+    # Execute requested action
+    switch ($Action) {
+        "HealthCheck" {
+            $Result = Invoke-EQ12SystemManager -SystemAction "health-check"
+            if ($Result.Success -and $Result.Output) {
+                try {
+                    $HealthData = $Result.Output | ConvertFrom-Json
+                    Write-EQ12Log "🏥 Health Score: $($HealthData.health_score * 100)%" "INFO"
+                    Write-EQ12Log "📊 CPU: $($HealthData.cpu_percent)%, RAM: $($HealthData.memory_percent)%" "INFO"
+                }
+                catch {
+                    Write-EQ12Log "Health check output: $($Result.Output)" "INFO"
+                }
+            }
+        }
+        
+        "Diagnostics" {
+            $Result = Invoke-EQ12SystemManager -SystemAction "diagnostics"
+            Write-EQ12Log "Diagnostics completed with exit code: $($Result.ExitCode)" "INFO"
+        }
+        
+        "AutoRepair" {
+            Write-EQ12Log "🛠️ Starting automatic system repair..." "WARNING"
+            $Result = Invoke-EQ12SystemManager -SystemAction "auto-repair"
+            Write-EQ12Log "Auto-repair completed with exit code: $($Result.ExitCode)" "INFO"
+        }
+        
+        "Monitor" {
+            Start-ContinuousMonitoring -MonitorInterval $Interval
+        }
+        
+        "Report" {
+            $Report = New-SystemReport
+            Write-EQ12Log "📋 System report generated successfully" "SUCCESS"
+        }
+        
+        "All" {
+            Write-EQ12Log "🔄 Running all system management operations..." "INFO"
+            
+            # Health check
+            Write-EQ12Log "Step 1: Health Check" "INFO"
+            $HealthResult = Invoke-EQ12SystemManager -SystemAction "health-check"
+            
+            # Diagnostics
+            Write-EQ12Log "Step 2: Diagnostics" "INFO"
+            $DiagnosticsResult = Invoke-EQ12SystemManager -SystemAction "diagnostics"
+            
+            # Auto-repair if needed
+            if (-not $HealthResult.Success -or -not $DiagnosticsResult.Success) {
+                Write-EQ12Log "Step 3: Auto-Repair (triggered by failures)" "WARNING"
+                $RepairResult = Invoke-EQ12SystemManager -SystemAction "auto-repair"
+            }
+            
+            # Generate report
+            Write-EQ12Log "Step 4: Generate Report" "INFO"
+            $Report = New-SystemReport
+        }
+    }
+    
+    if ($GenerateReport -and $Action -ne "Report" -and $Action -ne "All") {
+        Write-EQ12Log "📊 Generating additional system report..." "INFO"
+        $Report = New-SystemReport
+    }
+    
+    Write-EQ12Log "✅ $($ScriptInfo.Name) completed successfully" "SUCCESS"
+    return 0
+}
+
+# Execute main function
+try {
+    $ExitCode = Main
+    exit $ExitCode
+}
+catch {
+    Write-EQ12Log "💥 Fatal error: $_" "ERROR"
+    Write-EQ12Log "Stack trace: $($_.ScriptStackTrace)" "ERROR"
+    exit 1
+}

@@ -1,0 +1,20 @@
+{
+  "theme": "cyberpunk-hockey",
+  "libraries": [
+    "Tailwind CSS",
+    "shadcn/ui",
+    "Heroicons"
+  ],
+  "components": [
+    "nhl-parlay-cards",
+    "live-odds-ticker",
+    "probability-meters"
+  ],
+  "responsive": true,
+  "animations": [
+    "neon-glow",
+    "typing-effect",
+    "fade-in"
+  ],
+  "gpt5_generation": true
+}

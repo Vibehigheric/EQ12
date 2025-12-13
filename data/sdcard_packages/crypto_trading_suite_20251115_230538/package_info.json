@@ -1,0 +1,25 @@
+{
+  "package_name": "crypto_trading_suite",
+  "creation_date": "20251115_230538",
+  "location": "Buffalo, NY 14215",
+  "files_included": [
+    "crypto_starter_guide.html",
+    "auto_trading_bot_demo.py",
+    "portfolio_tracker_data.json",
+    "risk_management_guide.md",
+    "README.txt"
+  ],
+  "target_market": "Cryptocurrency beginners",
+  "pricing": {
+    "cost": 19.0,
+    "retail_price": 149.0,
+    "profit_margin": 130.0,
+    "roi_percentage": 684.2105263157895
+  },
+  "local_advantage": {
+    "location": "Buffalo, NY 14215",
+    "shipping_zone": "Northeast US",
+    "two_day_shipping": true,
+    "local_pickup": true
+  }
+}

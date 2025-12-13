@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eq12_memory>
+    <meta>
+        <last_updated>2025-12-06</last_updated>
+        <version>2.1.0</version>
+        <phase>35</phase>
+        <phase_name>Founder Mode Activation</phase_name>
+        <management_mode>Founder Mode</management_mode>
+    </meta>
+
+    <cluster_state>
+        <node id="EQ12-Main" role="master" os="Windows 11" status="online" />
+        <node id="RaspberryPi-5" role="edge" ip="192.168.1.80" status="online" />
+        <node id="Coral-TPU" role="accelerator" type="USB" status="online" />
+        <node id="Lenovo-10T8" role="worker" os="Ubuntu" status="delayed_until_thursday">
+            <note>Hardware unavailable until after Thursday.</note>
+        </node>
+    </cluster_state>
+
+    <active_missions>
+        <mission id="betting_engine_v1" status="priority_1">
+            <goal>Ship daily betting pipeline (OddsAPI -> Model -> Telegram)</goal>
+            <deadline>30 Days</deadline>
+            <constraints>No new hardware. No side projects. Single domain.</constraints>
+            <next_action>Verify network (Wednesday) -> Deploy V1 container</next_action>
+        </mission>
+        <mission id="operation_spice_route" status="paused">
+            <goal>Launch private label seasoning brand</goal>
+            <strategy>Hybrid (High Volume Taco + High Margin Burger)</strategy>
+            <next_action>Sourcing packaging (Mylar/Jars)</next_action>
+        </mission>
+        <mission id="empire_expansion" status="phase_2">
+            <goal>Deploy 13-product AI portfolio</goal>
+            <products>
+                <product status="initialized">
+                    <name>betting_brain</name>
+                    <engine>sports-betting (Python Lib)</engine>
+                    <data_source>The Odds API (Key: ...16ce)</data_source>
+                    <capabilities>
+                        <capability>Historical Backtesting (Italy 2020+)</capability>
+                        <capability>Live Odds Fetching (Global)</capability>
+                        <capability>Arbitrage Detection (Planned)</capability>
+                    </capabilities>
+                </product>
+                <product>retail_engine</product>
+                <product>content_factory</product>
+                <product>tradetech</product>
+                <product>caredesk</product>
+                <product>eduflow</product>
+                <product>mechview</product>
+                <product>listing_ai</product>
+                <product>kitchen_brain</product>
+                <product>caseflow</product>
+                <product>sitepilot</product>
+                <product>lawfusion</product>
+                <product>assetguard</product>
+            </products>
+            <orchestration>src/products/docker-compose.yaml</orchestration>
+        </mission>
+    </active_missions>
+
+    <core_philosophy>
+        <doctrine name="Magnificent Seven">
+            <verdict>Do not compete with Tech Giants.</verdict>
+            <strategy>Platform Parasite</strategy>
+            <directive>Exploit infrastructure as utilities.</directive>
+        </doctrine>
+    </core_philosophy>
+
+    <coding_standards>
+        <language name="PowerShell">CmdletBinding(), Structured Logging</language>
+        <language name="Python">Argparse, Logging, Type Hints</language>
+        <security>No hardcoded secrets. Use ENV variables.</security>
+    </coding_standards>
+
+    <recent_accomplishments>
+        <item>Deployed eq12-mcp-server (Node.js/TypeScript)</item>
+        <item>Scaffolded 10-product AI Business Blueprint</item>
+        <item>Created Master System Prompts (100 Prompts)</item>
+        <item>Upgraded Memory to XML Schema</item>
+        <item>Scraped 50+ Paul Graham Essays (YC Knowledge Base)</item>
+    </recent_accomplishments>
+</eq12_memory>

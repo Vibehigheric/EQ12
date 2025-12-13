@@ -1,0 +1,25 @@
+{
+  "virtual_hosts": [
+    {
+      "name": "eq12-betting.local",
+      "document_root": "C:/EQ12/dashboard",
+      "directory_index": "index.php index.html",
+      "error_log": "C:/EQ12/logs/apache_eq12_error.log",
+      "access_log": "C:/EQ12/logs/apache_eq12_access.log"
+    },
+    {
+      "name": "eq12-api.local",
+      "document_root": "C:/EQ12/api",
+      "directory_index": "index.php",
+      "error_log": "C:/EQ12/logs/apache_api_error.log",
+      "access_log": "C:/EQ12/logs/apache_api_access.log"
+    }
+  ],
+  "modules": [
+    "mod_rewrite",
+    "mod_ssl",
+    "mod_headers",
+    "mod_expires",
+    "mod_deflate"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "system": {
+    "name": "EQ12 Betting Intelligence",
+    "version": "2.0.0-playoff",
+    "mode": "production"
+  },
+  "safety_rails": {
+    "max_daily_exposure": 1000.0,
+    "max_single_bet": 100.0,
+    "kelly_fraction": 0.25,
+    "confidence_threshold": 0.70,
+    "auto_hedge_threshold": 0.15,
+    "freeze_after_losses": 3
+  },
+  "api_limits": {
+    "odds_api": {
+      "requests_per_minute": 60,
+      "timeout": 30,
+      "retry_attempts": 3
+    },
+    "lineup_api": {
+      "requests_per_minute": 120,
+      "timeout": 15,
+      "retry_attempts": 5
+    },
+    "weather_api": {
+      "requests_per_minute": 30,
+      "timeout": 20,
+      "retry_attempts": 3
+    }
+  },
+  "books": {
+    "primary": ["draftkings", "fanduel", "betmgm"],
+    "secondary": ["caesars", "pointsbet", "barstool"],
+    "arbitrage_threshold": 0.02,
+    "line_move_threshold": 0.05
+  },
+  "mlb_playoff_teams": {
+    "al": ["NYY", "CLE", "HOU", "DET"],
+    "nl": ["LAD", "NYM", "SD", "PHI"],
+    "venues": {
+      "NYY": {"stadium": "Yankee Stadium", "wind_factor": 1.1},
+      "CLE": {"stadium": "Progressive Field", "wind_factor": 0.9},
+      "HOU": {"stadium": "Minute Maid Park", "wind_factor": 0.95},
+      "DET": {"stadium": "Comerica Park", "wind_factor": 0.85},
+      "LAD": {"stadium": "Dodger Stadium", "wind_factor": 0.9},
+      "NYM": {"stadium": "Citi Field", "wind_factor": 0.9},
+      "SD": {"stadium": "Petco Park", "wind_factor": 0.8},
+      "PHI": {"stadium": "Citizens Bank Park", "wind_factor": 1.05}
+    }
+  },
+  "sgp_constraints": {
+    "draftkings": {
+      "max_legs": 5,
+      "min_odds_per_leg": -400,
+      "max_odds_per_leg": 500,
+      "prohibited_combinations": [
+        ["pitcher_strikeouts_under", "opponent_hits_over"],
+        ["team_runs_under", "team_hits_over"],
+        ["player_rbi_over", "team_runs_under"],
+        ["pitcher_wins_yes", "opponent_runs_over"]
+      ],
+      "correlation_boost": 0.05,
+      "max_correlation_legs": 3
+    }
+  },
+  "weather_thresholds": {
+    "significant_wind": 12,
+    "temperature_impact": {
+      "cold_threshold": 50,
+      "hot_threshold": 85
+    },
+    "rain_delay_probability": 0.30
+  },
+  "alert_channels": {
+    "telegram": {
+      "critical": "@EQ12_Critical",
+      "lineup_locks": "@EQ12_Lineups", 
+      "arbitrage": "@EQ12_Arb",
+      "sgp_recommendations": "@EQ12_SGP"
+    },
+    "discord": {
+      "enabled": false,
+      "webhook_url": ""
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "json_format": true,
+    "audit_trail": true,
+    "max_log_size_mb": 50,
+    "log_retention_days": 30
+  },
+  "circuit_breakers": {
+    "api_failure_threshold": 5,
+    "recovery_timeout_seconds": 300,
+    "half_open_max_attempts": 3
+  },
+  "task_priorities": {
+    "lineup_confirmation": 1,
+    "injury_updates": 1,
+    "weather_significant": 2,
+    "umpire_assignment": 2,
+    "odds_arbitrage": 2,
+    "sgp_optimization": 3,
+    "line_moves": 3,
+    "backtesting": 4,
+    "analytics": 4
+  }
+}

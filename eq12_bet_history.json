@@ -1,0 +1,27 @@
+[
+  {
+    "id": "bet_001",
+    "player": "Luka Doncic",
+    "prop": "Over 28.5 Points",
+    "odds": -110,
+    "stake": 50.0,
+    "ev": 4.5,
+    "timestamp": "2025-12-12T19:48:20.708288",
+    "status": "PENDING",
+    "result": null,
+    "pnl": 0.0
+  },
+  {
+    "player": "Luka Doncic",
+    "team": "LAL",
+    "prop": "Over 28.5 Points",
+    "odds": -110,
+    "model_prob": 58,
+    "stake": 147.5,
+    "ev": 10.72727272727273,
+    "timestamp": "2025-12-12T19:51:08.474043",
+    "status": "PENDING",
+    "result": null,
+    "pnl": 0.0
+  }
+]

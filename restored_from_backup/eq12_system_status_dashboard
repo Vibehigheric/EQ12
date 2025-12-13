@@ -1,0 +1,390 @@
+"""
+EQ12 System Status Dashboard
+Comprehensive command line troubleshooting and system analysis
+"""
+
+import json
+import logging
+import os
+import subprocess
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+
+class EQ12SystemStatusDashboard:
+    def __init__(self, workspace_path="C:/EQ12"):
+        self.workspace = Path(workspace_path)
+        self.logs_dir = self.workspace / "logs"
+        self.scripts_dir = self.workspace / "scripts"
+
+        # Setup logging
+        log_file = (
+            self.logs_dir / f"system_status_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.log"
+        )
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file, encoding="utf-8"), logging.StreamHandler()],
+        )
+        self.logger = logging.getLogger(__name__)
+
+    def check_python_environment(self):
+        """Check Python installation and key packages"""
+        python_info = {
+            "version": sys.version,
+            "executable": sys.executable,
+            "path": sys.path[:3],  # First 3 paths
+        }
+
+        # Check key packages
+        required_packages = [
+            "requests",
+            "beautifulsoup4",
+            "pandas",
+            "numpy",
+            "python-dotenv",
+            "openai",
+            "anthropic",
+        ]
+
+        installed_packages = {}
+        for package in required_packages:
+            try:
+                __import__(package.replace("-", "_"))
+                installed_packages[package] = "[OK] Installed"
+            except ImportError:
+                installed_packages[package] = "❌ Missing"
+
+        return {"python_info": python_info, "packages": installed_packages}
+
+    def check_system_resources(self):
+        """Check system resources and disk space"""
+        try:
+            import psutil
+
+            # Memory info
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage(str(self.workspace))
+
+            return {
+                "memory": {
+                    "total_gb": round(memory.total / (1024**3), 2),
+                    "available_gb": round(memory.available / (1024**3), 2),
+                    "percent_used": memory.percent,
+                },
+                "disk": {
+                    "total_gb": round(disk.total / (1024**3), 2),
+                    "free_gb": round(disk.free / (1024**3), 2),
+                    "percent_used": round((disk.used / disk.total) * 100, 1),
+                },
+            }
+        except ImportError:
+            return {"error": "psutil not installed - run: pip install psutil"}
+
+    def analyze_logs_directory(self):
+        """Analyze the logs directory for issues"""
+        if not self.logs_dir.exists():
+            return {"error": "Logs directory does not exist"}
+
+        log_files = list(self.logs_dir.glob("*.log"))
+        json_files = list(self.logs_dir.glob("*.json"))
+
+        # Check for recent errors
+        recent_errors = []
+        for log_file in log_files[-10:]:  # Check last 10 log files
+            try:
+                with open(log_file, encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+                    if "ERROR" in content or "CRITICAL" in content:
+                        recent_errors.append(log_file.name)
+            except Exception:
+                continue
+
+        return {
+            "total_log_files": len(log_files),
+            "total_json_files": len(json_files),
+            "recent_error_logs": recent_errors,
+            "directory_size_mb": sum(
+                f.stat().st_size for f in self.logs_dir.iterdir() if f.is_file()
+            )
+            / (1024 * 1024),
+        }
+
+    def check_critical_scripts(self):
+        """Check status of critical system scripts"""
+        critical_scripts = [
+            "eq12_universal_repair_assistant.py",
+            "eq12_system_monitor.py",
+            "eq12_status.py",
+            "eq12_nfl_td_parlay_revised.py",
+            "eq12_nhl_goalscorer_optimizer.py",
+        ]
+
+        script_status = {}
+        for script in critical_scripts:
+            script_path = self.scripts_dir / script
+            if script_path.exists():
+                try:
+                    # Try to compile the script
+                    with open(script_path, encoding="utf-8", errors="ignore") as f:
+                        content = f.read()
+                    compile(content, str(script_path), "exec")
+                    script_status[script] = "[OK] Syntax OK"
+                except SyntaxError as e:
+                    script_status[script] = f"❌ Syntax Error: Line {e.lineno}"
+                except Exception as e:
+                    script_status[script] = f"[WARN] Warning: {str(e)[:50]}"
+            else:
+                script_status[script] = "❌ Missing"
+
+        return script_status
+
+    def check_environment_variables(self):
+        """Check for required environment variables"""
+        required_vars = [
+            "ODDS_API_KEY",
+            "TELEGRAM_BOT_TOKEN",
+            "TELEGRAM_CHAT_ID",
+            "OPENAI_API_KEY",
+            "ANTHROPIC_API_KEY",
+        ]
+
+        env_status = {}
+        for var in required_vars:
+            value = os.getenv(var)
+            if value:
+                env_status[var] = f"[OK] Set ({len(value)} chars)"
+            else:
+                env_status[var] = "❌ Not set"
+
+        return env_status
+
+    def check_git_repository(self):
+        """Check Git repository status"""
+        try:
+            # Check if we're in a git repository
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=self.workspace,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+            if result.returncode == 0:
+                uncommitted_files = (
+                    len(result.stdout.strip().split("\n")) if result.stdout.strip() else 0
+                )
+
+                # Get current branch
+                branch_result = subprocess.run(
+                    ["git", "branch", "--show-current"],
+                    cwd=self.workspace,
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                current_branch = (
+                    branch_result.stdout.strip() if branch_result.returncode == 0 else "unknown"
+                )
+
+                return {
+                    "is_git_repo": True,
+                    "uncommitted_files": uncommitted_files,
+                    "current_branch": current_branch,
+                    "status": (
+                        "Clean"
+                        if uncommitted_files == 0
+                        else f"{uncommitted_files} uncommitted files"
+                    ),
+                }
+            else:
+                return {"is_git_repo": False, "error": "Not a git repository"}
+
+        except subprocess.TimeoutExpired:
+            return {"error": "Git command timed out"}
+        except FileNotFoundError:
+            return {"error": "Git not installed"}
+        except Exception as e:
+            return {"error": f"Git check failed: {e}"}
+
+    def run_quick_fixes(self):
+        """Run quick system fixes"""
+        fixes_applied = []
+
+        # Fix 1: Create logs directory if missing
+        if not self.logs_dir.exists():
+            self.logs_dir.mkdir(parents=True, exist_ok=True)
+            fixes_applied.append("Created logs directory")
+
+        # Fix 2: Create __init__.py files for Python packages
+        for py_dir in [self.scripts_dir, self.workspace / "tests"]:
+            if py_dir.exists() and not (py_dir / "__init__.py").exists():
+                (py_dir / "__init__.py").write_text("# EQ12 Package Init\n")
+                fixes_applied.append(f"Created {py_dir}/__init__.py")
+
+        # Fix 3: Clear Python cache
+        pycache_dirs = list(self.workspace.rglob("__pycache__"))
+        for cache_dir in pycache_dirs:
+            try:
+                import shutil
+
+                shutil.rmtree(cache_dir)
+                fixes_applied.append(f"Cleared {cache_dir}")
+            except Exception:
+                continue
+
+        return fixes_applied
+
+    def generate_comprehensive_report(self):
+        """Generate comprehensive system status report"""
+        report = {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "workspace": str(self.workspace),
+            "python_environment": self.check_python_environment(),
+            "system_resources": self.check_system_resources(),
+            "logs_analysis": self.analyze_logs_directory(),
+            "critical_scripts": self.check_critical_scripts(),
+            "environment_variables": self.check_environment_variables(),
+            "git_repository": self.check_git_repository(),
+            "quick_fixes_applied": self.run_quick_fixes(),
+        }
+
+        # Save report
+        report_file = (
+            self.logs_dir
+            / f"comprehensive_system_report_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}.json"
+        )
+        with open(report_file, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
+
+        # Display summary
+        self.display_status_dashboard(report)
+
+        return report
+
+    def display_status_dashboard(self, report):
+        """Display comprehensive status dashboard"""
+        print("\n" + "=" * 80)
+        print("[START] EQ12 SYSTEM STATUS DASHBOARD")
+        print("=" * 80)
+
+        # Python Environment
+        print("\n🐍 PYTHON ENVIRONMENT:")
+        print(f"   Version: {report['python_environment']['python_info']['version'].split()[0]}")
+        print(f"   Executable: {report['python_environment']['python_info']['executable']}")
+
+        # Package Status
+        print("\n[PACKAGE] PACKAGE STATUS:")
+        for pkg, status in report["python_environment"]["packages"].items():
+            print(f"   {pkg}: {status}")
+
+        # System Resources
+        if "error" not in report["system_resources"]:
+            print("\n💾 SYSTEM RESOURCES:")
+            mem = report["system_resources"]["memory"]
+            disk = report["system_resources"]["disk"]
+            print(
+                f"   Memory: {mem['available_gb']:.1f}GB available / \
+                    {mem['total_gb']:.1f}GB total ({mem['percent_used']:.1f}% used)"
+            )
+            print(
+                f"   Disk: {disk['free_gb']:.1f}GB free / \
+                    {disk['total_gb']:.1f}GB total ({disk['percent_used']:.1f}% used)"
+            )
+
+        # Critical Scripts
+        print("\n⚙️ CRITICAL SCRIPTS:")
+        for script, status in report["critical_scripts"].items():
+            print(f"   {script}: {status}")
+
+        # Environment Variables
+        print("\n🔐 ENVIRONMENT VARIABLES:")
+        for var, status in report["environment_variables"].items():
+            print(f"   {var}: {status}")
+
+        # Git Repository
+        print("\n📁 GIT REPOSITORY:")
+        git_info = report["git_repository"]
+        if "error" not in git_info:
+            print(f"   Branch: {git_info.get('current_branch', 'unknown')}")
+            print(f"   Status: {git_info.get('status', 'unknown')}")
+        else:
+            print(f"   Error: {git_info['error']}")
+
+        # Logs Analysis
+        print("\n[LIST] LOGS ANALYSIS:")
+        logs = report["logs_analysis"]
+        if "error" not in logs:
+            print(f"   Total log files: {logs['total_log_files']}")
+            print(f"   Total JSON files: {logs['total_json_files']}")
+            print(f"   Directory size: {logs['directory_size_mb']:.1f}MB")
+            if logs["recent_error_logs"]:
+                print(f"   Recent error logs: {len(logs['recent_error_logs'])}")
+
+        # Quick Fixes
+        if report["quick_fixes_applied"]:
+            print("\n[FIX] QUICK FIXES APPLIED:")
+            for fix in report["quick_fixes_applied"]:
+                print(f"   [OK] {fix}")
+
+        print("\n" + "=" * 80)
+        print("[DATA] SYSTEM HEALTH SUMMARY:")
+
+        # Calculate overall health score
+        health_factors = {
+            "critical_scripts_ok": sum(
+                1 for status in report["critical_scripts"].values() if "[OK]" in status
+            ),
+            "packages_installed": sum(
+                1
+                for status in report["python_environment"]["packages"].values()
+                if "[OK]" in status
+            ),
+            "env_vars_set": sum(
+                1 for status in report["environment_variables"].values() if "[OK]" in status
+            ),
+        }
+
+        total_critical_scripts = len(report["critical_scripts"])
+        total_packages = len(report["python_environment"]["packages"])
+        total_env_vars = len(report["environment_variables"])
+
+        health_score = (
+            (health_factors["critical_scripts_ok"] / total_critical_scripts * 40)
+            + (health_factors["packages_installed"] / total_packages * 30)
+            + (health_factors["env_vars_set"] / total_env_vars * 30)
+        )
+
+        print(f"🏥 Overall Health Score: {health_score:.1f}%")
+        print(
+            f"[FIX] Critical Scripts:
+    {health_factors['critical_scripts_ok']}/{total_critical_scripts} OK"
+        )
+        print(
+            f"[PACKAGE] Packages: {health_factors['packages_installed']}/{total_packages} Installed"
+        )
+        print(f"🔐 Environment: {health_factors['env_vars_set']}/{total_env_vars} Variables Set")
+
+        print("\n" + "=" * 80)
+
+
+def main():
+    """Main entry point"""
+    try:
+        dashboard = EQ12SystemStatusDashboard()
+        dashboard.generate_comprehensive_report()
+
+        print("\n[TARGET] SYSTEM ANALYSIS COMPLETE")
+        print(f"📄 Full report saved to: {dashboard.logs_dir}/comprehensive_system_report_*.json")
+
+        return 0
+
+    except Exception as e:
+        print(f"❌ System analysis failed: {e}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

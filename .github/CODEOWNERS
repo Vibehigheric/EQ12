@@ -1,0 +1,37 @@
+# EQ12 GODSTACK CODEOWNERS
+# Defines code ownership and required approvals for sensitive business stacks
+
+# Global fallback - you own everything by default
+* @Vibehigheric
+
+# Sensitive Business Stacks - Require explicit approval
+betting/ @Vibehigheric
+cannabis/ @Vibehigheric  
+credit/ @Vibehigheric
+
+# Core betting logic files
+odds_parser.py @Vibehigheric
+parlay_builder.py @Vibehigheric
+
+# Governance and security files - Critical infrastructure
+.github/ @Vibehigheric
+governance/ @Vibehigheric
+GOVERNANCE*.md @Vibehigheric
+COPILOT*.md @Vibehigheric
+check_secrets.py @Vibehigheric
+badge_check.py @Vibehigheric
+compliance_audit.py @Vibehigheric
+
+# DevContainer and CI/CD - Infrastructure changes
+.devcontainer/ @Vibehigheric
+.github/workflows/ @Vibehigheric
+requirements*.txt @Vibehigheric
+/scripts/ @Vibehigheric
+
+# Enrichment and core automation
+enrichment.py @Vibehigheric
+eq12_meta_search/trending_monitor.py @Vibehigheric
+
+# Configuration files with secrets or sensitive settings  
+*.env.example @Vibehigheric
+configs/ @Vibehigheric

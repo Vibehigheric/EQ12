@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+r"""
+EQ12 scraper template (hardened): argparse, logging, UA rotation, randomized delays,
+JSON output and CSV export stub. Writes to C:\EQ12\logs or container path from EQ12_LOGS.
+"""
+
+import argparse
+import json
+import logging
+import os
+import random
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
+try:
+    import pandas as pd
+except Exception:
+    pd = None
+
+LOGS = os.environ.get("EQ12_LOGS", r"C:\EQ12\logs")
+Path(LOGS).mkdir(parents=True, exist_ok=True)
+
+logger = logging.getLogger("scraper")
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(Path(LOGS) / "scraper_template.log")
+handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+if not logger.handlers:
+    logger.addHandler(handler)
+
+# UA rotation pool (simple, extendable)
+UA_POOL = [
+    "Mozilla/5.0 (
+        Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
+        like Gecko
+    ) Chrome/115.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (
+        Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML,
+        like Gecko
+    ) Version/16.0 Safari/605.1.15",
+    "Mozilla/5.0 (
+        X11; Linux x86_64) AppleWebKit/537.36 (KHTML,
+        like Gecko
+    ) Chrome/116.0.0.0 Safari/537.36",
+]
+
+
+def parse_args():
+    p = argparse.ArgumentParser(description="EQ12 Scraper template")
+    p.add_argument("--out-json", help="Output JSON path", default=None)
+    p.add_argument("--out-csv", help="Output CSV path", default=None)
+    p.add_argument("--seed", type=int, help="Random seed for UA selection/delays", default=None)
+    return p.parse_args()
+
+
+def choose_ua(seed=None):
+    if seed is not None:
+        random.seed(seed)
+    return random.choice(UA_POOL)
+
+
+def delay_random(min_s=0.5, max_s=2.0, seed=None):
+    if seed is not None:
+        random.seed(seed)
+    t = random.uniform(min_s, max_s)
+    logger.debug("Delaying for %.2fs", t)
+    time.sleep(t)
+
+
+def get_cached_odds_key():
+    # TODO: Ensure Odds API requested once at startup and cached
+    return os.environ.get("ODDS_API_KEY")
+
+
+def main() -> None:
+    args = parse_args()
+    if args.seed:
+        random.seed(args.seed)
+
+    result = {"ok": True, "timestamp": datetime.utcnow().isoformat(), "data": []}
+    ua = choose_ua(args.seed)
+    logger.info("Using UA: %s", ua)
+    cached_odds = get_cached_odds_key()
+    if not cached_odds:
+        logger.warning("ODDS_API_KEY not present in environment")
+
+    try:
+        # ... scraping logic here ...
+        # Stealth: rotate UA, add randomized delays, and prefer undetected drivers when available
+        delay_random(0.3, 1.5)
+
+        # placeholder data
+        result["data"] = [
+            {"symbol": "BTC", "price": 27345.12, "source": "example", "ua": ua},
+        ]
+
+        # Export CSV if requested
+        if args.out_csv:
+            if pd is None:
+                logger.warning("pandas not available; skipping CSV export")
+            else:
+                df = pd.DataFrame(result["data"])
+                df.to_csv(args.out_csv, index=False)
+
+        # Write JSON snapshot into logs by default
+        out_json = (
+            args.out_json
+            or Path(LOGS) / f"scraper_template_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.json"
+        )
+        with open(out_json, "w", encoding="utf-8") as fh:
+            try:
+                json.dump(result, fh, ensure_ascii=False, indent=2)
+
+            except OSError as e:
+                logging.error(f"Failed to write JSON: {e}")
+
+                raise
+
+        # TODO: export as JSON for dashboard
+        dashboard_json = Path(LOGS) / "dashboard_snapshot.json"
+        with open(dashboard_json, "w", encoding="utf-8") as dh:
+            try:
+                json.dump(
+                    {
+                        "ok": True,
+                        "timestamp": datetime.utcnow().isoformat(),
+                        "data": result["data"],
+                    },
+                    dh,
+                    ensure_ascii=False,
+                    indent=2,
+                )
+            except OSError as e:
+                logging.error(f"Failed to write JSON: {e}")
+                raise
+
+        print(json.dumps(result))
+    except Exception as exc:
+        logger.exception("Scraper failed")
+        result["ok"] = False
+        result["error"] = str(exc)
+        print(json.dumps(result))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
