@@ -1,5 +1,5 @@
 # EQ12 Advanced Development Container with VB Debugging
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 
 # Environment for VB debugging and development
 ENV EQ12_VB_DEBUG=true
