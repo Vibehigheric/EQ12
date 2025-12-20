@@ -1,7 +1,7 @@
 # EQ12 GODSTACK Dockerfile
 # Optimized for Swarm & BuildKit
 
-FROM python:3.12-slim AS base
+FROM python:3.14-slim AS base
 
 # Set environment vars
 ENV PYTHONUNBUFFERED=1 \
