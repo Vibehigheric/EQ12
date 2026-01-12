@@ -24,8 +24,8 @@
         "webextension-polyfill": "^0.12.0"
     },
     "devDependencies": {
-        "@types/webextension-polyfill": "^0.10.7",
-        "eslint": "^8.57.0",
+        "@types/webextension-polyfill": "^0.12.4",
+        "eslint": "^9.39.2",
         "web-ext": "^8.2.0"
     },
     "keywords": [
