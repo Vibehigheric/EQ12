@@ -20,13 +20,19 @@
         "package": "npm run package:windows"
     },
     "dependencies": {
+        "@google-cloud/bigquery": "8.3.1",
+        "@google-cloud/storage": "^5.20.4",
+        "mocha": "^11.7.6",
+        "node-cron": "4.2.1",
         "send": "1.2.1",
+        "uuid": "14.0.0",
+        "wdio-vscode-service": "^6.1.4",
         "webextension-polyfill": "^0.12.0"
     },
     "devDependencies": {
         "@types/webextension-polyfill": "^0.12.5",
-        "eslint": "^10.0.2",
-        "web-ext": "^8.2.0"
+        "eslint": "^10.4.0",
+        "web-ext": "^10.2.0"
     },
     "keywords": [
         "betting",
