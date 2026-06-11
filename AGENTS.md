@@ -258,6 +258,103 @@ Specs are the source of truth. Python modules, workflows, database tables, tests
 7. Generate tests from spec.
 8. Run tests.
 9. Run workflows.
+
+---
+
+## 10) Safe Odds API Key Validation
+
+When working on MLB or SGP workflows, cycle only odds API keys that are already configured and do it safely.
+
+### Objective
+
+- Test all configured odds API keys.
+- Identify the first working key.
+- Export only the selected working key to the active process environment.
+- Write a masked health report.
+- Never expose secrets in logs, artifacts, commits, or summaries.
+
+### Allowed key sources
+
+- GitHub Actions secrets
+- local `.env`
+- environment variables
+- existing secret-manager style config already present in the repo
+
+### Candidate environment variable names
+
+- `THEODDSAPI_KEY`
+- `THE_ODDS_API_KEY`
+- `ODDS_API_KEY`
+- `ODDSAPI_API_KEY`
+- `SPORTS_ODDS_API_KEY`
+- `EQ12_ODDS_API_KEY`
+
+### Safety rules
+
+- Never echo a full key.
+- Never commit a key.
+- Never write a full key to artifacts.
+- Mask keys as first four and last four characters only.
+- Do not brute-force unknown keys.
+- Only test keys that are already configured.
+
+### Required implementation
+
+Create and maintain:
+
+- `scripts/validate_odds_keys.py`
+- `artifacts/mlb/odds_key_health.json`
+
+### Validation behavior
+
+- Endpoint: The Odds API MLB odds endpoint
+- Scope:
+  - sport `baseball_mlb`
+  - regions `us`
+  - markets `h2h`
+  - odds format `american`
+- Status mapping:
+  - `200` with games => `VALID`
+  - `200` with empty response => `VALID_EMPTY`
+  - `401` => `INVALID_KEY`
+  - `403` => `FORBIDDEN_OR_QUOTA`
+  - `429` => `RATE_LIMITED`
+  - `5xx` => `PROVIDER_ERROR`
+
+### Output requirements
+
+`artifacts/mlb/odds_key_health.json` must include:
+
+- `env_name`
+- `key_masked`
+- `status`
+- `http_status`
+- `quota_remaining_if_available`
+- `selected`
+- `tested_at`
+
+### Workflow integration rules
+
+- Run `validate_odds_keys.py` before MLB or SGP odds fetch steps.
+- Export the selected key to process env only.
+- If no key is valid, continue in `NO_BET_HOLD`.
+- Never fail the workflow only because an odds key is missing or invalid.
+- Record odds provider status in the workflow summary.
+
+### Required workflow targets
+
+- `.github/workflows/eq12-daily.yml`
+- `.github/workflows/sgps.yml`
+
+### MLB fallback behavior
+
+If no valid odds API key is available, the correct output is:
+
+```text
+NO RELEASE-GRADE MLB PLAYS TODAY
+Reason: no valid odds API key available
+Mode: NO_BET_HOLD
+```
 10. Produce MLB artifacts.
 
 ### Final deliverable checklist

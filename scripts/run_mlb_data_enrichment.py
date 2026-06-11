@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 MLB_TZ = ZoneInfo("America/New_York")
 ARTIFACT_FILES = [
+    "odds_key_health.json",
     "odds_snapshot.json",
     "projections.json",
     "edges.json",
@@ -87,7 +88,16 @@ def collect_odds_api_candidates() -> list[dict[str, str]]:
         seen.add(normalized)
         candidates.append({"source": source, "key": normalized})
 
-    for env_name in ("ODDS_API_KEY", "THE_ODDS_API_KEY", "ODDSAPI_KEY"):
+    for env_name in (
+        "SELECTED_ODDS_API_KEY",
+        "THEODDSAPI_KEY",
+        "THE_ODDS_API_KEY",
+        "ODDS_API_KEY",
+        "ODDSAPI_API_KEY",
+        "SPORTS_ODDS_API_KEY",
+        "EQ12_ODDS_API_KEY",
+        "ODDSAPI_KEY",
+    ):
         add_candidate(f"env:{env_name}", os.getenv(env_name))
 
     key_files = {
@@ -147,12 +157,13 @@ def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
             "warnings": warnings.copy(),
             "games": [],
             "key_sources_tried": [],
+            "provider_status": "NO_CONFIGURED_KEYS",
         }
     payload = None
-    source_url = None
     success_source = None
     key_sources_tried: list[str] = []
     fetch_errors: list[str] = []
+    provider_status = "NO_VALID_KEYS"
 
     for candidate in candidates:
         params = urlencode(
@@ -166,19 +177,21 @@ def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
         )
         url = f"https://api.the-odds-api.com/v4/sports/baseball_mlb/odds?{params}"
         key_sources_tried.append(candidate["source"])
-        source_url = url
         try:
             payload = fetch_json(url)
             success_source = candidate["source"]
+            provider_status = "VALID_KEY_SELECTED"
             break
         except HTTPError as exc:
             fetch_errors.append(f"{candidate['source']}:{exc.code}")
             if exc.code in (401, 403):
+                provider_status = "FORBIDDEN_OR_QUOTA" if exc.code == 403 else provider_status
                 continue
             warnings.append(f"odds_fetch_failed: {candidate['source']} {exc}")
             break
         except (URLError, TimeoutError, json.JSONDecodeError) as exc:
             warnings.append(f"odds_fetch_failed: {candidate['source']} {exc}")
+            provider_status = "REQUEST_ERROR"
             break
 
     if payload is None:
@@ -190,8 +203,8 @@ def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
             "system_status": "DEGRADED",
             "warnings": warnings.copy(),
             "games": [],
-            "source_url": source_url,
             "key_sources_tried": key_sources_tried,
+            "provider_status": provider_status,
         }
 
     snapshot_games = []
@@ -222,12 +235,22 @@ def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
         "date": date_text,
         "generated_at": datetime.now(MLB_TZ).isoformat(),
         "system_status": "OK" if snapshot_games else "DEGRADED",
-        "source_url": source_url,
         "warnings": warnings.copy(),
         "key_source_used": success_source,
         "key_sources_tried": key_sources_tried,
+        "provider_status": provider_status if snapshot_games else "VALID_EMPTY",
         "games": snapshot_games,
     }
+
+
+def load_odds_key_health(artifacts_dir: Path) -> dict[str, Any]:
+    path = artifacts_dir / "odds_key_health.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
 
 
 def build_odds_index(odds_snapshot: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
@@ -289,6 +312,7 @@ def main() -> int:
         raise FileNotFoundError(f"Missing slate context: {slate_path}")
 
     slate = load_json(slate_path)
+    odds_key_health = load_odds_key_health(artifacts_dir)
     odds_snapshot = fetch_odds_snapshot(args.date, warnings)
     write_json(artifacts_dir / "odds_snapshot.json", odds_snapshot)
     source_files_used.append((artifacts_dir / "odds_snapshot.json").as_posix())
@@ -390,6 +414,12 @@ def main() -> int:
             release_grade_candidates.append(projection)
 
     watchlist.sort(key=lambda item: item["completeness_score"], reverse=True)
+    provider_status = (
+        odds_key_health.get("provider_status")
+        or odds_snapshot.get("provider_status")
+        or "UNKNOWN"
+    )
+    no_valid_odds_key = provider_status in {"NO_CONFIGURED_KEYS", "NO_VALID_KEYS", "FORBIDDEN_OR_QUOTA", "RATE_LIMITED"}
 
     projections_payload = {
         "date": args.date,
@@ -397,6 +427,7 @@ def main() -> int:
         "system_status": "OK",
         "source_files_used": source_files_used,
         "warnings": warnings,
+        "provider_status": provider_status,
         "model_artifacts_found": model_artifacts,
         "games": projections,
     }
@@ -405,6 +436,7 @@ def main() -> int:
         "generated_at": generated_at,
         "system_status": "OK",
         "official_release_count": len(release_grade_candidates),
+        "provider_status": provider_status,
         "games": edges,
         "warnings": warnings,
     }
@@ -413,6 +445,7 @@ def main() -> int:
         "generated_at": generated_at,
         "system_status": "OK",
         "official_play": False,
+        "provider_status": provider_status,
         "watchlist": watchlist,
         "warnings": warnings,
     }
@@ -421,14 +454,23 @@ def main() -> int:
     write_json(artifacts_dir / "edges.json", edges_payload)
     write_json(artifacts_dir / "watchlist.json", watchlist_payload)
 
-    release_card = [
-        f"# MLB Release Card - {args.date}",
-        "",
-        "NO RELEASE-GRADE MLB PLAYS TODAY",
-        "",
-        "Reason: release-grade gates require confirmed lineups, fresh markets, confirmed pitchers, and validated model artifacts.",
-        "This run produced only proxy watchlist entries.",
-    ]
+    if no_valid_odds_key:
+        release_card = [
+            f"# MLB Release Card - {args.date}",
+            "",
+            "NO RELEASE-GRADE MLB PLAYS TODAY",
+            "Reason: no valid odds API key available",
+            "Mode: NO_BET_HOLD",
+        ]
+    else:
+        release_card = [
+            f"# MLB Release Card - {args.date}",
+            "",
+            "NO RELEASE-GRADE MLB PLAYS TODAY",
+            "",
+            "Reason: release-grade gates require confirmed lineups, fresh markets, confirmed pitchers, and validated model artifacts.",
+            "This run produced only proxy watchlist entries.",
+        ]
     (artifacts_dir / "release_card.md").write_text("\n".join(release_card) + "\n", encoding="utf-8")
 
     no_bet_lines = [
@@ -450,6 +492,9 @@ def main() -> int:
         f"- Generated at: {generated_at}",
         f"- Slate games found: {slate.get('games_found', len(slate.get('games', [])))}",
         f"- Odds games found: {len(odds_snapshot.get('games', []))}",
+        f"- Odds provider status: {provider_status}",
+        f"- Odds keys tested: {odds_key_health.get('keys_tested_count', 0)}",
+        f"- Selected odds key: {odds_key_health.get('selected_key_masked') or 'none'}",
         f"- Model artifacts found: {len(model_artifacts)}",
         f"- Release-grade plays: {len(release_grade_candidates)}",
         f"- Proxy watchlist entries: {len(watchlist)}",
@@ -464,6 +509,15 @@ def main() -> int:
         workflow_summary.append("## Warnings")
         for warning in warnings:
             workflow_summary.append(f"- {warning}")
+    if no_valid_odds_key:
+        workflow_summary.extend(
+            [
+                "",
+                "## Mode",
+                "- Mode: NO_BET_HOLD",
+                "- Reason: no valid odds API key available",
+            ]
+        )
     (artifacts_dir / "workflow_summary.md").write_text("\n".join(workflow_summary) + "\n", encoding="utf-8")
 
     print(f"Wrote MLB artifacts to {artifacts_dir}")

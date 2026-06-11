@@ -91,11 +91,25 @@ jobs:
             --date "$MLB_DATE" \
             --out artifacts/mlb/slate_context.json
 
+      - name: Validate odds API keys
+        env:
+          THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          ODDSAPI_API_KEY: ${{ secrets.ODDSAPI_API_KEY }}
+          SPORTS_ODDS_API_KEY: ${{ secrets.SPORTS_ODDS_API_KEY }}
+          EQ12_ODDS_API_KEY: ${{ secrets.EQ12_ODDS_API_KEY }}
+        run: python scripts/validate_odds_keys.py
+
       - name: Run MLB data enrichment
         env:
           TZ: America/New_York
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+          THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
+          ODDSAPI_API_KEY: ${{ secrets.ODDSAPI_API_KEY }}
+          SPORTS_ODDS_API_KEY: ${{ secrets.SPORTS_ODDS_API_KEY }}
+          EQ12_ODDS_API_KEY: ${{ secrets.EQ12_ODDS_API_KEY }}
         run: |
           MLB_DATE="$(date +%F)"
           python scripts/run_mlb_data_enrichment.py \
@@ -110,6 +124,7 @@ jobs:
           name: mlb-production-artifacts
           path: |
             artifacts/mlb/slate_context.json
+            artifacts/mlb/odds_key_health.json
             artifacts/mlb/odds_snapshot.json
             artifacts/mlb/projections.json
             artifacts/mlb/edges.json

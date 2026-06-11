@@ -46,15 +46,28 @@ jobs:
 
             - name: Set up environment variables
               env:
+                  THEODDSAPI_KEY: ${{ secrets.THEODDSAPI_KEY }}
+                  THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
                   ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+                  ODDSAPI_API_KEY: ${{ secrets.ODDSAPI_API_KEY }}
+                  SPORTS_ODDS_API_KEY: ${{ secrets.SPORTS_ODDS_API_KEY }}
+                  EQ12_ODDS_API_KEY: ${{ secrets.EQ12_ODDS_API_KEY }}
                   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
                   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
               run: |
                   echo "Environment variables configured"
                   # Export for subsequent steps
+                  echo "THEODDSAPI_KEY=$THEODDSAPI_KEY" >> $GITHUB_ENV
+                  echo "THE_ODDS_API_KEY=$THE_ODDS_API_KEY" >> $GITHUB_ENV
                   echo "ODDS_API_KEY=$ODDS_API_KEY" >> $GITHUB_ENV
+                  echo "ODDSAPI_API_KEY=$ODDSAPI_API_KEY" >> $GITHUB_ENV
+                  echo "SPORTS_ODDS_API_KEY=$SPORTS_ODDS_API_KEY" >> $GITHUB_ENV
+                  echo "EQ12_ODDS_API_KEY=$EQ12_ODDS_API_KEY" >> $GITHUB_ENV
                   echo "TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN" >> $GITHUB_ENV
                   echo "TELEGRAM_CHAT_ID=$TELEGRAM_CHAT_ID" >> $GITHUB_ENV
+
+            - name: Validate odds API keys
+              run: python scripts/validate_odds_keys.py
 
             - name: Parse stake range
               id: parse-stakes
@@ -90,6 +103,7 @@ jobs:
                       logs/sgp_*.json
                       logs/sgp_*.csv
                       logs/sgp_*.txt
+                      artifacts/mlb/odds_key_health.json
                   retention-days: 30
 
             - name: Check for results
@@ -134,3 +148,22 @@ jobs:
                   echo "❌ SGP generation failed"
                   echo "Check logs for details"
                   # Could add Telegram notification here with TELEGRAM_BOT_TOKEN
+
+            - name: Append workflow summary
+              if: always()
+              run: |
+                  echo "## EQ12 Daily SGP Generation" >> $GITHUB_STEP_SUMMARY
+                  if [ -f artifacts/mlb/odds_key_health.json ]; then
+                    provider_status=$(python - <<'PY'
+import json
+from pathlib import Path
+path = Path("artifacts/mlb/odds_key_health.json")
+payload = json.loads(path.read_text(encoding="utf-8"))
+print(payload.get("provider_status", "UNKNOWN"))
+PY
+)
+                    echo "- Odds provider status: $provider_status" >> $GITHUB_STEP_SUMMARY
+                    echo "- Odds key health artifact: artifacts/mlb/odds_key_health.json" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "- Odds provider status: artifact missing" >> $GITHUB_STEP_SUMMARY
+                  fi
