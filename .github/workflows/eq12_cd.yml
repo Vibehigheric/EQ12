@@ -105,7 +105,7 @@ jobs:
         python -c "import sys; sys.dont_write_bytecode = True; from eq12_no_pycache import eq12_import_hook; eq12_import_hook(); print('EQ12 no-pycache protection: ACTIVE')"
 
         # Clean any existing pycache
-        & powershell -ExecutionPolicy Bypass -File "scripts\eq12_pycache_cleanup.ps1" -Quick
+        & powershell -ExecutionPolicy Bypass -File "scripts\eq12_pycache_cleanup.ps1"
 
         # Test critical systems
         if (Test-Path "scripts\eq12_system_status.py") {
