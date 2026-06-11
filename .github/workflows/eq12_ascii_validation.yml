@@ -1,9 +1,9 @@
 name: EQ12 ASCII Validation & Hardening
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ master, main ]
   schedule:
     - cron: '0 6 * * *'  # Daily at 6 AM UTC
 
@@ -117,14 +117,7 @@ jobs:
         # Validate no-pycache module
         if (Test-Path "eq12_no_pycache.py") {
           Write-Host "Testing no-pycache module..." -ForegroundColor Gray
-          python -c "
-from eq12_no_pycache import eq12_import_hook, verify_no_pycache
-eq12_import_hook()
-if verify_no_pycache():
-    print('SUCCESS: No-pycache system validated')
-else:
-    print('WARNING: No-pycache system needs attention')
-          "
+          python -c "from eq12_no_pycache import eq12_import_hook, verify_no_pycache; eq12_import_hook(); print('SUCCESS: No-pycache system validated' if verify_no_pycache() else 'WARNING: No-pycache system needs attention')"
         }
 
     - name: Generate EQ12 Hardening Report
@@ -135,39 +128,40 @@ else:
         $reportPath = "eq12_hardening_report.md"
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
 
-        $report = @"
-# EQ12 ASCII Hardening Report
-Generated: $timestamp
-
-## Validation Summary
-- Repository scanned for ASCII compliance
-- Unicode corruption automatically fixed
-- Pycache directories cleaned
-- EQ12 protection systems validated
-
-## System Status
-- ASCII-Safe Mode: ACTIVE
-- No-Pycache System: OPERATIONAL
-- Unicode Corruption: ELIMINATED
-- Pylance Protection: ENABLED
-
-## Environment Configuration
-- PYTHONDONTWRITEBYTECODE: 1
-- EQ12_ASCII_MODE: ACTIVE
-- EQ12_NO_PYCACHE: ACTIVE
-
-## Buffalo NY 14215 Content Empire
-EQ12 workspace is hardened and corruption-immune.
-"@
+        $report = @(
+          "# EQ12 ASCII Hardening Report",
+          "Generated: $timestamp",
+          "",
+          "## Validation Summary",
+          "- Repository scanned for ASCII compliance",
+          "- Unicode corruption automatically fixed",
+          "- Pycache directories cleaned",
+          "- EQ12 protection systems validated",
+          "",
+          "## System Status",
+          "- ASCII-Safe Mode: ACTIVE",
+          "- No-Pycache System: OPERATIONAL",
+          "- Unicode Corruption: ELIMINATED",
+          "- Pylance Protection: ENABLED",
+          "",
+          "## Environment Configuration",
+          "- PYTHONDONTWRITEBYTECODE: 1",
+          "- EQ12_ASCII_MODE: ACTIVE",
+          "- EQ12_NO_PYCACHE: ACTIVE",
+          "",
+          "## Buffalo NY 14215 Content Empire",
+          "EQ12 workspace is hardened and corruption-immune."
+        ) -join "`n"
 
         Set-Content -Path $reportPath -Value $report -Encoding ASCII
         Write-Host "Hardening report generated: $reportPath" -ForegroundColor Green
 
     - name: Upload Hardening Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-hardening-report
         path: eq12_hardening_report.md
+        if-no-files-found: ignore
 
   pylance-protection:
     name: EQ12 Pylance Protection Test
@@ -193,33 +187,27 @@ EQ12 workspace is hardened and corruption-immune.
           New-Item -ItemType Directory -Path $vscodeDir -Force | Out-Null
         }
 
-        $testSettings = @'
-{
-    "python.languageServer": "Pylance",
-    "python.analysis.typeCheckingMode": "off",
-    "python.analysis.disableBytecode": true,
-    "python.linting.ignorePycache": true,
-    "files.encoding": "utf8",
-    "editor.unicodeHighlight.nonBasicASCII": true,
-    "terminal.integrated.env.windows": {
-        "PYTHONDONTWRITEBYTECODE": "1",
-        "EQ12_ASCII_MODE": "ACTIVE"
-    }
-}
-'@
+        $testSettings = @(
+          "{",
+          '    "python.languageServer": "Pylance",',
+          '    "python.analysis.typeCheckingMode": "off",',
+          '    "python.analysis.disableBytecode": true,',
+          '    "python.linting.ignorePycache": true,',
+          '    "files.encoding": "utf8",',
+          '    "editor.unicodeHighlight.nonBasicASCII": true,',
+          '    "terminal.integrated.env.windows": {',
+          '        "PYTHONDONTWRITEBYTECODE": "1",',
+          '        "EQ12_ASCII_MODE": "ACTIVE"',
+          "    }",
+          "}"
+        ) -join "`n"
 
         Set-Content -Path "$vscodeDir/settings.json" -Value $testSettings -Encoding ASCII
         Write-Host "Created Pylance-safe VS Code settings" -ForegroundColor Green
 
         # Test Python import system
         if (Test-Path "eq12_no_pycache.py") {
-          python -c "
-import sys
-sys.dont_write_bytecode = True
-from eq12_no_pycache import eq12_import_hook
-eq12_import_hook()
-print('Pylance protection test: PASSED')
-          " || exit 1
+          python -c "import sys; sys.dont_write_bytecode = True; from eq12_no_pycache import eq12_import_hook; eq12_import_hook(); print('Pylance protection test: PASSED')" || exit 1
         }
 
         Write-Host "EQ12 Pylance protection validated" -ForegroundColor Green

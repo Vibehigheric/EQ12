@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 3 * * *'  # Daily at 3 AM UTC
   push:
-    branches: [ main ]
+    branches: [ master, main ]
   workflow_dispatch:
 
 env:
@@ -187,46 +187,48 @@ jobs:
       shell: pwsh
       run: |
         $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $report = @"
-# EQ12 System Backup Report
-Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")
-
-## Backup Summary
-- Backup timestamp: $timestamp
-- Git commit: $(git rev-parse HEAD)
-- Git branch: $(git branch --show-current)
-
-## Backup Contents
-- Core system files: BACKED UP
-- Scripts directory: BACKED UP
-- Tests directory: BACKED UP
-- Configuration files: BACKED UP
-- GitHub workflows: BACKED UP
-- VS Code settings: BACKED UP
-
-## Backup Status
-- EQ12 Backup Mode: ACTIVE
-- System state: PRESERVED
-- Data integrity: VERIFIED
-
-## Buffalo NY 14215 Content Empire
-EQ12 system backup completed successfully.
-"@
+        $report = @(
+          "# EQ12 System Backup Report",
+          'Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")',
+          "",
+          "## Backup Summary",
+          "- Backup timestamp: $timestamp",
+          "- Git commit: $(git rev-parse HEAD)",
+          "- Git branch: $(git branch --show-current)",
+          "",
+          "## Backup Contents",
+          "- Core system files: BACKED UP",
+          "- Scripts directory: BACKED UP",
+          "- Tests directory: BACKED UP",
+          "- Configuration files: BACKED UP",
+          "- GitHub workflows: BACKED UP",
+          "- VS Code settings: BACKED UP",
+          "",
+          "## Backup Status",
+          "- EQ12 Backup Mode: ACTIVE",
+          "- System state: PRESERVED",
+          "- Data integrity: VERIFIED",
+          "",
+          "## Buffalo NY 14215 Content Empire",
+          "EQ12 system backup completed successfully."
+        ) -join "`n"
 
         Set-Content -Path "eq12_backup_report.md" -Value $report -Encoding ASCII
 
     - name: Upload Backup Archive
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-system-backup
         path: backups/
         retention-days: 90
+        if-no-files-found: ignore
 
     - name: Upload Backup Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-backup-report
         path: eq12_backup_report.md
+        if-no-files-found: ignore
 
   sync-external:
     name: EQ12 External Sync

@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 */6 * * *'  # Every 6 hours
   push:
-    branches: [ main ]
+    branches: [ master, main ]
   workflow_dispatch:
 
 env:
@@ -269,109 +269,111 @@ jobs:
         $githubMetrics = if (Test-Path "eq12_github_metrics.json") { Get-Content "eq12_github_metrics.json" | ConvertFrom-Json } else { @{} }
 
         $dashboardHtml = @"
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EQ12 Telemetry Dashboard - Buffalo NY 14215 Content Empire</title>
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0d1117; color: #c9d1d9; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #21262d; padding-bottom: 20px; }
-        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .metric-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; }
-        .metric-title { color: #58a6ff; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-        .metric-value { font-size: 24px; font-weight: bold; color: #7ee787; }
-        .metric-label { color: #8b949e; font-size: 14px; margin-top: 5px; }
-        .status-good { color: #7ee787; }
-        .status-warning { color: #f0883e; }
-        .status-error { color: #ff6b6b; }
-        .timestamp { text-align: center; color: #8b949e; margin-top: 30px; }
-        .eq12-brand { color: #58a6ff; font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1><span class="eq12-brand">EQ12</span> Telemetry Dashboard</h1>
-            <p>Buffalo NY 14215 Content Empire - System Analytics</p>
-            <p>Generated: $timestamp</p>
-        </div>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>EQ12 Telemetry Dashboard - Buffalo NY 14215 Content Empire</title>
+            <style>
+                body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #0d1117; color: #c9d1d9; }
+                .container { max-width: 1200px; margin: 0 auto; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #21262d; padding-bottom: 20px; }
+                .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+                .metric-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; }
+                .metric-title { color: #58a6ff; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+                .metric-value { font-size: 24px; font-weight: bold; color: #7ee787; }
+                .metric-label { color: #8b949e; font-size: 14px; margin-top: 5px; }
+                .status-good { color: #7ee787; }
+                .status-warning { color: #f0883e; }
+                .status-error { color: #ff6b6b; }
+                .timestamp { text-align: center; color: #8b949e; margin-top: 30px; }
+                .eq12-brand { color: #58a6ff; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1><span class="eq12-brand">EQ12</span> Telemetry Dashboard</h1>
+                    <p>Buffalo NY 14215 Content Empire - System Analytics</p>
+                    <p>Generated: $timestamp</p>
+                </div>
 
-        <div class="metric-grid">
-            <div class="metric-card">
-                <div class="metric-title">Repository Overview</div>
-                <div class="metric-value">$($metrics.repository_stats.python_files -join '')</div>
-                <div class="metric-label">Python Files</div>
-                <div class="metric-value">$($metrics.repository_stats.powershell_files -join '')</div>
-                <div class="metric-label">PowerShell Files</div>
-                <div class="metric-value">$($metrics.repository_stats.total_lines_of_code -join '')</div>
-                <div class="metric-label">Total Lines of Code</div>
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-title">Repository Overview</div>
+                        <div class="metric-value">$($metrics.repository_stats.python_files -join '')</div>
+                        <div class="metric-label">Python Files</div>
+                        <div class="metric-value">$($metrics.repository_stats.powershell_files -join '')</div>
+                        <div class="metric-label">PowerShell Files</div>
+                        <div class="metric-value">$($metrics.repository_stats.total_lines_of_code -join '')</div>
+                        <div class="metric-label">Total Lines of Code</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">ASCII Compliance</div>
+                        <div class="metric-value status-good">$($asciiMetrics.compliance_percentage -join '')%</div>
+                        <div class="metric-label">Compliance Rate</div>
+                        <div class="metric-value">$($asciiMetrics.ascii_compliant_files -join '')</div>
+                        <div class="metric-label">Compliant Files</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">Pycache Status</div>
+                        <div class="metric-value status-good">$($pycacheMetrics.pycache_directories_found -join '')</div>
+                        <div class="metric-label">Pycache Directories</div>
+                        <div class="metric-value status-good">ACTIVE</div>
+                        <div class="metric-label">No-Pycache Protection</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">Performance Metrics</div>
+                        <div class="metric-value">$($perfMetrics.avg_compilation_time -join '')ms</div>
+                        <div class="metric-label">Avg Compilation Time</div>
+                        <div class="metric-value">$($perfMetrics.total_scripts_tested -join '')</div>
+                        <div class="metric-label">Scripts Tested</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">GitHub Actions</div>
+                        <div class="metric-value">$($githubMetrics.total_workflows -join '')</div>
+                        <div class="metric-label">Total Workflows</div>
+                        <div class="metric-value status-good">ACTIVE</div>
+                        <div class="metric-label">CI/CD Status</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-title">System Status</div>
+                        <div class="metric-value status-good">OPERATIONAL</div>
+                        <div class="metric-label">EQ12 System</div>
+                        <div class="metric-value status-good">PROTECTED</div>
+                        <div class="metric-label">Corruption Immunity</div>
+                    </div>
+                </div>
+
+                <div class="timestamp">
+                    <p><strong>EQ12 Telemetry Dashboard</strong> | Buffalo NY 14215 Content Empire</p>
+                    <p>Last Updated: $timestamp | System Status: OPERATIONAL</p>
+                </div>
             </div>
-
-            <div class="metric-card">
-                <div class="metric-title">ASCII Compliance</div>
-                <div class="metric-value status-good">$($asciiMetrics.compliance_percentage -join '')%</div>
-                <div class="metric-label">Compliance Rate</div>
-                <div class="metric-value">$($asciiMetrics.ascii_compliant_files -join '')</div>
-                <div class="metric-label">Compliant Files</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-title">Pycache Status</div>
-                <div class="metric-value status-good">$($pycacheMetrics.pycache_directories_found -join '')</div>
-                <div class="metric-label">Pycache Directories</div>
-                <div class="metric-value status-good">ACTIVE</div>
-                <div class="metric-label">No-Pycache Protection</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-title">Performance Metrics</div>
-                <div class="metric-value">$($perfMetrics.avg_compilation_time -join '')ms</div>
-                <div class="metric-label">Avg Compilation Time</div>
-                <div class="metric-value">$($perfMetrics.total_scripts_tested -join '')</div>
-                <div class="metric-label">Scripts Tested</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-title">GitHub Actions</div>
-                <div class="metric-value">$($githubMetrics.total_workflows -join '')</div>
-                <div class="metric-label">Total Workflows</div>
-                <div class="metric-value status-good">ACTIVE</div>
-                <div class="metric-label">CI/CD Status</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-title">System Status</div>
-                <div class="metric-value status-good">OPERATIONAL</div>
-                <div class="metric-label">EQ12 System</div>
-                <div class="metric-value status-good">PROTECTED</div>
-                <div class="metric-label">Corruption Immunity</div>
-            </div>
-        </div>
-
-        <div class="timestamp">
-            <p><strong>EQ12 Telemetry Dashboard</strong> | Buffalo NY 14215 Content Empire</p>
-            <p>Last Updated: $timestamp | System Status: OPERATIONAL</p>
-        </div>
-    </div>
-</body>
-</html>
-"@
+        </body>
+        </html>
+        "@
 
         Set-Content -Path "eq12_telemetry_dashboard.html" -Value $dashboardHtml -Encoding ASCII
 
         Write-Host "Telemetry dashboard generated" -ForegroundColor Green
 
     - name: Upload Telemetry Dashboard
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-telemetry-dashboard
         path: eq12_telemetry_dashboard.html
+        if-no-files-found: ignore
 
     - name: Upload Telemetry Data
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-telemetry-data
         path: eq12_*_metrics.json
+        if-no-files-found: ignore

@@ -2,7 +2,7 @@ name: EQ12 Continuous Deployment
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master, main ]
   release:
     types: [ published ]
 
@@ -14,7 +14,7 @@ jobs:
   deploy-production:
     name: EQ12 Production Deployment
     runs-on: windows-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
 
     steps:
     - name: Checkout EQ12 Repository
@@ -105,34 +105,35 @@ jobs:
       shell: pwsh
       run: |
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
-        $report = @"
-# EQ12 Deployment Report
-Generated: $timestamp
-Branch: $($env:GITHUB_REF_NAME)
-Commit: $($env:GITHUB_SHA)
-
-## Deployment Summary
-- ASCII compliance: VERIFIED
-- Core system: DEPLOYED
-- No-pycache protection: ACTIVE
-- Critical files: VALIDATED
-
-## System Status
-- EQ12 Deployment Mode: ACTIVE
-- Unicode corruption protection: ENABLED
-- Pylance hardening: APPLIED
-
-## Buffalo NY 14215 Content Empire
-EQ12 system successfully deployed to production.
-"@
+        $report = @(
+          "# EQ12 Deployment Report",
+          "Generated: $timestamp",
+          "Branch: $($env:GITHUB_REF_NAME)",
+          "Commit: $($env:GITHUB_SHA)",
+          "",
+          "## Deployment Summary",
+          "- ASCII compliance: VERIFIED",
+          "- Core system: DEPLOYED",
+          "- No-pycache protection: ACTIVE",
+          "- Critical files: VALIDATED",
+          "",
+          "## System Status",
+          "- EQ12 Deployment Mode: ACTIVE",
+          "- Unicode corruption protection: ENABLED",
+          "- Pylance hardening: APPLIED",
+          "",
+          "## Buffalo NY 14215 Content Empire",
+          "EQ12 system successfully deployed to production."
+        ) -join "`n"
 
         Set-Content -Path "eq12_deployment_report.md" -Value $report -Encoding ASCII
 
     - name: Upload Deployment Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-deployment-report
         path: eq12_deployment_report.md
+        if-no-files-found: ignore
 
   deploy-backup:
     name: EQ12 Backup Sync
@@ -177,8 +178,9 @@ EQ12 system successfully deployed to production.
         Write-Host "EQ12 BACKUP CREATED: $backupDir" -ForegroundColor Green
 
     - name: Upload Backup Archive
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-deployment-backup
         path: eq12_backup_*
         retention-days: 30
+        if-no-files-found: ignore

@@ -1,9 +1,9 @@
 name: EQ12 Security Audit
 on:
   push:
-    branches: [ main ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ main ]
+    branches: [ master, main ]
   schedule:
     - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM UTC
 
@@ -169,45 +169,47 @@ jobs:
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
         $reportPath = "eq12_security_report.md"
 
-        $report = @"
-# EQ12 Security Audit Report
-Generated: $timestamp
-
-## Scan Summary
-- Secret detection: COMPLETED
-- Dependency vulnerabilities: SCANNED
-- Unicode corruption: CHECKED
-- PowerShell security: AUDITED
-- Python security (Bandit): ANALYZED
-
-## Security Status
-- EQ12 Security Mode: ACTIVE
-- Hardcoded secrets: NONE DETECTED
-- Corruption vulnerabilities: CLEAN
-- Execution policies: VALIDATED
-
-## Recommendations
-1. Keep dependencies updated
-2. Maintain ASCII-only content
-3. Regular security scans
-4. Environment variable protection
-
-## Buffalo NY 14215 Content Empire
-EQ12 security audit completed successfully.
-"@
+        $report = @(
+          "# EQ12 Security Audit Report",
+          "Generated: $timestamp",
+          "",
+          "## Scan Summary",
+          "- Secret detection: COMPLETED",
+          "- Dependency vulnerabilities: SCANNED",
+          "- Unicode corruption: CHECKED",
+          "- PowerShell security: AUDITED",
+          "- Python security (Bandit): ANALYZED",
+          "",
+          "## Security Status",
+          "- EQ12 Security Mode: ACTIVE",
+          "- Hardcoded secrets: NONE DETECTED",
+          "- Corruption vulnerabilities: CLEAN",
+          "- Execution policies: VALIDATED",
+          "",
+          "## Recommendations",
+          "1. Keep dependencies updated",
+          "2. Maintain ASCII-only content",
+          "3. Regular security scans",
+          "4. Environment variable protection",
+          "",
+          "## Buffalo NY 14215 Content Empire",
+          "EQ12 security audit completed successfully."
+        ) -join "`n"
 
         Set-Content -Path $reportPath -Value $report -Encoding ASCII
         Write-Host "Security report generated: $reportPath" -ForegroundColor Green
 
     - name: Upload Security Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: eq12-security-report
         path: eq12_security_report.md
+        if-no-files-found: ignore
 
     - name: Upload Bandit Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bandit-security-report
         path: bandit_report.json
+        if-no-files-found: ignore
       if: always()
