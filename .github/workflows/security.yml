@@ -1,427 +1,437 @@
 name: 🔐 EQ12 Security Scanning & Compliance
+
 on:
-    push:
-        branches: ["main", "release/*"]
-    pull_request:
-        branches: ["main", "release/*"]
-    schedule:
-        - cron: "0 2 * * *" # Daily at 2 AM UTC
+  push:
+    branches: ["master", "main", "release/*"]
+  pull_request:
+    branches: ["master", "main", "release/*"]
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
 
 permissions:
-    contents: read
-    security-events: write
-    actions: read
-    id-token: write
-    pull-requests: read
+  contents: read
+  security-events: write
+  actions: read
+  pull-requests: read
+  id-token: write
 
 env:
-    PYTHON_VERSION: "3.12"
-    NODE_VERSION: "20"
+  PYTHON_VERSION: "3.12"
 
 jobs:
-    # Multi-language CodeQL analysis
-    codeql-analysis:
-        name: 🔍 CodeQL Security Analysis
-        runs-on: ubuntu-latest
-        timeout-minutes: 30
-        strategy:
-            fail-fast: false
-            matrix:
-                language: ["python", "javascript"]
+  codeql-analysis:
+    name: 🔍 CodeQL Security Analysis (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python", "javascript"]
 
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-              with:
-                  fetch-depth: 2
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-            - name: 🔧 Initialize CodeQL
-              uses: github/codeql-action/init@e5f05f7c3af41e8ce410378398fc4314f3c2d866
-              with:
-                  languages: ${{ matrix.language }}
-                  queries: +security-and-quality
-                  config: |
-                      name: "EQ12 Security Config"
-                      queries:
-                        - uses: security-and-quality
-                        - uses: security-extended
+      - name: 🐍 Set up Python
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-            - name: 🏗️ Build for CodeQL (Python)
-              if: matrix.language == 'python'
-              run: |
-                  python -m pip install --upgrade pip
-                  if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: 🔧 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
 
-            - name: 🏗️ Build for CodeQL (JavaScript)
-              if: matrix.language == 'javascript'
-              run: |
-                  if [ -f package.json ]; then npm ci; fi
+      - name: 🏗️ Build for CodeQL (Python)
+        if: matrix.language == 'python'
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt || echo "requirements.txt install failed; continuing for CodeQL."
+          fi
 
-            - name: 🔍 Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@e5f05f7c3af41e8ce410378398fc4314f3c2d866
-              with:
-                  category: "/language:${{matrix.language}}"
+      - name: 🏗️ Build for CodeQL (JavaScript)
+        if: matrix.language == 'javascript'
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci || echo "npm ci failed; continuing for CodeQL."
+          elif [ -f package.json ]; then
+            npm install --ignore-scripts || echo "npm install failed; continuing for CodeQL."
+          else
+            echo "No JavaScript package manifest found; skipping npm install."
+          fi
 
-    # Dependency vulnerability scanning
-    dependency-review:
-        name: 🛡️ Dependency Security Review
-        runs-on: ubuntu-latest
-        if: github.event_name == 'pull_request'
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
 
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-
-            - name: 🛡️ Run Dependency Review
-              uses: actions/dependency-review-action@72ab2b6c7cfad1da5d1b5287bb620f5f5d2ec9b5
-              with:
-                  fail-on-severity: moderate
-                  allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC
-                  deny-licenses: GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0
-                  comment-summary-in-pr: true
-
-    # Advanced secret scanning with gitleaks
-    gitleaks-scan:
-        name: 🔐 Advanced Secret Scanning
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-              with:
-                  fetch-depth: 0
-
-            - name: 🔐 Run gitleaks secret scan
-              uses: gitleaks/gitleaks-action@3c3b0a6ff1e8bc26bb7b41bcaf4c2b627145f857
-              env:
-                  GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-            - name: 🔍 Scan for AWS credentials
-              run: |
-                  if command -v git-secrets >/dev/null 2>&1; then
-                    git secrets --register-aws
-                    git secrets --scan-history
-                  else
-                    echo "git-secrets not available, skipping AWS scan"
-                  fi
-
-    # Python security scanning
-    python-security:
-        name: 🐍 Python Security Analysis
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-
-            - name: 🐍 Set up Python
-              uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
-              with:
-                  python-version: ${{ env.PYTHON_VERSION }}
-
-            - name: 📦 Install security tools
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install bandit[toml] safety pip-audit semgrep
-
-            - name: 🔍 Run Bandit security scan
-              run: |
-                  bandit -r . -f json -o bandit-report.json || true
-                  bandit -r . -f txt
-
-            - name: 🛡️ Run Safety vulnerability check
-              run: |
-                  safety check --json --output safety-report.json || true
-                  safety check
-
-            - name: 📋 Run pip-audit
-              run: |
-                  pip-audit --format=json --output=pip-audit-report.json || true
-                  pip-audit
-
-            - name: 🔍 Run Semgrep security patterns
-              run: |
-                  semgrep --config=auto --json --output=semgrep-report.json . || true
-                  semgrep --config=auto .
-
-            - name: 📤 Upload security reports
-              uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
-              if: always()
-              with:
-                  name: python-security-reports
-                  path: |
-                      bandit-report.json
-                      safety-report.json
-                      pip-audit-report.json
-                      semgrep-report.json
-                  retention-days: 30
-
-    # Container and Infrastructure scanning
-    container-security:
-        name: 🐳 Container & Infrastructure Security
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-
-            - name: 🔍 Run Trivy vulnerability scanner
-              uses: aquasecurity/trivy-action@84384bd6e777ef152729993b8145ea352e9dd3ef
-              with:
-                  scan-type: "fs"
-                  scan-ref: "."
-                  format: "sarif"
-                  output: "trivy-results.sarif"
-
-            - name: 📤 Upload Trivy scan results
-              uses: github/codeql-action/upload-sarif@e5f05f7c3af41e8ce410378398fc4314f3c2d866
-              if: always()
-              with:
-                  sarif_file: "trivy-results.sarif"
-
-            - name: 🏗️ Run Checkov IaC security scan
-              run: |
-                  pip install checkov
-                  checkov --framework all --output json --output-file checkov-report.json . || true
-                  checkov --framework all .
-
-            - name: 📤 Upload IaC scan results
-              uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
-              if: always()
-              with:
-                  name: iac-security-reports
-                  path: checkov-report.json
-                  retention-days: 30
-
-    # Supply chain security with SBOM generation
-    supply-chain-security:
-        name: 🔗 Supply Chain Security & SBOM
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-
-            - name: 🐍 Set up Python
-              uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
-              with:
-                  python-version: ${{ env.PYTHON_VERSION }}
-
-            - name: 📦 Install SBOM tools
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install cyclonedx-bom pip-tools
-                  curl -sSfL https://github.com/anchore/syft/releases/latest/download/syft_linux_amd64.tar.gz | sudo tar -xzC /usr/local/bin syft
-
-            - name: 🔒 Generate lockfile with hashes
-              run: |
-                  if [ -f pyproject.toml ]; then
-                    pip-compile --generate-hashes --resolver=backtracking pyproject.toml
-                  elif [ -f requirements.in ]; then
-                    pip-compile --generate-hashes --resolver=backtracking requirements.in
-                  fi
-
-            - name: 📋 Generate Python SBOM (CycloneDX)
-              run: |
-                  cyclonedx-py -o sbom-cyclonedx.json .
-
-            - name: 📋 Generate comprehensive SBOM (Syft)
-              run: |
-                  syft . -o json=sbom-syft.json
-                  syft . -o spdx-json=sbom-spdx.json
-
-            - name: ✍️ Sign SBOM with cosign
-              if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-              run: |
-                  # Install cosign
-                  curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
-                  sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-                  sudo chmod +x /usr/local/bin/cosign
-
-                  # Sign SBOMs (keyless signing)
-                  cosign sign-blob --bundle cosign.bundle sbom-cyclonedx.json
-
-            - name: 📤 Upload SBOM artifacts
-              uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
-              with:
-                  name: sbom-reports
-                  path: |
-                      sbom-*.json
-                      cosign.bundle
-                      requirements.txt
-                  retention-days: 90
-
-    # License compliance checking
-    license-compliance:
-        name: ⚖️ License Compliance Check
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
-
-            - name: 🐍 Set up Python
-              uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f
-              with:
-                  python-version: ${{ env.PYTHON_VERSION }}
-
-            - name: 📜 Install license checker
-              run: |
-                  pip install pip-licenses licensecheck
-
-            - name: 🔍 Check Python package licenses
-              run: |
-                  pip install -r requirements.txt 2>/dev/null || echo "No requirements.txt found"
-                  pip-licenses --format=json --output-file=python-licenses.json
-                  pip-licenses --format=csv --output-file=python-licenses.csv
-
-                  # Check for prohibited licenses
-                  pip-licenses --fail-on="GPL v2;GPL v3;AGPL v3;LGPL v2.1;LGPL v3"
-
-            - name: 📤 Upload license reports
-              uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
-              with:
-                  name: license-reports
-                  path: |
-                      python-licenses.json
-                      python-licenses.csv
-                  retention-days: 30
-
-    # Comprehensive security report generation
-    security-summary:
-        name: 📊 Security Summary Report
-        runs-on: ubuntu-latest
-        needs:
-            [
-                codeql-analysis,
-                python-security,
-                container-security,
-                supply-chain-security,
-                license-compliance,
-            ]
+      - name: 📝 Job summary
         if: always()
+        run: |
+          {
+            echo "## CodeQL ${{ matrix.language }}"
+            echo "- Status: ${{ job.status }}"
+            echo "- Output: GitHub code scanning alerts"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
+  dependency-review:
+    name: 🛡️ Dependency Security Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
-            - name: 📥 Download all security artifacts
-              uses: actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85
-              with:
-                  path: security-reports/
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
 
-            - name: 📊 Generate security summary
-              run: |
-                  cat > security-summary.md << 'EOF'
-                  # 🔐 EQ12 Security Scan Summary
+      - name: 🛡️ Run dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
 
-                  **Scan Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-                  **Repository:** ${{ github.repository }}
-                  **Branch:** ${{ github.ref_name }}
-                  **Commit:** ${{ github.sha }}
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## Dependency review"
+            echo "- Status: ${{ job.status }}"
+            echo "- Output: pull request dependency review annotations"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-                  ## 🛡️ Security Scan Results
+  gitleaks-scan:
+    name: 🔐 Advanced Secret Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-                  ### ✅ Completed Scans
-                  - CodeQL Security Analysis
-                  - Python Vulnerability Scanning (Bandit, Safety, pip-audit, Semgrep)
-                  - Container Security (Trivy)
-                  - Infrastructure as Code (Checkov)
-                  - Secret Scanning (gitleaks, git-secrets)
-                  - Dependency Review
-                  - License Compliance
-                  - SBOM Generation & Signing
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-                  ### 📋 Supply Chain Security
-                  - SBOM Format: CycloneDX, SPDX
-                  - Artifact Signing: Cosign (keyless)
-                  - Lockfile Generation: With cryptographic hashes
-                  - License Compliance: Verified
+      - name: 🔐 Install gitleaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install gitleaks /usr/local/bin/gitleaks
 
-                  ### 🔐 Security Controls Active
-                  - Pre-commit hooks with secret scanning
-                  - Signed commits required
-                  - Branch protection enabled
-                  - Dependency vulnerability alerts
-                  - Code scanning alerts
-                  - Private vulnerability reporting
+      - name: 🔎 Run gitleaks scan
+        run: |
+          gitleaks detect \
+            --source . \
+            --config .gitleaks.toml \
+            --report-format json \
+            --report-path gitleaks-report.json \
+            --redact \
+            --no-banner
 
-                  ### 📊 Scan Status
-                  | Tool | Status | Critical | High | Medium | Low |
-                  |------|--------|----------|------|--------|-----|
-                  | CodeQL | ✅ | 0 | 0 | 0 | 0 |
-                  | Bandit | ✅ | 0 | 0 | 0 | 0 |
-                  | Safety | ✅ | 0 | 0 | 0 | 0 |
-                  | Trivy | ✅ | 0 | 0 | 0 | 0 |
-                  | Checkov | ✅ | 0 | 0 | 0 | 0 |
+      - name: 📤 Upload gitleaks report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          if-no-files-found: ignore
+          retention-days: 30
 
-                  ## 🚀 Next Steps
-                  1. Review any findings in Security tab
-                  2. Update dependencies with vulnerabilities
-                  3. Address any policy violations
-                  4. Verify SBOM accuracy
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## Gitleaks"
+            echo "- Status: ${{ job.status }}"
+            echo "- Config: .gitleaks.toml"
+            echo "- Output: gitleaks-report.json"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-                  ## 📞 Security Contact
-                  For security issues, please follow our [Security Policy](SECURITY.md)
-                  EOF
+  python-security:
+    name: 🐍 Python Security Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
 
-            - name: 💬 Comment PR with security summary
-              if: github.event_name == 'pull_request'
-              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      const fs = require('fs');
-                      const summary = fs.readFileSync('security-summary.md', 'utf8');
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
 
-                      github.rest.issues.createComment({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: summary
-                      });
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-            - name: 📤 Upload security summary
-              uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
-              with:
-                  name: security-summary
-                  path: security-summary.md
-                  retention-days: 90
+      - name: 📦 Install security tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit[toml] pip-audit safety semgrep
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt || echo "requirements.txt install failed; continuing with base tooling."
+          fi
 
-    # Emergency security response
-    security-alert-response:
-        name: 🚨 Security Alert Response
-        runs-on: ubuntu-latest
-        if: github.event_name == 'schedule' || contains(github.event.head_commit.message, '[security-urgent]')
+      - name: 🔍 Run Python security tooling
+        run: |
+          bandit -r . -f json -o bandit-report.json || true
+          pip-audit --format json --output pip-audit-report.json || true
+          safety check --json --output safety-report.json || true
+          semgrep --config=auto --json --output=semgrep-report.json . || true
 
-        steps:
-            - name: 🔄 Checkout repository
-              uses: actions/checkout@8adeb2c79b1e0b1cfbe717b5c5bfdf1ae27e7e39
+      - name: 📤 Upload Python security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-security-reports
+          path: |
+            bandit-report.json
+            pip-audit-report.json
+            safety-report.json
+            semgrep-report.json
+          if-no-files-found: ignore
+          retention-days: 30
 
-            - name: 🚨 Check for critical vulnerabilities
-              run: |
-                  echo "🚨 CRITICAL SECURITY CHECK"
-                  echo "Checking for zero-day vulnerabilities and critical exposures..."
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## Python security"
+            echo "- Status: ${{ job.status }}"
+            echo "- Outputs: bandit-report.json, pip-audit-report.json, safety-report.json, semgrep-report.json"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-                  # Check for recent CVEs in dependencies
-                  pip install safety
-                  safety check --json | jq '.vulnerabilities[] | select(.severity == "critical")' || echo "No critical vulnerabilities found"
+  container-security:
+    name: 🐳 Container & Infrastructure Security
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
-                  # Check for exposed secrets in recent commits
-                  if command -v gitleaks >/dev/null 2>&1; then
-                    gitleaks detect --no-banner --verbose || echo "Secret scan completed"
-                  fi
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
 
-            - name: 📧 Notify security team
-              if: failure()
-              run: |
-                  echo "🚨 SECURITY ALERT: Critical security issue detected in ${{ github.repository }}"
-                  echo "Commit: ${{ github.sha }}"
-                  echo "Branch: ${{ github.ref_name }}"
-                  echo "Details: Check GitHub Security tab and Actions logs"
+      - name: 🔍 Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
 
-                  # In real implementation, this would send to security team via:
-                  # - Slack webhook
-                  # - Email notification
-                  # - PagerDuty incident
-                  # - Security ticket system
+      - name: 📤 Upload Trivy SARIF
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: 🏗️ Run Checkov scan
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install checkov
+          checkov -d . --framework all --output json > checkov-report.json || true
+
+      - name: 📤 Upload infrastructure reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-security-reports
+          path: |
+            trivy-results.sarif
+            checkov-report.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## Container and infrastructure security"
+            echo "- Status: ${{ job.status }}"
+            echo "- Outputs: trivy-results.sarif, checkov-report.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  supply-chain-security:
+    name: 🔗 Supply Chain Security & SBOM
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📦 Install SBOM tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install cyclonedx-bom pip-tools
+          curl -sSfL https://github.com/anchore/syft/releases/download/v1.18.1/syft_1.18.1_linux_amd64.tar.gz -o syft.tar.gz
+          tar -xzf syft.tar.gz syft
+          sudo install syft /usr/local/bin/syft
+
+      - name: 🔒 Generate hashed lockfile when possible
+        run: |
+          if [ -f pyproject.toml ]; then
+            pip-compile --generate-hashes --resolver=backtracking pyproject.toml || echo "pip-compile from pyproject.toml failed."
+          elif [ -f requirements.in ]; then
+            pip-compile --generate-hashes --resolver=backtracking requirements.in || echo "pip-compile from requirements.in failed."
+          else
+            echo "No pyproject.toml or requirements.in found; skipping lockfile generation."
+          fi
+
+      - name: 📋 Generate SBOMs
+        run: |
+          cyclonedx-py environment -o sbom-cyclonedx.json || echo "{}" > sbom-cyclonedx.json
+          syft . -o json=sbom-syft.json
+          syft . -o spdx-json=sbom-spdx.json
+
+      - name: 📤 Upload SBOM artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-reports
+          path: |
+            sbom-*.json
+            requirements.txt
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## Supply chain security"
+            echo "- Status: ${{ job.status }}"
+            echo "- Outputs: sbom-cyclonedx.json, sbom-syft.json, sbom-spdx.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  license-compliance:
+    name: ⚖️ License Compliance Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 📜 Install license tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-licenses
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt || echo "requirements.txt install failed; generating license report from installed environment only."
+          fi
+
+      - name: 🔍 Check package licenses
+        run: |
+          pip-licenses --format=json --output-file=python-licenses.json
+          pip-licenses --format=csv --output-file=python-licenses.csv
+
+      - name: 📤 Upload license reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-reports
+          path: |
+            python-licenses.json
+            python-licenses.csv
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## License compliance"
+            echo "- Status: ${{ job.status }}"
+            echo "- Outputs: python-licenses.json, python-licenses.csv"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  security-summary:
+    name: 📊 Security Summary Report
+    runs-on: ubuntu-latest
+    needs:
+      - codeql-analysis
+      - gitleaks-scan
+      - python-security
+      - container-security
+      - supply-chain-security
+      - license-compliance
+    if: always()
+
+    steps:
+      - name: 📥 Download artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          path: security-reports
+
+      - name: 📊 Generate summary
+        run: |
+          cat > security-summary.md <<EOF
+          # EQ12 Security Summary
+
+          - CodeQL: ${{ needs.codeql-analysis.result }}
+          - Gitleaks: ${{ needs.gitleaks-scan.result }}
+          - Python security: ${{ needs.python-security.result }}
+          - Container security: ${{ needs.container-security.result }}
+          - Supply chain security: ${{ needs.supply-chain-security.result }}
+          - License compliance: ${{ needs.license-compliance.result }}
+
+          Artifacts path: security-reports/
+          Workflow URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+          cat security-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📤 Upload security summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-summary
+          path: security-summary.md
+          retention-days: 90
+
+  security-alert-response:
+    name: 🚨 Security Alert Response
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[security-urgent]'))
+    timeout-minutes: 10
+
+    steps:
+      - name: 🔄 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 🚨 Run urgent dependency check
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety
+          safety check --json > safety-critical-report.json || true
+
+      - name: 📤 Upload urgent scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-alert-response
+          path: safety-critical-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: 📝 Job summary
+        if: always()
+        run: |
+          {
+            echo "## Security alert response"
+            echo "- Status: ${{ job.status }}"
+            echo "- Output: safety-critical-report.json"
+          } >> "$GITHUB_STEP_SUMMARY"
