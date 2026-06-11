@@ -1,0 +1,24 @@
+version: 1.0
+flow:
+  - step: scan_existing_repo
+  - step: create_missing_spec_files
+  - step: map_existing_code_to_spec
+  - step: detect_gaps_between_spec_and_code
+  - step: create_missing_modules
+  - step: patch_existing_modules
+  - step: generate_tests_from_spec
+  - step: run_tests
+  - step: run_workflows
+  - step: produce_mlb_artifacts
+
+mlb_daily_pipeline:
+  - build_slate_context
+  - fetch_odds_snapshot
+  - validate_pitchers
+  - validate_lineups
+  - validate_model_artifacts
+  - compute_readiness
+  - write_release_card
+  - write_watchlist
+  - write_no_bet_report
+  - write_workflow_summary

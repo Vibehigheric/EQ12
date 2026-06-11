@@ -163,6 +163,118 @@ Implement [short description].
 
 ---
 
+## 9) EDGEGOD Machine-Readable System Spec
+
+EDGEGOD architecture must be maintained as machine-readable source-of-truth files before major Python module work starts.
+
+### Required instruction order
+
+1. Convert the active architecture into machine-readable files.
+2. Use YAML, JSON, and SQL as the source of truth.
+3. Do not start with Python-only implementation.
+4. Generate specs first.
+5. Generate code from specs.
+6. Generate tests from specs.
+
+### Required spec files
+
+Create and maintain these files under `specs/` when missing:
+
+- `specs/edgegod_system_spec.yaml`
+- `specs/edgegod_database_schema.sql`
+- `specs/edgegod_api_contracts.json`
+- `specs/edgegod_orchestration_flow.yaml`
+- `specs/edgegod_feature_registry.yaml`
+- `specs/edgegod_model_registry.yaml`
+- `specs/edgegod_live_state_events.yaml`
+- `specs/edgegod_clv_ledger_schema.sql`
+- `specs/edgegod_monte_carlo_schema.yaml`
+- `specs/edgegod_agent_protocol.yaml`
+
+### Source-of-truth rule
+
+Specs are the source of truth. Python modules, workflows, database tables, tests, and reports must be generated or validated against the YAML, JSON, and SQL specs.
+
+### EDGEGOD MLB operating requirements
+
+- Modes:
+  - `PREGAME_BUILD`: build slate, fetch openers, check pitchers, no betting release
+  - `SLATE`: allowed bets `moneyline`, `total`, `team_total`
+  - `LINEUP_LOCK`: allowed bets `moneyline`, `total`, `team_total`, `player_props`
+  - `LIVE`: all market types allowed
+  - `POSTGAME`: no betting release
+  - `NO_BET_HOLD`: no betting release
+- Data source priority:
+  - `statcast`: exit velocity, launch angle, barrels, hard hit, xBA, xwOBA, bat speed, blast rate
+  - `mlb_api`: schedule, lineups, game status, probable pitchers
+  - `ballparkpal`: weather, park factor, HR factor
+  - `odds`: moneyline, totals, team totals, props, live lines
+- Readiness weights:
+  - savant `0.15`
+  - lineup `0.20`
+  - pitcher `0.15`
+  - bullpen `0.15`
+  - weather `0.10`
+  - market `0.15`
+  - injury `0.10`
+- Readiness thresholds:
+  - release `0.80`
+  - lean `0.65`
+  - no-bet-hold `<0.65`
+- Lineup confidence:
+  - confirmed `1.00`
+  - projected `0.70`
+  - expected `0.55`
+  - unknown `0.25`
+- Bullpen fatigue formula:
+  - yesterday `0.50`
+  - two_days `0.30`
+  - three_days `0.20`
+- Monte Carlo minimum: `10000` runs
+- CLV tracking fields:
+  - `prediction_id`
+  - `opening_odds`
+  - `bet_odds`
+  - `closing_odds`
+  - `result`
+  - `clv_percent`
+  - `closing_edge_delta`
+- Approval rules:
+  - readiness min `0.80`
+  - confidence min `0.70`
+  - edge min `0.04`
+  - stale data blocks release
+  - unconfirmed lineups block props
+  - missing pitchers block release
+
+### Required generation order
+
+1. Scan existing repo.
+2. Create missing spec files.
+3. Map existing code to spec.
+4. Detect gaps between spec and code.
+5. Create missing modules.
+6. Patch existing modules.
+7. Generate tests from spec.
+8. Run tests.
+9. Run workflows.
+10. Produce MLB artifacts.
+
+### Final deliverable checklist
+
+- specs created
+- code created from specs
+- tests created from specs
+- mismatches found
+- mismatches fixed
+- database schema created
+- API contract created
+- orchestration flow created
+- MLB today artifacts created
+- next scheduled pipeline run identified
+
+---
+
 If you want, I can additionally scaffold:
 - a `devcontainer.json` and `postCreateCommand` to match Codespaces setup,
 - a GitHub Actions job that enforces `AGENTS.md` rules by linting PR diffs,

@@ -1,0 +1,29 @@
+version: 1.0
+models:
+  - name: mlb_readiness_model
+    type: rules
+    inputs:
+      - lineup_score
+      - pitcher_confirmed
+      - market_freshness_minutes
+      - model_artifact_presence
+  - name: mlb_release_gate
+    type: rules
+    inputs:
+      - readiness_score
+      - confidence
+      - edge
+      - lineup_score
+  - name: mlb_up2_early_win_model
+    type: simulation
+    inputs:
+      - first_inning_run_rate
+      - first_three_inning_run_rate
+      - offensive_explosiveness
+      - bullpen_collapse_rate
+  - name: mlb_monte_carlo_engine
+    type: monte_carlo
+    inputs:
+      - lineup_score
+      - pitcher_confirmed
+      - market_context

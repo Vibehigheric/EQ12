@@ -1,0 +1,28 @@
+version: 1.0
+agents:
+  - name: data_agent
+    responsibilities:
+      - collect_data
+      - validate_data
+  - name: feature_agent
+    responsibilities:
+      - build_features
+      - register_features
+  - name: modeling_agent
+    responsibilities:
+      - score_models
+      - write_predictions
+  - name: reporting_agent
+    responsibilities:
+      - write_release_card
+      - write_watchlist
+      - write_no_bet_report
+      - write_workflow_summary
+
+protocol:
+  source_of_truth: specs
+  required_outputs:
+    - release_card
+    - watchlist
+    - no_bet_report
+    - workflow_summary

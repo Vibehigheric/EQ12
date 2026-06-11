@@ -1,0 +1,13 @@
+version: 1.0
+simulation:
+  minimum_runs: 10000
+  outputs:
+    - home_win_probability
+    - away_win_probability
+    - projected_score_mean
+    - projected_score_median
+    - game_total_mean
+    - game_total_p25
+    - game_total_p75
+    - player_prop_probabilities
+    - confidence_interval

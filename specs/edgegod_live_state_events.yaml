@@ -1,0 +1,31 @@
+version: 1.0
+events:
+  - name: game_started
+    required_fields:
+      - game_id
+      - started_at_utc
+  - name: score_update
+    required_fields:
+      - game_id
+      - inning
+      - home_score
+      - away_score
+  - name: pitching_change
+    required_fields:
+      - game_id
+      - team
+      - pitcher_id
+      - replaced_pitcher_id
+  - name: market_update
+    required_fields:
+      - game_id
+      - market
+      - sportsbook
+      - line_value
+      - odds
+  - name: live_alert
+    required_fields:
+      - game_id
+      - market
+      - edge
+      - confidence

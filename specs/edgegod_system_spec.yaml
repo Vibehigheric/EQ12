@@ -1,0 +1,112 @@
+version: 1.0
+system: EDGEGOD
+source_of_truth: true
+generation_rule:
+  specs_first: true
+  code_from_specs: true
+  tests_from_specs: true
+
+mlb:
+  slate_modes:
+    PREGAME_BUILD:
+      allowed_bets: []
+      purpose: build_slate_fetch_openers_check_pitchers
+    SLATE:
+      allowed_bets:
+        - moneyline
+        - total
+        - team_total
+    LINEUP_LOCK:
+      allowed_bets:
+        - moneyline
+        - total
+        - team_total
+        - player_props
+    LIVE:
+      allowed_bets:
+        - all
+    POSTGAME:
+      allowed_bets: []
+    NO_BET_HOLD:
+      allowed_bets: []
+
+  data_sources:
+    statcast:
+      priority: 1
+      metrics:
+        - exit_velocity
+        - launch_angle
+        - barrels
+        - hard_hit
+        - xba
+        - xwoba
+        - bat_speed
+        - blast_rate
+    mlb_api:
+      priority: 1
+      data:
+        - schedule
+        - lineups
+        - game_status
+        - probable_pitchers
+    ballparkpal:
+      priority: 2
+      data:
+        - weather
+        - park_factor
+        - hr_factor
+    odds:
+      priority: 1
+      data:
+        - moneyline
+        - totals
+        - team_totals
+        - props
+        - live_lines
+
+  readiness:
+    weights:
+      savant: 0.15
+      lineup: 0.20
+      pitcher: 0.15
+      bullpen: 0.15
+      weather: 0.10
+      market: 0.15
+      injury: 0.10
+    thresholds:
+      release: 0.80
+      lean: 0.65
+      no_bet_hold: "<0.65"
+
+  lineup_confidence:
+    confirmed: 1.00
+    projected: 0.70
+    expected: 0.55
+    unknown: 0.25
+
+  bullpen:
+    fatigue_formula:
+      yesterday: 0.50
+      two_days: 0.30
+      three_days: 0.20
+
+  simulation:
+    monte_carlo_runs: 10000
+
+  clv:
+    track:
+      - prediction_id
+      - opening_odds
+      - bet_odds
+      - closing_odds
+      - result
+      - clv_percent
+      - closing_edge_delta
+
+  approval_rules:
+    readiness_min: 0.80
+    confidence_min: 0.70
+    edge_min: 0.04
+    stale_data_block: true
+    unconfirmed_lineup_block_for_props: true
+    missing_pitcher_block: true

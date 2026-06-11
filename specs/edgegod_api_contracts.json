@@ -1,0 +1,74 @@
+{
+  "version": "1.0",
+  "artifacts": [
+    {
+      "name": "slate_context",
+      "path": "artifacts/mlb/slate_context.json",
+      "format": "json"
+    },
+    {
+      "name": "odds_snapshot",
+      "path": "artifacts/mlb/odds_snapshot.json",
+      "format": "json"
+    },
+    {
+      "name": "projections",
+      "path": "artifacts/mlb/projections.json",
+      "format": "json"
+    },
+    {
+      "name": "edges",
+      "path": "artifacts/mlb/edges.json",
+      "format": "json"
+    },
+    {
+      "name": "watchlist",
+      "path": "artifacts/mlb/watchlist.json",
+      "format": "json"
+    },
+    {
+      "name": "release_card",
+      "path": "artifacts/mlb/release_card.md",
+      "format": "markdown"
+    },
+    {
+      "name": "no_bet_report",
+      "path": "artifacts/mlb/no_bet_report.md",
+      "format": "markdown"
+    },
+    {
+      "name": "workflow_summary",
+      "path": "artifacts/mlb/workflow_summary.md",
+      "format": "markdown"
+    }
+  ],
+  "contracts": {
+    "slate_context": {
+      "required_fields": [
+        "date",
+        "generated_at",
+        "system_status",
+        "games_found",
+        "games"
+      ]
+    },
+    "odds_snapshot": {
+      "required_fields": [
+        "date",
+        "generated_at",
+        "system_status",
+        "games",
+        "warnings"
+      ]
+    },
+    "watchlist": {
+      "required_fields": [
+        "date",
+        "generated_at",
+        "system_status",
+        "official_play",
+        "watchlist"
+      ]
+    }
+  }
+}

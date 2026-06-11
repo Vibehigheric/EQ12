@@ -1,0 +1,29 @@
+version: 1.0
+features:
+  - name: readiness_score
+    category: governance
+    source: derived
+  - name: lineup_score
+    category: lineup
+    source: mlb_api
+  - name: pitcher_confirmed
+    category: pitcher
+    source: mlb_api
+  - name: market_freshness_minutes
+    category: market
+    source: odds
+  - name: bullpen_fatigue_score
+    category: bullpen
+    source: historical_game_logs
+  - name: park_factor
+    category: environment
+    source: ballparkpal
+  - name: hr_factor
+    category: environment
+    source: ballparkpal
+  - name: xwoba
+    category: statcast
+    source: statcast
+  - name: bat_speed
+    category: statcast
+    source: statcast

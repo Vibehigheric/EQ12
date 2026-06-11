@@ -23,6 +23,13 @@ ARTIFACT_FILES = [
     "no_bet_report.md",
     "workflow_summary.md",
 ]
+PLACEHOLDER_PATTERNS = (
+    "PLACEHOLDER",
+    "REPLACE_ME",
+    "YOUR_API_KEY_HERE",
+    "your_key_here",
+    "demo_key",
+)
 
 
 def fetch_json(url: str) -> Any:
@@ -48,6 +55,70 @@ def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def is_viable_key(value: str | None) -> bool:
+    if not value:
+        return False
+    stripped = value.lstrip("\ufeff").strip()
+    if len(stripped) < 12:
+        return False
+    upper = stripped.upper()
+    return not any(token in upper for token in PLACEHOLDER_PATTERNS)
+
+
+def load_json_file_if_present(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def collect_odds_api_candidates() -> list[dict[str, str]]:
+    candidates: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    def add_candidate(source: str, value: str | None) -> None:
+        if not is_viable_key(value):
+            return
+        normalized = value.lstrip("\ufeff").strip()
+        if normalized in seen:
+            return
+        seen.add(normalized)
+        candidates.append({"source": source, "key": normalized})
+
+    for env_name in ("ODDS_API_KEY", "THE_ODDS_API_KEY", "ODDSAPI_KEY"):
+        add_candidate(f"env:{env_name}", os.getenv(env_name))
+
+    key_files = {
+        "keys/oddsapi.txt": Path("keys/oddsapi.txt"),
+        "keys/odds_api_key.txt": Path("keys/odds_api_key.txt"),
+        "keys/credentials.json": Path("keys/credentials.json"),
+        "keys/creds.json": Path("keys/creds.json"),
+    }
+
+    for label, path in key_files.items():
+        if path.suffix.lower() == ".txt" and path.exists():
+            try:
+                add_candidate(f"file:{label}", path.read_text(encoding="utf-8").strip())
+            except OSError:
+                continue
+            continue
+
+        payload = load_json_file_if_present(path)
+        if not payload:
+            continue
+        add_candidate(f"file:{label}:odds_api.api_key", payload.get("odds_api", {}).get("api_key"))
+        add_candidate(f"file:{label}:ODDS_API_KEY", payload.get("ODDS_API_KEY"))
+        add_candidate(f"file:{label}:THE_ODDS_API_KEY", payload.get("THE_ODDS_API_KEY"))
+        for nested_key in ("api_key", "key"):
+            nested = payload.get("odds_api") or {}
+            if isinstance(nested, dict):
+                add_candidate(f"file:{label}:odds_api.{nested_key}", nested.get(nested_key))
+
+    return candidates
+
+
 def find_model_artifacts() -> list[str]:
     roots = [Path("models"), Path("artifacts"), Path("outputs"), Path("data")]
     matches: list[str] = []
@@ -66,8 +137,8 @@ def find_model_artifacts() -> list[str]:
 
 
 def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
-    api_key = os.getenv("ODDS_API_KEY") or os.getenv("THE_ODDS_API_KEY")
-    if not api_key:
+    candidates = collect_odds_api_candidates()
+    if not candidates:
         warnings.append("odds_api_key_missing")
         return {
             "date": date_text,
@@ -75,29 +146,52 @@ def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
             "system_status": "DEGRADED",
             "warnings": warnings.copy(),
             "games": [],
+            "key_sources_tried": [],
         }
+    payload = None
+    source_url = None
+    success_source = None
+    key_sources_tried: list[str] = []
+    fetch_errors: list[str] = []
 
-    params = urlencode(
-        {
-            "apiKey": api_key,
-            "regions": "us",
-            "markets": "h2h,spreads,totals",
-            "oddsFormat": "american",
-            "dateFormat": "iso",
-        }
-    )
-    url = f"https://api.the-odds-api.com/v4/sports/baseball_mlb/odds?{params}"
-    try:
-        payload = fetch_json(url)
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
-        warnings.append(f"odds_fetch_failed: {exc}")
+    for candidate in candidates:
+        params = urlencode(
+            {
+                "apiKey": candidate["key"],
+                "regions": "us",
+                "markets": "h2h,spreads,totals",
+                "oddsFormat": "american",
+                "dateFormat": "iso",
+            }
+        )
+        url = f"https://api.the-odds-api.com/v4/sports/baseball_mlb/odds?{params}"
+        key_sources_tried.append(candidate["source"])
+        source_url = url
+        try:
+            payload = fetch_json(url)
+            success_source = candidate["source"]
+            break
+        except HTTPError as exc:
+            fetch_errors.append(f"{candidate['source']}:{exc.code}")
+            if exc.code in (401, 403):
+                continue
+            warnings.append(f"odds_fetch_failed: {candidate['source']} {exc}")
+            break
+        except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+            warnings.append(f"odds_fetch_failed: {candidate['source']} {exc}")
+            break
+
+    if payload is None:
+        if fetch_errors:
+            warnings.append(f"odds_fetch_failed_all_candidates: {', '.join(fetch_errors)}")
         return {
             "date": date_text,
             "generated_at": datetime.now(MLB_TZ).isoformat(),
             "system_status": "DEGRADED",
             "warnings": warnings.copy(),
             "games": [],
-            "source_url": url,
+            "source_url": source_url,
+            "key_sources_tried": key_sources_tried,
         }
 
     snapshot_games = []
@@ -128,8 +222,10 @@ def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
         "date": date_text,
         "generated_at": datetime.now(MLB_TZ).isoformat(),
         "system_status": "OK" if snapshot_games else "DEGRADED",
-        "source_url": url,
+        "source_url": source_url,
         "warnings": warnings.copy(),
+        "key_source_used": success_source,
+        "key_sources_tried": key_sources_tried,
         "games": snapshot_games,
     }
 
