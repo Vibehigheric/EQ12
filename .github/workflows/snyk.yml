@@ -47,7 +47,7 @@ jobs:
 
       - name: Set up Snyk CLI
         if: steps.gate.outputs.run_scan == 'true'
-        uses: snyk/actions/setup@v4
+        uses: snyk/actions/setup@v1
 
       - name: Run Snyk test
         if: steps.gate.outputs.run_scan == 'true'
