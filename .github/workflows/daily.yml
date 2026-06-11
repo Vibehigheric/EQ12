@@ -59,8 +59,16 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add reports/
-          git commit -m "Daily backtest and analytics report [$(date -u +'%Y-%m-%d')]" || echo "No changes"
+          if git check-ignore -q reports/; then
+            echo "reports/ is gitignored; publishing via artifacts only."
+            exit 0
+          fi
+          git add reports/ logs/ || true
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+            exit 0
+          fi
+          git commit -m "Daily backtest and analytics report [$(date -u +'%Y-%m-%d')]"
           git push origin HEAD:${{ github.ref_name }}
 
       - name: Upload report artifacts

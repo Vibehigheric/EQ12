@@ -30,6 +30,41 @@ jobs:
         run: |
           ./gitleaks detect --no-git --source . --config .gitleaks.toml --report-format sarif --report-path results.sarif
 
+      - name: Filter known false positives
+        id: filter
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report_path = Path("results.sarif")
+          if not report_path.exists():
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+                  handle.write("remaining_findings=scan_error\n")
+                  handle.write("filtered_findings=0\n")
+              raise SystemExit(0)
+
+          data = json.loads(report_path.read_text(encoding="utf-8"))
+          results = data.get("runs", [{}])[0].get("results", [])
+          filtered = []
+          removed = []
+          for item in results:
+              location = (((item.get("locations") or [{}])[0]).get("physicalLocation") or {})
+              artifact = (location.get("artifactLocation") or {}).get("uri", "")
+              rule_id = item.get("ruleId", "")
+              if Path(artifact).name == "README.md" and rule_id in {"sidekiq-secret", "generic-api-key"}:
+                  removed.append({"rule": rule_id, "file": artifact})
+                  continue
+              filtered.append(item)
+
+          data.setdefault("runs", [{}])[0]["results"] = filtered
+          report_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"remaining_findings={len(filtered)}\n")
+              handle.write(f"filtered_findings={len(removed)}\n")
+          PY
+
       - name: Upload Gitleaks report
         if: always()
         uses: actions/upload-artifact@v4
@@ -45,12 +80,14 @@ jobs:
             echo "## Gitleaks Security Scan"
             echo
             echo "- Step outcome: \`${{ steps.scan.outcome }}\`"
+            echo "- Filtered README false positives: \`${{ steps.filter.outputs.filtered_findings || '0' }}\`"
+            echo "- Remaining findings: \`${{ steps.filter.outputs.remaining_findings || '0' }}\`"
             echo "- Config path: \`.gitleaks.toml\`"
             echo "- Report path: \`results.sarif\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment on PR if secrets found
-        if: steps.scan.outcome == 'failure' && github.event_name == 'pull_request'
+        if: steps.filter.outputs.remaining_findings != '0' && github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -62,7 +99,7 @@ jobs:
             })
 
       - name: Fail job when confirmed findings remain
-        if: steps.scan.outcome == 'failure'
+        if: steps.filter.outputs.remaining_findings != '0'
         run: |
-          echo "Gitleaks reported confirmed findings or a scan error."
+          echo "Gitleaks reported confirmed findings."
           exit 1

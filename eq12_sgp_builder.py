@@ -10,6 +10,7 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from itertools import combinations
+from pathlib import Path
 from typing import Any
 
 # Import existing EQ12 components
@@ -377,6 +378,7 @@ def setup_logging() -> None:
     """Setup ASCII-only logging to avoid Windows encoding issues"""
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
+    Path("logs").mkdir(parents=True, exist_ok=True)
 
     # Console handler
     console_handler = logging.StreamHandler()
