@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Playwright and other tools AS ROOT
 RUN pip install --no-cache-dir playwright==1.47.0 fastapi uvicorn && \
-    playwright install --with-deps chromium
+    playwright install chromium
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash appuser

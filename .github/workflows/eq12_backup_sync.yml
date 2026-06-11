@@ -14,6 +14,8 @@ jobs:
   backup-system:
     name: EQ12 System Backup
     runs-on: windows-latest
+    outputs:
+      backup_dir: ${{ steps.init.outputs.backup_dir }}
 
     steps:
     - name: Checkout EQ12 Repository
@@ -21,7 +23,8 @@ jobs:
       with:
         fetch-depth: 0  # Full history for complete backup
 
-    - name: Create EQ12 System Backup
+    - name: Initialize backup directory
+      id: init
       shell: pwsh
       run: |
         Write-Host "=== EQ12 SYSTEM BACKUP CREATION ===" -ForegroundColor Green
@@ -29,6 +32,7 @@ jobs:
         $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
         $backupName = "eq12_backup_$timestamp"
         $backupDir = "backups\$backupName"
+        "backup_dir=$backupDir" >> $env:GITHUB_OUTPUT
 
         # Create backup directory structure
         New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
@@ -47,8 +51,7 @@ jobs:
       run: |
         Write-Host "=== BACKING UP EQ12 CORE FILES ===" -ForegroundColor Yellow
 
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $backupDir = "backups\eq12_backup_$timestamp"
+        $backupDir = "${{ steps.init.outputs.backup_dir }}"
 
         # Core system files
         $coreFiles = @(
@@ -80,12 +83,10 @@ jobs:
       run: |
         Write-Host "=== BACKING UP EQ12 SCRIPTS ===" -ForegroundColor Yellow
 
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $backupDir = "backups\eq12_backup_$timestamp"
+        $backupDir = "${{ steps.init.outputs.backup_dir }}"
 
         if (Test-Path "scripts") {
-          # Copy entire scripts directory
-          Copy-Item -Path "scripts\*" -Destination "$backupDir\scripts\" -Recurse -Force
+          Copy-Item -Path "scripts" -Destination $backupDir -Recurse -Force
 
           $scriptCount = (Get-ChildItem -Path "scripts" -File).Count
           Write-Host "  Backed up $scriptCount script files" -ForegroundColor Gray
@@ -97,11 +98,10 @@ jobs:
       run: |
         Write-Host "=== BACKING UP EQ12 TESTS ===" -ForegroundColor Yellow
 
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $backupDir = "backups\eq12_backup_$timestamp"
+        $backupDir = "${{ steps.init.outputs.backup_dir }}"
 
         if (Test-Path "tests") {
-          Copy-Item -Path "tests\*" -Destination "$backupDir\tests\" -Recurse -Force
+          Copy-Item -Path "tests" -Destination $backupDir -Recurse -Force
 
           $testCount = (Get-ChildItem -Path "tests" -File -Include "*.py").Count
           Write-Host "  Backed up $testCount test files" -ForegroundColor Gray
@@ -113,24 +113,23 @@ jobs:
       run: |
         Write-Host "=== BACKING UP EQ12 CONFIGURATIONS ===" -ForegroundColor Yellow
 
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $backupDir = "backups\eq12_backup_$timestamp"
+        $backupDir = "${{ steps.init.outputs.backup_dir }}"
 
         # Configs directory
         if (Test-Path "configs") {
-          Copy-Item -Path "configs\*" -Destination "$backupDir\configs\" -Recurse -Force
+          Copy-Item -Path "configs" -Destination $backupDir -Recurse -Force
           Write-Host "  Backed up configs directory" -ForegroundColor Gray
         }
 
         # GitHub workflows
         if (Test-Path ".github") {
-          Copy-Item -Path ".github\*" -Destination "$backupDir\github\" -Recurse -Force
+          Copy-Item -Path ".github" -Destination $backupDir -Recurse -Force
           Write-Host "  Backed up GitHub workflows" -ForegroundColor Gray
         }
 
         # VS Code settings
         if (Test-Path ".vscode") {
-          Copy-Item -Path ".vscode\*" -Destination "$backupDir\vscode\" -Recurse -Force
+          Copy-Item -Path ".vscode" -Destination $backupDir -Recurse -Force
           Write-Host "  Backed up VS Code settings" -ForegroundColor Gray
         }
 
@@ -141,9 +140,9 @@ jobs:
       run: |
         Write-Host "=== CREATING BACKUP MANIFEST ===" -ForegroundColor Yellow
 
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-        $backupDir = "backups\eq12_backup_$timestamp"
+        $backupDir = "${{ steps.init.outputs.backup_dir }}"
         $manifestPath = "$backupDir\backup_manifest.json"
+        $timestamp = Split-Path -Leaf $backupDir
 
         # Get git information
         $gitCommit = git rev-parse HEAD
@@ -186,13 +185,13 @@ jobs:
     - name: Generate Backup Report
       shell: pwsh
       run: |
-        $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+        $backupDir = "${{ steps.init.outputs.backup_dir }}"
         $report = @(
           "# EQ12 System Backup Report",
           'Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC")',
           "",
           "## Backup Summary",
-          "- Backup timestamp: $timestamp",
+          "- Backup directory: $backupDir",
           "- Git commit: $(git rev-parse HEAD)",
           "- Git branch: $(git branch --show-current)",
           "",

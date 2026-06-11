@@ -1,42 +1,51 @@
 name: Release
 
 on:
-    push:
-        tags:
-            - "v*"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            packages: write
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build distributions
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+          python -m build
+
+      - name: Publish wheels when token is configured
         env:
-            GITLENS_LICENSE_KEY: ${{ secrets.GITLENS_LICENSE_KEY }}
-        steps:
-            - uses: actions/checkout@v4
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          if [ -n "$TWINE_PASSWORD" ]; then
+            twine upload dist/*
+          else
+            echo "PYPI_TOKEN not configured; skipping publish."
+          fi
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.12"
+      - name: Create GitHub Release and attach artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
 
-            - name: Build distributions
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install build twine
-                  python -m build
-
-            - name: Publish wheels to PyPI (or GH Packages)
-              if: ${{ secrets.PYPI_TOKEN != '' }}
-              env:
-                  TWINE_USERNAME: __token__
-                  TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-              run: |
-                  twine upload dist/*
-
-            - name: Create GitHub Release and attach artifacts
-              uses: softprops/action-gh-release@v2
-              with:
-                  files: |
-                      dist/*
+      - name: Write summary
+        run: |
+          {
+            echo "## Release"
+            echo "- Tag: ${{ github.ref_name }}"
+            echo "- Dist path: dist/"
+          } >> "$GITHUB_STEP_SUMMARY"

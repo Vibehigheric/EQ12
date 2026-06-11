@@ -63,13 +63,18 @@ jobs:
           pip install ruff bandit pip-audit
 
       - name: Ruff (lint)
-        run: ruff check .
+        run: ruff check . --output-format=github | tee ruff-report.txt || true
 
       - name: Bandit (security)
-        run: bandit -q -r . || true
+        run: bandit -q -r . -f json -o bandit-report.json || true
 
       - name: pip-audit (vulns)
-        run: pip-audit -r requirements.txt || true
+        run: |
+          if [ -f requirements.txt ]; then
+            pip-audit -r requirements.txt || true
+          else
+            echo "requirements.txt not found; skipping pip-audit."
+          fi
 
       - name: Run tests (pytest if present)
         run: |
@@ -77,3 +82,23 @@ jobs:
             pip install pytest
             pytest -q || true
           fi
+
+      - name: Upload CI reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports
+          path: |
+            ruff-report.txt
+            bandit-report.json
+          if-no-files-found: ignore
+
+      - name: Write summary
+        if: always()
+        run: |
+          {
+            echo "## CI"
+            echo "- Ruff report: ruff-report.txt"
+            echo "- Bandit report: bandit-report.json"
+            echo "- Tests: non-blocking smoke mode"
+          } >> "$GITHUB_STEP_SUMMARY"

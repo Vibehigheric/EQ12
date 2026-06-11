@@ -181,30 +181,32 @@ jobs:
               STATUS_EMOJI="❌"
               STATUS_TEXT="Webhook update failed"
             fi
-            
-            MESSAGE="🌐 *EQ12 Ngrok Webhook Sync*
 
-📅 *Time*: \`$TIMESTAMP\`
-🔗 *Primary URL*: \`$PRIMARY_URL\`
-🔄 *Webhooks*: $UPDATED updated, $FAILED failed
-$STATUS_EMOJI *Status*: $STATUS_TEXT
+            MESSAGE=$(printf '%s\n' \
+              '🌐 *EQ12 Ngrok Webhook Sync*' \
+              '' \
+              "📅 *Time*: \`$TIMESTAMP\`" \
+              "🔗 *Primary URL*: \`$PRIMARY_URL\`" \
+              "🔄 *Webhooks*: $UPDATED updated, $FAILED failed" \
+              "$STATUS_EMOJI *Status*: $STATUS_TEXT" \
+              '' \
+              'Quick Access:' \
+              "• 📊 Dashboard: $PRIMARY_URL" \
+              "• 🔌 API: $PRIMARY_URL/api" \
+              "• 📈 Metrics: $PRIMARY_URL/metrics" \
+              "• 🪝 Webhook: $PRIMARY_URL/webhook" \
+              '' \
+              'EQ12 GODSTACK ready for secure access!')
 
-Quick Access:
-• 📊 Dashboard: $PRIMARY_URL
-• 🔌 API: $PRIMARY_URL/api
-• 📈 Metrics: $PRIMARY_URL/metrics
-• 🪝 Webhook: $PRIMARY_URL/webhook
+            jq -n \
+              --arg chat_id "$TG_CHAT_ID" \
+              --arg text "$MESSAGE" \
+              '{chat_id: $chat_id, text: $text, parse_mode: "Markdown", disable_web_page_preview: true}' \
+              > telegram_payload.json
 
-EQ12 GODSTACK ready for secure access!"
-            
             curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
               -H "Content-Type: application/json" \
-              -d "{
-                \"chat_id\": \"$TG_CHAT_ID\",
-                \"text\": \"$MESSAGE\",
-                \"parse_mode\": \"Markdown\",
-                \"disable_web_page_preview\": true
-              }"
+              --data @telegram_payload.json
             echo "📲 Telegram notification sent"
           else
             echo "⚠️ Telegram not configured (TG_TOKEN/TG_CHAT_ID missing)"
@@ -279,28 +281,28 @@ EQ12 GODSTACK ready for secure access!"
             
             REPO_NODE_ID=$(gh api repos/$REPO --jq '.node_id')
             
-            INITIAL_BODY="# 📜 EQ12 Ngrok Tunnel Continuous Log
-
-This is a **continuous audit log** of EQ12 ngrok tunnel changes and webhook synchronization.
-
-## Purpose
-- 🔍 **Audit Trail**: Track all tunnel URL changes for compliance
-- 🔄 **Webhook Sync**: Monitor GitHub webhook updates  
-- 📱 **Integration Status**: Verify Telegram and other integrations
-- 🌐 **Access Points**: Current tunnel URLs for secure access
-
-## Labels
-- \`$GOVERNANCE_LABEL\` - Infrastructure governance tracking
-- \`ngrok\` - Tunnel management
-- \`automation\` - Automated workflow updates
-
-
-**Latest Update**: $(date '+%Y-%m-%d %H:%M:%S UTC')
-**Status**: Log initialized
-**Environment**: EQ12 GODSTACK
-
-___
-*This discussion is automatically updated every 10 minutes by the Ngrok Webhook Sync workflow.*"
+            INITIAL_BODY=$(printf '%s\n' \
+              '# 📜 EQ12 Ngrok Tunnel Continuous Log' \
+              '' \
+              'This is a **continuous audit log** of EQ12 ngrok tunnel changes and webhook synchronization.' \
+              '' \
+              '## Purpose' \
+              '- 🔍 **Audit Trail**: Track all tunnel URL changes for compliance' \
+              '- 🔄 **Webhook Sync**: Monitor GitHub webhook updates' \
+              '- 📱 **Integration Status**: Verify Telegram and other integrations' \
+              '- 🌐 **Access Points**: Current tunnel URLs for secure access' \
+              '' \
+              '## Labels' \
+              "- \`$GOVERNANCE_LABEL\` - Infrastructure governance tracking" \
+              '- `ngrok` - Tunnel management' \
+              '- `automation` - Automated workflow updates' \
+              '' \
+              "**Latest Update**: $(date '+%Y-%m-%d %H:%M:%S UTC')" \
+              '**Status**: Log initialized' \
+              '**Environment**: EQ12 GODSTACK' \
+              '' \
+              '___' \
+              '*This discussion is automatically updated every 10 minutes by the Ngrok Webhook Sync workflow.*')
             
             # Create discussion
             DISCUSSION_RESULT=$(gh api graphql -F query='
@@ -363,38 +365,38 @@ ___
           fi
           
           # Create tunnel table
-          TUNNEL_TABLE="| Service | Public URL | Local Address |
-|---------|------------|---------------|"
+          TUNNEL_TABLE=$(printf '%s\n' \
+            '| Service | Public URL | Local Address |' \
+            '|---------|------------|---------------|')
           
           if [ -n "${{ steps.tunnels.outputs.tunnel_summary }}" ]; then
             TUNNEL_ROWS=$(echo '${{ steps.tunnels.outputs.tunnel_summary }}' | sed 's/• \*\*\([^*]*\)\*\*: `\([^`]*\)` → `\([^`]*\)`/| \1 | [\2](\2) | `\3` |/g')
-            TUNNEL_TABLE="$TUNNEL_TABLE
-$TUNNEL_ROWS"
+            TUNNEL_TABLE=$(printf '%s\n%s' "$TUNNEL_TABLE" "$TUNNEL_ROWS")
           else
-            TUNNEL_TABLE="$TUNNEL_TABLE
-| None | No tunnels active | N/A |"
+            TUNNEL_TABLE=$(printf '%s\n%s' "$TUNNEL_TABLE" '| None | No tunnels active | N/A |')
           fi
-          
-          COMMENT_BODY="## 🕒 $TIMESTAMP
 
-$STATUS_BADGE | **Tunnels**: $TUNNEL_COUNT | **Webhooks**: $UPDATED_COUNT updated, $FAILED_COUNT failed
-
-### 🌐 Active Tunnels
-$TUNNEL_TABLE
-
-### 🔧 Integration Status
-- **Primary URL**: \`$PRIMARY_URL\`
-- **GitHub Webhooks**: $UPDATED_COUNT repositories synchronized
-- **Telegram Notifications**: $( [ -n '${{ secrets.TG_TOKEN }}' ] && echo 'Sent' || echo 'Not configured' )
-- **Workflow Trigger**: ${{ github.event_name }}
-
-### 📊 Quick Access
-- 📊 [EQ12 Dashboard]($PRIMARY_URL)
-- 🔌 [API Endpoints]($PRIMARY_URL/api)
-- 📈 [Prometheus Metrics]($PRIMARY_URL/metrics)
-- 🪝 [Webhooks Endpoint]($PRIMARY_URL/webhook)
-
-___"
+          COMMENT_BODY=$(printf '%s\n' \
+            "## 🕒 $TIMESTAMP" \
+            '' \
+            "$STATUS_BADGE | **Tunnels**: $TUNNEL_COUNT | **Webhooks**: $UPDATED_COUNT updated, $FAILED_COUNT failed" \
+            '' \
+            '### 🌐 Active Tunnels' \
+            "$TUNNEL_TABLE" \
+            '' \
+            '### 🔧 Integration Status' \
+            "- **Primary URL**: \`$PRIMARY_URL\`" \
+            "- **GitHub Webhooks**: $UPDATED_COUNT repositories synchronized" \
+            "- **Telegram Notifications**: $( [ -n '${{ secrets.TG_TOKEN }}' ] && echo 'Sent' || echo 'Not configured' )" \
+            "- **Workflow Trigger**: ${{ github.event_name }}" \
+            '' \
+            '### 📊 Quick Access' \
+            "- 📊 [EQ12 Dashboard]($PRIMARY_URL)" \
+            "- 🔌 [API Endpoints]($PRIMARY_URL/api)" \
+            "- 📈 [Prometheus Metrics]($PRIMARY_URL/metrics)" \
+            "- 🪝 [Webhooks Endpoint]($PRIMARY_URL/webhook)" \
+            '' \
+            '___')
           
           # Add comment to discussion
           gh api graphql -F query='

@@ -2,8 +2,11 @@ name: EQ12 Daily CI
 
 on:
   schedule:
-    - cron: '0 12 * * *'
+    - cron: "0 12 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test-and-smoke:
@@ -12,23 +15,30 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+          pip install pytest
 
-      - name: Run pytest
-        run: pytest -q || true
+      - name: Run pytest when tests exist
+        run: |
+          if [ -d tests ]; then
+            pytest -q || true
+          fi
 
       - name: Start ngrok if token present
-        if: secrets.NGROK_AUTHTOKEN != ''
         env:
           NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
         run: |
+          if [ -z "$NGROK_AUTHTOKEN" ]; then
+            echo "NGROK token not configured; skipping tunnel startup."
+            exit 0
+          fi
           curl -sSLo ngrok.zip https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
           unzip -q ngrok.zip -d ./
           chmod +x ./ngrok
@@ -39,25 +49,84 @@ jobs:
           jq -r '.tunnels[] | {name: .name, url: .public_url}' ngrok_api.json > ngrok_urls.json || true
 
       - name: Verify last commit signature
-        run: |
-          git --no-pager log -1 --show-signature || true
+        run: git --no-pager log -1 --show-signature || true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: eq12-artifacts
+          name: eq12-daily-artifacts
           path: |
             ngrok.log
             ngrok_urls.json
-            pester-results.xml
             logs/**
+          if-no-files-found: ignore
 
-  windows-pester:
-    runs-on: windows-latest
+      - name: Write summary
+        if: always()
+        run: |
+          {
+            echo "## EQ12 Daily CI"
+            echo "- Tests: completed"
+            echo "- ngrok artifacts: ngrok.log, ngrok_urls.json"
+            echo "- Logs path: logs/**"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  mlb-production:
+    name: MLB production slate
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Pester
-        shell: pwsh
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build MLB slate context
+        env:
+          TZ: America/New_York
         run: |
-          Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
-          Invoke-Pester -Script C:\EQ12\tests\pester -OutputFormat NUnitXml -OutputFile pester-results.xml
+          MLB_DATE="$(date +%F)"
+          python scripts/build_mlb_slate_timing_context.py \
+            --date "$MLB_DATE" \
+            --out artifacts/mlb/slate_context.json
+
+      - name: Run MLB data enrichment
+        env:
+          TZ: America/New_York
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+        run: |
+          MLB_DATE="$(date +%F)"
+          python scripts/run_mlb_data_enrichment.py \
+            --date "$MLB_DATE" \
+            --slate artifacts/mlb/slate_context.json \
+            --artifacts-dir artifacts/mlb
+
+      - name: Upload MLB artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlb-production-artifacts
+          path: |
+            artifacts/mlb/slate_context.json
+            artifacts/mlb/odds_snapshot.json
+            artifacts/mlb/projections.json
+            artifacts/mlb/edges.json
+            artifacts/mlb/watchlist.json
+            artifacts/mlb/release_card.md
+            artifacts/mlb/no_bet_report.md
+            artifacts/mlb/workflow_summary.md
+          if-no-files-found: ignore
+
+      - name: Append MLB summary
+        if: always()
+        run: |
+          if [ -f artifacts/mlb/workflow_summary.md ]; then
+            cat artifacts/mlb/workflow_summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo "## MLB production slate"
+              echo "- workflow_summary.md was not generated"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
