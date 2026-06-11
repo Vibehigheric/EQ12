@@ -194,8 +194,12 @@ class MLBExpertAnalyzer:
                 market_key = market.get("key", "")
 
                 # Focus on MLB-specific props
-                if "player_" in market_key:
-                    if "total_bases" in market_key or "home_runs" in market_key:
+                if "batter_" in market_key:
+                    if (
+                        "total_bases" in market_key
+                        or "home_runs" in market_key
+                        or "hits" in market_key
+                    ):
                         prop_bets = await self._analyze_tb_hr_props(market, bookmaker)
                         edge_bets.extend(prop_bets)
 
@@ -206,7 +210,9 @@ class MLBExpertAnalyzer:
         edge_bets = []
 
         for outcome in market.get("outcomes", []):
-            player_name = outcome.get("name", "")
+            if outcome.get("name") != "Over":
+                continue
+            player_name = outcome.get("description", "") or outcome.get("name", "")
 
             # Skip if player is on IL
             if self._is_on_injured_list(player_name):
@@ -214,7 +220,11 @@ class MLBExpertAnalyzer:
                 continue
 
             # Calculate fair value based on historical data
-            fair_prob = await self._calculate_fair_probability(player_name, market["key"])
+            fair_prob = await self._calculate_fair_probability(
+                player_name,
+                market["key"],
+                float(outcome.get("point", 0.0) or 0.0),
+            )
 
             if fair_prob > 0:
                 odds = outcome.get("price", 0)
@@ -231,7 +241,7 @@ class MLBExpertAnalyzer:
                         event_id=outcome.get("event_id", ""),
                         sport="MLB",
                         market=market["key"],
-                        selection=f"{player_name} - {outcome.get('point', 'N/A')}",
+                        selection=f"{player_name} Over {outcome.get('point', 'N/A')}",
                         book=bookmaker["title"],
                         odds=odds,
                         implied_prob=implied_prob,
@@ -249,17 +259,34 @@ class MLBExpertAnalyzer:
         """Check if player is on injured list"""
         return player_name.lower() in self.il_exclusions
 
-    async def _calculate_fair_probability(self, player_name: str, market_key: str) -> float:
+    async def _calculate_fair_probability(
+        self,
+        player_name: str,
+        market_key: str,
+        line: float,
+    ) -> float:
         """Calculate fair probability based on historical data and models"""
         # Placeholder for advanced statistical modeling
         # In production, this would query player stats, weather, matchups, etc.
 
+        if "hits" in market_key:
+            if line <= 0.5:
+                return 0.62
+            if line <= 1.5:
+                return 0.28
+            return 0.12
         if "total_bases" in market_key:
-            # Base rate for total bases props (example logic)
-            return 0.45  # 45% base rate for over
+            if line <= 0.5:
+                return 0.60
+            if line <= 1.5:
+                return 0.38
+            if line <= 2.5:
+                return 0.22
+            return 0.10
         if "home_runs" in market_key:
-            # Base rate for home run props
-            return 0.25  # 25% base rate for over
+            if line <= 0.5:
+                return 0.18
+            return 0.04
 
         return 0.0
 
@@ -550,7 +577,7 @@ async def get_events(sport_key: str, start_iso: str, end_iso: str) -> list[dict[
 async def get_odds_for_events(
     sport_key: str,
     event_ids: list[str],
-    markets: str = "h2h,spreads,totals,player_home_runs,player_total_bases",
+    markets: str = "h2h,spreads,totals,batter_home_runs,batter_total_bases,batter_hits",
     regions: str = "us",
     odds_format: str = "american",
 ) -> list[dict[str, Any]]:

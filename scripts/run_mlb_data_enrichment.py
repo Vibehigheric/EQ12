@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 
 MLB_TZ = ZoneInfo("America/New_York")
 ARTIFACT_FILES = [
+    "model_artifacts.json",
     "odds_key_health.json",
     "odds_snapshot.json",
     "projections.json",
@@ -54,6 +55,57 @@ def normalize_team(name: str | None) -> str:
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def fetch_game_lineup_status(game_id: str, warnings: list[str]) -> dict[str, Any]:
+    url = f"https://statsapi.mlb.com/api/v1.1/game/{game_id}/feed/live"
+    try:
+        payload = fetch_json(url)
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+        warnings.append(f"lineup_fetch_failed:{game_id}:{exc}")
+        return {
+            "game_id": game_id,
+            "home_confirmed": False,
+            "away_confirmed": False,
+            "lineups_confirmed": False,
+            "home_batters": 0,
+            "away_batters": 0,
+            "home_pitcher_confirmed": False,
+            "away_pitcher_confirmed": False,
+        }
+
+    teams = payload.get("liveData", {}).get("boxscore", {}).get("teams", {})
+    players = payload.get("liveData", {}).get("boxscore", {}).get("players", {})
+
+    def extract_team_status(side: str) -> dict[str, Any]:
+        team_data = teams.get(side, {})
+        batter_ids = team_data.get("batters", [])
+        confirmed_batters = 0
+        for batter_id in batter_ids:
+            player = players.get(f"ID{batter_id}", {})
+            batting_order = player.get("battingOrder")
+            if batting_order and 101 <= batting_order <= 109:
+                confirmed_batters += 1
+        pitchers = team_data.get("pitchers", [])
+        pitcher_confirmed = bool(pitchers)
+        return {
+            "confirmed": confirmed_batters == 9 and pitcher_confirmed,
+            "batters": confirmed_batters,
+            "pitcher_confirmed": pitcher_confirmed,
+        }
+
+    home = extract_team_status("home")
+    away = extract_team_status("away")
+    return {
+        "game_id": game_id,
+        "home_confirmed": home["confirmed"],
+        "away_confirmed": away["confirmed"],
+        "lineups_confirmed": home["confirmed"] and away["confirmed"],
+        "home_batters": home["batters"],
+        "away_batters": away["batters"],
+        "home_pitcher_confirmed": home["pitcher_confirmed"],
+        "away_pitcher_confirmed": away["pitcher_confirmed"],
+    }
 
 
 def is_viable_key(value: str | None) -> bool:
@@ -129,21 +181,92 @@ def collect_odds_api_candidates() -> list[dict[str, str]]:
     return candidates
 
 
-def find_model_artifacts() -> list[str]:
-    roots = [Path("models"), Path("artifacts"), Path("outputs"), Path("data")]
-    matches: list[str] = []
-    suffixes = {".joblib", ".json", ".pkl", ".pt", ".bin", ".duckdb"}
+def load_text_if_present(path: Path) -> str:
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
+def find_model_artifacts(repo_root: Path | None = None) -> list[dict[str, str]]:
+    base = repo_root or Path.cwd()
+    discovered: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    def add_artifact(path: Path, artifact_type: str, reason: str) -> None:
+        resolved = path.resolve()
+        key = str(resolved).lower()
+        if key in seen or not path.exists() or not path.is_file():
+            return
+        seen.add(key)
+        discovered.append(
+            {
+                "path": path.as_posix(),
+                "type": artifact_type,
+                "reason": reason,
+            }
+        )
+
+    curated_checks = [
+        (
+            base / "specs" / "edgegod_model_registry.yaml",
+            "model_registry",
+            "contains_mlb_model_registry",
+            lambda text: "mlb_" in text,
+        ),
+        (
+            base / "specs" / "edgegod_system_spec.yaml",
+            "system_spec",
+            "contains_mlb_system_spec",
+            lambda text: "mlb:" in text,
+        ),
+        (
+            base / "EdgeGodParlays" / "edgegod_expert_engine.py",
+            "expert_engine",
+            "contains_mlb_prop_analyzer",
+            lambda text: "class MLBExpertAnalyzer" in text,
+        ),
+        (
+            base / "src" / "betting_engine" / "ml_engine.py",
+            "ml_engine",
+            "contains_mlb_props_model_binding",
+            lambda text: "mlb_props" in text,
+        ),
+        (
+            base / "src" / "intelligences" / "prop_tensor" / "engine.py",
+            "prop_engine",
+            "contains_player_prop_fetch_pipeline",
+            lambda text: "fetch_player_props" in text and "player_" in text,
+        ),
+    ]
+    for path, artifact_type, reason, predicate in curated_checks:
+        text = load_text_if_present(path)
+        if text and predicate(text):
+            add_artifact(path, artifact_type, reason)
+
+    roots = [
+        base / "models",
+        base / "artifacts",
+        base / "outputs",
+        base / "data",
+        base / "EdgeGodParlays",
+        base / "src",
+    ]
+    suffixes = {".joblib", ".json", ".pkl", ".pt", ".bin", ".duckdb", ".tflite", ".yaml"}
     for root in roots:
-      if not root.exists():
-        continue
-      for path in root.rglob("*"):
-        if not path.is_file():
-          continue
-        name = path.name.lower()
-        if "mlb" not in name or path.suffix.lower() not in suffixes:
-          continue
-        matches.append(path.as_posix())
-    return sorted(matches)[:50]
+        if not root.exists():
+            continue
+        for path in root.rglob("*"):
+            if not path.is_file():
+                continue
+            name = path.name.lower()
+            if path.suffix.lower() not in suffixes:
+                continue
+            if not any(token in name for token in ("mlb", "edgegod", "prop")):
+                continue
+            add_artifact(path, "discovered_file", "matched_mlb_or_edgegod_filename")
+
+    return discovered[:50]
 
 
 def fetch_odds_snapshot(date_text: str, warnings: list[str]) -> dict[str, Any]:
@@ -318,7 +441,21 @@ def main() -> int:
     source_files_used.append((artifacts_dir / "odds_snapshot.json").as_posix())
 
     model_artifacts = find_model_artifacts()
+    write_json(
+        artifacts_dir / "model_artifacts.json",
+        {
+            "date": args.date,
+            "generated_at": generated_at,
+            "count": len(model_artifacts),
+            "artifacts": model_artifacts,
+        },
+    )
+    source_files_used.append((artifacts_dir / "model_artifacts.json").as_posix())
     odds_index = build_odds_index(odds_snapshot)
+    lineup_status_by_game = {
+        game["game_id"]: fetch_game_lineup_status(game["game_id"], warnings)
+        for game in slate.get("games", [])
+    }
     projections: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
     watchlist: list[dict[str, Any]] = []
@@ -329,9 +466,10 @@ def main() -> int:
         away_key = normalize_team(game.get("away_team"))
         home_key = normalize_team(game.get("home_team"))
         odds_game = odds_index.get((away_key, home_key))
+        lineup_status = lineup_status_by_game.get(game["game_id"], {})
 
         pitchers_ready = bool(game.get("home_pitcher", {}).get("name") and game.get("away_pitcher", {}).get("name"))
-        lineup_ready = False
+        lineup_ready = bool(lineup_status.get("lineups_confirmed"))
         market_ready = odds_game is not None
         market_lines = best_h2h_lines(odds_game.get("bookmakers", [])) if odds_game else {}
         freshest_update = None
@@ -368,6 +506,10 @@ def main() -> int:
             "start_time": game.get("start_time"),
             "pitchers_confirmed": pitchers_ready,
             "lineups_confirmed": lineup_ready,
+            "home_lineup_confirmed": bool(lineup_status.get("home_confirmed")),
+            "away_lineup_confirmed": bool(lineup_status.get("away_confirmed")),
+            "home_confirmed_batters": lineup_status.get("home_batters"),
+            "away_confirmed_batters": lineup_status.get("away_batters"),
             "markets_available": market_ready,
             "market_freshness_minutes": freshness_minutes,
             "model_artifacts_available": model_ready,

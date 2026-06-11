@@ -55,3 +55,21 @@ def test_no_valid_odds_key_writes_exact_no_bet_message(monkeypatch, tmp_path) ->
     assert "NO RELEASE-GRADE MLB PLAYS TODAY" in release_card
     assert "Reason: no valid odds API key available" in release_card
     assert "Mode: NO_BET_HOLD" in release_card
+
+
+def test_find_model_artifacts_uses_registry_and_engine_paths(tmp_path) -> None:
+    (tmp_path / "specs").mkdir()
+    (tmp_path / "EdgeGodParlays").mkdir()
+    (tmp_path / "specs" / "edgegod_model_registry.yaml").write_text(
+        "models:\n  - name: mlb_readiness_model\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "EdgeGodParlays" / "edgegod_expert_engine.py").write_text(
+        "class MLBExpertAnalyzer:\n    pass\n",
+        encoding="utf-8",
+    )
+
+    artifacts = run_mlb_data_enrichment.find_model_artifacts(tmp_path)
+    paths = {item["path"] for item in artifacts}
+    assert any(path.endswith("/specs/edgegod_model_registry.yaml") for path in paths)
+    assert any(path.endswith("/EdgeGodParlays/edgegod_expert_engine.py") for path in paths)
