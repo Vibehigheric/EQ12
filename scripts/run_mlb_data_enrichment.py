@@ -75,17 +75,11 @@ def fetch_game_lineup_status(game_id: str, warnings: list[str]) -> dict[str, Any
         }
 
     teams = payload.get("liveData", {}).get("boxscore", {}).get("teams", {})
-    players = payload.get("liveData", {}).get("boxscore", {}).get("players", {})
 
     def extract_team_status(side: str) -> dict[str, Any]:
         team_data = teams.get(side, {})
-        batter_ids = team_data.get("batters", [])
-        confirmed_batters = 0
-        for batter_id in batter_ids:
-            player = players.get(f"ID{batter_id}", {})
-            batting_order = player.get("battingOrder")
-            if batting_order and 101 <= batting_order <= 109:
-                confirmed_batters += 1
+        batting_order = team_data.get("battingOrder") or []
+        confirmed_batters = len(batting_order)
         pitchers = team_data.get("pitchers", [])
         pitcher_confirmed = bool(pitchers)
         return {
@@ -514,7 +508,7 @@ def main() -> int:
             "market_freshness_minutes": freshness_minutes,
             "model_artifacts_available": model_ready,
             "completeness_score": completeness_score,
-            "release_grade": False,
+            "release_grade": not reasons,
             "blocked_reasons": reasons,
         }
         projections.append(projection)
@@ -523,9 +517,9 @@ def main() -> int:
             "game_id": game["game_id"],
             "away_team": game.get("away_team"),
             "home_team": game.get("home_team"),
-            "official_play": False,
+            "official_play": not reasons,
             "best_market_lines": market_lines,
-            "release_blocked": True,
+            "release_blocked": bool(reasons),
             "blocked_reasons": reasons,
         }
         edges.append(edge_record)
