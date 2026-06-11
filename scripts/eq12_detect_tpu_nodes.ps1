@@ -16,9 +16,9 @@
 .PARAMETER OutputFormat
     Output format: Console, JSON, or HTML (default: Console)
 .EXAMPLE
-    .\eq12_detect_tpu_nodes.ps1 -Action Full -Password "102120sRO1!"
+    .\eq12_detect_tpu_nodes.ps1 -Action Full -Password "CLUSTER_PASSWORD_PLACEHOLDER"
 .EXAMPLE
-    .\eq12_detect_tpu_nodes.ps1 -Action Benchmark -IPRange "192.168.100.2" -Password "102120sRO1!"
+    .\eq12_detect_tpu_nodes.ps1 -Action Benchmark -IPRange "192.168.100.2" -Password "CLUSTER_PASSWORD_PLACEHOLDER"
 #>
 
 [CmdletBinding()]
@@ -28,7 +28,7 @@ param(
     
     [string]$IPRange = "192.168.100.2-254",
     [string]$Username = "ricoj100",
-    [string]$Password = "102120sRO1!",
+    [string]$Password = "CLUSTER_PASSWORD_PLACEHOLDER",
     
     [ValidateSet("Console", "JSON", "HTML")]
     [string]$OutputFormat = "Console",

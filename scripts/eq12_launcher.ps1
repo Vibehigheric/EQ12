@@ -105,14 +105,14 @@ function Run-Command {
         "23" {
             Write-Host "Deploying AI Models to Edge (Coral TPU)..." -ForegroundColor Cyan
             Write-Host "Connecting to Raspberry Pi..."
-            wsl -e sshpass -p '102120sRO1!' ssh -o StrictHostKeyChecking=no ricoj100@192.168.1.80 "cd ~/coral_templates && ./run_sports_demo.sh"
+            wsl -e sshpass -p 'CLUSTER_PASSWORD_PLACEHOLDER' ssh -o StrictHostKeyChecking=no ricoj100@192.168.1.80 "cd ~/coral_templates && ./run_sports_demo.sh"
         }
         "21" {
             Write-Host "GODMODE ACTIVATED. RUNNING ALL SYSTEMS." -ForegroundColor Red
             Write-Host "1. Initializing Cluster..."
             Start-Process python -ArgumentList "src/eq12_betting_cluster.py"
             Write-Host "2. Triggering Edge Node..."
-            wsl -e sshpass -p '102120sRO1!' ssh -o StrictHostKeyChecking=no ricoj100@192.168.1.80 "cd ~/coral_templates && nohup ./run_sports_demo.sh > /dev/null 2>&1 &"
+            wsl -e sshpass -p 'CLUSTER_PASSWORD_PLACEHOLDER' ssh -o StrictHostKeyChecking=no ricoj100@192.168.1.80 "cd ~/coral_templates && nohup ./run_sports_demo.sh > /dev/null 2>&1 &"
             Write-Host "SYSTEMS ARE GO."
         }
         "35" { .\scripts\EQ12_CLUSTER_OPS.ps1 -Task Update }

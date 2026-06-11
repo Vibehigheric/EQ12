@@ -18,7 +18,7 @@ from pathlib import Path
 # Removed unused typing imports
 
 # Configure API key from EQ12 environment
-ODDS_API_KEY = "8eb822610b7753d45f76dcac8230a7d1"
+ODDS_API_KEY = "ODDS_API_KEY_PLACEHOLDER"
 
 # The Odds API endpoints
 BASE_URL = "https://api.the-odds-api.com/v4"

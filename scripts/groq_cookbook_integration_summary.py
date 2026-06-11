@@ -87,8 +87,8 @@ def display_integration_summary():
     print("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     api_status = {
-        "Groq API Key": "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",
-        "Google AI Key": "AIzaSyDlgzo9hrLHl9C1AuP-GwtJDFta23iwauc",
+        "Groq API Key": "GROQ_API_KEY_PLACEHOLDER",
+        "Google AI Key": "GOOGLE_API_KEY_PLACEHOLDER",
         "OpenAI Base URL": "https://api.groq.com/openai/v1",
         "Integration Hub": "groq_integration_hub.py",
         "Function Calling": "eq12_betting_function_caller.py",

@@ -94,14 +94,6 @@ class EQ12KellyBankrollManager:
         self.bankroll += amount_won_or_lost
         logger.info(f"Bankroll Updated: ${self.bankroll:.2f} ({amount_won_or_lost:+.2f})")
 
-if __name__ == "__main__":
-    mgr = EQ12BankrollManager(total_bankroll=10000)
-    
-    # Scenario: High confidence edge
-    # 55% win rate at -110 odds (EV ~5%)
-    stake = mgr.calculate_stake(ev_percent=4.9, american_odds=-110, model_probability_percent=55)
-    print(f"Recommended Stake: ${stake}")
-
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,

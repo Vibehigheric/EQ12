@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 class EQ12CFBLiveParlayGenerator:
     def __init__(self):
         # Use alternative working API key
-        self.api_key = 'c32c9644050b2240081428b43e7016ce'
-        self.telegram_token = os.getenv('TELEGRAM_BOT_TOKEN', '7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc')
+        self.api_key = 'ODDS_API_KEY_PLACEHOLDER'
+        self.telegram_token = os.getenv('TELEGRAM_BOT_TOKEN', 'TELEGRAM_BOT_TOKEN_PLACEHOLDER')
         self.telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID', '-5475370304')
 
         # CFB-specific configuration

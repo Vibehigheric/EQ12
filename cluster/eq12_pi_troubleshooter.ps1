@@ -6,7 +6,7 @@ param(
     [string]$PiIP = "192.168.100.2",
     [string]$HostIP = "192.168.100.1",
     [string]$Username = "ricoj100",
-    [string]$Password = "102120sRO1!",
+    [string]$Password = "CLUSTER_PASSWORD_PLACEHOLDER",
     [switch]$FixNetwork,
     [switch]$EnableAdapter,
     [switch]$ShowDetailedStatus

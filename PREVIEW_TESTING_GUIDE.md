@@ -37,7 +37,7 @@ docker-compose -f docker-compose.preview.yml up -d
 $dashboardUrl = "https://eq12-pr-123-dash.ngrok-free.app"
 $credentials = @{
     Username = "preview"
-    Password = "eq12preview123"
+    Password = "PREVIEW_PASSWORD_PLACEHOLDER"
 }
 
 # Basic connectivity test
@@ -52,7 +52,7 @@ Start-Process $dashboardUrl
 # Test API endpoints
 $apiUrl = "https://eq12-pr-123-api.ngrok-free.app"
 $headers = @{
-    "Authorization" = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("preview:eq12preview123"))
+    "Authorization" = "Basic " + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("preview:PREVIEW_PASSWORD_PLACEHOLDER"))
     "Content-Type" = "application/json"
 }
 

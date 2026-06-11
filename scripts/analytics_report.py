@@ -15,8 +15,12 @@ from typing import Dict, List, Optional
 class EQ12AnalyticsEngine:
     """Main analytics engine for EQ12 revenue intelligence"""
     
-    def __init__(self, workspace_root: str = "C:\\EQ12_BROKEN_20251122_210342"):
-        self.workspace = Path(workspace_root)
+    def __init__(self, workspace_root: Optional[str] = None):
+        default_root = Path(__file__).resolve().parents[1]
+        configured_root = workspace_root or default_root
+        self.workspace = Path(configured_root)
+        if not self.workspace.exists():
+            self.workspace = default_root
         self.databases = self._discover_databases()
         
     def _discover_databases(self) -> Dict[str, Path]:
@@ -222,7 +226,7 @@ def main():
     )
     parser.add_argument(
         "--workspace",
-        default="C:\\EQ12_BROKEN_20251122_210342",
+        default=None,
         help="Workspace root path"
     )
     parser.add_argument(

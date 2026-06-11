@@ -2,7 +2,7 @@ import google.generativeai as genai
 import os
 
 # Hardcoded key from the client file
-api_key = "AIzaSyDlgzo9hrLHl9C1AuP-GwtJDFta23iwauc"
+api_key = "GOOGLE_API_KEY_PLACEHOLDER"
 genai.configure(api_key=api_key)
 
 print("Listing available Google AI models...")

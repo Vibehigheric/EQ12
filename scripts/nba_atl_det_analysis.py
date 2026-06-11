@@ -8,7 +8,7 @@ from nba_api.stats.static import teams, players
 import time
 
 # Configuration
-ODDS_API_KEY = "c32c9644050b2240081428b43e7016ce"
+ODDS_API_KEY = "ODDS_API_KEY_PLACEHOLDER"
 ODDS_API_URL = "https://api.the-odds-api.com/v4/sports/basketball_nba/odds"
 TARGET_MATCHUP = {"ATL", "DET"}
 

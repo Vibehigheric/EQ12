@@ -574,7 +574,7 @@ class TNFCoralSGPGenerator:
 
     async def send_telegram_alerts(self, parlays: List[Dict]) -> None:
         """Send Telegram alerts with edge AI status"""
-        telegram_bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc")
+        telegram_bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "TELEGRAM_BOT_TOKEN_PLACEHOLDER")
         telegram_chat_id = os.getenv("TELEGRAM_CHAT_ID", "-1002482553861")
 
         if not telegram_bot_token or not telegram_chat_id:

@@ -91,10 +91,10 @@ class EQ12CapacityOptimizer:
             self.logger.info(f" Starting NFL intelligence instance {instance_id}")
             
             env = {
-                "OPENAI_API_KEY": "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",
-                "GROQ_API_KEY": "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",
-                "ODDS_API_KEY": "8eb822610b7753d45f76dcac8230a7d1",
-                "OPENWEATHER_API_KEY": "229507bc0f5ea7d23bd26958e023652b"
+                "OPENAI_API_KEY": "OPENAI_API_KEY_PLACEHOLDER",
+                "GROQ_API_KEY": "GROQ_API_KEY_PLACEHOLDER",
+                "ODDS_API_KEY": "ODDS_API_KEY_PLACEHOLDER",
+                "OPENWEATHER_API_KEY": "OPENWEATHER_API_KEY_PLACEHOLDER"
             }
             
             process = await asyncio.create_subprocess_exec(

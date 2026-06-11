@@ -107,7 +107,7 @@ class LegalPromptExecutor:
                 logger.error(f"❌ OpenRouter setup failed: {e}")
         
         # 2. Claude Direct API
-        claude_key = os.getenv('ANTHROPIC_API_KEY') or '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'
+        claude_key = os.getenv('ANTHROPIC_API_KEY') or 'ANTHROPIC_API_KEY_PLACEHOLDER'
         if claude_key and ANTHROPIC_AVAILABLE:
             try:
                 providers['claude'] = {

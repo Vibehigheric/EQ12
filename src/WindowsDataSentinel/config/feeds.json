@@ -58,7 +58,7 @@
     {
       "name": "OpenWeatherMap Buffalo",
       "type": "api-json",
-      "url": "https://api.openweathermap.org/data/2.5/weather?q=Buffalo,US&appid=229507bc0f5ea7d23bd26958e023652b",
+      "url": "https://api.openweathermap.org/data/2.5/weather?q=Buffalo,US&appid=OPENWEATHER_API_KEY_PLACEHOLDER",
       "category": "weather",
       "enabled": true,
       "pollMinutes": 15,

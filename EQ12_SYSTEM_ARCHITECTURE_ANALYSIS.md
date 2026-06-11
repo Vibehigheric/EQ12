@@ -193,7 +193,7 @@ request_args = {
 #### **Secrets Management Risks**
 ```python
 # RISK: Hardcoded API keys in terminal history
-$env:ODDS_API_KEY="8eb822610b7753d45f76dcac8230a7d1"
+$env:ODDS_API_KEY="ODDS_API_KEY_PLACEHOLDER"
 
 # RECOMMENDATION: Use secure secret management
 $env:ODDS_API_KEY = (Get-SecureString -Path "C:\EQ12\secrets\odds_key.encrypted")

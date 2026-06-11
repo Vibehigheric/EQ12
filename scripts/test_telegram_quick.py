@@ -9,7 +9,7 @@ import aiohttp
 
 
 async def test_telegram():
-    bot_token = "7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc"
+    bot_token = "TELEGRAM_BOT_TOKEN_PLACEHOLDER"
     chat_id = "-5475370304"
 
     print(f"Bot Token: {bot_token[:10]}...")

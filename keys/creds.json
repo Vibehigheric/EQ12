@@ -1,13 +1,13 @@
 {
-  "type": "service_account",
-  "project_id": "clear-region-421121",
-  "private_key_id": "d87fcf1452bc55c8a7907444d50474d857089730",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCF5Yi5I/RGh3Sq\ntopNA+lM2zpIaN/FaA9LunSHMAfzksAmRXrXaq3hUh5TrlUStUCzU6vOuZGbvHGu\nSJCVoM/CVLHYTqpfpuFOyhmdolLxLiS6va//FyN4DeZ+QUOu4XcHjPvEj0F/T2Ao\nzsGpkllQj6YiwSWOuyVExRQnZB9Iqd7+ME7CtVxhHEFRk+7kVRu2cPglGnSkvWQt\nqlfpKvujPvX+TVl/+zFbXTK/sViwG1R5lruLVofjAC67/B35ZjjfSEr+y/DBLoHt\nlX1I3dRgeF5EJPg91rqpK1bCkc35pdnGFaccgFtb5RuvOr89z2gjlkS6VR6fy3kb\nk/oG5JxJAgMBAAECggEAA5RXS1vCs//7BnVKzTRFkGBr9nOXR9e4UPXzF4oZLFHI\nAT3qQsf/Tf68ANCwRYfC6whZl3Uuh1NKVrZp5xYdd7x75KR1uYjkjQ6qEKS+QuRQ\n5w0bH16m/BajCs0D2jD81Z7XPDH4NkcQ8wZT9wyKhrTQZC11q5MlM+lw2Hy8uVyH\nS228Yp0x1ixEWbDnmkdbCTmPrJ8/ZOmsUPNoHf7H9t84+4DcHYF9O27IVhAvkc7Z\nN7RrjNaenml8YGskAVBnePKP/Bxz95y2eZdO+PpyCfryuhuQ03HC+rtZnT5V7Hsi\nvInX4IFfCUCCKdcEqUxQtPG2gr6PuLpmM9UHtWHXYQKBgQC543CCiEPe8viraa+Q\nSaEesMwJovSspqRckPvnd/YCQhnJxxnGjRyw9q5EKqx0rqRRHUzoCmjgiK0LcY31\nnuc+Eix6TCigsZMMpM8RTJ0nEIV13Ff0A90UqWx9PAMgA+wSHmnGSJaIHUH/KMjj\nTxydw7hXinUxgXGSYDM3EI2F8wKBgQC4Zf7ywKRF/12qE4tXIB2WEdS6K82F7GhW\nt5uUeYzxii1ga4j2jFoCmLMOmsmevxDfVZ6vFRFi0YrXB97mPcwD9I48b1v+zzc1\nPWjSz6AXCkCKJpbQ7/QItAIDhWVNscWVcA/DQsf+HM3dDwoKpOlwLmrdVuC8IGES\nPdP4Yag30wKBgF1R7hjJ2fDiX66GNyojnKxwq24nDdhjLF6ANsZkde96ScH/n1QL\nYZ0Bqkj0d3F4f2ttXz+agj4+v0jgcBkf9g02SHf5JehOXXlaf826faav56Bcxxbs\nnZ+S0rEoYJVBAtGxzP5LUK7yqUA0tG1ROReGu1PPYbhBuMd4Xh3FxJa7AoGAd6XW\n03SkIrcb82tTEmlISUOwoEwjwy4uVXY1gRWNmnxqDRI5gKB5Fw41wNg20sZvEDri\nCADHkzMbv4Lf4s1eP4LDd/tZ2fBihi0egwsteUWxsvJvEYtg8PS8CcTYgp1C80AP\nOkdutTfDbBiCD34J6jx0IsJoeCkaU1fC3nufRvkCgYEAtGJX+9tZIkPoB9Hqmbvo\nRDDNiOvcTgFw9u/aLf3U3dmUprVc7rmuRzKttY4BMd28nfHW2avixe1hBMQdnDs+\nWiIIJwYjpxIoDA3ZHN9ZF5Kqx+KnIVJyaujnNU0TAPCHchsIDtkyPAxEpxZVsG9E\n/V2llcJE+Is3UFe0Usi0VAE=\n-----END PRIVATE KEY-----\n",
-  "client_email": "sports-sheet@clear-region-421121.iam.gserviceaccount.com",
-  "client_id": "114209592083115113321",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sports-sheet%40clear-region-421121.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
+  "example_only": true,
+  "description": "Do not commit real Google service account credentials. Provide them through a secret manager or an untracked local file.",
+  "required_runtime_inputs": [
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "GOOGLE_SHEETS_PRIVATE_KEY",
+    "GOOGLE_SHEETS_CLIENT_EMAIL"
+  ],
+  "local_setup": {
+    "copy_from": "keys/creds.local.json",
+    "git_tracking": "disabled"
+  }
 }

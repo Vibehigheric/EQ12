@@ -9,7 +9,7 @@ import aiohttp
 
 
 async def test_simple():
-    bot_token = "7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc"
+    bot_token = "TELEGRAM_BOT_TOKEN_PLACEHOLDER"
 
     # Try different chat ID formats
     test_chat_ids = [

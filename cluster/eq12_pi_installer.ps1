@@ -181,7 +181,7 @@ function New-PiConfiguration {
         services  = @{
             ssh_enabled        = $true
             username           = "pi"
-            password           = "eq12stack"
+            password           = "CLUSTER_PASSWORD_PLACEHOLDER"
             tpu_worker_port    = 8080
             cross_listing_port = 8081
             web_scraper_port   = 8082

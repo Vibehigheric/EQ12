@@ -4,7 +4,7 @@ import requests
 r = requests.get(
     "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds",
     params={
-        "apiKey": "8eb822610b7753d45f76dcac8230a7d1",
+        "apiKey": "ODDS_API_KEY_PLACEHOLDER",
         "regions": "us",
         "markets": "h2h",
     },
@@ -30,7 +30,7 @@ if games:
         r2 = requests.get(
             "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds",
             params={
-                "apiKey": "8eb822610b7753d45f76dcac8230a7d1",
+                "apiKey": "ODDS_API_KEY_PLACEHOLDER",
                 "regions": "us",
                 "markets": "player_anytime_td",
             },

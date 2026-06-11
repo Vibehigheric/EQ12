@@ -106,7 +106,7 @@ if ($foundDevices.Count -gt 0) {
     foreach ($device in $foundDevices) {
         Write-Host "Test connection to $($device.IPAddress):" -ForegroundColor Yellow
         Write-Host "ssh ricoj100@$($device.IPAddress)" -ForegroundColor Green
-        Write-Host "Password: 102120sRO1!" -ForegroundColor White
+        Write-Host "Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
         Write-Host ""
     }
     

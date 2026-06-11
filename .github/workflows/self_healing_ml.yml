@@ -2,162 +2,270 @@ name: EQ12 Self-Healing ML Pipeline
 
 on:
   schedule:
-    # Run daily at 3 AM UTC (off-peak)
     - cron: '0 3 * * *'
   workflow_dispatch:
     inputs:
       force_retrain:
-        description: 'Force model retrain regardless of drift'
+        description: Force model retrain regardless of drift
         required: false
         default: 'false'
 
 jobs:
   daily-ml-cycle:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      
+        uses: actions/checkout@v4
+
       - name: Setup Python 3.12
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
-      
+          cache: pip
+
+      - name: Prepare directories and inspect inputs
+        id: prep
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path logs, reports, data, models | Out-Null
+
+          $rawDataExists = Test-Path "data/raw_sports_data.csv"
+          $configExists = Test-Path "configs/model_moneyline_v1.yaml"
+          $modelDirExists = Test-Path "models/champion"
+          $backtestSlipsExist = Test-Path "data/backtest_predictions.csv"
+
+          "raw_data_exists=$rawDataExists" >> $env:GITHUB_OUTPUT
+          "config_exists=$configExists" >> $env:GITHUB_OUTPUT
+          "model_dir_exists=$modelDirExists" >> $env:GITHUB_OUTPUT
+          "backtest_slips_exist=$backtestSlipsExist" >> $env:GITHUB_OUTPUT
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      
+          if (Test-Path "requirements.txt") {
+            pip install -r requirements.txt
+          }
+
       - name: Configure environment variables
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        shell: pwsh
         run: |
-          echo "Environment variables configured"
-      
-      - name: Generate features (build_features.py)
+          $status = if ($env:OPENAI_API_KEY) { "configured" } else { "missing" }
+          "openai_status=$status" >> $env:GITHUB_OUTPUT
+          Write-Host "Environment variables inspected"
+
+      - name: Generate features
+        if: steps.prep.outputs.raw_data_exists == 'True' && steps.prep.outputs.config_exists == 'True'
         run: |
           python scripts/build_features.py `
             --input data/raw_sports_data.csv `
             --output data/features_latest.csv `
             --config configs/model_moneyline_v1.yaml
-      
+
+      - name: Note skipped feature generation
+        if: steps.prep.outputs.raw_data_exists != 'True' || steps.prep.outputs.config_exists != 'True'
+        shell: pwsh
+        run: |
+          Write-Host "Skipping feature generation because raw data or config is missing."
+
       - name: Check for model drift
         id: drift_check
         continue-on-error: true
+        shell: pwsh
         run: |
+          if (-not (Test-Path "models/champion")) {
+            "drift_detected=true" >> $env:GITHUB_OUTPUT
+            "drift_reason=missing_champion_model" >> $env:GITHUB_OUTPUT
+            exit 0
+          }
+
           python scripts/drift_monitor.py `
             --model-dir models/champion `
             --threshold 0.15 `
             --days 7
-          echo "DRIFT_DETECTED=$LASTEXITCODE" >> $env:GITHUB_OUTPUT
-      
-      - name: Train new model (if drift detected or forced)
-        if: steps.drift_check.outputs.DRIFT_DETECTED == '1' || github.event.inputs.force_retrain == 'true'
+
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -eq 0) {
+            "drift_detected=false" >> $env:GITHUB_OUTPUT
+            "drift_reason=no_drift" >> $env:GITHUB_OUTPUT
+          }
+          else {
+            "drift_detected=true" >> $env:GITHUB_OUTPUT
+            "drift_reason=drift_or_monitor_error" >> $env:GITHUB_OUTPUT
+          }
+          exit 0
+
+      - name: Train new model
+        if: (steps.drift_check.outputs.drift_detected == 'true' || github.event.inputs.force_retrain == 'true') && steps.prep.outputs.config_exists == 'True' && steps.prep.outputs.raw_data_exists == 'True'
+        id: train_model
+        shell: pwsh
         run: |
           $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
           $newVersion = "v_$timestamp"
-          
+
           python scripts/train_model_production.py `
             --config configs/model_moneyline_v1.yaml
-          
-          echo "NEW_MODEL_VERSION=$newVersion" >> $env:GITHUB_OUTPUT
-        id: train_model
-      
+
+          if ($LASTEXITCODE -eq 0) {
+            "new_model_version=$newVersion" >> $env:GITHUB_OUTPUT
+          }
+          else {
+            exit $LASTEXITCODE
+          }
+
       - name: Run backtest validation
-        if: steps.train_model.outputs.NEW_MODEL_VERSION != ''
+        if: steps.train_model.outputs.new_model_version != '' && steps.prep.outputs.backtest_slips_exist == 'True'
         run: |
           python scripts/backtester.py `
             --slips data/backtest_predictions.csv `
             --bankroll 10000 `
             --output logs/backtest_results.json `
             --days 90
-      
+
       - name: Evaluate champion-challenger promotion
-        if: steps.train_model.outputs.NEW_MODEL_VERSION != ''
+        if: steps.train_model.outputs.new_model_version != ''
         id: promote_check
         continue-on-error: true
+        shell: pwsh
         run: |
           python scripts/promote_model.py `
-            --challenger ${{ steps.train_model.outputs.NEW_MODEL_VERSION }} `
+            --challenger ${{ steps.train_model.outputs.new_model_version }} `
             --min-improvement 2.0 `
             --models-root models
-          echo "PROMOTED=$LASTEXITCODE" >> $env:GITHUB_OUTPUT
-      
+
+          $exitCode = $LASTEXITCODE
+          if ($exitCode -eq 0) {
+            "promoted=true" >> $env:GITHUB_OUTPUT
+          }
+          else {
+            "promoted=false" >> $env:GITHUB_OUTPUT
+          }
+          exit 0
+
       - name: Run BI-Core daily cycle (VB.NET)
         run: |
           dotnet build src/EQ12.BICore/EQ12.BICore.vbproj
           dotnet run --project src/EQ12.CommandCenter/EQ12.CommandCenter.vbproj -- bicore-daily
-      
+
       - name: Send Telegram notification
         if: always()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        shell: pwsh
         run: |
-          $driftStatus = if ($env:DRIFT_DETECTED -eq '1') { "⚠️ DRIFT DETECTED" } else { "✅ No drift" }
-          $trainStatus = if ($env:NEW_MODEL_VERSION) { "🔄 Retrained: $env:NEW_MODEL_VERSION" } else { "⏭️ No retrain needed" }
-          $promoteStatus = if ($env:PROMOTED -eq '0') { "🏆 CHAMPION PROMOTED" } else { "❌ Not promoted" }
-          
+          if (-not $env:TELEGRAM_BOT_TOKEN -or -not $env:TELEGRAM_CHAT_ID) {
+            Write-Host "Telegram secrets are not configured; skipping notification."
+            exit 0
+          }
+
+          $driftStatus = if ("${{ steps.drift_check.outputs.drift_detected }}" -eq "true") { "⚠️ Drift or missing champion model" } else { "✅ No drift" }
+          $trainStatus = if ("${{ steps.train_model.outputs.new_model_version }}" -ne "") { "🔄 Retrained: ${{ steps.train_model.outputs.new_model_version }}" } else { "⏭️ No retrain" }
+          $promoteStatus = if ("${{ steps.promote_check.outputs.promoted }}" -eq "true") { "🏆 Promoted" } else { "ℹ️ Not promoted" }
+
           $message = @"
-          🤖 EQ12 Daily ML Cycle Complete
-          
+          EQ12 Daily ML Cycle Complete
+
           Drift Check: $driftStatus
           Training: $trainStatus
           Promotion: $promoteStatus
-          
-          Time: $(Get-Date -Format "yyyy-MM-dd HH:mm UTC")
+          Workflow Status: ${{ job.status }}
           "@
-          
+
           $uri = "https://api.telegram.org/bot$env:TELEGRAM_BOT_TOKEN/sendMessage"
           $body = @{
             chat_id = $env:TELEGRAM_CHAT_ID
             text = $message
           } | ConvertTo-Json
-          
+
           Invoke-RestMethod -Uri $uri -Method Post -Body $body -ContentType "application/json"
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+
+      - name: Upload ML artifacts
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: ml-pipeline-logs
           path: |
-            logs/drift_report_*.json
-            logs/backtest_results.json
-            logs/training_*.log
+            logs/
+            reports/
+            data/features_latest.csv
+          if-no-files-found: ignore
           retention-days: 30
+
+      - name: Workflow summary
+        if: always()
+        shell: pwsh
+        run: |
+          @"
+          ## EQ12 Self-Healing ML Pipeline
+
+          - Job status: `${{ job.status }}`
+          - Raw data available: `${{ steps.prep.outputs.raw_data_exists }}`
+          - Config available: `${{ steps.prep.outputs.config_exists }}`
+          - Champion model available: `${{ steps.prep.outputs.model_dir_exists }}`
+          - Drift status: `${{ steps.drift_check.outputs.drift_detected }}`
+          - Drift reason: `${{ steps.drift_check.outputs.drift_reason }}`
+          - New model version: `${{ steps.train_model.outputs.new_model_version }}`
+          - Promotion result: `${{ steps.promote_check.outputs.promoted }}`
+          - Output paths: `logs/`, `reports/`, `data/features_latest.csv`
+          "@ >> $env:GITHUB_STEP_SUMMARY
 
   cleanup-old-models:
     runs-on: windows-latest
     needs: daily-ml-cycle
-    
+    if: always()
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      
+        uses: actions/checkout@v4
+
       - name: Remove old model versions (keep last 10)
+        shell: pwsh
         run: |
-          $modelsPath = "models"
-          $versions = Get-ChildItem -Path $modelsPath -Directory | 
-            Where-Object { $_.Name -match "^v_" } | 
-            Sort-Object LastWriteTime -Descending
-          
-          if ($versions.Count -gt 10) {
-            $toDelete = $versions | Select-Object -Skip 10
-            foreach ($version in $toDelete) {
-              Write-Host "Removing old model: $($version.Name)"
-              Remove-Item -Path $version.FullName -Recurse -Force
-            }
+          if (-not (Test-Path "models")) {
+            Write-Host "No models directory found; skipping cleanup."
+            exit 0
           }
-      
+
+          $versions = Get-ChildItem -Path models -Directory |
+            Where-Object { $_.Name -match "^v_" } |
+            Sort-Object LastWriteTime -Descending
+
+          if ($versions.Count -le 10) {
+            Write-Host "No cleanup required."
+            exit 0
+          }
+
+          $toDelete = $versions | Select-Object -Skip 10
+          foreach ($version in $toDelete) {
+            Write-Host "Removing old model: $($version.Name)"
+            Remove-Item -Path $version.FullName -Recurse -Force
+          }
+
       - name: Commit cleanup (if changes)
+        shell: pwsh
         run: |
           git config user.name "EQ12 Bot"
           git config user.email "eq12-bot@users.noreply.github.com"
           git add models/
-          git diff-index --quiet HEAD || git commit -m "🧹 Automated model cleanup [skip ci]"
-          git push
+          git diff-index --quiet HEAD
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "chore: automated model cleanup [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          }
+
+      - name: Cleanup summary
+        if: always()
+        shell: pwsh
+        run: |
+          @"
+          ## EQ12 Model Cleanup
+
+          - Job status: `${{ job.status }}`
+          - Upstream ML cycle status: `${{ needs.daily-ml-cycle.result }}`
+          - Output path: `models/`
+          "@ >> $env:GITHUB_STEP_SUMMARY

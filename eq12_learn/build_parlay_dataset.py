@@ -17,9 +17,13 @@ import re
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import argparse
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_LOG_DIR = Path(os.getenv("EQ12_LOG_DIR", REPO_ROOT / "logs"))
+DEFAULT_OUTPUT_DIR = Path(os.getenv("EQ12_PARLAY_OUTPUT_DIR", Path(__file__).resolve().parent))
+
 # EQ12 Logging Setup
-log_dir = Path("C:/EQ12/logs")
-log_dir.mkdir(exist_ok=True)
+log_dir = DEFAULT_LOG_DIR
+log_dir.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,8 +39,8 @@ logger = logging.getLogger(__name__)
 class ParlayDatasetBuilder:
     """Extracts ML training features from historical parlay analysis logs."""
     
-    def __init__(self, logs_dir: str = "C:/EQ12/logs"):
-        self.logs_dir = Path(logs_dir)
+    def __init__(self, logs_dir: Optional[str] = None):
+        self.logs_dir = Path(logs_dir) if logs_dir else DEFAULT_LOG_DIR
         self.raw_data = []
         self.features_df = None
         self.label_encoders = {}
@@ -322,7 +326,7 @@ class ParlayDatasetBuilder:
             
         if output_path is None:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            output_path = f"C:/EQ12/eq12_learn/parlay_dataset_{timestamp}"
+            output_path = str(DEFAULT_OUTPUT_DIR / f"parlay_dataset_{timestamp}")
             
         # Save as CSV
         csv_path = f"{output_path}.csv"
@@ -401,9 +405,9 @@ class ParlayDatasetBuilder:
 def main():
     """Main execution function for dataset building."""
     parser = argparse.ArgumentParser(description='Build ML dataset from EQ12 parlay logs')
-    parser.add_argument('--logs-dir', default='C:/EQ12/logs', 
+    parser.add_argument('--logs-dir', default=str(DEFAULT_LOG_DIR),
                        help='Directory containing parlay analysis logs')
-    parser.add_argument('--output-dir', default='C:/EQ12/eq12_learn',
+    parser.add_argument('--output-dir', default=str(DEFAULT_OUTPUT_DIR),
                        help='Output directory for dataset files')
     parser.add_argument('--verbose', '-v', action='store_true',
                        help='Verbose logging')

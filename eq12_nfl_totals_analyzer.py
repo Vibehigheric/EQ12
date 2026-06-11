@@ -16,7 +16,7 @@ import requests
 
 class EQ12NFLTotalsAnalyzer:
     def __init__(self):
-        self.api_key = "8eb822610b7753d45f76dcac8230a7d1"
+        self.api_key = "ODDS_API_KEY_PLACEHOLDER"
         self.bankroll = 1000.0
 
         # Setup logging

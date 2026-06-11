@@ -45,7 +45,7 @@ def load_latest_odds(specific_file=None):
 def analyze_with_gpt(odds_data, source_file):
     """Sends odds data to GPT for analysis."""
     # HARDCODED KEY FOR TESTING
-    api_key = "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"
+    api_key = "OPENROUTER_API_KEY_PLACEHOLDER"
 
     if not api_key:
         print("Error: API Key not set.")

@@ -5,7 +5,7 @@ import requests
 import re
 
 # Configuration
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "OPENROUTER_API_KEY_PLACEHOLDER"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 CODE_GENESIS_SYSTEM = """

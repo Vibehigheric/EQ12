@@ -58,7 +58,7 @@ Groq is **10x faster** than OpenAI and **FREE**:
 
 Already configured in your `.env`:
 ```
-GROQ_API_KEY=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
+GROQ_API_KEY=GROQ_API_KEY_PLACEHOLDER
 ```
 
 Should be working automatically!

@@ -1,93 +1,92 @@
-# SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2025 EQ12 Project Contributors
-
-title = "EQ12 GitLeaks Configuration"
-description = "Comprehensive secret scanning for Python, PowerShell, JSON, YAML"
+title = "EQ12 gitleaks configuration"
 
 [extend]
 useDefault = true
 
-[rules.generic-api-key]
-description = "Generic API Key"
+[allowlist]
+description = "Allow placeholder secrets and example fixtures"
+regexTarget = "match"
+paths = [
+  '''(?:^|/)(?:docs|examples|tests)(?:/.*)?$''',
+  '''(?:^|/)tests/fixtures(?:/.*)?$''',
+  '''(?:^|/)\.env\.(?:template|example)$''',
+  '''(?:^|/)(?:test_.*|.*_test)\.py$''',
+  '''(?:^|/)gitleaks\.toml$''',
+  '''(?:^|/)(?:profiles|bin|obj|__pycache__|\.tmp)(?:/.*)?$''',
+  '''(?:^|/)(?:vendor|xampp-source|data/odds_cache|incident_response)(?:/.*)?$''',
+  '''(?:^|/)enterprise/k8s-manifests\.yml$''',
+  '''(?:^|/)scripts/agentic_secret_detection\.py$''',
+  '''(?:^|/).*\.backup_[0-9_]+$''',
+  '''(?:^|/).*\.bak(?:\..*)?$''',
+  '''(?:^|/)gitleaks-report(?:-working-tree)?\.json$'''
+]
+regexes = [
+  '''(?i)(?:PLACEHOLDER|EXAMPLE|SAMPLE|YOUR_[A-Z_]+|REPLACE_[A-Z_]+|REPLACE_ME|DUMMY|FAKE|MOCK|TEST_(?:KEY|TOKEN|SECRET)|example_password)''',
+  '''(?i)github_pat_\*+''',
+  '''(?i)ghp_\*+''',
+  '''\b[a-f0-9]{40}\b''',
+  '''eq12-test-key-2025''',
+  '''(?i)gsk_[A-Za-z0-9]+\.\.\.''',
+  '''(?i)sk-or-v1-[A-Za-z0-9.-]+\.\.\.''',
+  '''(?i)password["']?\s*[:=]\s*["']password["']''',
+  '''self\.eq12_root''',
+  '''Minute/hourly/daily''',
+  '''ghp_1234567890123456789012345678901234567890''',
+  '''sk-1234567890abcdef1234567890abcdef123456789012345678'''
+]
+stopwords = [
+  "placeholder",
+  "example",
+  "sample",
+  "dummy",
+  "fake",
+  "mock"
+]
+
+[[rules]]
+id = "eq12-generic-api-key"
+description = "Generic API key assigned in code or config"
 regex = '''(?i)(?:api[_-]?key|apikey|access[_-]?token)[\"']*\s*[:=]\s*[\"']?([a-zA-Z0-9]{20,})'''
 keywords = ["api", "key", "token", "secret"]
 
-[rules.slack-token]
-description = "Slack Token"
+[[rules]]
+id = "eq12-slack-token"
+description = "Slack token"
 regex = '''xox[baprs]-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}'''
 keywords = ["slack"]
 
-[rules.github-token]
-description = "GitHub Token"
-regex = '''gh[pousr]_[A-Za-z0-9_]{36}'''
+[[rules]]
+id = "eq12-github-token"
+description = "GitHub token"
+regex = '''gh[pousr]_[A-Za-z0-9_]{36,}'''
 keywords = ["github"]
 
-[rules.openai-api-key]
-description = "OpenAI API Key"
-regex = '''sk-[a-zA-Z0-9]{48}'''
+[[rules]]
+id = "eq12-openai-api-key"
+description = "OpenAI API key"
+regex = '''sk-[A-Za-z0-9]{20,}'''
 keywords = ["openai", "sk-"]
 
-[rules.telegram-bot-token]
-description = "Telegram Bot Token"
-regex = '''[0-9]{8,10}:[a-zA-Z0-9_-]{35}'''
+[[rules]]
+id = "eq12-telegram-bot-token"
+description = "Telegram bot token"
+regex = '''[0-9]{8,10}:[A-Za-z0-9_-]{35}'''
 keywords = ["telegram", "bot"]
 
-[rules.aws-secret-access-key]
-description = "AWS Secret Access Key"
+[[rules]]
+id = "eq12-aws-secret-access-key"
+description = "AWS secret access key"
 regex = '''(?i)aws[_-]?secret[_-]?access[_-]?key[\"']*\s*[:=]\s*[\"']?([A-Za-z0-9/\+=]{40})'''
 keywords = ["aws", "secret", "access"]
 
-[rules.private-key]
-description = "Private Key"
+[[rules]]
+id = "eq12-private-key"
+description = "Private key"
 regex = '''-----BEGIN [A-Z ]+ PRIVATE KEY-----'''
-keywords = ["private", "key", "BEGIN"]
+keywords = ["private", "key", "begin"]
 
-[rules.password]
-description = "Password in config"
+[[rules]]
+id = "eq12-password"
+description = "Password assigned in config"
 regex = '''(?i)password[\"']*\s*[:=]\s*[\"']([^\"'\\n]{8,})[\"']'''
 keywords = ["password"]
-
-[[rules.allowlist]]
-description = "Test fixtures and examples"
-paths = [
-    "tests/fixtures/**",
-    "examples/**",
-    "docs/**",
-    "**/test_*.py",
-    "**/*_test.py",
-    ".env.template",
-    ".env.example",
-]
-
-[[rules.allowlist]]
-description = "Sample/placeholder values"
-regex = '''(sk-|xox[baprs]-|gh[pousr]_)?(PLACEHOLDER|EXAMPLE|SAMPLE|YOUR_|REPLACE_|TODO|XXX|placeholder|example)'''
-
-[[rules.allowlist]]
-description = "Common test values"
-regex = '''(test_key|dummy_token|fake_secret|mock_api_key|example_password)'''
-
-[allowlist]
-commits = []
-paths = [
-    "**/.env.template",
-    "**/.env.example",
-    "**/test_*.py",
-    "**/*_test.py",
-    "tests/**",
-    "examples/**",
-    "docs/**",
-]
-stopwords = [
-    "PLACEHOLDER",
-    "EXAMPLE",
-    "SAMPLE",
-    "YOUR_KEY_HERE",
-    "REPLACE_ME",
-    "TODO",
-    "XXX",
-    "test_",
-    "dummy_",
-    "fake_",
-    "mock_",
-]

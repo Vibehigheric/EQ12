@@ -2,61 +2,87 @@ name: Daily EQ12 Optimizer & Analytics
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # 6 AM UTC daily
+    - cron: '0 6 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   backtest-and-report:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
-      
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      
+
+      - name: Prepare report directories
+        run: mkdir -p reports logs data
+
       - name: Install Python dependencies
         run: |
-          pip install -r requirements.txt
-      
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
       - name: Restore .NET solution
         run: dotnet restore EQ12.sln
-      
+
       - name: Build EQ12
-        run: dotnet build -c Release --no-restore
-      
+        run: dotnet build EQ12.sln -c Release --no-restore
+
       - name: Run backtester
-        run: python scripts/backtester.py --days 90 --output reports/backtest.json
-      
+        run: python scripts/backtester.py --slips data/historical_slips.csv --days 90 --output reports/backtest.json
+
       - name: Generate analytics report
-        run: python scripts/analytics_report.py --metric all --output reports/daily_summary.csv
-      
+        run: python scripts/analytics_report.py --metric all --workspace . --format json --output reports/daily_summary.json
+
       - name: Sync Gumroad earnings
         env:
-          GUMROAD_TOKEN: ${{ secrets.GUMROAD_TOKEN }}
-        run: python scripts/gumroad_sync.py --update
-      
+          GUMROAD_API_TOKEN: ${{ secrets.GUMROAD_TOKEN }}
+        run: python gumroad_sync.py --update
+
       - name: Update bankroll status
-        run: python scripts/eq12_bankroll_manager.py --action report
-      
+        run: python scripts/eq12_bankroll_manager.py --action report --output reports/bankroll_report.json
+
       - name: Commit and push reports
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add reports/
-          git commit -m "Daily backtest and analytics report [$(date)]" || echo "No changes"
-          git push
-      
-      - name: Upload artifacts
+          git commit -m "Daily backtest and analytics report [$(date -u +'%Y-%m-%d')]" || echo "No changes"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Upload report artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: daily-reports
-          path: reports/
+          path: |
+            reports/
+            logs/
+          if-no-files-found: ignore
           retention-days: 30
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Daily EQ12 Optimizer & Analytics"
+            echo
+            echo "- Job status: \`${{ job.status }}\`"
+            echo "- Build target: \`EQ12.sln\`"
+            echo "- Backtest output: \`reports/backtest.json\`"
+            echo "- Analytics output: \`reports/daily_summary.json\`"
+            echo "- Bankroll output: \`reports/bankroll_report.json\`"
+          } >> "$GITHUB_STEP_SUMMARY"

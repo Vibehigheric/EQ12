@@ -18,7 +18,7 @@ import requests
 class EQ12ComprehensiveNFLAnalyzer:
     def __init__(self):
         self.setup_logging()
-        self.api_key = "4b0b0cba11ff90531efaae3b7f546734"
+        self.api_key = "API_KEY_PLACEHOLDER"
         self.bankroll = 1000.0
 
     def setup_logging(self):

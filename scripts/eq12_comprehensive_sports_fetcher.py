@@ -28,13 +28,13 @@ class EQ12ComprehensiveSportsDataFetcher:
     def __init__(self):
         # Set API keys from provided credentials
         self.api_keys = {
-            'odds_api': '8eb822610b7753d45f76dcac8230a7d1',
-            'openai': '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',
-            'groq': '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',
-            'telegram_bot': '7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc',
-            'google_ai': 'AIzaSyDlgzo9hrLHl9C1AuP-GwtJDFta23iwauc',
-            'huggingface': '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',
-            'claude': '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'
+            'odds_api': 'ODDS_API_KEY_PLACEHOLDER',
+            'openai': 'OPENAI_API_KEY_PLACEHOLDER',
+            'groq': 'GROQ_API_KEY_PLACEHOLDER',
+            'telegram_bot': 'TELEGRAM_BOT_TOKEN_PLACEHOLDER',
+            'google_ai': 'GOOGLE_API_KEY_PLACEHOLDER',
+            'huggingface': 'HUGGINGFACE_TOKEN_PLACEHOLDER',
+            'claude': 'ANTHROPIC_API_KEY_PLACEHOLDER'
         }
         
         # Sport configurations for ESPN API

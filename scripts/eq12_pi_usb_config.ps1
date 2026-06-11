@@ -116,7 +116,7 @@ network={
     Write-Host "4. Run: .\eq12_pi_boot_detector.ps1" -ForegroundColor White
     Write-Host ""
     Write-Host "Expected boot time: 2-3 minutes" -ForegroundColor Yellow
-    Write-Host "SSH credentials: ricoj100 / 102120sRO1!" -ForegroundColor Yellow
+    Write-Host "SSH credentials: ricoj100 / CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor Yellow
 
 }
 catch {

@@ -31,13 +31,37 @@ class EQ12Backtester:
     def load_historical_slips(self, csv_path: str) -> pd.DataFrame:
         """Load historical betting slips"""
         logger.info(f"Loading slips from {csv_path}")
-        df = pd.read_csv(csv_path)
+        path = Path(csv_path)
+        required_columns = ['date', 'stake', 'odds', 'outcome']
+
+        if not path.exists():
+            logger.warning("Historical slips file not found; using empty dataset")
+            return pd.DataFrame(columns=required_columns)
+
+        df = pd.read_csv(path)
+        if df.empty:
+            logger.warning("Historical slips file is empty")
+            return pd.DataFrame(columns=required_columns)
+
+        missing_columns = [column for column in required_columns if column not in df.columns]
+        if missing_columns:
+            logger.warning(
+                "Historical slips file is missing required columns: %s",
+                ", ".join(missing_columns),
+            )
+            return pd.DataFrame(columns=required_columns)
+
         df['date'] = pd.to_datetime(df['date'])
         return df.sort_values('date')
     
     def backtest(self, slips: pd.DataFrame, kelly_fraction: float = 0.25) -> Dict[str, Any]:
         """Run backtest simulation"""
         logger.info(f"Running backtest with {len(slips)} slips")
+
+        if slips.empty:
+            logger.warning("No historical slips available; returning empty backtest metrics")
+            self.daily_equity = [self.initial_bankroll]
+            return self._calculate_metrics(0, 0)
         
         daily_pnl = {}
         winning_trades = 0
@@ -124,26 +148,33 @@ class EQ12Backtester:
             'roi': round(roi, 4),
             'sharpe_ratio': round(sharpe, 4),
             'max_drawdown': round(max_dd, 4),
-            'avg_trade_size': round(sum(t['stake'] for t in self.trades) / total_trades, 2),
+            'avg_trade_size': round(sum(t['stake'] for t in self.trades) / total_trades, 2) if total_trades else 0,
             'avg_winning_trade': round(np.mean([t['pnl'] for t in self.trades if t['pnl'] > 0]), 2) if any(t['pnl'] > 0 for t in self.trades) else 0,
             'avg_losing_trade': round(np.mean([t['pnl'] for t in self.trades if t['pnl'] < 0]), 2) if any(t['pnl'] < 0 for t in self.trades) else 0,
         }
     
-    def save_results(self, output_path: str):
+    def save_results(self, output_path: str, metrics: Dict[str, Any]):
         """Save backtest results"""
-        Path('reports').mkdir(exist_ok=True)
+        output_base = Path(output_path)
+        output_base.parent.mkdir(parents=True, exist_ok=True)
+        output_prefix = output_base.with_suffix('') if output_base.suffix else output_base
         
         # Save trades
         trades_df = pd.DataFrame(self.trades)
-        trades_path = f"{output_path}_trades.csv"
+        trades_path = f"{output_prefix}_trades.csv"
         trades_df.to_csv(trades_path, index=False)
         logger.info(f"Saved trades to {trades_path}")
         
         # Save equity curve
-        equity_path = f"{output_path}_equity.json"
+        equity_path = f"{output_prefix}_equity.json"
         with open(equity_path, 'w') as f:
             json.dump(self.daily_equity, f)
         logger.info(f"Saved equity curve to {equity_path}")
+
+        metrics_path = output_base if output_base.suffix == '.json' else Path(f"{output_path}.json")
+        with open(metrics_path, 'w') as f:
+            json.dump(metrics, f, indent=2)
+        logger.info(f"Saved metrics to {metrics_path}")
 
 def main():
     parser = argparse.ArgumentParser(description="Backtest EQ12 betting system")
@@ -161,13 +192,13 @@ def main():
     backtester = EQ12Backtester(args.bankroll)
     slips = backtester.load_historical_slips(args.slips)
     
-    if args.days:
+    if args.days and not slips.empty:
         cutoff = datetime.now() - timedelta(days=args.days)
         slips = slips[slips['date'] >= cutoff]
         logger.info(f"Backtesting {args.days} days: {len(slips)} slips")
     
     metrics = backtester.backtest(slips)
-    backtester.save_results(args.output)
+    backtester.save_results(args.output, metrics)
     
     # Print results
     print("\n" + "="*60)

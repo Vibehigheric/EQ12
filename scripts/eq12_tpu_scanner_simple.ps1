@@ -11,7 +11,7 @@
 .PARAMETER Password
     SSH password for Pi access
 .EXAMPLE
-    .\eq12_tpu_scanner_simple.ps1 -Action Scan -IP "192.168.100.2" -Password "102120sRO1!"
+    .\eq12_tpu_scanner_simple.ps1 -Action Scan -IP "192.168.100.2" -Password "CLUSTER_PASSWORD_PLACEHOLDER"
 #>
 
 [CmdletBinding()]
@@ -21,7 +21,7 @@ param(
     
     [string]$IP = "192.168.100.2",
     [string]$Username = "ricoj100",
-    [string]$Password = "102120sRO1!",
+    [string]$Password = "CLUSTER_PASSWORD_PLACEHOLDER",
     [int]$Timeout = 30
 )
 

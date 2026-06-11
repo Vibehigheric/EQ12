@@ -9,9 +9,9 @@
 
 ```ini
 # Primary Keys (from your .env)
-CHATGPT_API_KEY=sk-proj-xuzgJEzZGxPZlyxkK80q73sneMotwf1d2cesxsN5cf5niKE_Si88FQfEgWuuRGcDbzLWy0Ck5AT3BlbkFJNYBFREPJUsMYTs...
-OPENAI_API_KEY=sk-proj-xuzgJEzZGxPZlyxkK80q73sneMotwf1d2cesxsN5cf5niKE_Si88FQfEgWuuRGcDbzLWy0Ck5AT3BlbkFJNYBFREPJUsMYTs...
-AZURE_OPENAI_API_KEY=sk-proj-xuzgJEzZGxPZlyxkK80q73sneMotwf1d2cesxsN5cf5niKE_Si88FQfEgWuuRGcDbzLWy0Ck5AT3BlbkFJNYBFREPJUsMYTs...
+CHATGPT_API_KEY=OPENAI_API_KEY_PLACEHOLDER
+OPENAI_API_KEY=OPENAI_API_KEY_PLACEHOLDER
+AZURE_OPENAI_API_KEY=OPENAI_API_KEY_PLACEHOLDER
 
 # Endpoint Configuration
 API_URL=https://api.openai.com/v1/chat/completions

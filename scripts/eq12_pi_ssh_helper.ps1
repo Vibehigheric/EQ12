@@ -88,7 +88,7 @@ function Show-SSHFixOptions {
     Write-Host "Option 1: Pi Imager SSH Re-enable" -ForegroundColor Cyan
     Write-Host " Re-flash USB drive with Pi Imager" -ForegroundColor White
     Write-Host " In advanced options: Enable SSH + Password Auth" -ForegroundColor White
-    Write-Host " Set username: ricoj100, password: 102120sRO1!" -ForegroundColor White
+    Write-Host " Set username: ricoj100, password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
     Write-Host ""
     
     Write-Host "Option 2: Manual SSH Enable (if you have HDMI/keyboard)" -ForegroundColor Cyan
@@ -102,7 +102,7 @@ function Show-SSHFixOptions {
     Write-Host "Option 3: USB Boot Drive Fix" -ForegroundColor Cyan
     Write-Host " Remove USB from Pi, connect to EQ12" -ForegroundColor White
     Write-Host " Create empty file named 'ssh' in boot partition" -ForegroundColor White
-    Write-Host " Create userconf.txt with: ricoj100:102120sRO1!" -ForegroundColor White
+    Write-Host " Create userconf.txt with: ricoj100:CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
     Write-Host ""
 }
 

@@ -33,7 +33,7 @@ class EQ12SpecificDateSportsPull:
     def __init__(self):
         # API Keys from environment
         self.odds_api_key = os.getenv(
-            "ODDS_API_KEY", "8eb822610b7753d45f76dcac8230a7d1")
+            "ODDS_API_KEY", "ODDS_API_KEY_PLACEHOLDER")
         self.openweather_api_key = os.getenv("OPENWEATHER_API_KEY")
 
         # API Base URLs

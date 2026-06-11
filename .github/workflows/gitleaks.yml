@@ -1,43 +1,68 @@
 name: Gitleaks Security Scan
+
 on:
-    push:
-    pull_request:
-    workflow_dispatch:
-    schedule:
-        - cron: "0 6 * * *" # Daily at 6 AM UTC
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
 
 jobs:
-    gitleaks:
-        name: Secret Scanning
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+  gitleaks:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
 
-            - name: Run Gitleaks
-              uses: gitleaks/gitleaks-action@v2
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  args: detect --no-git -v --report-format json --report-path gitleaks-report.json
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - name: Upload Gitleaks report
-              if: always()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: gitleaks-report
-                  path: gitleaks-report.json
+      - name: Install Gitleaks CLI
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz
+          chmod +x gitleaks
 
-            - name: Comment on PR if secrets found
-              if: failure() && github.event_name == 'pull_request'
-              uses: actions/github-script@v7
-              with:
-                  script: |
-                      github.rest.issues.createComment({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: '🚨 **Gitleaks detected potential secrets!** Please review the scan results and remove any exposed credentials before merging.'
-                      })
+      - name: Run Gitleaks
+        id: scan
+        continue-on-error: true
+        run: |
+          ./gitleaks detect --no-git --source . --config .gitleaks.toml --report-format sarif --report-path results.sarif
+
+      - name: Upload Gitleaks report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: results.sarif
+          if-no-files-found: ignore
+
+      - name: Workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Gitleaks Security Scan"
+            echo
+            echo "- Step outcome: \`${{ steps.scan.outcome }}\`"
+            echo "- Config path: \`.gitleaks.toml\`"
+            echo "- Report path: \`results.sarif\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment on PR if secrets found
+        if: steps.scan.outcome == 'failure' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚨 **Gitleaks detected potential secrets.** Review the SARIF artifact and remove confirmed credentials before merging.'
+            })
+
+      - name: Fail job when confirmed findings remain
+        if: steps.scan.outcome == 'failure'
+        run: |
+          echo "Gitleaks reported confirmed findings or a scan error."
+          exit 1

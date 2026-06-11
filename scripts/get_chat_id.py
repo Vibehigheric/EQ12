@@ -10,7 +10,7 @@ import aiohttp
 
 
 async def get_updates():
-    bot_token = "7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc"
+    bot_token = "TELEGRAM_BOT_TOKEN_PLACEHOLDER"
 
     url = f"https://api.telegram.org/bot{bot_token}/getUpdates"
 

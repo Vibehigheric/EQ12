@@ -2,7 +2,7 @@ import requests
 import json
 from datetime import datetime, timezone, timedelta
 
-API_KEY = "c32c9644050b2240081428b43e7016ce"
+API_KEY = "ODDS_API_KEY_PLACEHOLDER"
 
 r = requests.get(
     'https://api.the-odds-api.com/v4/sports/basketball_nba/odds',

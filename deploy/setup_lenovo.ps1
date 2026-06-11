@@ -37,8 +37,8 @@ else {
 if (-not (Test-Path ".env")) {
     Write-Host "🔑 Creating .env file..." -ForegroundColor Yellow
     $envContent = @"
-OPENAI_API_KEY=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
-ODDS_API_KEY=c32c9644050b2240081428b43e7016ce
+OPENAI_API_KEY=OPENROUTER_API_KEY_PLACEHOLDER
+ODDS_API_KEY=ODDS_API_KEY_PLACEHOLDER
 EQ12_ENV=PRODUCTION
 "@
     Set-Content -Path ".env" -Value $envContent

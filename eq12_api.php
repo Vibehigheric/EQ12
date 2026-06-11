@@ -37,7 +37,7 @@ class EQ12ApiRouter {
     private array $middleware = [];
     
     public function __construct() {
-        $this->oddsApiKey = $_ENV['ODDS_API_KEY'] ?? '8eb822610b7753d45f76dcac8230a7d1';
+        $this->oddsApiKey = $_ENV['ODDS_API_KEY'] ?? 'ODDS_API_KEY_PLACEHOLDER';
         $this->setupRoutes();
         $this->setupMiddleware();
     }

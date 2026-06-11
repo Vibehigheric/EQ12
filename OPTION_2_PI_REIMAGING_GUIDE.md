@@ -45,7 +45,7 @@ If current drive is corrupted:
    **Generate password hash:**
    ```bash
    # On any Linux system or WSL:
-   echo '102120sRO1!' | openssl passwd -6 -stdin
+   echo 'CLUSTER_PASSWORD_PLACEHOLDER' | openssl passwd -6 -stdin
    ```
 
 ### Step 2: Network Pre-Configuration
@@ -108,7 +108,7 @@ cd C:\EQ12\scripts
 3. **Complete initial setup manually**
 4. **Run our auto-config from EQ12:**
    ```powershell
-   .\eq12_pi_quicksetup.ps1 -IPAddress 192.168.100.2 -Username ricoj100 -Password '102120sRO1!'
+   .\eq12_pi_quicksetup.ps1 -IPAddress 192.168.100.2 -Username ricoj100 -Password 'CLUSTER_PASSWORD_PLACEHOLDER'
    ```
 
 ##  SUPPORT ESCALATION

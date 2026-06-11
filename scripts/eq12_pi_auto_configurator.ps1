@@ -51,7 +51,7 @@ Write-Host ""
 Write-Host "OPTION 1: Manual SSH (Recommended)" -ForegroundColor Green
 Write-Host "1. Open a new PowerShell window" -ForegroundColor White
 Write-Host "2. Run: ssh ricoj100@192.168.1.80" -ForegroundColor Cyan
-Write-Host "3. Password: 102120sRO1!" -ForegroundColor White
+Write-Host "3. Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
 Write-Host "4. Copy/paste these commands:" -ForegroundColor White
 Write-Host ""
 
@@ -74,7 +74,7 @@ Write-Host "OPTION 2: Using PuTTY or SSH Client" -ForegroundColor Green
 Write-Host " Download PuTTY if needed" -ForegroundColor White
 Write-Host " Connect to: 192.168.1.80:22" -ForegroundColor White
 Write-Host " Username: ricoj100" -ForegroundColor White
-Write-Host " Password: 102120sRO1!" -ForegroundColor White
+Write-Host " Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
 Write-Host " Run the commands above" -ForegroundColor White
 
 Write-Host ""
@@ -113,7 +113,7 @@ if ($response -eq "Y" -or $response -eq "y") {
                 Write-StatusLog " SUCCESS! Pi joined cluster network!" "Green"
                 Write-Host ""
                 Write-Host "Cluster SSH ready: ssh ricoj100@192.168.100.2" -ForegroundColor Cyan
-                Write-Host "Password: 102120sRO1!" -ForegroundColor White
+                Write-Host "Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
                 break
             } else {
                 Write-StatusLog "Pi responding on cluster, SSH starting..." "Yellow"

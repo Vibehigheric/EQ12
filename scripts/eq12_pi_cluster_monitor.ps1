@@ -65,7 +65,7 @@ while ($attempt -le $maxAttempts) {
         Write-Host ""
         Write-Host "Pi is now available at:" -ForegroundColor Cyan
         Write-Host "ssh ricoj100@192.168.100.2" -ForegroundColor Green
-        Write-Host "Password: 102120sRO1!" -ForegroundColor White
+        Write-Host "Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
         Write-Host ""
         Write-Host " Ready for cluster operations!" -ForegroundColor Cyan
         exit 0

@@ -18,28 +18,28 @@ Write-Host "Setting up environment variables for EQ12 betting automation..." -Fo
 Write-Host "📝 Configuring environment variables..." -ForegroundColor Yellow
 
 # AI Services
-$env:GROQ_API_KEY = "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"
+$env:GROQ_API_KEY = "GROQ_API_KEY_PLACEHOLDER"
 [Environment]::SetEnvironmentVariable("GROQ_API_KEY", $env:GROQ_API_KEY, "User")
 
-$env:OPENAI_API_KEY = "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"
+$env:OPENAI_API_KEY = "OPENAI_API_KEY_PLACEHOLDER"
 [Environment]::SetEnvironmentVariable("OPENAI_API_KEY", $env:OPENAI_API_KEY, "User")
 
 # Sports Data
-$env:THE_ODDS_API_KEY = "8eb822610b7753d45f76dcac8230a7d1"
+$env:THE_ODDS_API_KEY = "ODDS_API_KEY_PLACEHOLDER"
 [Environment]::SetEnvironmentVariable("THE_ODDS_API_KEY", $env:THE_ODDS_API_KEY, "User")
 
 # Communication
-$env:TELEGRAM_BOT_TOKEN = "7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc"
+$env:TELEGRAM_BOT_TOKEN = "TELEGRAM_BOT_TOKEN_PLACEHOLDER"
 $env:TELEGRAM_CHAT_ID = "5475370304"
 [Environment]::SetEnvironmentVariable("TELEGRAM_BOT_TOKEN", $env:TELEGRAM_BOT_TOKEN, "User")
 [Environment]::SetEnvironmentVariable("TELEGRAM_CHAT_ID", $env:TELEGRAM_CHAT_ID, "User")
 
 # GitHub Integration
-$env:GITHUB_TOKEN = "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"
+$env:GITHUB_TOKEN = "GITHUB_PAT_PLACEHOLDER"
 [Environment]::SetEnvironmentVariable("GITHUB_TOKEN", $env:GITHUB_TOKEN, "User")
 
 # Development Tools
-$env:GITLENS_KEY = "1e338eec-3959-480d-8e73-628cc045cfe3"
+$env:GITLENS_KEY = "GITLENS_KEY_PLACEHOLDER"
 [Environment]::SetEnvironmentVariable("GITLENS_KEY", $env:GITLENS_KEY, "User")
 
 # EQ12 Configuration

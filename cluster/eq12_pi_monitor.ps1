@@ -112,7 +112,7 @@ do {
             Write-Host "`n SUCCESS! Pi is now accessible!" -ForegroundColor Green
             Write-Host " Ready for cluster integration" -ForegroundColor Green
             Write-Host "`nNext step:" -ForegroundColor Cyan
-            Write-Host "python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip $PiIP --username ricoj100 --password 102120sRO1!" -ForegroundColor Yellow
+            Write-Host "python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip $PiIP --username ricoj100 --password CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor Yellow
             
             if (-not $Continuous) {
                 Write-Host "`nConnection established! Exiting monitor..." -ForegroundColor Green

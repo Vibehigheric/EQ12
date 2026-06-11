@@ -123,7 +123,7 @@ if ($FixAll) {
     if ($FinalPing) {
         Write-Host " SUCCESS! Pi is now reachable at 192.168.100.2" -ForegroundColor Green
         Write-Host " Next step: Run cluster integration" -ForegroundColor Green
-        Write-Host "   python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip 192.168.100.2 --username ricoj100 --password 102120sRO1!" -ForegroundColor Yellow
+        Write-Host "   python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip 192.168.100.2 --username ricoj100 --password CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor Yellow
     }
     else {
         Write-Host "  Network configured but Pi not responding" -ForegroundColor Yellow

@@ -33,7 +33,7 @@ class EQ12GroqIntegrationHub:
         # HARDCODED GROQ CONFIGURATION
         self.base_url = "https://api.groq.com/openai/v1"
         self.api_key = os.environ.get(
-            "GROQ_API_KEY", "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"
+            "GROQ_API_KEY", "GROQ_API_KEY_PLACEHOLDER"
         )
 
         # GROQ COOKBOOK INTEGRATIONS (hardcoded from documentation)

@@ -3,7 +3,7 @@
 ## Current Status
  **USB-to-Ethernet Adapter**: Detected and configured (Realtek USB 2.5GbE)  
  **Host Network Configuration**: Static IP 192.168.100.1/24 configured  
- **Pi Credentials Confirmed**: Username: ricoj100, Password: 102120sRO1!  
+ **Pi Credentials Confirmed**: Username: ricoj100, Password: CLUSTER_PASSWORD_PLACEHOLDER  
  **Ready for USB Boot**: Pi OS Lite 64-bit with SSH pre-configured  
  **Target IP**: Pi will use 192.168.100.2/24 static IP
 
@@ -38,7 +38,7 @@ If using Imager directly:
     Enable SSH
    Authentication: Use password
    Username: ricoj100
-   Password: 102120sRO1!
+   Password: CLUSTER_PASSWORD_PLACEHOLDER
    Hostname: pi-node-1
    
     Configure wireless LAN (optional backup)
@@ -81,7 +81,7 @@ Test-NetConnection -ComputerName 192.168.100.2 -Port 22
 
 # Connect via SSH
 ssh ricoj100@192.168.100.2
-# Password: 102120sRO1!
+# Password: CLUSTER_PASSWORD_PLACEHOLDER
 # Accept host key when prompted (type 'yes')
 ```
 
@@ -130,7 +130,7 @@ wlan0: inet 192.168.0.105/24   # Internet access (DHCP)
 ### Automatic Cluster Registration
 ```powershell
 # Add Pi to EQ12 cluster with confirmed credentials
-python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip 192.168.100.2 --username ricoj100 --password 102120sRO1!
+python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip 192.168.100.2 --username ricoj100 --password CLUSTER_PASSWORD_PLACEHOLDER
 
 # Verify cluster status
 python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action status
@@ -181,7 +181,7 @@ python C:\EQ12\scripts\eq12_pi_setup_assistant.py --target-ip 192.168.100.2 --de
    sudo systemctl status ssh
    sudo systemctl restart ssh
    ```
-3. **Verify credentials**: Username `ricoj100`, Password `102120sRO1!`
+3. **Verify credentials**: Username `ricoj100`, Password `CLUSTER_PASSWORD_PLACEHOLDER`
 4. **Check SSH key conflicts**: Clear known_hosts if previous Pi connected
    ```powershell
    ssh-keygen -R 192.168.100.2
@@ -214,7 +214,7 @@ python C:\EQ12\scripts\eq12_pi_setup_assistant.py --target-ip 192.168.100.2 --de
 
 ### SSH Credentials
 - **Username**: ricoj100
-- **Password**: 102120sRO1!
+- **Password**: CLUSTER_PASSWORD_PLACEHOLDER
 - **Hostname**: pi-node-1
 - **SSH Port**: 22 (default)
 

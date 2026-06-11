@@ -16,7 +16,7 @@ from pathlib import Path
 os.environ["EQ12_USE_LLM"] = "1"
 if not os.getenv("OPENAI_API_KEY"):
     os.environ["OPENAI_API_KEY"] = (
-        "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"
+        "OPENAI_API_KEY_PLACEHOLDER"
     )
 
 try:

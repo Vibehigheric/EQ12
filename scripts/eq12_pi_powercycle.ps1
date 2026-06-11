@@ -129,7 +129,7 @@ if ($success) {
                 Write-Host " BOOT SUCCESS!" -ForegroundColor Green
                 Write-Host "Device: $Device at 192.168.100.2" -ForegroundColor Cyan
                 Write-Host "SSH: ssh ricoj100@192.168.100.2" -ForegroundColor Cyan
-                Write-Host "Password: 102120sRO1!" -ForegroundColor White
+                Write-Host "Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor White
                 exit 0
             }
             

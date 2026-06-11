@@ -5,7 +5,7 @@ import re
 import os
 from datetime import datetime
 
-API_KEY = "c32c9644050b2240081428b43e7016ce"
+API_KEY = "ODDS_API_KEY_PLACEHOLDER"
 MEMORY_FILE = "c:\\EQ12_BROKEN_20251122_210342\\config\\learning_memory.md"
 
 class PostMortem:

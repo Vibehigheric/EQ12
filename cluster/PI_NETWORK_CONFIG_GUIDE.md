@@ -22,7 +22,7 @@ If you're installing Pi OS fresh:
     Enable SSH
    Authentication: Use password
    Username: ricoj100
-   Password: 102120sRO1!
+   Password: CLUSTER_PASSWORD_PLACEHOLDER
    Hostname: pi-node-1
    
     Configure static IP:
@@ -87,7 +87,7 @@ Test-NetConnection -ComputerName 192.168.100.2 -Port 22
 
 # Connect via SSH
 ssh ricoj100@192.168.100.2
-# Password: 102120sRO1!
+# Password: CLUSTER_PASSWORD_PLACEHOLDER
 ```
 
 ##  Expected Results
@@ -138,12 +138,12 @@ arp -a | findstr "192.168.100"
 
  **Ping responds** from 192.168.100.2  
  **SSH port 22** is accessible  
- **SSH login** works with ricoj100/102120sRO1!  
+ **SSH login** works with ricoj100/CLUSTER_PASSWORD_PLACEHOLDER  
  **ARP entry** shows Pi MAC address
 
 Once connectivity works, proceed to cluster integration:
 
 ```powershell
 # Add Pi to EQ12 cluster
-python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip 192.168.100.2 --username ricoj100 --password 102120sRO1!
+python C:\EQ12\scripts\eq12_raspberry_pi_cluster_manager.py --action add-node --ip 192.168.100.2 --username ricoj100 --password CLUSTER_PASSWORD_PLACEHOLDER
 ```

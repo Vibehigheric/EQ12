@@ -11,7 +11,7 @@ PROMPT_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../con
 EVOLUTION_LOG = os.path.join(LOGS_DIR, "prompt_evolution_log.md")
 
 # HARDCODED KEY (Same as gpt_analyzer.py)
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = "OPENROUTER_API_KEY_PLACEHOLDER"
 
 def load_picks():
     """Loads the last set of picks made by the AI."""

@@ -94,8 +94,8 @@ powershell -ExecutionPolicy Bypass -File .\wireguard_test.ps1 -ShowStatus -TestC
 ## Security Features Implemented
 
 ### ✅ Key Generation
-- Private Key: `IOQ9drZ8R2U5wjEmcr7Ppg2Ckqh93sGOpHUHHwMVPE4=`
-- Public Key: `9/NWNG+i9djhNCx06OikTKJ1nBnYyy9J94JFbSJI01k=`
+- Private Key: `WIREGUARD_PRIVATE_KEY_PLACEHOLDER`
+- Public Key: `WIREGUARD_PRIVATE_KEY_PLACEHOLDER`
 
 ### ✅ DNS Protection
 - Configured to use Cloudflare DNS (1.1.1.1, 1.0.0.1)

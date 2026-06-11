@@ -5,7 +5,7 @@
 param(
     [string]$PiIP = "192.168.100.2",
     [string]$Username = "ricoj100", 
-    [string]$Password = "102120sRO1!",
+    [string]$Password = "CLUSTER_PASSWORD_PLACEHOLDER",
     [int]$TimeoutSeconds = 300,
     [switch]$SetupSSHKey,
     [switch]$DeployServices

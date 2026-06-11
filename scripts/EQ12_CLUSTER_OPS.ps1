@@ -17,7 +17,7 @@ param(
 
 $PiIP = "192.168.1.80"
 $PiUser = "ricoj100"
-$PiPass = "102120sRO1!"
+$PiPass = "CLUSTER_PASSWORD_PLACEHOLDER"
 # WSL wrapper for sshpass
 $SSHCmd = "wsl -e sshpass -p '$PiPass' ssh -o StrictHostKeyChecking=no $PiUser@$PiIP"
 $SCPCmd = "wsl -e sshpass -p '$PiPass' scp -o StrictHostKeyChecking=no"

@@ -13,7 +13,7 @@
 .PARAMETER Password
     SSH password
 .EXAMPLE
-    .\eq12_pi_cluster_autoconfig.ps1 -Password "102120sRO1!"
+    .\eq12_pi_cluster_autoconfig.ps1 -Password "CLUSTER_PASSWORD_PLACEHOLDER"
 #>
 
 [CmdletBinding()]
@@ -21,7 +21,7 @@ param(
     [string]$PiIP = "192.168.1.80",
     [string]$ClusterIP = "192.168.100.2",
     [string]$Username = "ricoj100",
-    [string]$Password = "102120sRO1!",
+    [string]$Password = "CLUSTER_PASSWORD_PLACEHOLDER",
     [switch]$VerboseOutput
 )
 

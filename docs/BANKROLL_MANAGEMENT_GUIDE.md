@@ -241,7 +241,7 @@ min_bankroll_percent = 0.50  # Stop at 50% loss
 
 ### Step 1: Run Enhanced Scanner
 ```powershell
-$env:ODDS_API_KEY = "c32c9644050b2240081428b43e7016ce"
+$env:ODDS_API_KEY = "ODDS_API_KEY_PLACEHOLDER"
 cd C:\EQ12_BROKEN_20251122_210342\scripts
 python eq12_live_sports_scanner_ENHANCED.py --workers 10 --bankroll 10000
 ```

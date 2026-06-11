@@ -281,8 +281,8 @@ class PlayerPropTensorEngine:
 if __name__ == "__main__":
     # Inject keys from environment or hardcoded for this run
     # Using the keys provided in context
-    os.environ["ODDS_API_KEY"] = "8eb822610b7753d45f76dcac8230a7d1"
-    os.environ["OPENWEATHER_API_KEY"] = "229507bc0f5ea7d23bd26958e023652b"
+    os.environ["ODDS_API_KEY"] = "ODDS_API_KEY_PLACEHOLDER"
+    os.environ["OPENWEATHER_API_KEY"] = "OPENWEATHER_API_KEY_PLACEHOLDER"
     
     engine = PlayerPropTensorEngine()
     results = engine.run()

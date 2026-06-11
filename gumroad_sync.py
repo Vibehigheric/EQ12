@@ -14,7 +14,7 @@ from pathlib import Path
 
 class GumroadSync:
     def __init__(self):
-        self.gumroad_token = os.getenv("GUMROAD_API_TOKEN")
+        self.gumroad_token = os.getenv("GUMROAD_API_TOKEN") or os.getenv("GUMROAD_TOKEN")
         self.base_url = "https://api.gumroad.com/v2"
         self.db_path = Path("data/business_intelligence.db")
         
@@ -40,8 +40,17 @@ class GumroadSync:
     def update_database(self, sales):
         """Update local database with sales data"""
         try:
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS revenue_snapshots (
+                    stream_name TEXT,
+                    daily_revenue REAL,
+                    monthly_revenue REAL,
+                    timestamp TEXT
+                )
+            """)
             
             for sale in sales:
                 cursor.execute("""
@@ -89,8 +98,7 @@ class GumroadSync:
         print("🔄 Syncing Gumroad data...")
         
         if not self.gumroad_token:
-            print("⚠️  GUMROAD_API_TOKEN not set. Set environment variable:")
-            print("   setx GUMROAD_API_TOKEN \"your_token_here\"")
+            print("⚠️  Gumroad token not set. Skipping remote sync and leaving local data unchanged.")
             return
         
         sales = self.fetch_sales()

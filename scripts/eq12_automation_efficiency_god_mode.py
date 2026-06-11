@@ -70,28 +70,28 @@ class EQ12AutomationGodMode:
         
         api_config = {
             # AI/ML APIs
-            "CHATGPT_API_KEY": "sk-proj-xuzgJEzZGxPZlyxkK80q73sneMotwf1d2cesxsN5cf5niKE_Si88FQfEgWuuRGcDbzLWy0Ck5AT3BlbkFJNYBFREPJUsMYTs...",
-            "OPENAI_API_KEY": "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",
-            "GROQ_API_KEY": "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",
-            "OPENROUTER_API_KEY": "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",
-            "GOOGLE_AI_API_KEY": "AIzaSyDlgzo9hrLHl9C1AuP-GwtJDFta23iwauc",
-            "HUGGINGFACE_AUTH": "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",
+            "CHATGPT_API_KEY": "OPENAI_API_KEY_PLACEHOLDER",
+            "OPENAI_API_KEY": "OPENAI_API_KEY_PLACEHOLDER",
+            "GROQ_API_KEY": "GROQ_API_KEY_PLACEHOLDER",
+            "OPENROUTER_API_KEY": "OPENROUTER_API_KEY_PLACEHOLDER",
+            "GOOGLE_AI_API_KEY": "GOOGLE_API_KEY_PLACEHOLDER",
+            "HUGGINGFACE_AUTH": "HUGGINGFACE_TOKEN_PLACEHOLDER",
             
             # Development APIs
-            "GITHUB_TOKEN": "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",
-            "GITLENS_KEY": "1e338eec-3959-480d-8e73-628cc045cfe3",
+            "GITHUB_TOKEN": "GITHUB_PAT_PLACEHOLDER",
+            "GITLENS_KEY": "GITLENS_KEY_PLACEHOLDER",
             
             # Sports/Betting APIs
-            "ODDS_API_KEY": "8eb822610b7753d45f76dcac8230a7d1",
-            "THE_ODDS_API_KEY": "8eb822610b7753d45f76dcac8230a7d1",
+            "ODDS_API_KEY": "ODDS_API_KEY_PLACEHOLDER",
+            "THE_ODDS_API_KEY": "ODDS_API_KEY_PLACEHOLDER",
             "DRAFTKINGS_AFFILIATE": "https://sportsbook.draftkings.com/r/sb/iamdigitalrico/US-NY-SB/US-NY",
             
             # Utility APIs
-            "OPENWEATHER_API_KEY": "229507bc0f5ea7d23bd26958e023652b",
-            "SYSTEM_IO_API_KEY": "czf39d58e8mzqxnrqh44jtaovclb89ubyr9le4x1mxrxqsf4twl13grvxnmcsp8q",
+            "OPENWEATHER_API_KEY": "OPENWEATHER_API_KEY_PLACEHOLDER",
+            "SYSTEM_IO_API_KEY": "SYSTEM_IO_API_KEY_PLACEHOLDER",
             
             # Communication APIs
-            "TELEGRAM_BOT_TOKEN": "7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc",
+            "TELEGRAM_BOT_TOKEN": "TELEGRAM_BOT_TOKEN_PLACEHOLDER",
             "TELEGRAM_CHAT_ID": "5475370304"
         }
         

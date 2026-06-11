@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 class EQ12CFBHardcodedParlayGenerator:
     def __init__(self):
-        self.telegram_token = '7913469072:AAHlN0XQyZG1G8uHGnbjLacUbh6QybTb8pc'
+        self.telegram_token = 'TELEGRAM_BOT_TOKEN_PLACEHOLDER'
         self.telegram_chat_id = '-5475370304'
 
     def get_hardcoded_cfb_games(self):

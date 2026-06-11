@@ -79,7 +79,7 @@ class EQ12AdvancedRevenueReporter:
     def initialize_claude_ai(self) -> bool:
         """Initialize Claude AI client with API key"""
         try:
-            api_key = os.getenv('ANTHROPIC_API_KEY', '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')
+            api_key = os.getenv('ANTHROPIC_API_KEY', 'ANTHROPIC_API_KEY_PLACEHOLDER')
             
             if api_key and api_key.startswith('sk-ant-'):
                 self.claude_client = anthropic.Anthropic(api_key=api_key)

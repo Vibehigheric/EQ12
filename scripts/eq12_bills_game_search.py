@@ -9,7 +9,7 @@ from typing import Dict, List, Optional
 
 class EQ12BillsGameSearch:
     def __init__(self):
-        self.odds_api_key = os.getenv('ODDS_API_KEY', '8eb822610b7753d45f76dcac8230a7d1')
+        self.odds_api_key = os.getenv('ODDS_API_KEY', 'ODDS_API_KEY_PLACEHOLDER')
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': 'EQ12-Bills-Search/1.0'})
 

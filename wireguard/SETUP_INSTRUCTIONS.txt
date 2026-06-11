@@ -8,8 +8,8 @@
    - Replace 'vpn.yourprovider.com:51820' with your server endpoint
 
 2. GENERATED KEYS (if applicable):
-   - Private Key: IOQ9drZ8R2U5wjEmcr7Ppg2Ckqh93sGOpHUHHwMVPE4=
-   - Public Key: 9/NWNG+i9djhNCx06OikTKJ1nBnYyy9J94JFbSJI01k=
+   - Private Key: WIREGUARD_PRIVATE_KEY_PLACEHOLDER
+   - Public Key: WIREGUARD_PRIVATE_KEY_PLACEHOLDER
    - Key Files: C:\EQ12\wireguard\keys\eq12-betting.private, C:\EQ12\wireguard\keys\eq12-betting.public
 
 3. TEST THE CONNECTION:

@@ -38,7 +38,7 @@ class EQ12OpenWeatherIntegration:
     def __init__(self, api_key: str | None = None):
         """Initialize OpenWeatherMap Integration"""
         self.api_key = api_key or os.getenv(
-            "OPENWEATHER_API_KEY", "229507bc0f5ea7d23bd26958e023652"
+            "OPENWEATHER_API_KEY", "OPENWEATHER_API_KEY_PLACEHOLDER"
         )
 
         # OpenWeatherMap API endpoints

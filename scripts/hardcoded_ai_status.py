@@ -24,7 +24,7 @@ def print_hardcoded_strategy():
     print()
 
     print("⚡ GROQ (Ultra-Fast Inference) - PRIMARY PROVIDER")
-    print("   └─ API Key: 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")
+    print("   └─ API Key: GROQ_API_KEY_PLACEHOLDER")
     print("   └─ USE FOR:")
     print("     🎯 Arbitrage detection (<0.5s response needed)")
     print("     ⚡ Live odds monitoring and alerts")
@@ -44,7 +44,7 @@ def print_hardcoded_strategy():
     print()
 
     print("🎁 GOOGLE AI (Free Backup) - SUPPLEMENTARY PROVIDER")
-    print("   └─ API Key: AIzaSyDlgzo9hrLHl9C1AuP-GwtJDFta23iwauc")
+    print("   └─ API Key: GOOGLE_API_KEY_PLACEHOLDER")
     print("   └─ USE FOR:")
     print("     🆓 Free tier experimentation")
     print("     🧪 Testing new betting strategies")
@@ -61,7 +61,7 @@ def check_api_status():
 
     # Check Groq API key (hardcoded in environment)
     groq_key = os.environ.get("GROQ_API_KEY", "")
-    if "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" in groq_key:
+    if "GROQ_API_KEY_PLACEHOLDER" in groq_key:
         print("   ✅ GROQ: Hardcoded key configured in environment")
     else:
         print("   ⚠️ GROQ: Environment key missing - using fallback")

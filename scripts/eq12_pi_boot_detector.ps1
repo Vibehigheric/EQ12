@@ -73,7 +73,7 @@ while ($attempt -le $maxAttempts) {
             Write-Host "Pi is fully online and ready for cluster integration!" -ForegroundColor Green
             Write-Host ""
             Write-Host "Next step: ssh ricoj100@$IPAddress" -ForegroundColor Cyan
-            Write-Host "Password: 102120sRO1!" -ForegroundColor Cyan
+            Write-Host "Password: CLUSTER_PASSWORD_PLACEHOLDER" -ForegroundColor Cyan
             exit 0
         }
         else {

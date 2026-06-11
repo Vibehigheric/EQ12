@@ -57,10 +57,10 @@ try {
     Write-Host " Action: $Action | Legs: $Legs" -ForegroundColor White
     
     # Set API environment variables
-    ${env}OPENAI_API_KEY = "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"
-    ${env}GROQ_API_KEY = "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"
-    ${env}ODDS_API_KEY = "8eb822610b7753d45f76dcac8230a7d1"
-    ${env}OPENWEATHER_API_KEY = "229507bc0f5ea7d23bd26958e023652b"
+    ${env}OPENAI_API_KEY = "OPENAI_API_KEY_PLACEHOLDER"
+    ${env}GROQ_API_KEY = "GROQ_API_KEY_PLACEHOLDER"
+    ${env}ODDS_API_KEY = "ODDS_API_KEY_PLACEHOLDER"
+    ${env}OPENWEATHER_API_KEY = "OPENWEATHER_API_KEY_PLACEHOLDER"
     
     Write-Host " API Keys configured: OpenAI, Groq, Odds, Weather" -ForegroundColor Green
     

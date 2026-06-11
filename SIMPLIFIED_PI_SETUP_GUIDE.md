@@ -9,7 +9,7 @@
 4. **Configure ONLY these settings:**
    -  **Enable SSH**  Use password authentication
    -  **Set username:** `ricoj100`
-   -  **Set password:** `102120sRO1!`
+   -  **Set password:** `CLUSTER_PASSWORD_PLACEHOLDER`
    -  **Configure WiFi** (optional, for initial setup)
    -  **Skip static IP** (Pi Imager doesn't support it properly)
 

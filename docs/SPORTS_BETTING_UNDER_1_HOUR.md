@@ -45,7 +45,7 @@ Scans all major US sports simultaneously:
 ### ❌ Issue: ODDS_API_KEY Deactivated
 Your API key from `check_markets.py` is **deactivated** (payment/cancellation):
 ```
-API key: 8eb822610b7753d45f76dcac8230a7d1
+API key: ODDS_API_KEY_PLACEHOLDER
 Status: DEACTIVATED_KEY
 ```
 

@@ -42,7 +42,7 @@ class EQ12GoogleAIClient:
             )
 
         # HARDCODED GOOGLE AI API KEY (User provided)
-        self.api_key = "AIzaSyDlgzo9hrLHl9C1AuP-GwtJDFta23iwauc"
+        self.api_key = "GOOGLE_API_KEY_PLACEHOLDER"
         logger.info("✅ Google AI API key hardcoded for EQ12 system")
 
         # Configure the client

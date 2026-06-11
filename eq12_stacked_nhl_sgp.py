@@ -18,7 +18,7 @@ class EQ12StackedNHLSGP:
         """Initialize stacked SGP builder."""
 
         # EQ12 production API key
-        self.api_key = "8eb822610b7753d45f76dcac8230a7d1"
+        self.api_key = "ODDS_API_KEY_PLACEHOLDER"
         self.base_url = "https://api.the-odds-api.com/v4"
 
         # Setup logging

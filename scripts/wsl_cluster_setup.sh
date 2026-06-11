@@ -4,7 +4,7 @@
 
 PI_USER="ricoj100"
 PI_IP="192.168.1.80"
-PI_PASS="102120sRO1!"
+PI_PASS="CLUSTER_PASSWORD_PLACEHOLDER"
 
 echo "========================================"
 echo "   EQ12 WSL CLUSTER EXPERT SETUP"

@@ -31,7 +31,7 @@ class EQ12PythonIntegration
         $this->scriptsPath = __DIR__ . '/';
         $this->venvPath = 'C:/EQ12/.venv';
         $this->environmentVars = [
-            'ODDS_API_KEY' => $_ENV['ODDS_API_KEY'] ?? '8eb822610b7753d45f76dcac8230a7d1',
+            'ODDS_API_KEY' => $_ENV['ODDS_API_KEY'] ?? 'ODDS_API_KEY_PLACEHOLDER',
             'PYTHONPATH' => __DIR__,
             'PYTHONUNBUFFERED' => '1'
         ];

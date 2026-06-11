@@ -23,7 +23,7 @@ class EQ12BettingFunctionCaller:
     def __init__(self):
         # HARDCODED GROQ CONFIGURATION
         self.api_key = os.environ.get(
-            "GROQ_API_KEY", "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"
+            "GROQ_API_KEY", "GROQ_API_KEY_PLACEHOLDER"
         )
 
         # Initialize with OpenAI-compatible base URL

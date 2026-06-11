@@ -10,8 +10,8 @@ import statistics
 
 class EQ12LiveTNFEngine:
     def __init__(self):
-        self.odds_api_key = os.getenv('ODDS_API_KEY', '8eb822610b7753d45f76dcac8230a7d1')
-        self.weather_api_key = os.getenv('OPENWEATHER_API_KEY', '229507bc0f5ea7d23bd26958e023652b')
+        self.odds_api_key = os.getenv('ODDS_API_KEY', 'ODDS_API_KEY_PLACEHOLDER')
+        self.weather_api_key = os.getenv('OPENWEATHER_API_KEY', 'OPENWEATHER_API_KEY_PLACEHOLDER')
         self.analysis_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.session = requests.Session()
         self.session.headers.update({'User-Agent': 'EQ12-Betting-Engine/1.0'})

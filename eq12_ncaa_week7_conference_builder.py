@@ -1283,7 +1283,7 @@ async def generate_top25_master_ticket(builder, all_parlays):
 if __name__ == "__main__":
     # Set OpenAI API key if not already set
     if not os.getenv("OPENAI_API_KEY"):
-        api_key = "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"
+        api_key = "OPENAI_API_KEY_PLACEHOLDER"
         os.environ["OPENAI_API_KEY"] = api_key
         safe_print("✅ OpenAI API key configured for Boolean logic integration")
 

@@ -37,7 +37,7 @@ try {
     $OpenAIApiKey = [Environment]::GetEnvironmentVariable("OPENAI_API_KEY")
     if (-not $OpenAIApiKey) {
         Write-Warning "⚠️ OPENAI_API_KEY not set. Setting for session."
-        $env:OPENAI_API_KEY = "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"
+        $env:OPENAI_API_KEY = "OPENAI_API_KEY_PLACEHOLDER"
     }
     
     # Ensure output directories exist
