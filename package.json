@@ -42,7 +42,7 @@
     "dotenv": "^17.2.3",
     "winston": "^3.18.3",
     "dayjs": "^1.11.13",
-    "lodash-es": "^4.17.21",
+    "lodash-es": "^4.18.1",
     "helmet": "^8.0.0",
     "cors": "^2.8.5",
     "compression": "^1.7.4",
